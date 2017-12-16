@@ -1,5 +1,5 @@
 {
-  "name": "weby",
+  "name": "pawjs",
   "version": "0.3.7",
   "description": "A highly scalable, Progressive Web Application foundation with the best Developer Experience (DX).",
   "engines": {
@@ -7,7 +7,8 @@
   },
   "engineStrict": true,
   "bin": {
-    "weby": "./scripts.js"
+    "paw": "./scripts.js",
+    "pawjs": "./scripts.js"
   },
   "dependencies": {
     "assets-webpack-plugin": "^3.5.1",
