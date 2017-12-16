@@ -82,6 +82,7 @@
     "redux": "^3.7.2",
     "sass-loader": "^6.0.6",
     "serve-favicon": "^2.4.3",
+    "shelljs": "^0.7.8",
     "strict-uri-encode": "^2.0.0",
     "style-loader": "^0.19.1",
     "uglify-js": "^3.0.28",
@@ -115,7 +116,6 @@
   },
   "main": "scripts.js",
   "devDependencies": {
-    "chokidar": "^1.7.0",
-    "shelljs": "^0.7.8"
+    "chokidar": "^1.7.0"
   }
 }
