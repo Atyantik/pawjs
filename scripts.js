@@ -7,6 +7,8 @@ const nodemon = require("nodemon");
 const path = require("path");
 const fs = require("fs");
 const webpack = require("webpack");
+const chokidar = require("chokidar");
+const shell = require("shelljs");
 
 const currentDir = process.cwd();
 process.env.__p_root = currentDir + path.sep;
@@ -33,34 +35,34 @@ process.env.BABEL_DISABLE_CACHE = 1;
  * @param {string} src The path to the thing to copy.
  * @param {string} dest The path to the new copy.
  */
-const copyRecursiveSync = function(src, dest) {
-  var exists = fs.existsSync(src);
-  var stats = exists && fs.statSync(src);
-  var isDirectory = exists && stats.isDirectory();
-  if (exists && isDirectory) {
-    deleteFolderRecursive(dest);
-    fs.mkdirSync(dest);
-    fs.readdirSync(src).forEach(function(childItemName) {
-      copyRecursiveSync(path.join(src, childItemName), path.join(dest, childItemName));
-    });
-  } else {
-    fs.linkSync(src, dest);
-  }
-};
-
-const deleteFolderRecursive = function(filePath) {
-  if (fs.existsSync(filePath)) {
-    fs.readdirSync(filePath).forEach(function(file){
-      var curPath = filePath + path.sep + file;
-      if (fs.lstatSync(curPath).isDirectory()) { // recurse
-        deleteFolderRecursive(curPath);
-      } else { // delete file
-        fs.unlinkSync(curPath);
-      }
-    });
-    fs.rmdirSync(filePath);
-  }
-};
+// const copyRecursiveSync = function(src, dest) {
+//   var exists = fs.existsSync(src);
+//   var stats = exists && fs.statSync(src);
+//   var isDirectory = exists && stats.isDirectory();
+//   if (exists && isDirectory) {
+//     deleteFolderRecursive(dest);
+//     fs.mkdirSync(dest);
+//     fs.readdirSync(src).forEach(function(childItemName) {
+//       copyRecursiveSync(path.join(src, childItemName), path.join(dest, childItemName));
+//     });
+//   } else {
+//     fs.linkSync(src, dest);
+//   }
+// };
+//
+// const deleteFolderRecursive = function(filePath) {
+//   if (fs.existsSync(filePath)) {
+//     fs.readdirSync(filePath).forEach(function(file){
+//       var curPath = filePath + path.sep + file;
+//       if (fs.lstatSync(curPath).isDirectory()) { // recurse
+//         deleteFolderRecursive(curPath);
+//       } else { // delete file
+//         fs.unlinkSync(curPath);
+//       }
+//     });
+//     fs.rmdirSync(filePath);
+//   }
+// };
 
 let allExecutablePaths = process.env.PATH.split(path.delimiter);
 allExecutablePaths.unshift(__dirname);
@@ -120,8 +122,21 @@ switch(userCommand) {
     });
     break;
   }
+  case "build:watch": {
+    const watcher = chokidar.watch("./lib", {
+      persistent: true
+    });
+    // eslint-disable-next-line
+    console.log(shell.exec("npm run build").stdout);
+    watcher.on("change", () => {
+      // eslint-disable-next-line
+      console.log(shell.exec("npm run build").stdout);
+    });
+    break;
+  }
   case "copy-babel-to-src": {
-    copyRecursiveSync(`lib${path.sep}babel`, `src${path.sep}babel`);
+    shell.rm("-rf", "src");
+    shell.cp("-R", `lib${path.sep}babel`, `src${path.sep}babel`);
     break;
   }
 }
