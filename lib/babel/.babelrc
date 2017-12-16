@@ -1,0 +1,24 @@
+{
+  "presets": [
+    "react",
+    "env"
+  ],
+  "ignore": [
+    "**/jsdom/**"
+  ],
+  "plugins": [
+    [
+      "resolver", {
+        "resolveDirs": [
+          "node_modules",
+          "."
+        ]
+      }
+    ],
+    "lodash",
+    "transform-decorators-legacy",
+    "transform-class-properties",
+    "transform-object-rest-spread",
+    "react-hot-loader/babel"
+  ]
+}
