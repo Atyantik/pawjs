@@ -1,6 +1,6 @@
 {
   "name": "pawjs",
-  "version": "0.3.9",
+  "version": "0.4.0",
   "description": "A highly scalable, Progressive Web Application foundation with the best Developer Experience (DX).",
   "engines": {
     "node": ">= 8.4.0"
@@ -97,7 +97,7 @@
     "workbox-sw": "^2.1.2"
   },
   "scripts": {
-    "start": "node scripts.js build:watch",
+    "start": "node scripts.js lib:build",
     "build": "BABEL_ENV=production babel lib --out-dir src --copy-files",
     "copy-babel-to-src": "node scripts.js copy-babel-to-src",
     "prepublishOnly": "npm run build && npm run copy-babel-to-src"

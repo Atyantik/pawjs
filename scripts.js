@@ -30,40 +30,6 @@ process.env.NODE_ENV = NODE_ENV;
 // Disable babel cache
 process.env.BABEL_DISABLE_CACHE = 1;
 
-/**
- * It's cp -R.
- * @param {string} src The path to the thing to copy.
- * @param {string} dest The path to the new copy.
- */
-// const copyRecursiveSync = function(src, dest) {
-//   var exists = fs.existsSync(src);
-//   var stats = exists && fs.statSync(src);
-//   var isDirectory = exists && stats.isDirectory();
-//   if (exists && isDirectory) {
-//     deleteFolderRecursive(dest);
-//     fs.mkdirSync(dest);
-//     fs.readdirSync(src).forEach(function(childItemName) {
-//       copyRecursiveSync(path.join(src, childItemName), path.join(dest, childItemName));
-//     });
-//   } else {
-//     fs.linkSync(src, dest);
-//   }
-// };
-//
-// const deleteFolderRecursive = function(filePath) {
-//   if (fs.existsSync(filePath)) {
-//     fs.readdirSync(filePath).forEach(function(file){
-//       var curPath = filePath + path.sep + file;
-//       if (fs.lstatSync(curPath).isDirectory()) { // recurse
-//         deleteFolderRecursive(curPath);
-//       } else { // delete file
-//         fs.unlinkSync(curPath);
-//       }
-//     });
-//     fs.rmdirSync(filePath);
-//   }
-// };
-
 let allExecutablePaths = process.env.PATH.split(path.delimiter);
 allExecutablePaths.unshift(__dirname);
 allExecutablePaths.unshift(`${__dirname}${path.sep}.bin`);
@@ -87,8 +53,13 @@ function findCommandPath(com) {
   return execPath.length ? execPath: undefined;
 }
 
+
+const lint = () => {
+  return shell.exec(`${findCommandPath("eslint")} -c ${process.env.__p_root}.eslintrc --ignore-path ${process.env.__p_root}.gitignore ${process.env.__p_root}src`);
+};
 switch(userCommand) {
   case "start": {
+    process.env.NODE_ENV = process.env.NODE_ENV || "development";
     nodemon({
       script: `${currentDir}${path.sep}src${path.sep}server.js`,
       execMap: {
@@ -101,7 +72,7 @@ switch(userCommand) {
     break;
   }
   case "build": {
-    process.env.NODE_ENV = "production";
+    process.env.NODE_ENV = process.env.NODE_ENV || "production";
     const prodClientConfig = require(path.resolve(path.join(__dirname, "src", "webpack", "config", "prod.client.babel.js"))).default;
     // eslint-disable-next-line
     webpack(prodClientConfig, (clientErr, clientStats) => {
@@ -122,7 +93,7 @@ switch(userCommand) {
     });
     break;
   }
-  case "build:watch": {
+  case "lib:build": {
     const watcher = chokidar.watch("./lib", {
       persistent: true
     });
@@ -138,5 +109,17 @@ switch(userCommand) {
     shell.rm("-rf", `src${path.sep}babel`);
     shell.cp("-R", `lib${path.sep}babel`, "src");
     break;
+  }
+  case "lint": {
+    const result = lint();
+    return process.exit(result.code);
+  }
+  case "test": {
+    const lintResults = lint();
+    if (lintResults.code) {
+      return process.exit(lintResults.code);
+    }
+    const testResults = shell.exec(`${findCommandPath("cross-env")} NODE_ENV=test ${findCommandPath("mocha")} --require babel-core/register "${process.env.__p_root}src/**/*.test.js"`);
+    return process.exit(testResults.code);
   }
 }
