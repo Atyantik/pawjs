@@ -135,8 +135,8 @@ switch(userCommand) {
     break;
   }
   case "copy-babel-to-src": {
-    shell.rm("-rf", "src");
-    shell.cp("-R", `lib${path.sep}babel`, `src${path.sep}babel`);
+    shell.rm("-rf", `src${path.sep}babel`);
+    shell.cp("-R", `lib${path.sep}babel`, "src");
     break;
   }
 }
