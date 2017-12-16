@@ -48,17 +48,17 @@ const copyRecursiveSync = function(src, dest) {
   }
 };
 
-const deleteFolderRecursive = function(path) {
-  if (fs.existsSync(path)) {
-    fs.readdirSync(path).forEach(function(file){
-      var curPath = path + path.sep + file;
+const deleteFolderRecursive = function(filePath) {
+  if (fs.existsSync(filePath)) {
+    fs.readdirSync(filePath).forEach(function(file){
+      var curPath = filePath + path.sep + file;
       if (fs.lstatSync(curPath).isDirectory()) { // recurse
         deleteFolderRecursive(curPath);
       } else { // delete file
         fs.unlinkSync(curPath);
       }
     });
-    fs.rmdirSync(path);
+    fs.rmdirSync(filePath);
   }
 };
 
