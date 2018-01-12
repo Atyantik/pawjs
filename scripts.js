@@ -72,6 +72,7 @@ switch(userCommand) {
     process.env.NODE_ENV = process.env.NODE_ENV || "development";
     nodemon({
       script: path.join(currentDir, "src", "server.js"),
+      verbose: true,
       execMap: {
         "js": findCommandPath("babel-node")
       },
@@ -93,12 +94,12 @@ switch(userCommand) {
         webpack(prodServerConfig, (serverErr, serverStats) => {
           if (serverErr) {
             // eslint-disable-next-line
-						console.log(serverErr);
+            console.log(serverErr);
           }
         });
       } else {
         // eslint-disable-next-line
-				console.log(clientErr);
+        console.log(clientErr);
       }
     });
     break;
@@ -108,10 +109,10 @@ switch(userCommand) {
       persistent: true
     });
     // eslint-disable-next-line
-    console.log(shell.exec("npm run build").stdout);
+    console.log(shell.exec("npm run build -- --source-maps && npm run copy-babel-to-src").stdout);
     watcher.on("change", () => {
       // eslint-disable-next-line
-      console.log(shell.exec("npm run build").stdout);
+      console.log(shell.exec("npm run build -- --source-maps && npm run copy-babel-to-src").stdout);
     });
     break;
   }
