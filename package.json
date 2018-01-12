@@ -1,6 +1,6 @@
 {
   "name": "pawjs",
-  "version": "0.4.4",
+  "version": "0.4.5",
   "description": "A highly scalable, Progressive Web Application foundation with the best Developer Experience (DX).",
   "engines": {
     "node": ">= 8.4.0"
@@ -94,6 +94,7 @@
     "webpack-dev-middleware": "^2.0.4",
     "webpack-dev-server": "^2.10.1",
     "webpack-hot-middleware": "^2.19.1",
+    "wook": "^0.1.4",
     "workbox-sw": "^2.1.2"
   },
   "scripts": {
