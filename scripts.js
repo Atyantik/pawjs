@@ -7,7 +7,6 @@ const nodemon = require("nodemon");
 const path = require("path");
 const fs = require("fs");
 const webpack = require("webpack");
-const chokidar = require("chokidar");
 const shell = require("shelljs");
 
 const currentDir = process.cwd();
@@ -68,6 +67,11 @@ const test = () => {
   return shell.exec(`${findCommandPath("cross-env")} NODE_ENV=test ${findCommandPath("mocha")} --require babel-core/register "${process.env.__p_root}src/**/*.test.js"`);
 };
 switch(userCommand) {
+  case "clear-src": {
+    shell.rm("-rf", "src");
+    shell.mkdir("src");
+    break;
+  }
   case "start": {
     process.env.NODE_ENV = process.env.NODE_ENV || "development";
     nodemon({
@@ -105,15 +109,8 @@ switch(userCommand) {
     break;
   }
   case "lib:build": {
-    const watcher = chokidar.watch("./lib", {
-      persistent: true
-    });
     // eslint-disable-next-line
-    console.log(shell.exec("npm run build -- --source-maps && npm run copy-babel-to-src").stdout);
-    watcher.on("change", () => {
-      // eslint-disable-next-line
-      console.log(shell.exec("npm run build -- --source-maps && npm run copy-babel-to-src").stdout);
-    });
+    console.log(shell.exec("npm run build -- --source-maps --watch && npm run copy-babel-to-src").stdout);
     break;
   }
   case "copy-babel-to-src": {
