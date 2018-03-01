@@ -1,6 +1,6 @@
 {
   "name": "pawjs",
-  "version": "0.4.6",
+  "version": "0.4.7",
   "description": "A highly scalable, Progressive Web Application foundation with the best Developer Experience (DX).",
   "engines": {
     "node": ">= 8.4.0"
