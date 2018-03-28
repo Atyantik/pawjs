@@ -1,0 +1,14 @@
+{
+  "development": {
+    "port": "9090",
+    "host": "0.0.0.0",
+    "staticSite": false,
+    "serverSideRender": false
+  },
+  "production": {
+    "port": "8080",
+    "host": "0.0.0.0",
+    "staticSite": false,
+    "serverSideRender": false
+  }
+}
