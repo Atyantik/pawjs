@@ -1,0 +1,6 @@
+{
+  "name": "PagesAndRouting",
+  "version": "0.0.1",
+  "private": true,
+  "main": "./pages-routing.js"
+}

@@ -1,24 +1,19 @@
-const fs = require("fs");
-const path = require("path");
+const defaultConfig = require("../config/defaults.json");
 const _ = require("lodash");
-const defaultConfig = require("./defaults.json");
 
 let config = {};
+try {
+  config = require(`${process.env.__project_root}/pawconfig.json`);
 
-if(fs.existsSync(
-  path.join(process.env.__project_root, "pawconfig.json")
-)) {
-  config = require(path.resolve(path.join(process.env.__project_root, "pawconfig.json")));
-  if (config && config.default) {
-    config = config.default;
-    // Add validations in future
-  }
+} catch (ex) {
+  config = {};
 }
+config = _.defaultsDeep(config, defaultConfig);
 
-module.exports = _.defaultsDeep(config, defaultConfig);
+module.exports = _.assignIn({}, config);
 module.exports.env = (env = "") => {
   if (!env) {
-    return _.defaultsDeep(config, defaultConfig);
+    return _.assignIn({}, config);
   }
-  return _.defaultsDeep(_.get(config, env, {}), _.get(defaultConfig, env, {}));
+  return _.assignIn({}, _.get(config, env, {}));
 };

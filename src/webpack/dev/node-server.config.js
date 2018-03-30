@@ -19,7 +19,7 @@ _.each(pawConfig, (value, key) => {
 
 module.exports = {
   mode: "development",
-  entry: path.resolve(process.env.__lib_root,"./src/server/dev.js"),
+  entry: path.resolve(process.env.__lib_root,"./src/server/common.js"),
   module: {
     rules: [
       serverRule,
@@ -93,6 +93,7 @@ module.exports = {
       "__project_root": process.env.__project_root,
       "__lib_root": process.env.__lib_root,
     }, configEnvVars)),
+
     new ExtractTextPlugin({
       filename: "server.css",
       allChunks: true

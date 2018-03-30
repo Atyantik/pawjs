@@ -1,6 +1,6 @@
 import express from "express";
 import _ from "lodash";
-import server from "./dev";
+import server from "./common";
 import path from "path";
 // the below assets will be added by webpack. Don't worry about it
 import assets from "pwa-assets";

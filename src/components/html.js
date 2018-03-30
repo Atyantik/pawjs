@@ -3,7 +3,7 @@ import React, { Component } from "react";
 class Html extends Component {
   render() {
     return (
-      <html lang="en" dir="rtl">
+      <html lang="en" dir="ltr">
         <head>
           <meta charSet="utf-8" />
           <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />

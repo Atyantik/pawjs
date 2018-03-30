@@ -17,8 +17,8 @@ module.exports = {
   entry: {
     client: [
       "react-hot-loader/patch",
-      "webpack-hot-middleware/client?name=web&path=/__hmr_update&timeout=2000&overlay=true",
-      "./src/index.js",
+      "webpack-hot-middleware/client?name=web&path=/__hmr_update&timeout=2000&overlay=true&quiet=true",
+      path.resolve(process.env.__lib_root, "./src/client/dev/init.js"),
     ],
   },
   output: {

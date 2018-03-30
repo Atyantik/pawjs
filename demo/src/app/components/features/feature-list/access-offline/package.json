@@ -1,0 +1,6 @@
+{
+  "name": "AccessOffline",
+  "version": "0.0.1",
+  "private": true,
+  "main": "./access-offline.js"
+}

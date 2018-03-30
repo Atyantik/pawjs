@@ -41,7 +41,7 @@ switch(userCommand) {
   case "start:dev": {
     const
       spawn = require("child_process").spawn,
-      childSpawn = spawn("node", [path.resolve(libRoot, "src/webpack/dev/start")]);
+      childSpawn = spawn("node", [path.resolve(libRoot, "src/server/dev.js")]);
 
     childSpawn.stdout.pipe(process.stdout);
     childSpawn.stderr.pipe(process.stderr);
