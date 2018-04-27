@@ -3,7 +3,7 @@ const webpack = require("webpack");
 const _ = require("lodash");
 
 const directories = require("../utils/directories");
-const pawConfig = require("../../config").env("development");
+const pawConfig = require("../../config");
 
 let configEnvVars = {};
 _.each(pawConfig, (value, key) => {
@@ -16,8 +16,13 @@ module.exports = {
   context: directories.root,
   entry: {
     client: [
+      "@babel/polyfill",
+      // Need react hot loader
       "react-hot-loader/patch",
+      // Need webpack hot middleware
       "webpack-hot-middleware/client?name=web&path=/__hmr_update&timeout=2000&overlay=true&quiet=true",
+
+      // Initial entry point for dev
       path.resolve(process.env.__lib_root, "./src/client/dev/init.js"),
     ],
   },
@@ -66,6 +71,18 @@ module.exports = {
           },
         ]
       }
+    ]
+  },
+  resolve: {
+    modules: [
+      path.resolve(path.join(directories.root, "node_modules")),
+      path.resolve(path.join(process.env.__lib_root, "node_modules")),
+    ]
+  },
+  resolveLoader: {
+    modules: [
+      path.resolve(path.join(directories.root, "node_modules")),
+      path.resolve(path.join(process.env.__lib_root, "node_modules")),
     ]
   },
   optimization: {

@@ -1,26 +1,25 @@
 import React from "react";
 import Loadable from "react-loadable";
 
-export default class RouterCompiler {
+export default class RouteCompiler {
 
-  compileRoutes(routes) {
+  compileRoutes(routes, routerService) {
     return _.map(routes, (r) => {
       if (r.component.compiled) return r;
-      return this.compileRoute(r);
+      return this.compileRoute(r, routerService);
     });
   }
 
-  compileRoute(route) {
-    const LibRouter = this.serviceManager.getService("router");
+  compileRoute(route, routerService) {
 
     const {path, skeleton, error, timeout, delay, loadData, seo, component, ...others} = route;
 
     // JSXifiable component object
     const Params = {
-      errorComponent: error || LibRouter.getErrorComponent(),
-      skeletonComponent: skeleton || LibRouter.getSkeletonComponent(),
-      timeout: timeout || LibRouter.getTimeout(),
-      delay: delay || LibRouter.getDelay()
+      errorComponent: error || routerService.getLoadErrorComponent(),
+      skeletonComponent: skeleton || routerService.getLoaderComponent(),
+      timeout: timeout || routerService.getLoadTimeout(),
+      delay: delay || routerService.getAllowedLoadDelay()
     };
 
     const loadableComponent = Loadable.Map({
@@ -49,7 +48,7 @@ export default class RouterCompiler {
       component: loadableComponent,
       seo: Object.assign({}, seo),
       ...others,
-      ...(route.routes ? {routes: this.compileRoutes(route.routes)} : {})
+      ...(route.routes ? {routes: this.compileRoutes(route.routes, routerService)} : {})
     };
 
   }

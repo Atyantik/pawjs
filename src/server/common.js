@@ -3,6 +3,11 @@ import React from "react";
 import ReactDOMServer from "react-dom/server";
 import _ from "lodash";
 import Html from "../components/html";
+import { renderRoutes, matchRoutes } from "react-router-config";
+
+import ServiceManager from "../service-manager";
+import ServerService from "./service";
+import env from "../config/index";
 
 const app = express();
 //const ClientApp = require(`${process.env.__project_root}/src/app`);
@@ -29,16 +34,23 @@ app.get("/", (req, res) => {
   const assets = assetsToArray(res.locals.assets);
   res.write("<!DOCTYPE html>");
   let childComponent = null;
+  let serviceManager = ServiceManager();
 
   if (res.locals.ssr) {
     // something with ssr
     // childComponent = <ClientApp.default />;
   }
 
+
+
   ReactDOMServer.renderToNodeStream(
     <Html
       assets={assets}
-    >{childComponent}</Html>
+    >
+      <StaticRouter>
+        {renderRoutes(childComponent)}
+      </StaticRouter>
+    </Html>
   ).pipe(res);
 });
 

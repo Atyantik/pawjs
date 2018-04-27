@@ -5,14 +5,14 @@ module.exports = {
     options: {
       presets: [
         [
-          "@babel/env",
+          require("@babel/preset-env"),
           {
             "targets": {
               "browsers": ["last 2 versions", "safari >= 7", "ie >= 9"]
             }
           }
         ],
-        "@babel/react"
+        require("@babel/preset-react"),
       ],
       cacheDirectory: true,
       plugins: require("./babel-plugins")()

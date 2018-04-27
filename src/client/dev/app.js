@@ -1,45 +1,25 @@
-import _ from "lodash";
 import ServiceManager from "../../service-manager";
 import ClientService from "../service";
-import { env } from "../../config/index";
-
-let ProjectClientPlugin = require(`${process.env.__project_root}/src/client`).default;
-if (ProjectClientPlugin.default) {
-  ProjectClientPlugin = ProjectClientPlugin.default;
-}
-
-const app = new ClientService({
-  root: _.get(env, "divRoot", "app"),
-  env: env("development")
-});
+import env from "../../config/index";
 
 const manager = new ServiceManager({
-  env: env("development"),
-  app: app,
+  handler: ClientService,
+  env,
 });
 
-app.setServiceManager(manager);
-app.initPlugins((env.plugins? env.plugins: []).concat([]));
-app.addPlugin(new ProjectClientPlugin());
+try {
+  let ProjectClient = require(`${process.env.__project_root}/src/client`);
+  if (ProjectClient.default) ProjectClient = ProjectClient.default;
 
-app.run();
+  let ProjectRoutes = require(`${process.env.__project_root}/src/routes`);
+  if (ProjectRoutes.default) ProjectRoutes = ProjectRoutes.default;
 
+  manager.addPlugin(new ProjectClient);
+  manager.addPluginRoutes(new ProjectRoutes);
+  manager.run();
+} catch (ex) {
+  // eslint-disable-next-line
+  console.log(ex);
+}
 
-// const rootElement = document.getElementById("app");
-// const initApp = () => {
-//   return import("./app").then(App => {
-//     if (process.env.__config_serverSideRender) {
-//       hydrate(<App.default />, rootElement);
-//     } else {
-//       render(<App.default />, rootElement);
-//     }
-//   });
-// };
-//
-// if (typeof window.Symbol === "undefined") {
-//   import("@babel/polyfill").then(initApp);
-// } else {
-//   initApp();
-// }
-//
-// if (module.hot) module.hot.accept();
+if (module.hot) module.hot.accept();

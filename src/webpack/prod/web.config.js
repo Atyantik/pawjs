@@ -6,7 +6,7 @@ const _ = require("lodash");
 
 const ExtractEmittedAssets = require("../plugins/extract-emitted-assets");
 const directories = require("../utils/directories");
-const pawConfig = require("../../config").env(mode);
+const pawConfig = require("../../config");
 const SyncedFilesPlugin = require("../plugins/synced-files-plugin");
 
 let configEnvVars = {};

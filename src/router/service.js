@@ -1,15 +1,17 @@
-import { Tapable, SyncHook } from "tapable";
+import { Tapable } from "tapable";
 import AsyncRouteLoadErrorComponent from "../components/AsyncRouteLoadError";
 import AsyncRouteLoaderComponent from "../components/AsyncRouteLoader";
+import RouteCompiler from "./compiler";
 
 
 export default class RouterService extends Tapable {
 
+  routeCompiler = new RouteCompiler();
+  routes = [];
+
   constructor() {
     super();
-    this.hooks = {
-      "init": new SyncHook("router"),
-    };
+    this.hooks = {};
 
     // Private methods
     let loadErrorComponent = AsyncRouteLoadErrorComponent;
@@ -52,5 +54,21 @@ export default class RouterService extends Tapable {
     this.getLoadTimeout = () => {
       return timeout;
     };
+  }
+
+  addRoute(route) {
+    const compiledRoute = this.routeCompiler.compileRoute(route, this);
+    this.routes.push(compiledRoute);
+    this.routes = _.uniq(this.routes);
+  }
+
+  addRoutes(routes) {
+    const compiledRoutes = this.routeCompiler.compileRoutes(routes, this);
+    this.routes = this.routes.concat(compiledRoutes);
+    this.routes = _.uniq(this.routes);
+  }
+
+  getRoutes() {
+    return _.cloneDeep(this.routes);
   }
 }

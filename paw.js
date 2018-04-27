@@ -31,6 +31,10 @@ if (allCommands.length) {
 process.env.BABEL_DISABLE_CACHE = 1;
 
 const allExecutablePaths = require("./scripts/executable-paths");
+
+process.env.NODE_PATH = allExecutablePaths.join(path.delimiter);
+process.env.PATH = allExecutablePaths.join(path.delimiter);
+
 const get_cmd = require("./scripts/find-command").factory(allExecutablePaths);
 
 const cleanExit = function() { process.exit(); };
@@ -39,12 +43,8 @@ process.on("SIGTERM", cleanExit); // catch kill
 
 switch(userCommand) {
   case "start:dev": {
-    const
-      spawn = require("child_process").spawn,
-      childSpawn = spawn("node", [path.resolve(libRoot, "src/server/dev.js")]);
-
-    childSpawn.stdout.pipe(process.stdout);
-    childSpawn.stderr.pipe(process.stderr);
+    // Simply include the server/dev.js
+    require(path.resolve(libRoot, "src/server/dev.js"));
     break;
   }
   case "build:prod": {
@@ -71,6 +71,15 @@ switch(userCommand) {
         childSpawn2.stderr.pipe(process.stderr);
       }
     });
+
+    childSpawn.stdout.pipe(process.stdout);
+    childSpawn.stderr.pipe(process.stderr);
+    break;
+  }
+  case "test": {
+    const
+      spawn = require("child_process").spawn,
+      childSpawn = spawn("jest");
 
     childSpawn.stdout.pipe(process.stdout);
     childSpawn.stderr.pipe(process.stderr);

@@ -33,11 +33,11 @@ export default class Header extends Component {
     });
   }
   initPrism() {
-    if (typeof window === "undefined") return;
-    if (!this.prism) {
-      this.prism = require("prismjs");
-    }
-    this.prism.highlightElement(this.codeElement);
+    // if (typeof window === "undefined") return;
+    // if (!this.prism) {
+    //   this.prism = require("prismjs");
+    // }
+    // this.prism.highlightElement(this.codeElement);
   }
   render() {
     return (

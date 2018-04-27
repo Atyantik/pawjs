@@ -1,6 +1,5 @@
 import React, { Component } from "react";
-import Link from "pawjs/src/components/link";
-import Fold from "pawjs/src/components/fold";
+import { Link } from "react-router-dom";
 import Prism from "../prism";
 import AnimatedAtom from "../animated-atom";
 import * as styles from "./home.scss";
@@ -71,17 +70,15 @@ export default class Home extends Component {
             <i>For more detailed instruction please visit <Link to="/docs">docs</Link></i>
           </p>
           {supportsServiceWorker() && (
-            <Fold>
-              <div className="card text-white bg-info mb-3">
-                <div className="card-header"><small>This is a </small> Progressive Web Application!</div>
-                <div className="card-body">
-                  <h4 className="card-title">Add us to "Home screen"</h4>
-                  <p className="card-text">You might be interested to learn that current site is build using ReactPWA.
-                    Why don't you add us to your Home Screen when prompted.
-                    We are sure you will love the experience.</p>
-                </div>
+            <div className="card text-white bg-info mb-3">
+              <div className="card-header"><small>This is a </small> Progressive Web Application!</div>
+              <div className="card-body">
+                <h4 className="card-title">Add us to "Home screen"</h4>
+                <p className="card-text">You might be interested to learn that current site is build using ReactPWA.
+                  Why don't you add us to your Home Screen when prompted.
+                  We are sure you will love the experience.</p>
               </div>
-            </Fold>
+            </div>
           )}
         </div>
       </div>

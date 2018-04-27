@@ -3,6 +3,8 @@ const ExtractTextPlugin = require("extract-text-webpack-plugin");
 const webpack = require("webpack");
 const _ = require("lodash");
 
+
+
 let serverRule = require("../inc/babel-server-rule");
 serverRule.use.options.plugins = require("../inc/babel-plugins")({noChunk: true});
 
@@ -10,7 +12,7 @@ let cssUseRules = [].concat(require("../inc/babel-css-rule").use);
 cssUseRules.shift();
 
 const directories = require("../utils/directories");
-const pawConfig = require("../../config").env("development");
+const pawConfig = require("../../config");
 
 let configEnvVars = {};
 _.each(pawConfig, (value, key) => {
@@ -87,6 +89,18 @@ module.exports = {
     path: directories.dist,
     library: "dev-server",
     libraryTarget: "umd"
+  },
+  resolve: {
+    modules: [
+      path.resolve(directories.root, "node_modules"),
+      path.resolve(process.env.__lib_root, "node_modules"),
+    ]
+  },
+  resolveLoader: {
+    modules: [
+      path.resolve(path.join(directories.root, "node_modules")),
+      path.resolve(path.join(process.env.__lib_root, "node_modules")),
+    ]
   },
   plugins: [
     new webpack.EnvironmentPlugin(Object.assign({}, {

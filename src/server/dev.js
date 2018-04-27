@@ -3,6 +3,7 @@ console.log("Compiling files, please wait...");
 
 const express = require("express");
 const webpack = require("webpack");
+
 const webpackMiddleware = require("webpack-dev-middleware");
 const webpackHotMiddleware = require("webpack-hot-middleware");
 

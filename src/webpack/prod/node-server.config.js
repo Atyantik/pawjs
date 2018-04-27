@@ -6,7 +6,7 @@ const _ = require("lodash");
 const SyncedFilesPlugin = require("../plugins/synced-files-plugin");
 const directories = require("../utils/directories");
 
-const pawConfig = require("../../config").env("production");
+const pawConfig = require("../../config");
 
 let configEnvVars = {};
 _.each(pawConfig, (value, key) => {

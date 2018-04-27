@@ -1,36 +1,58 @@
-import { Tapable } from "tapable";
+import _ from "lodash";
+import { Tapable, AsyncSeriesHook } from "tapable";
+import RouterService from "./router/service";
+
 export default class ServiceManager extends Tapable {
 
-  constructor({env, app}) {
+  plugins = [];
+  routerService = new RouterService();
+  beforeRun = [];
+
+
+  constructor({env, handler}) {
     super();
-    this.hooks = {};
+    this.hooks = {
+      "initRoutes": new AsyncSeriesHook(["Router"])
+    };
     this.env = env;
-
-    this.initServices({app});
+    this.handler = new handler({env});
   }
 
-  // Init private services with public get and set
-  initServices({app}) {
-
-    let services = {
-      app
-    };
-    this.getService = (name = "", defaultValue = false) => {
-      if (!name) {
-        return defaultValue;
-      }
-      return _.get(services, name, defaultValue);
-    };
-
-    this.setService = (name = "", value = null) => {
-      if(!name || !value) {
-        throw new Error (`Invalid service name: ${name} or value: ${value}`);
-      }
-      if (name === "app") {
-        throw new Error("app is a reserved service name.");
-      }
-      _.set(services, name, value);
-      return this;
-    };
+  addPlugin(plugin) {
+    try {
+      _.each(plugin.hooks, (hookValue, hookName) => {
+        this.hooks[hookName] = hookValue;
+      });
+    } catch(ex) {
+      // eslint-disable-next-line
+      console.log(ex);
+    }
+    plugin.apply(this);
   }
+  addPluginRoutes(routes) {
+    try {
+      _.each(routes.hooks, (hookValue, hookName) => {
+        this.hooks[hookName] = hookValue;
+      });
+    } catch(ex) {
+      // eslint-disable-next-line
+      console.log(ex);
+    }
+    routes.apply(this);
+  }
+
+  run() {
+    this.hooks.initRoutes.callAsync(this.routerService, err => {
+      if (err) {
+        // eslint-disable-next-line
+        console.log(err);
+        return;
+      }
+
+      this.handler.run({
+        routerService: this.routerService
+      });
+    });
+  }
+
 }

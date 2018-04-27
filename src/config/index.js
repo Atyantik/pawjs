@@ -11,9 +11,3 @@ try {
 config = _.defaultsDeep(config, defaultConfig);
 
 module.exports = _.assignIn({}, config);
-module.exports.env = (env = "") => {
-  if (!env) {
-    return _.assignIn({}, config);
-  }
-  return _.assignIn({}, _.get(config, env, {}));
-};

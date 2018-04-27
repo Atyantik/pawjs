@@ -14,6 +14,9 @@ allExecutablePaths.unshift(libRoot);
 fs.existsSync(path.join(libRoot, ".bin")) &&
 allExecutablePaths.unshift(path.join(libRoot, ".bin"));
 
+fs.existsSync(path.join(libRoot, "node_modules")) &&
+allExecutablePaths.unshift(path.join(libRoot, "node_modules"));
+
 fs.existsSync(path.join(libRoot, "node_modules", ".bin")) &&
 allExecutablePaths.unshift(path.join(libRoot, "node_modules", ".bin"));
 
@@ -24,6 +27,9 @@ allExecutablePaths.unshift(projectRoot);
 // Include current folder bin and node_modules's bin
 fs.existsSync(path.join(projectRoot, ".bin")) &&
 allExecutablePaths.unshift(path.join(projectRoot, ".bin"));
+
+fs.existsSync(path.join(projectRoot, "node_modules")) &&
+allExecutablePaths.unshift(path.join(projectRoot, "node_modules"));
 
 fs.existsSync(path.join(projectRoot, "node_modules", ".bin")) &&
 allExecutablePaths.unshift(path.join(projectRoot, "node_modules", ".bin"));
