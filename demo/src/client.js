@@ -1,6 +1,6 @@
 export default class Client {
-  apply(serviceManager) {
 
+  apply(serviceManager) {
     // serviceManager.hooks.locationChange.tap("TrackPageChange", (page, title, location) => {
     //   console.log(page, title, location);
     // });

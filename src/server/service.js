@@ -20,20 +20,20 @@ export default class ServerService extends Tapable {
   }
 
   run({ routerService }) {
-    const {env} = this.options;
-    const root = _.get(env, "clientRootElementId", "app");
-
-    this.hooks.clientBeforeRender.callAsync(() => {
-      // Render according to routes!
-      renderer(
-        <StaticRouter>
-          {renderRoutes(routerService.getRoutes())}
-        </StaticRouter>,
-        domRootReference,
-        () => {
-          this.hooks.clientRenderComplete.call();
-        }
-      );
-    });
+    // const {env} = this.options;
+    // const root = _.get(env, "clientRootElementId", "app");
+    //
+    // this.hooks.clientBeforeRender.callAsync(() => {
+    //   // Render according to routes!
+    //   renderer(
+    //     <StaticRouter>
+    //       {renderRoutes(routerService.getRoutes())}
+    //     </StaticRouter>,
+    //     domRootReference,
+    //     () => {
+    //       this.hooks.clientRenderComplete.call();
+    //     }
+    //   );
+    // });
   }
 }

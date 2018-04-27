@@ -34,22 +34,18 @@ app.get("/", (req, res) => {
   const assets = assetsToArray(res.locals.assets);
   res.write("<!DOCTYPE html>");
   let childComponent = null;
-  let serviceManager = ServiceManager();
+  //let serviceManager = ServiceManager();
 
   if (res.locals.ssr) {
     // something with ssr
     // childComponent = <ClientApp.default />;
   }
 
-
-
   ReactDOMServer.renderToNodeStream(
     <Html
       assets={assets}
     >
-      <StaticRouter>
-        {renderRoutes(childComponent)}
-      </StaticRouter>
+      {childComponent}
     </Html>
   ).pipe(res);
 });
