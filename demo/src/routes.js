@@ -5,11 +5,11 @@ const appRoutes = [
 ];
 
 export default class Routes {
-  apply(serviceManager) {
 
+  apply(router) {
     // Adding application routes to application routes
-    serviceManager.hooks.initRoutes.tap("AddAppRoutes", Router => {
-      Router.addRoutes(appRoutes);
+    router.hooks.initRoutes.tap("AddAppRoutes", () => {
+      router.addRoutes(appRoutes);
     });
 
   }

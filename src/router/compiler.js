@@ -1,7 +1,12 @@
 import React from "react";
-import Loadable from "react-loadable";
+import _ from "lodash";
+import Loadable from "../components/loadable";
 
 export default class RouteCompiler {
+
+  constructor(options) {
+    this.options = options;
+  }
 
   compileRoutes(routes, routerService) {
     return _.map(routes, (r) => {
@@ -12,14 +17,24 @@ export default class RouteCompiler {
 
   compileRoute(route, routerService) {
 
-    const {path, skeleton, error, timeout, delay, loadData, seo, component, ...others} = route;
+    const {
+      path,
+      skeleton,
+      error,
+      timeout,
+      delay,
+      loadData,
+      seo,
+      component,
+      ...others
+    } = route;
 
     // JSXifiable component object
     const Params = {
-      errorComponent: error || routerService.getLoadErrorComponent(),
-      skeletonComponent: skeleton || routerService.getLoaderComponent(),
-      timeout: timeout || routerService.getLoadTimeout(),
-      delay: delay || routerService.getAllowedLoadDelay()
+      errorComponent: error || routerService.getDefaultLoadErrorComponent(),
+      skeletonComponent: skeleton || routerService.getDefaultLoaderComponent(),
+      timeout: timeout || routerService.getDefaultLoadTimeout(),
+      delay: delay || routerService.getDefaultAllowedLoadDelay()
     };
 
     const loadableComponent = Loadable.Map({
@@ -37,10 +52,12 @@ export default class RouteCompiler {
         }
       },
       render(loaded, props) {
-        let RouteComponent = loaded.RouteComponent.default;
+        let RouteComponent = loaded.RouteComponent.default? loaded.RouteComponent.default: loaded.RouteComponent;
         let LoadedData = loaded.LoadData;
         return <RouteComponent {...props} loadedData={LoadedData}/>;
       },
+      ...(route.webpack? {webpack: route.webpack}: {}),
+      ...(route.modules? {modules: route.modules}: {}),
     });
     loadableComponent.compiled = true;
     return {
@@ -48,7 +65,7 @@ export default class RouteCompiler {
       component: loadableComponent,
       seo: Object.assign({}, seo),
       ...others,
-      ...(route.routes ? {routes: this.compileRoutes(route.routes, routerService)} : {})
+      ...(route.routes ? {routes: this.compileRoutes(route.routes, routerService)} : {}),
     };
 
   }

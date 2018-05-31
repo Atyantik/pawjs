@@ -20,6 +20,7 @@ const serverConfig = require("../webpack/dev/node-server.config");
 // Web client configurations
 const webConfig = require("../webpack/dev/web.config");
 
+
 // Create a webpack server compiler from the server config
 const serverCompiler = webpack(serverConfig);
 const devServerOptions = Object.assign({}, serverConfig.devServer, {
@@ -72,8 +73,20 @@ app.use(webpackHotMiddleware(webCompiler, {
 }));
 
 app.get("*", function (req, res, next) {
-  const filesystem = serverMiddleware.fileSystem;
-  const serverContent = filesystem.readFileSync(serverMiddleware.getFilenameFromUrl(devServerOptions.publicPath + "/server.js"), "utf-8");
+
+  const mfs = serverMiddleware.fileSystem;
+  const fileNameFromUrl = serverMiddleware.getFilenameFromUrl(devServerOptions.publicPath + req.path);
+
+  if (
+    fileNameFromUrl.indexOf("favicon.ico") !== -1 || (
+      mfs.existsSync(fileNameFromUrl) &&
+      mfs.statSync(fileNameFromUrl).isFile()
+    )
+  ) {
+    return next();
+  }
+
+  const serverContent = mfs.readFileSync(serverMiddleware.getFilenameFromUrl(devServerOptions.publicPath + "/server.js"), "utf-8");
 
   let CommonServerMiddleware;
   try {
@@ -90,10 +103,12 @@ app.get("*", function (req, res, next) {
 });
 
 let totalCompilationComplete = 0;
+
 webCompiler.hooks.done.tap("InformWebCompiled", () => {
   totalCompilationComplete++;
   if (totalCompilationComplete >=2 ) startServer();
 });
+
 serverCompiler.hooks.done.tap("InformServerCompiled", () => {
   totalCompilationComplete++;
   if (totalCompilationComplete >=2 ) startServer();

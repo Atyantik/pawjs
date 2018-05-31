@@ -1,13 +1,30 @@
 import express from "express";
-import React from "react";
-import ReactDOMServer from "react-dom/server";
 import _ from "lodash";
-import Html from "../components/html";
-import { renderRoutes, matchRoutes } from "react-router-config";
+import RouteHandler from "../router/handler";
+import ServerHandler from "./handler";
+import env from "../config";
+import Loadable from "react-loadable";
 
-import ServiceManager from "../service-manager";
-import ServerService from "./service";
-import env from "../config/index";
+
+const rHandler = new RouteHandler({
+  env: _.assignIn({}, env),
+  isServer: true,
+});
+
+let ProjectRoutes = require(`${process.env.__project_root}/src/routes`);
+if (ProjectRoutes.default) ProjectRoutes = ProjectRoutes.default;
+
+rHandler.addPlugin(new ProjectRoutes({addPlugin: rHandler.addPlugin}));
+
+
+let ProjectServer = require(`${process.env.__project_root}/src/server`);
+if (ProjectServer.default) ProjectServer = ProjectServer.default;
+
+const sHandler = new ServerHandler({
+  env: _.assignIn({}, env)
+});
+
+
 
 const app = express();
 //const ClientApp = require(`${process.env.__project_root}/src/app`);
@@ -29,25 +46,38 @@ const assetsToArray = (assets) => {
   return _.uniq(allAssets);
 };
 
-app.get("/", (req, res) => {
+app.get("*", (req, res, next) => {
   // Get the resources
   const assets = assetsToArray(res.locals.assets);
+
   res.write("<!DOCTYPE html>");
-  let childComponent = null;
-  //let serviceManager = ServiceManager();
 
-  if (res.locals.ssr) {
-    // something with ssr
-    // childComponent = <ClientApp.default />;
+
+  if (!res.locals.ssr) {
+    return sHandler.run({
+      req,
+      res,
+      next,
+      assets
+    });
   }
+  // Wait for all routes to load everything!
+  rHandler.hooks.initRoutes.callAsync(err => {
+    if (err) {
+      // eslint-disable-next-line
+      console.log(err);
+      // @todo: Handle Error
+      return next();
+    }
+    return sHandler.run({
+      routeHandler: rHandler,
+      req,
+      res,
+      next,
+      assets
+    });
+  });
 
-  ReactDOMServer.renderToNodeStream(
-    <Html
-      assets={assets}
-    >
-      {childComponent}
-    </Html>
-  ).pipe(res);
 });
 
 export default (req, res, next) => {

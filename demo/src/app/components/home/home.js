@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import Prism from "../prism";
 import AnimatedAtom from "../animated-atom";
 import * as styles from "./home.scss";
+import {renderRoutes} from "react-router-config";
 
 const supportsServiceWorker = function() {
   if (typeof window === "undefined") return false;
@@ -10,6 +11,19 @@ const supportsServiceWorker = function() {
 };
 
 export default class Home extends Component {
+  constructor(props){
+    super(props);
+    this.state = {
+      supportsServiceWorker: false,
+    };
+  }
+  componentDidMount() {
+    if (supportsServiceWorker()) {
+      this.setState({
+        supportsServiceWorker: true,
+      });
+    }
+  }
   
   render() {
     return (
@@ -69,7 +83,7 @@ export default class Home extends Component {
           <p className="mt-4">
             <i>For more detailed instruction please visit <Link to="/docs">docs</Link></i>
           </p>
-          {supportsServiceWorker() && (
+          {this.state.supportsServiceWorker && (
             <div className="card text-white bg-info mb-3">
               <div className="card-header"><small>This is a </small> Progressive Web Application!</div>
               <div className="card-body">
@@ -81,6 +95,8 @@ export default class Home extends Component {
             </div>
           )}
         </div>
+        <Link to="/test">Test</Link>
+        {renderRoutes(this.props.route.routes)}
       </div>
     );
   }

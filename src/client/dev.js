@@ -1,4 +1,4 @@
-import "../../promise-polyfill";
+import "../promise-polyfill";
 
 const importApp = () => import("./app");
 

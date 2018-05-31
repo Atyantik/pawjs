@@ -23,7 +23,7 @@ module.exports = {
       "webpack-hot-middleware/client?name=web&path=/__hmr_update&timeout=2000&overlay=true&quiet=true",
 
       // Initial entry point for dev
-      path.resolve(process.env.__lib_root, "./src/client/dev/init.js"),
+      path.resolve(process.env.__lib_root, "./src/client/dev.js"),
     ],
   },
   output: {

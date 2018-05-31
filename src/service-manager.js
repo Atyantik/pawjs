@@ -1,13 +1,10 @@
 import _ from "lodash";
 import { Tapable, AsyncSeriesHook } from "tapable";
-import RouterService from "./router/service";
+
 
 export default class ServiceManager extends Tapable {
 
-  plugins = [];
   routerService = new RouterService();
-  beforeRun = [];
-
 
   constructor({env, handler}) {
     super();

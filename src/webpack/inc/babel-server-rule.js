@@ -12,7 +12,7 @@ module.exports = {
         ],
         require("@babel/preset-react"),
       ],
-      cacheDirectory: true,
+      cacheDirectory: false,
       plugins: require("./babel-plugins")()
     }
   }

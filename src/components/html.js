@@ -2,6 +2,7 @@ import React, { Component } from "react";
 
 class Html extends Component {
   render() {
+    const { preloadedData } = this.props;
     return (
       <html lang="en" dir="ltr">
         <head>
@@ -43,6 +44,13 @@ class Html extends Component {
           <meta name="twitter:title" content="Content Title" />
           <meta name="twitter:description" content="Content description less than 200 characters" />
           <meta name="twitter:image" content="https://example.com/image.jpg" />
+          <script
+            type="text/javascript"
+            id="__pawjs_preloaded"
+            dangerouslySetInnerHTML={{
+              __html: `window.__preloaded_data = ${JSON.stringify(preloadedData)};`
+            }}
+          />
         </head>
         <body>
           <div id="app">{this.props.children}</div>

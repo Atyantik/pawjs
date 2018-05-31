@@ -1,5 +1,7 @@
 module.exports = (options = {noChunk: false}) => [
+  require("../plugins/react-loadable-routes"),
   options.noChunk ? require("../plugins/dynamic-import-webpack"): require("@babel/plugin-syntax-dynamic-import"),
+  // require("@babel/plugin-syntax-dynamic-import"),
   require("@babel/plugin-proposal-object-rest-spread"),
   [
     require("@babel/plugin-proposal-decorators"),

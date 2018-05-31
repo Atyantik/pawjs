@@ -1,17 +1,22 @@
-import { Tapable } from "tapable";
+import {AsyncSeriesHook, Tapable} from "tapable";
 import AsyncRouteLoadErrorComponent from "../components/AsyncRouteLoadError";
 import AsyncRouteLoaderComponent from "../components/AsyncRouteLoader";
 import RouteCompiler from "./compiler";
+import _ from "lodash";
 
 
-export default class RouterService extends Tapable {
-
-  routeCompiler = new RouteCompiler();
+export default class RouteHandler extends Tapable {
   routes = [];
 
-  constructor() {
+  constructor(options) {
     super();
-    this.hooks = {};
+
+    this.routeCompiler = new RouteCompiler({
+      isServer: Boolean(options.isServer)
+    });
+    this.hooks = {
+      "initRoutes": new AsyncSeriesHook(),
+    };
 
     // Private methods
     let loadErrorComponent = AsyncRouteLoadErrorComponent;
@@ -19,39 +24,39 @@ export default class RouterService extends Tapable {
     let delay = 300;
     let timeout = 10000;
 
-    this.setLoadErrorComponent = component => {
+    this.setDefaultLoadErrorComponent = component => {
       loadErrorComponent = component;
       return this;
     };
 
-    this.getLoadErrorComponent = () => {
+    this.getDefaultLoadErrorComponent = () => {
       return loadErrorComponent;
     };
 
-    this.setLoaderComponent = component => {
+    this.setDefaultLoaderComponent = component => {
       loaderComponent = component;
       return this;
     };
 
-    this.getLoaderComponent = () => {
+    this.getDefaultLoaderComponent = () => {
       return loaderComponent;
     };
 
-    this.setAllowedLoadDelay = allowedDelay => {
+    this.setDefaultAllowedLoadDelay = allowedDelay => {
       delay = allowedDelay;
       return this;
     };
 
-    this.getAllowedLoadDelay = () => {
+    this.getDefaultAllowedLoadDelay = () => {
       return delay;
     };
 
-    this.setLoadTimeout = loadTimeout => {
+    this.setDefaultLoadTimeout = loadTimeout => {
       timeout = loadTimeout;
       return this;
     };
 
-    this.getLoadTimeout = () => {
+    this.getDefaultLoadTimeout = () => {
       return timeout;
     };
   }
@@ -66,6 +71,18 @@ export default class RouterService extends Tapable {
     const compiledRoutes = this.routeCompiler.compileRoutes(routes, this);
     this.routes = this.routes.concat(compiledRoutes);
     this.routes = _.uniq(this.routes);
+  }
+
+  addPlugin(plugin) {
+    try {
+      _.each(plugin.hooks, (hookValue, hookName) => {
+        this.hooks[hookName] = hookValue;
+      });
+      plugin.apply && plugin.apply(this);
+    } catch(ex) {
+      // eslint-disable-next-line
+      console.log(ex);
+    }
   }
 
   getRoutes() {
