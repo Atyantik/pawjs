@@ -2,14 +2,16 @@ const _ = require("lodash");
 
 module.exports = function(webpackStats) {
   let assets = {};
+  let cssDependencyMap = [];
   webpackStats = webpackStats.toJson();
-  if (!webpackStats.children || webpackStats.children.length <= 1) {
+
+  if (!_.isArray(webpackStats)) {
     webpackStats = [webpackStats];
-  } else {
-    webpackStats = webpackStats.children;
   }
 
+
   _.each(webpackStats, stat => {
+
     const assetsByChunkName = stat.assetsByChunkName;
 
     const publicPath = stat.publicPath;
@@ -31,7 +33,27 @@ module.exports = function(webpackStats) {
       }
     });
 
-    assets = {...assetsByChunkName};
+    _.each(stat.chunks, chunk => {
+      let hasCSS = false;
+      let cssFileName = "";
+      _.each(chunk.files, f => {
+        if (hasCSS) return;
+
+        hasCSS = f.indexOf(".css") !== -1;
+        if (hasCSS) cssFileName = f;
+      });
+
+      if (!hasCSS) return;
+
+      cssDependencyMap.push({
+        path: `${publicPath}${cssFileName}`,
+        modules: _.map(chunk.modules, "name")
+      });
+
+    });
+
+    assets = {...assetsByChunkName, cssDependencyMap};
   });
+
   return assets;
 };

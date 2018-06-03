@@ -74,7 +74,8 @@ app.get("*", (req, res, next) => {
       req,
       res,
       next,
-      assets
+      assets,
+      cssDependencyMap: res.locals.cssDependencyMap
     });
   });
 

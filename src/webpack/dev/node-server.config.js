@@ -1,5 +1,5 @@
 const path = require("path");
-const ExtractTextPlugin = require("extract-text-webpack-plugin");
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const webpack = require("webpack");
 const _ = require("lodash");
 
@@ -27,9 +27,10 @@ module.exports = {
       serverRule,
       {
         test: /\.(sass|scss|css)$/,
-        use: ExtractTextPlugin.extract({
-          use: cssUseRules
-        })
+        use: [
+          MiniCssExtractPlugin.loader,
+          ...cssUseRules
+        ]
       },
       {
         test: /\.(eot|ttf|woff|woff2)$/,
@@ -109,9 +110,10 @@ module.exports = {
       "__lib_root": process.env.__lib_root,
     }, configEnvVars)),
 
-    new ExtractTextPlugin({
+    new MiniCssExtractPlugin({
+      // Options similar to the same options in webpackOptions.output
+      // both options are optional
       filename: "server.css",
-      allChunks: true
     })
   ]
 };

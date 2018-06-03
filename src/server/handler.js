@@ -4,6 +4,7 @@ import {
   SyncHook
 } from "tapable";
 import React from "react";
+import _ from "lodash";
 import { renderToNodeStream } from "react-dom/server";
 import Html from "../components/html";
 import {matchRoutes, renderRoutes} from "react-router-config";
@@ -20,7 +21,7 @@ export default class ServerHandler extends Tapable {
     this.options = options;
   }
 
-  run({ routeHandler, req, res, next, assets }) {
+  run({ routeHandler, req, res, next, assets , cssDependencyMap}) {
 
     res.write("<!DOCTYPE html>");
 
@@ -36,30 +37,39 @@ export default class ServerHandler extends Tapable {
     let routes = routeHandler.getRoutes();
 
     let currentPageRoutes = matchRoutes(routes, req.path);
+
     let context = {};
 
     let promises = [];
     let preloadedData = [];
+    let cssToBeIncluded = [];
+    let modulesInRoutes = [];
 
     currentPageRoutes.forEach(({route}) => {
+      modulesInRoutes.push(...route.webpack());
       if (route.component.preload) {
         promises.push(route.component.preload());
       }
     });
+
+    modulesInRoutes.forEach(mod => {
+      cssDependencyMap.forEach(c => {
+        if (_.indexOf(c.modules, mod) !== -1) {
+          cssToBeIncluded.push(c.path);
+        }
+      });
+    });
+
     Promise.all(promises).then(args => {
-
       currentPageRoutes.forEach((r,i) => {
-
         preloadedData.push(args[i][1]);
       });
-
-      //console.log(preloadedData);
-
 
       // Render according to routes!
       renderToNodeStream(
         <Html
           assets={assets}
+          css={cssToBeIncluded}
           preloadedData={preloadedData}
         >
           <StaticRouter location={req.url}  context={context}>
@@ -67,6 +77,7 @@ export default class ServerHandler extends Tapable {
           </StaticRouter>
         </Html>
       ).pipe(res);
+
       // Free some memory
       routes = null;
       currentPageRoutes = null;

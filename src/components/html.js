@@ -51,6 +51,10 @@ class Html extends Component {
               __html: `window.__preloaded_data = ${JSON.stringify(preloadedData)};`
             }}
           />
+          {
+            this.props.css
+              .map(path => <link rel="stylesheet" type="text/css" key={path} href={path} async={true} />)
+          }
         </head>
         <body>
           <div id="app">{this.props.children}</div>

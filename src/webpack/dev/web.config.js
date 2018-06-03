@@ -1,7 +1,7 @@
 const path = require("path");
 const webpack = require("webpack");
 const _ = require("lodash");
-
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const directories = require("../utils/directories");
 const pawConfig = require("../../config");
 
@@ -9,6 +9,9 @@ let configEnvVars = {};
 _.each(pawConfig, (value, key) => {
   configEnvVars[`__config_${key}`] = value;
 });
+
+let cssUseRules = [].concat(require("../inc/babel-css-rule").use);
+cssUseRules.shift();
 
 module.exports = {
   name: "web",
@@ -35,7 +38,13 @@ module.exports = {
   module: {
     rules: [
       require("../inc/babel-web-rule"),
-      require("../inc/babel-css-rule"),
+      {
+        test: /\.(sass|scss|css)$/,
+        use: [
+          MiniCssExtractPlugin.loader,
+          ...cssUseRules
+        ]
+      },
       // Managing fonts
       {
         test: /\.(eot|ttf|woff|woff2)$/,
@@ -97,6 +106,13 @@ module.exports = {
       "__project_root": process.env.__project_root,
       "__lib_root": process.env.__lib_root,
     }, configEnvVars)),
-    new webpack.HotModuleReplacementPlugin()
+    new webpack.HotModuleReplacementPlugin(),
+
+    new MiniCssExtractPlugin({
+      // Options similar to the same options in webpackOptions.output
+      // both options are optional
+      filename: "[hash].css",
+      chunkFilename: "[chunkhash].css"
+    })
   ]
 };

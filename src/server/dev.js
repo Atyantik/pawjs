@@ -2,6 +2,7 @@
 console.log("Compiling files, please wait...");
 
 const express = require("express");
+const compression = require("compression");
 const webpack = require("webpack");
 
 const webpackMiddleware = require("webpack-dev-middleware");
@@ -51,6 +52,7 @@ const webOptions = Object.assign({}, {
 });
 
 const app = express();
+app.use(compression());
 
 // Add server middleware
 const serverMiddleware = webpackMiddleware(serverCompiler, devServerOptions);
@@ -96,7 +98,9 @@ app.get("*", function (req, res, next) {
     console.log(ex);
   }
 
-  res.locals.assets = normalizeAssets(res.locals.webpackStats);
+  const {cssDependencyMap,...assets} = normalizeAssets(res.locals.webpackStats)
+  res.locals.assets = assets;
+  res.locals.cssDependencyMap = cssDependencyMap;
   res.locals.ssr = serverConfig.devServer.serverSideRender;
 
   return CommonServerMiddleware(req, res, next);
