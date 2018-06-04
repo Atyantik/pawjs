@@ -16,4 +16,5 @@ module.exports = (options = {noChunk: false}) => [
     }
   ],
   require("@babel/plugin-proposal-async-generator-functions"),
+  require("babel-plugin-lodash")
 ];

@@ -2,6 +2,7 @@ const path = require("path");
 const webpack = require("webpack");
 const _ = require("lodash");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+const LodashModuleReplacementPlugin = require("lodash-webpack-plugin");
 const directories = require("../utils/directories");
 const pawConfig = require("../../config");
 
@@ -114,6 +115,7 @@ module.exports = {
       // both options are optional
       filename: "[hash].css",
       chunkFilename: "[chunkhash].css"
-    })
+    }),
+    new LodashModuleReplacementPlugin,
   ]
 };

@@ -1,5 +1,6 @@
 const path = require("path");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+const LodashModuleReplacementPlugin = require("lodash-webpack-plugin");
 const webpack = require("webpack");
 const _ = require("lodash");
 
@@ -115,6 +116,9 @@ module.exports = {
       // Options similar to the same options in webpackOptions.output
       // both options are optional
       filename: "server.css",
-    })
+    }),
+
+    new LodashModuleReplacementPlugin,
+
   ]
 };

@@ -1,6 +1,7 @@
 // eslint-disable-next-line
 console.log("Compiling files, please wait...");
 
+const path = require("path");
 const express = require("express");
 const compression = require("compression");
 const webpack = require("webpack");
@@ -92,13 +93,15 @@ app.get("*", function (req, res, next) {
 
   let CommonServerMiddleware;
   try {
-    CommonServerMiddleware = requireFromString(serverContent).default;
+    CommonServerMiddleware = requireFromString(serverContent, {
+      appendPaths: process.env.NODE_PATH.split(path.delimiter)
+    }).default;
   } catch(ex) {
     // eslint-disable-next-line
     console.log(ex);
   }
 
-  const {cssDependencyMap,...assets} = normalizeAssets(res.locals.webpackStats)
+  const {cssDependencyMap,...assets} = normalizeAssets(res.locals.webpackStats);
   res.locals.assets = assets;
   res.locals.cssDependencyMap = cssDependencyMap;
   res.locals.ssr = serverConfig.devServer.serverSideRender;

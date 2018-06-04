@@ -23,7 +23,7 @@ module.exports = {
         sourceMap: false,
         ident: "postcss",
         plugins: () => [
-          require("postcss-cssnext")()
+          require("postcss-preset-env")()
         ]
       }
     },

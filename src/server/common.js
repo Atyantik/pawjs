@@ -3,8 +3,6 @@ import _ from "lodash";
 import RouteHandler from "../router/handler";
 import ServerHandler from "./handler";
 import env from "../config";
-import Loadable from "react-loadable";
-
 
 const rHandler = new RouteHandler({
   env: _.assignIn({}, env),
