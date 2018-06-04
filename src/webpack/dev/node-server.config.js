@@ -21,6 +21,7 @@ _.each(pawConfig, (value, key) => {
 
 module.exports = {
   mode: "development",
+  devtool: "cheap-module-source-map",
   entry: path.resolve(process.env.__lib_root,"./src/server/common.js"),
   module: {
     rules: [

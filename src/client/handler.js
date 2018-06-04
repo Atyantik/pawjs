@@ -8,6 +8,7 @@ import React from "react";
 import { renderRoutes, matchRoutes } from "react-router-config";
 import { BrowserRouter } from "react-router-dom";
 import { render, hydrate } from "react-dom";
+import ErrorBoundary from "../components/ErrorBoundary";
 
 export default class ClientService extends Tapable {
 
@@ -49,7 +50,9 @@ export default class ClientService extends Tapable {
 
     this.hooks.beforeRender.callAsync(() => {
 
-      let currentPageRoutes = matchRoutes(routeHandler.getRoutes(), window.location.pathname);
+      const routes = routeHandler.getRoutes();
+
+      let currentPageRoutes = matchRoutes(routes, window.location.pathname);
 
       let promises = [];
 
@@ -65,9 +68,11 @@ export default class ClientService extends Tapable {
       Promise.all(promises).then(() => {
         // Render according to routes!
         renderer(
-          <BrowserRouter>
-            {renderRoutes(routeHandler.getRoutes())}
-          </BrowserRouter>,
+          <ErrorBoundary ErrorComponent={routeHandler.getErrorComponent()}>
+            <BrowserRouter>
+              {renderRoutes(routes)}
+            </BrowserRouter>
+          </ErrorBoundary>,
           domRootReference,
           //div,
           () => {

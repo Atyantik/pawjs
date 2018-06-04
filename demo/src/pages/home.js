@@ -5,13 +5,11 @@ export default [
     path: "/",
     component: import("../app/components/home"),
     skeleton: HomeSkeleton,
-    routes: [
-      {
-        exact: true,
-        path: "/test",
-        component: import("../app/components/home/test"),
-      }
-    ]
+    exact: true,
   },
-
+  {
+    exact: true,
+    path: "/test",
+    component: import("../app/components/home/test"),
+  }
 ];

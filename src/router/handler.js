@@ -1,12 +1,19 @@
 import {AsyncSeriesHook, Tapable} from "tapable";
 import AsyncRouteLoadErrorComponent from "../components/AsyncRouteLoadError";
 import AsyncRouteLoaderComponent from "../components/AsyncRouteLoader";
+import NotFoundComponent from "../components/NotFound";
+import ErrorComponent from "../components/Error";
 import RouteCompiler from "./compiler";
 import _ from "lodash";
 
 
 export default class RouteHandler extends Tapable {
+
   routes = [];
+  components = {
+    NotFoundComponent,
+    ErrorComponent
+  };
 
   constructor(options) {
     super();
@@ -21,6 +28,9 @@ export default class RouteHandler extends Tapable {
     // Private methods
     let loadErrorComponent = AsyncRouteLoadErrorComponent;
     let loaderComponent = AsyncRouteLoaderComponent;
+    let notFoundComponent = NotFoundComponent;
+    let errorComponent = ErrorComponent;
+
     let delay = 300;
     let timeout = 10000;
 
@@ -59,6 +69,21 @@ export default class RouteHandler extends Tapable {
     this.getDefaultLoadTimeout = () => {
       return timeout;
     };
+
+    this.set404Component = (component = () => null) => {
+      notFoundComponent = component;
+    };
+    this.get404Component = () => {
+      return notFoundComponent;
+    };
+
+    this.setErrorComponent = (component = () => null) => {
+      errorComponent = component;
+    };
+
+    this.getErrorComponent = () => {
+      return errorComponent;
+    };
   }
 
   addRoute(route) {
@@ -86,6 +111,10 @@ export default class RouteHandler extends Tapable {
   }
 
   getRoutes() {
-    return _.cloneDeep(this.routes);
+    let routes = _.cloneDeep(this.routes);
+    routes.push({
+      component: this.get404Component()
+    });
+    return routes;
   }
 }

@@ -16,6 +16,7 @@ cssUseRules.shift();
 module.exports = {
   name: "web",
   mode: "development",
+  devtool: "cheap-module-source-map",
   context: directories.root,
   entry: {
     client: [

@@ -3,7 +3,6 @@ import { Link } from "react-router-dom";
 import Prism from "../prism";
 import AnimatedAtom from "../animated-atom";
 import * as styles from "./home.scss";
-import {renderRoutes} from "react-router-config";
 
 const supportsServiceWorker = function() {
   if (typeof window === "undefined") return false;
@@ -96,7 +95,6 @@ export default class Home extends Component {
           )}
         </div>
         <Link to="/test">Test</Link>
-        {renderRoutes(this.props.route.routes)}
       </div>
     );
   }

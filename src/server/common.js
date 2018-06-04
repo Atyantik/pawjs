@@ -50,9 +50,6 @@ app.get("*", (req, res, next) => {
   // Get the resources
   const assets = assetsToArray(res.locals.assets);
 
-  res.write("<!DOCTYPE html>");
-
-
   if (!res.locals.ssr) {
     return sHandler.run({
       req,
