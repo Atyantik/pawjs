@@ -1,9 +1,15 @@
 const _ = require("lodash");
+const fs = require("fs");
+const util = require("util");
 
 module.exports = function(webpackStats) {
   let assets = {};
   let cssDependencyMap = [];
   webpackStats = webpackStats.toJson();
+
+  if (webpackStats.children && webpackStats.children.length === 1) {
+    webpackStats = webpackStats.children;
+  }
 
   if (!_.isArray(webpackStats)) {
     webpackStats = [webpackStats];
@@ -45,13 +51,19 @@ module.exports = function(webpackStats) {
 
       if (!hasCSS) return;
 
+      let moduleReasons = [];
+      _.each(chunk.modules, m => {
+        moduleReasons = moduleReasons.concat(_.map(m.reasons, "userRequest"));
+      });
+      moduleReasons = _.uniq(moduleReasons);
+
+
       cssDependencyMap.push({
         path: `${publicPath}${cssFileName}`,
-        modules: _.map(chunk.modules, "name")
+        modules:  moduleReasons
       });
 
     });
-
     assets = {...assetsByChunkName, cssDependencyMap};
   });
 

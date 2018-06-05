@@ -18,6 +18,8 @@ const normalizeAssets = require("../webpack/utils/normalizeAssets");
 
 // Server configurations
 const serverConfig = require("../webpack/dev/node-server.config");
+const firstServerConfig = serverConfig[0];
+const devServerConfig = firstServerConfig.devServer;
 
 // Web client configurations
 const webConfig = require("../webpack/dev/web.config");
@@ -25,7 +27,7 @@ const webConfig = require("../webpack/dev/web.config");
 
 // Create a webpack server compiler from the server config
 const serverCompiler = webpack(serverConfig);
-const devServerOptions = Object.assign({}, serverConfig.devServer, {
+const devServerOptions = Object.assign({}, devServerConfig, {
   stats: {
     colors: true,
     performance: false,
@@ -35,7 +37,7 @@ const devServerOptions = Object.assign({}, serverConfig.devServer, {
     maxModules: 0,
   },
   noInfo: true,
-  publicPath: serverConfig.output.publicPath
+  publicPath: firstServerConfig.output.publicPath
 });
 
 // Create a webpack web compiler from the web configurations
@@ -49,7 +51,7 @@ const webOptions = Object.assign({}, {
     colors: true,
     maxModules: 0
   },
-  publicPath: webConfig.output.publicPath
+  publicPath: webConfig[0].output.publicPath
 });
 
 const app = express();
@@ -104,7 +106,7 @@ app.get("*", function (req, res, next) {
   const {cssDependencyMap,...assets} = normalizeAssets(res.locals.webpackStats);
   res.locals.assets = assets;
   res.locals.cssDependencyMap = cssDependencyMap;
-  res.locals.ssr = serverConfig.devServer.serverSideRender;
+  res.locals.ssr = devServerConfig.serverSideRender;
 
   return CommonServerMiddleware(req, res, next);
 });
@@ -124,10 +126,10 @@ serverCompiler.hooks.done.tap("InformServerCompiled", () => {
 let serverStarted = false;
 const startServer = () => {
   if (serverStarted) return;
-  app.listen(serverConfig.devServer.port, serverConfig.devServer.host, () => {
+  app.listen(devServerConfig.port, devServerConfig.host, () => {
     serverStarted = true;
     // eslint-disable-next-line
-    console.log(`Listening to http://${serverConfig.devServer.host}:${serverConfig.devServer.port}`);
+    console.log(`Listening to http://${devServerConfig.host}:${devServerConfig.port}`);
   });
 };
 

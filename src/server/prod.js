@@ -2,9 +2,11 @@ import express from "express";
 import _ from "lodash";
 import server from "./common";
 import path from "path";
+import compression from "compression";
 // the below assets will be added by webpack. Don't worry about it
-import assets from "pwa-assets";
+import pawAssets from "pwa-assets";
 
+const {cssDependencyMap, ...assets} = pawAssets;
 /**
  * defining the current dir
  */
@@ -20,6 +22,8 @@ if (filename) {
 
 const app = express();
 
+app.use(compression());
+
 const cacheTime = 86400000*30;     // 30 days;
 app.use("/build", express.static(path.join(currentDir, "build"), {
   maxAge: cacheTime
@@ -27,6 +31,7 @@ app.use("/build", express.static(path.join(currentDir, "build"), {
 
 app.use((req, res, next) => {
   res.locals.assets = assets;
+  res.locals.cssDependencyMap = cssDependencyMap;
   res.locals.ssr = process.env.__config_serverSideRender;
   next();
 });

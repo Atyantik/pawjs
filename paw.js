@@ -2,7 +2,6 @@
 // eslint-disable-next-line
 const fs = require("fs");
 const path = require("path");
-const parseArgs = require("minimist");
 const _ = require("lodash");
 
 const processDir = process.cwd();
@@ -17,18 +16,15 @@ process.env.__project_root = projectRoot = path.isAbsolute(process.env.__project
 process.env.__lib_root = libRoot = __dirname;
 
 // Arguments passed to the script
-const args = parseArgs(process.argv.slice(2));
-const allCommands = args["_"];
-
+const allArgs = (process.argv.slice(2));
 let userCommand = "start";
+let otherCommands = [];
 
 // If we are provided with set of commands then
-if (allCommands.length) {
-  userCommand = _.first(allCommands);
-}
+if (allArgs.length) {
 
-// Disable babel cache
-process.env.BABEL_DISABLE_CACHE = 1;
+  [userCommand, ...otherCommands] = allArgs;
+}
 
 const allExecutablePaths = require("./scripts/executable-paths");
 
@@ -43,6 +39,8 @@ process.on("SIGTERM", cleanExit); // catch kill
 
 switch(userCommand) {
   case "start:dev": {
+    // Disable babel cache
+    process.env.BABEL_DISABLE_CACHE = 1;
     // Simply include the server/dev.js
     require(path.resolve(libRoot, "src/server/dev.js"));
     break;
@@ -71,6 +69,23 @@ switch(userCommand) {
         childSpawn2.stderr.pipe(process.stderr);
       }
     });
+
+    childSpawn.stdout.pipe(process.stdout);
+    childSpawn.stderr.pipe(process.stderr);
+    break;
+  }
+  case "webpack": {
+    // Disable babel cache
+    process.env.BABEL_DISABLE_CACHE = 0;
+    const spawn = require("child_process").spawn;
+
+    const childSpawn = spawn(
+      get_cmd("webpack"), [
+        "--config",
+        path.resolve(path.join(libRoot, "src", "webpack")),
+        ...otherCommands
+      ]
+    );
 
     childSpawn.stdout.pipe(process.stdout);
     childSpawn.stderr.pipe(process.stderr);

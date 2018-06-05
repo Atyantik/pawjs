@@ -22,10 +22,7 @@ const sHandler = new ServerHandler({
   env: _.assignIn({}, env)
 });
 
-
-
 const app = express();
-//const ClientApp = require(`${process.env.__project_root}/src/app`);
 
 const assetsToArray = (assets) => {
   let allAssets = [];

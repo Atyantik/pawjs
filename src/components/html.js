@@ -10,8 +10,8 @@ class Html extends Component {
           <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
           <title>Page Title less than 55 characters</title>
           <meta name="description" content="Description of the page less than 150 characters" />
-          <link rel="icon" type="image/x-icon" href="https://example.com/favicon.ico" />
-          <link rel="icon" type="image/png" href="https://example.com/favicon.png" />
+          {/*<link rel="icon" type="image/x-icon" href="https://example.com/favicon.ico" />*/}
+          {/*<link rel="icon" type="image/png" href="https://example.com/favicon.png" />*/}
 
           {/* Apple Touch Icon atleast 200x200px */}
           <link rel="apple-touch-icon" href="/custom-icon.png" />

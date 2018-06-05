@@ -1,19 +1,19 @@
-module.exports = {
+module.exports = module.exports.default = (options) => ({
   test: /\.jsx?$/,
   use: {
     loader: "babel-loader",
     options: {
       presets: [
         [
-          require("@babel/preset-env"),
+          "@babel/preset-env",
           {
-            "targets": { "node": "8.9.4" }
+            "targets": { "node": "8.11.2" }
           }
         ],
-        require("@babel/preset-react"),
+        "@babel/preset-react",
       ],
-      cacheDirectory: false,
-      plugins: require("./babel-plugins")()
+      cacheDirectory: options.cacheDirectory,
+      plugins: require("./babel-plugins")(options)
     }
   }
-};
+});

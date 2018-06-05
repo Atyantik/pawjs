@@ -46,13 +46,14 @@ export default class ServerHandler extends Tapable {
     let modulesInRoutes = [];
 
     currentPageRoutes.forEach(({route}) => {
-      route.webpack && modulesInRoutes.push(...route.webpack());
+      route.modules && modulesInRoutes.push(...route.modules);
       if (route.component.preload) {
         promises.push(route.component.preload());
       }
     });
 
     modulesInRoutes.forEach(mod => {
+      //eslint-disable-next-line
       cssDependencyMap.forEach(c => {
         if (_.indexOf(c.modules, mod) !== -1) {
           cssToBeIncluded.push(c.path);

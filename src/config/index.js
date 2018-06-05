@@ -1,5 +1,5 @@
 const defaultConfig = require("../config/defaults.json");
-const _ = require("lodash");
+const defaultsDeep = require("lodash/defaultsDeep");
 
 let config = {};
 try {
@@ -8,6 +8,6 @@ try {
 } catch (ex) {
   config = {};
 }
-config = _.defaultsDeep(config, defaultConfig);
+config = defaultsDeep(config, defaultConfig);
 
-module.exports = _.assignIn({}, config);
+module.exports = Object.assign({}, config);

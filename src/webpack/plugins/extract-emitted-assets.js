@@ -14,21 +14,10 @@ class ExtractEmittedAssets {
 
       if (webpackStatsObj.hasErrors()) return false;
 
-      // get emitted assets when done with compilation
-      const webpackStats = webpackStatsObj.toJson();
-
-
-
-      if (webpackStats && Object.keys(webpackStats).length && webpackStats["assetsByChunkName"]) {
-        let outputPath = this.outputPath || webpackStats.outputPath;
-        if (!path.resolve(outputPath)) {
-          throw `Invalid path: ${outputPath}. Cannot extract assets`;
-        }
-
-        let assetsByChunkName = normalizeAssets(webpackStatsObj);
-        const outputFile = path.join(path.resolve(outputPath), this.outputName);
-        fs.writeFileSync(outputFile, JSON.stringify(assetsByChunkName), "utf-8");
-      }
+      let outputPath = this.outputPath || webpackStatsObj.toJson().outputPath;
+      let assetsByChunkName = normalizeAssets(webpackStatsObj);
+      const outputFile = path.join(path.resolve(outputPath), this.outputName);
+      fs.writeFileSync(outputFile, JSON.stringify(assetsByChunkName), "utf-8");
     });
   }
 }

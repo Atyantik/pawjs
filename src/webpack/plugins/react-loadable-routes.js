@@ -35,26 +35,25 @@ module.exports = ({types: t}) => ({
           ])
         );
 
-        const webpackObj = t.objectProperty(
-          t.identifier("webpack"),
-          t.arrowFunctionExpression(
-            [],
-            t.arrayExpression(
-              [
-                t.callExpression(
-                  t.memberExpression(
-                    t.identifier("require"),
-                    t.identifier("resolveWeak"),
-                  ),
-                  [t.StringLiteral(source)],
-                )
-              ]
-            )
-          )
-        );
+        // const webpackObj = t.objectProperty(
+        //   t.identifier("webpack"),
+        //   t.arrowFunctionExpression(
+        //     [],
+        //     t.arrayExpression(
+        //       [
+        //         t.callExpression(
+        //           t.memberExpression(
+        //             t.identifier("require"),
+        //             t.identifier("resolveWeak"),
+        //           ),
+        //           [t.StringLiteral(source)],
+        //         )
+        //       ]
+        //     )
+        //   )
+        // );
 
         obj.parentPath.pushContainer("properties", moduleObj);
-        obj.parentPath.pushContainer("properties", webpackObj);
       } catch(ex) {
         // eslint-disable-next-line
         console.log(ex);
