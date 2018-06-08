@@ -4,7 +4,7 @@
  * Time: 3:20 PM
  */
 import React, { Component } from "react";
-import Link from "pawjs/src/components/link/link";
+import { Link } from "react-router-dom";
 
 export default class SEO extends Component {
   render() {
@@ -33,7 +33,6 @@ export default class SEO extends Component {
 
           <div className="card mt-4">
             <Link
-              animateSection="features-content"
               to="/features/seo-search-engine-optimization/social-sharing"
               className="text-dark"
             >
@@ -50,7 +49,6 @@ export default class SEO extends Component {
 
           <div className="card mt-4">
             <Link
-              animateSection="features-content"
               to="/features/seo-search-engine-optimization/ssr-server-side-rendering"
               className="text-dark"
             >
@@ -67,7 +65,6 @@ export default class SEO extends Component {
 
           <div className="card mt-4">
             <Link
-              animateSection="features-content"
               to="/features/seo-search-engine-optimization/content-folding"
               className="text-dark"
             >

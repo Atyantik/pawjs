@@ -1,6 +1,4 @@
 const _ = require("lodash");
-const fs = require("fs");
-const util = require("util");
 
 module.exports = function(webpackStats) {
   let assets = {};
@@ -55,7 +53,7 @@ module.exports = function(webpackStats) {
       _.each(chunk.modules, m => {
         moduleReasons = moduleReasons.concat(_.map(m.reasons, "userRequest"));
       });
-      moduleReasons = _.uniq(moduleReasons);
+      moduleReasons = _.uniq(_.compact(moduleReasons));
 
 
       cssDependencyMap.push({

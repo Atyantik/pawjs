@@ -4,10 +4,14 @@ const {
 } = require("tapable");
 
 const path = require("path");
+const fs = require("fs");
 const _ = require("lodash");
 const webpack = require("webpack");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const CleanWebpackPlugin = require("clean-webpack-plugin");
+const SwVariables = require("./plugins/sw-variables");
+const workboxPlugin = require("workbox-webpack-plugin");
+const MinifyPlugin = require("babel-minify-webpack-plugin");
 
 const ExtractEmittedAssets = require("./plugins/extract-emitted-assets");
 const SyncedFilesPlugin = require("./plugins/synced-files-plugin");
@@ -18,10 +22,14 @@ const pawConfig = require("./../config");
 const serverRule = require("./inc/babel-server-rule");
 const webRule = require("./inc/babel-web-rule");
 const fontRule = require("./inc/babel-font-rule");
-const srcSetRule = require("./inc/babel-srcset-rule");
 const imageRule = require("./inc/babel-image-rule");
 const resolverConfig =  require("./inc/webpack-resolver-config");
 const cssRule = require("./inc/babel-css-rule");
+
+let projectSW = "";
+if (fs.existsSync(path.join(directories.src, "sw.js"))) {
+  projectSW = fs.readFileSync(path.join(directories.src, "sw.js"), "utf-8");
+}
 
 let configEnvVars = {};
 _.each(pawConfig, (value, key) => {
@@ -60,16 +68,15 @@ module.exports = module.exports.default = class WebpackHandler extends Tapable {
             },
             output: {
               path: path.join(directories.dist, "build"),
-              publicPath: "/build/",
+              publicPath: "/",
               filename: "[hash].js",
               chunkFilename: "[chunkhash].js"
             },
             module: {
               rules: [
                 webRule(),
-                cssRule(),
+                ...cssRule(),
                 fontRule(),
-                srcSetRule(),
                 imageRule(),
               ]
             },
@@ -91,7 +98,15 @@ module.exports = module.exports.default = class WebpackHandler extends Tapable {
                 filename: "[hash].css",
                 chunkFilename: "[chunkhash].css"
               }),
-              //new LodashModuleReplacementPlugin,
+              new workboxPlugin.InjectManifest({
+                swSrc: path.resolve(process.env.__lib_root, "src","service-worker.js"),
+                swDest: "sw.js"
+              }),
+              new SwVariables({
+                fileName: "sw.js",
+                variables: pawConfig,
+                text: projectSW
+              }),
             ]
           }
         ],
@@ -104,10 +119,9 @@ module.exports = module.exports.default = class WebpackHandler extends Tapable {
             module: {
               rules: [
                 serverRule({noChunk: true}),
-                cssRule(),
-                fontRule({emitFile: false, outputPath: "build/images/"}),
-                srcSetRule(),
-                imageRule({ emitFile: false, outputPath: "build/images/"}),
+                ...cssRule(),
+                fontRule({emitFile: false, outputPath: "images/"}),
+                imageRule({ emitFile: false, outputPath: "images/"}),
               ]
             },
             context: directories.root,
@@ -156,20 +170,19 @@ module.exports = module.exports.default = class WebpackHandler extends Tapable {
             },
             output: {
               path: path.join(directories.dist, "build"),
-              publicPath: "/build/",
+              publicPath: "/",
               filename: "[hash].js",
               chunkFilename: "[chunkhash].js"
             },
             module: {
               rules: [
                 webRule({cacheDirectory: true}),
-                cssRule({
+                ...cssRule({
                   sourceMap: false,
                   localIdentName: "[hash:base64:5]",
                   compress: true,
                 }),
                 fontRule(),
-                srcSetRule(),
                 {
                   test: /\.(jpe?g|png|gif|svg|webp)$/i,
                   use: SyncedFilesPlugin.loader([
@@ -212,7 +225,25 @@ module.exports = module.exports.default = class WebpackHandler extends Tapable {
               }),
               new SyncedFilesPlugin({
                 outputPath: directories.dist
-              })
+              }),
+              new workboxPlugin.InjectManifest({
+                swSrc: path.resolve(process.env.__lib_root, "src","service-worker.js"),
+                swDest: "sw.js"
+              }),
+              new SwVariables({
+                fileName: "sw.js",
+                variables: pawConfig,
+                text: projectSW
+              }),
+
+              new MinifyPlugin({
+                removeConsole: true,
+                removeDebugger: true,
+                keepFnName: false,
+                keepClassName: false
+              }, {
+                comments: false,
+              }),
             ]
           }
         ],
@@ -224,13 +255,16 @@ module.exports = module.exports.default = class WebpackHandler extends Tapable {
             module: {
               rules: [
                 serverRule({noChunk: true, cacheDirectory: true}),
-                cssRule({
+                ...cssRule({
                   sourceMap: false,
                   localIdentName: "[hash:base64:5]",
                   compress: true,
                 }),
-                fontRule({emitFile: false, outputPath: "build/fonts/"}),
-                srcSetRule(),
+                fontRule({
+                  emitFile: false,
+                  outputPath: "build/fonts/",
+                  publicPath: "fonts/"
+                }),
                 {
                   test: /\.(jpe?g|png|gif|svg|webp)$/i,
                   use: SyncedFilesPlugin.loader([
@@ -238,6 +272,7 @@ module.exports = module.exports.default = class WebpackHandler extends Tapable {
                       loader: "file-loader",
                       options: {
                         outputPath: "build/images/",
+                        publicPath: "images/",
                         name: "[hash].[ext]",
                         context: directories.src,
                       }
@@ -247,11 +282,6 @@ module.exports = module.exports.default = class WebpackHandler extends Tapable {
               ]
             },
             context: directories.root,
-            devServer: {
-              port: pawConfig.port,
-              host: pawConfig.host,
-              serverSideRender: pawConfig.serverSideRender,
-            },
             optimization: {
               splitChunks: false
             },

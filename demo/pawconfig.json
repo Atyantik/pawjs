@@ -1,7 +1,13 @@
 {
   "port": "9090",
   "host": "0.0.0.0",
+  "rootUrl": "/",
   "staticSite": false,
   "serverSideRender": true,
-  "clientRootElementId": "app"
+  "clientRootElementId": "app",
+  "asyncCSS": false,
+  "hstsEnabled": true,
+  "hstsmaxAge": 31536000,
+  "hstsIncludeSubDomains": true,
+  "hstsPreload": false
 }

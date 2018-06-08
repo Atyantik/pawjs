@@ -5,7 +5,7 @@
  */
 
 import React, { Component } from "react";
-import Link from "pawjs/src/components/link";
+import { Link } from "react-router-dom";
 import Prism from "../prism";
 
 export default class FeaturesIndex extends Component {
@@ -20,7 +20,6 @@ export default class FeaturesIndex extends Component {
         <section>
           <div className="card mt-4">
             <Link
-              animateSection="features-content"
               to="/features/pwa-progressive-web-application"
               className="text-dark"
             >
@@ -39,7 +38,6 @@ export default class FeaturesIndex extends Component {
 
           <div className="card mt-4">
             <Link
-              animateSection="features-content"
               to="/features/access-offline"
               className="text-dark"
             >
@@ -54,7 +52,6 @@ export default class FeaturesIndex extends Component {
 
           <div className="card mt-4">
             <Link
-              animateSection="features-content"
               to="/features/code-splitting"
               className="text-dark"
             >
@@ -73,7 +70,6 @@ export default class FeaturesIndex extends Component {
 
           <div className="card mt-4">
             <Link
-              animateSection="features-content"
               to="/features/hot-reloading"
               className="text-dark"
             >
@@ -89,7 +85,6 @@ export default class FeaturesIndex extends Component {
 
           <div className="card mt-4">
             <Link
-              animateSection="features-content"
               to="/features/next-gen-js-es6-es7"
               className="text-dark"
             >
@@ -106,7 +101,6 @@ export default class FeaturesIndex extends Component {
 
           <div className="card mt-4">
             <Link
-              animateSection="features-content"
               to="/features/isomorphic-universal-routing"
               className="text-dark"
             >
@@ -122,7 +116,6 @@ export default class FeaturesIndex extends Component {
 
           <div className="card mt-4">
             <Link
-              animateSection="features-content"
               to="/features/seo-search-engine-optimization"
               className="text-dark"
             >
@@ -139,7 +132,6 @@ export default class FeaturesIndex extends Component {
 
           <div className="card mt-4">
             <Link
-              animateSection="features-content"
               to="/features/caching"
               className="text-dark"
             >
@@ -159,7 +151,6 @@ export default class FeaturesIndex extends Component {
 
           <div className="card mt-4">
             <Link
-              animateSection="features-content"
               to="/features/bundling"
               className="text-dark"
             >
@@ -176,7 +167,6 @@ export default class FeaturesIndex extends Component {
 
           <div className="card mt-4">
             <Link
-              animateSection="features-content"
               to="/features/image-optimization"
               className="text-dark"
             >
@@ -193,7 +183,6 @@ export default class FeaturesIndex extends Component {
 
           <div className="card mt-4">
             <Link
-              animateSection="features-content"
               to="/features/hsts"
               className="text-dark"
             >

@@ -106,7 +106,6 @@ app.get("*", function (req, res, next) {
   const {cssDependencyMap,...assets} = normalizeAssets(res.locals.webpackStats);
   res.locals.assets = assets;
   res.locals.cssDependencyMap = cssDependencyMap;
-  res.locals.ssr = devServerConfig.serverSideRender;
 
   return CommonServerMiddleware(req, res, next);
 });

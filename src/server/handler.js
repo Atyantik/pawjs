@@ -6,7 +6,7 @@ import {
 import React from "react";
 import _ from "lodash";
 import { renderToNodeStream, renderToString } from "react-dom/server";
-import Html from "../components/html";
+import Html from "../components/Html";
 import {matchRoutes, renderRoutes} from "react-router-config";
 import { StaticRouter } from "react-router";
 import ErrorBoundary from "../components/ErrorBoundary";
@@ -24,7 +24,9 @@ export default class ServerHandler extends Tapable {
 
   run({ routeHandler, req, res, next, assets , cssDependencyMap}) {
 
-    if (!res.locals.ssr) {
+    const { asyncCSS, serverSideRender } = this.options.env;
+
+    if (!serverSideRender) {
       res.write("<!DOCTYPE html>");
       renderToNodeStream(
         <Html
@@ -43,10 +45,14 @@ export default class ServerHandler extends Tapable {
     let promises = [];
     let preloadedData = [];
     let cssToBeIncluded = [];
+
     let modulesInRoutes = [];
+    if (!asyncCSS) {
+      modulesInRoutes = ["./app"];
+    }
 
     currentPageRoutes.forEach(({route}) => {
-      route.modules && modulesInRoutes.push(...route.modules);
+      !asyncCSS && route.modules && modulesInRoutes.push(...route.modules);
       if (route.component.preload) {
         promises.push(route.component.preload());
       }

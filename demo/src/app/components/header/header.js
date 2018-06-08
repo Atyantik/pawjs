@@ -1,8 +1,7 @@
 import React, {Component} from "react";
-import Link from "pawjs/src/components/link";
-import WhiteLogo from "src/resources/images/reactpwa-logo-white.png?sizes=64w";
+import { Link } from "react-router-dom";
+import WhiteLogo from "../../../resources/images/reactpwa-logo-white.png?sizes=64w";
 import GithubImage from "./github-icon-white.png?sizes=64w";
-import Picture from "pawjs/src/components/picture";
 import Storage from "pawjs/src/libs/storage";
 
 export default class Header extends Component {
@@ -22,7 +21,7 @@ export default class Header extends Component {
     this.setState({
       showNeedContributors: false,
     });
-    Storage.setItem("showNeedContributors", "shown");
+    Storage.setItem("showNeedContributorsUpgrade", "shown");
   }
   render() {
     return (
@@ -49,13 +48,13 @@ export default class Header extends Component {
           <div className="col text-white h3 mb-0">
             <div className="d-inline-block" style={{ width: "32px" }}>
               <Link to="/">
-                <Picture image={WhiteLogo} alt="ReactPWA" imgClassName="mw-100"/>
+                <img src={WhiteLogo} alt="ReactPWA" className="mw-100"/>
               </Link>
             </div>
             <Link to="/" className="d-none d-sm-inline text-white ml-2 align-bottom" style={{ textDecoration: "none"}}>React PWA</Link>
           </div>
           <a className="mr-2" href="https://github.com/Atyantik/react-pwa" target="_blank" rel="nofollow noopener" style={{ width: "32px" }}>
-            <Picture image={GithubImage} alt="ReactPWA" imgClassName="mw-100"/>
+            <img src={GithubImage} alt="ReactPWA" className="mw-100"/>
           </a>
           <Link to="/features" className="text-white pull-right mr-3" style={{ textDecoration: "none", lineHeight: "2rem"}}>Features</Link>
           <Link to="/docs" className="d-none d-sm-block text-white pull-right" style={{ textDecoration: "none", lineHeight: "2rem"}}>Documentation</Link>

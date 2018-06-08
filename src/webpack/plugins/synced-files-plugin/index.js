@@ -45,7 +45,7 @@ class SyncedFilesPlugin {
       const outputFile = path.join(path.resolve(outputPath), this.outputFileName);
 
       if (this.deleteAfterCompile) {
-        fs.existsSync(outputFile) && fs.unlinkSync(outputFile);
+        //fs.existsSync(outputFile) && fs.unlinkSync(outputFile);
         return;
       }
       if (webpackStats && Object.keys(webpackStats).length && webpackStats["assetsByChunkName"]) {

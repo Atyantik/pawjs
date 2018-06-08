@@ -4,12 +4,8 @@ export default [
   {
     path: "/",
     component: import("../app/components/home"),
+    layout: import("../app/components/layout"),
     skeleton: HomeSkeleton,
     exact: true,
-  },
-  {
-    exact: true,
-    path: "/test",
-    component: import("../app/components/home/test"),
   }
 ];

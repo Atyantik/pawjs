@@ -1,36 +1,8 @@
-/**
- * Created by Yash Thakur
- * Date: 27/10/17
- * Time: 4:41 PM
- */
-
-import FeaturesLayout from "../app/components/features/layout";
-import DefaultLayout from "../app/components/layout";
-import FeaturesIndex from "../app/components/features/index";
-import PWA from "../app/components/features/feature-list/pwa/pwa";
-import AccessOffline from "../app/components/features/feature-list/access-offline/access-offline";
-import CodeSplitting from "../app/components/features/feature-list/code-splitting/code-splitting";
-import HotReloading from "../app/components/features/feature-list/hot-reloading/hot-reloading";
-import NextGenJS from "../app/components/features/feature-list/nextgen-js/nextgen-js";
-import SSR from "../app/components/features/feature-list/ssr/ssr";
-import SocialSharing from "../app/components/features/feature-list/social-sharing/social-sharing";
-import UniversalRouting from "../app/components/features/feature-list/iso-uni-routing/iso-uni-routing";
-import Caching from "../app/components/features/feature-list/caching/caching";
-import HSTS from "../app/components/features/feature-list/hsts/hsts";
-import ImageOptimization from "../app/components/features/feature-list/image-optimization/image-optimization";
-import ContentFolding from "../app/components/features/feature-list/content-folding/content-folding";
-import SEO from "../app/components/features/feature-list/seo/seo";
-import Bundling from "../app/components/features/feature-list/bundling/bundling";
-
 const routes = [
   {
+    component: import("../app/components/features/layout"),
+    layout: import("../app/components/layout"),
     path: "/features",
-    abstract: true,
-    component: FeaturesLayout,
-    layout: DefaultLayout,
-    props: {
-      title: "Features"
-    },
     seo: {
       title: "Features | React PWA",
       description: "Get started with your own Progressive web application in the most simplest way.",
@@ -41,12 +13,12 @@ const routes = [
       {
         path: "/features",
         exact: true,
-        component: FeaturesIndex,
+        component: import("../app/components/features/index"),
         props: {
           title: "Features"
         },
         seo: {
-          title: "Features",
+          title: "Features | React PWA",
           description: "Features list of React-PWA boilerplate",
           keywords: "pwa,progressive web application,features,responsive,service worker,application,features",
           type: "article"
@@ -55,7 +27,7 @@ const routes = [
       {
         path: "/features/pwa-progressive-web-application",
         exact: true,
-        component: PWA,
+        component: import("../app/components/features/feature-list/pwa/pwa"),
         props: {
           title: "Progressive Web Application - PWA"
         },
@@ -69,7 +41,7 @@ const routes = [
       {
         path: "/features/access-offline",
         exact: true,
-        component: AccessOffline,
+        component: import("../app/components/features/feature-list/access-offline/access-offline"),
         props: {
           title: "Offline Accessibility"
         },
@@ -83,7 +55,7 @@ const routes = [
       {
         path: "/features/code-splitting",
         exact: true,
-        component: CodeSplitting,
+        component: import("../app/components/features/feature-list/code-splitting/code-splitting"),
         props: {
           title: "Code Splitting"
         },
@@ -97,7 +69,7 @@ const routes = [
       {
         path: "/features/hot-reloading",
         exact: true,
-        component: HotReloading,
+        component: import("../app/components/features/feature-list/hot-reloading/hot-reloading"),
         props: {
           title: "Hot Reloading"
         },
@@ -111,7 +83,7 @@ const routes = [
       {
         path: "/features/next-gen-js-es6-es7",
         exact: true,
-        component: NextGenJS,
+        component: import("../app/components/features/feature-list/nextgen-js/nextgen-js"),
         props: {
           title: "Next Generation JavaScript"
         },
@@ -125,7 +97,7 @@ const routes = [
       {
         path: "/features/isomorphic-universal-routing",
         exact: true,
-        component: UniversalRouting,
+        component: import("../app/components/features/feature-list/iso-uni-routing/iso-uni-routing"),
         props: {
           title: "Isomorphic/Universal Routing"
         },
@@ -139,7 +111,7 @@ const routes = [
       {
         path: "/features/seo-search-engine-optimization",
         exact: true,
-        component: SEO,
+        component: import("../app/components/features/feature-list/seo/seo"),
         props: {
           title: "Search Engine Optimization - SEO"
         },
@@ -153,7 +125,7 @@ const routes = [
       {
         path: "/features/seo-search-engine-optimization/social-sharing",
         exact: true,
-        component: SocialSharing,
+        component: import("../app/components/features/feature-list/social-sharing/social-sharing"),
         props: {
           title: "Social Sharing"
         },
@@ -167,7 +139,7 @@ const routes = [
       {
         path: "/features/seo-search-engine-optimization/ssr-server-side-rendering",
         exact: true,
-        component: SSR,
+        component: import("../app/components/features/feature-list/ssr/ssr"),
         props: {
           title: "Server Side Rendering - SSR"
         },
@@ -181,7 +153,7 @@ const routes = [
       {
         path: "/features/seo-search-engine-optimization/content-folding",
         exact: true,
-        component: ContentFolding,
+        component: import("../app/components/features/feature-list/content-folding/content-folding"),
         props: {
           title: "Content Folding"
         },
@@ -195,7 +167,7 @@ const routes = [
       {
         path: "/features/caching",
         exact: true,
-        component: Caching,
+        component: import("../app/components/features/feature-list/caching/caching"),
         props: {
           title: "Caching"
         },
@@ -209,7 +181,7 @@ const routes = [
       {
         path: "/features/bundling",
         exact: true,
-        component: Bundling,
+        component: import("../app/components/features/feature-list/bundling/bundling"),
         props: {
           title: "Bundling"
         },
@@ -223,7 +195,7 @@ const routes = [
       {
         path: "/features/image-optimization",
         exact: true,
-        component: ImageOptimization,
+        component: import("../app/components/features/feature-list/image-optimization/image-optimization"),
         props: {
           title: "Image Optimization"
         },
@@ -237,7 +209,7 @@ const routes = [
       {
         path: "/features/hsts",
         exact: true,
-        component: HSTS,
+        component: import("../app/components/features/feature-list/hsts/hsts"),
         props: {
           title: "HTTP Strict Transport Security - HSTS"
         },

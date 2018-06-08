@@ -1,6 +1,6 @@
 import React from "react";
 import _ from "lodash";
-import Loadable from "../components/loadable";
+import Loadable from "../components/Loadable";
 
 export default class RouteCompiler {
 
@@ -26,6 +26,7 @@ export default class RouteCompiler {
       loadData,
       seo,
       component,
+      layout,
       ...others
     } = route;
 
@@ -40,7 +41,8 @@ export default class RouteCompiler {
     const loadableComponent = Loadable.Map({
       loader: {
         RouteComponent: async () => component,
-        LoadData: loadData ||  (async () => ({}))
+        LoadData: loadData ||  (async () => ({})),
+        Layout: async() => layout,
       },
       loading: (props) => {
         if (props.error) {
@@ -54,9 +56,17 @@ export default class RouteCompiler {
       render(loaded, props) {
         let RouteComponent = loaded.RouteComponent.default? loaded.RouteComponent.default: loaded.RouteComponent;
         let LoadedData = loaded.LoadData;
+        let Layout = loaded.Layout;
+        if (Layout)  {
+          Layout = loaded.Layout.default ? loaded.Layout.default : loaded.Layout;
+          return (
+            <Layout {...props} loadedData={LoadedData}>
+              <RouteComponent {...props} loadedData={LoadedData}/>
+            </Layout>
+          );
+        }
         return <RouteComponent {...props} loadedData={LoadedData}/>;
       },
-      ...(route.webpack? {webpack: route.webpack}: {}),
       ...(route.modules? {modules: route.modules}: {}),
     });
     loadableComponent.compiled = true;

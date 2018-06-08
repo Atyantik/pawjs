@@ -23,6 +23,22 @@ export default class ClientService extends Tapable {
       "renderComplete": new SyncHook(),
     };
     this.options = options;
+    this.addServiceWorker();
+  }
+
+  addServiceWorker() {
+    this.hooks.renderComplete.tap("AddServiceWorker", (err) => {
+      if (err) return;
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", () => {
+          navigator.serviceWorker.register("/sw.js").then(registration => {
+            console.log("SW registered: ", registration);
+          }).catch(registrationError => {
+            console.log("SW registration failed: ", registrationError);
+          });
+        });
+      }
+    });
   }
 
   addPlugin(plugin) {

@@ -46,6 +46,7 @@ switch(userCommand) {
     break;
   }
   case "build:prod": {
+    process.env.BABEL_DISABLE_CACHE = 1;
     const spawn = require("child_process").spawn;
 
     const childSpawn = spawn(

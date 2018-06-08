@@ -1,7 +1,9 @@
 import HomeRoutes from "./pages/home";
+import FeaturesRoutes from "./pages/features";
 
 const appRoutes = [
-  ...HomeRoutes
+  ...HomeRoutes,
+  ...FeaturesRoutes
 ];
 
 export default class Routes {

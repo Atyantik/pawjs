@@ -2,6 +2,7 @@ import express from "express";
 import _ from "lodash";
 import RouteHandler from "../router/handler";
 import ServerHandler from "./handler";
+import hsts from "hsts";
 import env from "../config";
 
 const rHandler = new RouteHandler({
@@ -24,6 +25,23 @@ const sHandler = new ServerHandler({
 
 const app = express();
 
+// Add hsts support
+const hstsSettings = {
+  enabled: env.hstsEnabled,
+  maxAge: env.hstsMaxAge,
+  includeSubDomains: env.hstsIncludeSubDomains, // Must be enabled to be approved by Google
+  preload: env.hstsPreload,
+};
+
+if (hstsSettings.enabled) {
+  app.use(hsts(_.assignIn(hstsSettings, {
+    // Enable hsts for https sites
+    setIf: function (req) {
+      return req.secure || (req.headers["x-forwarded-proto"] === "https");
+    }
+  })));
+}
+
 const assetsToArray = (assets) => {
   let allAssets = [];
   if (assets instanceof Object) {
@@ -45,7 +63,7 @@ app.get("*", (req, res, next) => {
   // Get the resources
   const assets = assetsToArray(res.locals.assets);
 
-  if (!res.locals.ssr) {
+  if (!env.serverSideRender) {
     return sHandler.run({
       req,
       res,

@@ -8,6 +8,7 @@ class Html extends Component {
         <head>
           <meta charSet="utf-8" />
           <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+          <link href="https://fonts.googleapis.com/css?family=Lato" rel="stylesheet" />
           <title>Page Title less than 55 characters</title>
           <meta name="description" content="Description of the page less than 150 characters" />
           {/*<link rel="icon" type="image/x-icon" href="https://example.com/favicon.ico" />*/}
@@ -52,6 +53,7 @@ class Html extends Component {
             }}
           />
           {
+            this.props.css &&
             this.props.css
               .map(path => <link rel="stylesheet" type="text/css" key={path} href={path} async={true} />)
           }

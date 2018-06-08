@@ -6,9 +6,8 @@
 
 import React, { Component } from "react";
 
-import SSRImage from "./images/ssr.png?sizes=600w";
-import CSRImage from "./images/csr.png?sizes=600w";
-import Picture from "pawjs/src/components/picture/picture";
+import SSRImage from "./images/ssr.png";
+import CSRImage from "./images/csr.png";
 
 export default class SSR extends Component {
   render() {
@@ -48,19 +47,21 @@ export default class SSR extends Component {
               Here is a very simple timeline diagram(super simple)to showcase the difference between SSR and CSR.
             </p>
             <h3 className="mt-4 text-center">SSR</h3>
-            <Picture
-              pictureClassName="mw-100 text-center"
-              image={SSRImage}
-              alt="SSR Image"
-              imgClassName="mw-100"
-            />
+            <div className="mw-100 text-center">
+              <img
+                src={SSRImage}
+                alt="SSR Image"
+                className="mw-100"
+              />
+            </div>
             <h3 className="mt-4 text-center">CSR</h3>
-            <Picture
-              pictureClassName="mw-100 text-center"
-              image={CSRImage}
-              alt="CSR Image"
-              imgClassName="mw-100"
-            />
+            <div className="mw-100 text-center">
+              <img
+                src={CSRImage}
+                alt="CSR Image"
+                className="mw-100"
+              />
+            </div>
             <p className="mt-4">
               The difference here is that for SSR the response of the server is the HTML page that is ready to
               be rendered, while the CSR sends the JS files to the browser with empty documents which will then

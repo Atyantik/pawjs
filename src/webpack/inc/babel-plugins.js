@@ -16,5 +16,6 @@ module.exports = module.exports.default =  (options = {noChunk: false}) => [
     }
   ],
   require("@babel/plugin-proposal-async-generator-functions"),
-  require("babel-plugin-lodash")
+  require("babel-plugin-lodash"),
+  require("react-hot-loader/babel"),
 ];

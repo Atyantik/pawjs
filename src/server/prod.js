@@ -25,14 +25,13 @@ const app = express();
 app.use(compression());
 
 const cacheTime = 86400000*30;     // 30 days;
-app.use("/build", express.static(path.join(currentDir, "build"), {
+app.use(express.static(path.join(currentDir, "build"), {
   maxAge: cacheTime
 }));
 
 app.use((req, res, next) => {
   res.locals.assets = assets;
   res.locals.cssDependencyMap = cssDependencyMap;
-  res.locals.ssr = process.env.__config_serverSideRender;
   next();
 });
 app.use(server);

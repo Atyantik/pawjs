@@ -1,12 +1,7 @@
-/**
- * Created by Yash Thakur
- * Date: 28/10/17
- * Time: 2:44 PM
- */
-
 import React, { Component } from "react";
+import { hot } from "react-hot-loader";
 
-export default class CodeSplitting extends Component {
+class CodeSplitting extends Component {
   render() {
     return (
       <article>
@@ -31,3 +26,5 @@ export default class CodeSplitting extends Component {
     );
   }
 }
+
+export default hot(module)(CodeSplitting);

@@ -1,7 +1,6 @@
 import React, {Component} from "react";
-import Picture from "pawjs/src/components/picture";
-import BrowserStackLogo from "./BrowserStackLogo.png?sizes=50w+100w+200w";
-import EventerpriseLogo from "./EventerpriseLogo.png?sizes=50w+100w+200w";
+import BrowserStackLogo from "./BrowserStackLogo.png";
+import EventerpriseLogo from "./EventerpriseLogo.png";
 import * as styles from "./style.scss";
 
 export default class Header extends Component {
@@ -29,7 +28,7 @@ export default class Header extends Component {
               className="text-black d-inline-block v-middle  ml-2"
               rel="nofollow noopener"
             >
-              <Picture imgClassName={styles["supporter-img"]} image={BrowserStackLogo} alt={"Browser Stack Logo"}/>
+              <img className={styles["supporter-img"]} src={BrowserStackLogo} alt={"Browser Stack Logo"}/>
             </a>
             <a
               href="https://www.eventerprise.com"
@@ -37,7 +36,7 @@ export default class Header extends Component {
               className="text-black d-inline-block v-middle ml-2"
               rel="nofollow noopener"
             >
-              <Picture imgClassName={styles["eventerprise-log"]} image={EventerpriseLogo} alt={"Eventerprise Logo"}/>
+              <img className={styles["eventerprise-log"]} src={EventerpriseLogo} alt={"Eventerprise Logo"}/>
               Eventerprise
             </a>
           </div>
