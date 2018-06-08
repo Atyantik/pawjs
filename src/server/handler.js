@@ -10,6 +10,7 @@ import Html from "../components/Html";
 import {matchRoutes, renderRoutes} from "react-router-config";
 import { StaticRouter } from "react-router";
 import ErrorBoundary from "../components/ErrorBoundary";
+import {generateMeta} from "../utils/seo";
 
 export default class ServerHandler extends Tapable {
 
@@ -51,12 +52,20 @@ export default class ServerHandler extends Tapable {
       modulesInRoutes = ["./app"];
     }
 
+    let seoData = {};
+
     currentPageRoutes.forEach(({route}) => {
+      seoData = _.assignIn(seoData, route.seo);
       !asyncCSS && route.modules && modulesInRoutes.push(...route.modules);
       if (route.component.preload) {
         promises.push(route.component.preload());
       }
     });
+
+    const baseUrl = `${req.protocol}://${req.get("host")}`;
+    const fullUrl = `${baseUrl}${req.originalUrl}`;
+
+    const meta = generateMeta(seoData, {baseUrl, url: fullUrl});
 
     modulesInRoutes.forEach(mod => {
       //eslint-disable-next-line
@@ -80,6 +89,7 @@ export default class ServerHandler extends Tapable {
             assets={assets}
             css={cssToBeIncluded}
             preloadedData={preloadedData}
+            meta={meta}
           >
             <ErrorBoundary ErrorComponent={routeHandler.getErrorComponent()}>
               <StaticRouter location={req.url}  context={context}>

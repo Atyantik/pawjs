@@ -166,48 +166,23 @@ export const generateStringHash = (str, namespace) => {
 
 
 /**
- * Extract files from given assets collection
+ * Return assets as array
  * @param assets
- * @param ext
- * @returns {[*,*,*]}
+ * @returns {Array}
  */
-export const extractFilesFromAssets = (assets, ext = ".js") => {
-  let common = [];
-  let dev = [];
-  let other = [];
-  
-  const addToList = (file) => {
-    
-    let fileName = file.split("/").pop();
-    
-    if (_.startsWith(fileName, "common")) {
-      common.push(file);
-      return;
-    }
-    if (_.startsWith(fileName, "dev")) {
-      dev.push(file);
-      return;
-    }
-    other.push(file);
-  };
-  
-  _.each(assets, asset => {
-    if (_.isArray(asset) || _.isObject(asset)) {
-      _.each(asset, file => {
-        if (_.endsWith(file, ext)) {
-          addToList(file);
-        }
-      });
-    } else {
-      if (_.endsWith(asset, ext)) {
-        addToList(asset);
+export const assetsToArray = (assets) => {
+  let allAssets = [];
+  if (assets instanceof Object) {
+    _.each(assets, a => {
+      if (typeof a === "string") {
+        allAssets.push(a);
+      } else if (a instanceof Object) {
+        allAssets = allAssets.concat(assetsToArray(a));
       }
-    }
-  });
-  
-  return [
-    ...common.sort(),
-    ...dev.sort(),
-    ...other.sort(),
-  ];
+    });
+  } else if (typeof assets === "string") {
+    allAssets.push(assets);
+  }
+  allAssets = _.sortBy(allAssets, a => a.indexOf("hot-update") !== -1);
+  return _.uniq(allAssets);
 };

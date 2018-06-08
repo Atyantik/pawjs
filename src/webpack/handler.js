@@ -98,15 +98,18 @@ module.exports = module.exports.default = class WebpackHandler extends Tapable {
                 filename: "[hash].css",
                 chunkFilename: "[chunkhash].css"
               }),
-              new workboxPlugin.InjectManifest({
-                swSrc: path.resolve(process.env.__lib_root, "src","service-worker.js"),
-                swDest: "sw.js"
-              }),
-              new SwVariables({
-                fileName: "sw.js",
-                variables: pawConfig,
-                text: projectSW
-              }),
+              ...(pawConfig.serviceWorker? [
+                new workboxPlugin.InjectManifest({
+                  swSrc: path.resolve(process.env.__lib_root, "src","service-worker.js"),
+                  swDest: "sw.js"
+                }),
+                new SwVariables({
+                  fileName: "sw.js",
+                  variables: pawConfig,
+                  text: projectSW
+                }),
+              ] :[])
+
             ]
           }
         ],
@@ -226,24 +229,17 @@ module.exports = module.exports.default = class WebpackHandler extends Tapable {
               new SyncedFilesPlugin({
                 outputPath: directories.dist
               }),
-              new workboxPlugin.InjectManifest({
-                swSrc: path.resolve(process.env.__lib_root, "src","service-worker.js"),
-                swDest: "sw.js"
-              }),
-              new SwVariables({
-                fileName: "sw.js",
-                variables: pawConfig,
-                text: projectSW
-              }),
-
-              new MinifyPlugin({
-                removeConsole: true,
-                removeDebugger: true,
-                keepFnName: false,
-                keepClassName: false
-              }, {
-                comments: false,
-              }),
+              ...(pawConfig.serviceWorker? [
+                new workboxPlugin.InjectManifest({
+                  swSrc: path.resolve(process.env.__lib_root, "src","service-worker.js"),
+                  swDest: "sw.js"
+                }),
+                new SwVariables({
+                  fileName: "sw.js",
+                  variables: pawConfig,
+                  text: projectSW
+                }),
+              ] :[])
             ]
           }
         ],

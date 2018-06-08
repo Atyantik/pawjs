@@ -1,11 +1,12 @@
 // eslint-disable-next-line
 console.log("Compiling files, please wait...");
 
+// Notify the user that compilation has started and should be done soon.
+
 const path = require("path");
 const express = require("express");
 const compression = require("compression");
 const webpack = require("webpack");
-
 const webpackMiddleware = require("webpack-dev-middleware");
 const webpackHotMiddleware = require("webpack-hot-middleware");
 
@@ -24,17 +25,37 @@ const devServerConfig = firstServerConfig.devServer;
 // Web client configurations
 const webConfig = require("../webpack/dev/web.config");
 
-
 // Create a webpack server compiler from the server config
 const serverCompiler = webpack(serverConfig);
+
+// for core development
+/**
+ * STATS
+ *
+ stats: {
+    colors: true,
+    moduleTrace: false,
+    reasons: false,
+    entrypoints: false,
+    maxModules: 0
+  }
+ *
+ */
 const devServerOptions = Object.assign({}, devServerConfig, {
   stats: {
     colors: true,
-    performance: false,
     moduleTrace: false,
     reasons: false,
     entrypoints: false,
     maxModules: 0,
+    chunks: false,
+    assets: false,
+    children: false,
+    hash: false,
+    modules: false,
+    publicPath: false,
+    timings: false,
+    version: false
   },
   noInfo: true,
   publicPath: firstServerConfig.output.publicPath
@@ -47,9 +68,17 @@ const webOptions = Object.assign({}, {
   inline: true,
   serverSideRender: true,
   stats: {
-    warnings: false,
     colors: true,
-    maxModules: 0
+    entrypoints: false,
+    maxModules: 0,
+    moduleTrace: false,
+    chunks: false,
+    children: false,
+    hash: false,
+    modules: false,
+    publicPath: false,
+    timings: false,
+    version: false
   },
   publicPath: webConfig[0].output.publicPath
 });
@@ -77,41 +106,57 @@ app.use(webpackHotMiddleware(webCompiler, {
   heartbeat: 2000,
 }));
 
+
+/**
+ * Below is where the magic happens!
+ * We import the compiled server.js file as string and run it as module
+ * thus we can get a fast experience of compilation and developer can
+ * develop code with SSR enabled.
+ */
 app.get("*", function (req, res, next) {
 
   const mfs = serverMiddleware.fileSystem;
   const fileNameFromUrl = serverMiddleware.getFilenameFromUrl(devServerOptions.publicPath + req.path);
 
+  // If the request is for static file, do not compute or send data to
+  // server just execute the express default next functionality
+  // to let it manage itself.
   if (
+    // if the request is for favicon
     fileNameFromUrl.indexOf("favicon.ico") !== -1 || (
+      // if the request exists in middleware filesystem
       mfs.existsSync(fileNameFromUrl) &&
+      // and the request is for a file
       mfs.statSync(fileNameFromUrl).isFile()
     )
   ) {
     return next();
   }
 
+  // Get content of the server that is compiled!
   const serverContent = mfs.readFileSync(serverMiddleware.getFilenameFromUrl(devServerOptions.publicPath + "/server.js"), "utf-8");
+
 
   let CommonServerMiddleware;
   try {
     CommonServerMiddleware = requireFromString(serverContent, {
       appendPaths: process.env.NODE_PATH.split(path.delimiter)
     }).default;
+
+    const {cssDependencyMap,...assets} = normalizeAssets(res.locals.webpackStats);
+    res.locals.assets = assets;
+    res.locals.cssDependencyMap = cssDependencyMap;
+
+    return CommonServerMiddleware(req, res, next);
   } catch(ex) {
     // eslint-disable-next-line
     console.log(ex);
   }
-
-  const {cssDependencyMap,...assets} = normalizeAssets(res.locals.webpackStats);
-  res.locals.assets = assets;
-  res.locals.cssDependencyMap = cssDependencyMap;
-
-  return CommonServerMiddleware(req, res, next);
+  // Console.log
+  next();
 });
 
 let totalCompilationComplete = 0;
-
 webCompiler.hooks.done.tap("InformWebCompiled", () => {
   totalCompilationComplete++;
   if (totalCompilationComplete >=2 ) startServer();
@@ -131,5 +176,3 @@ const startServer = () => {
     console.log(`Listening to http://${devServerConfig.host}:${devServerConfig.port}`);
   });
 };
-
-

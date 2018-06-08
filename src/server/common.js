@@ -4,7 +4,12 @@ import RouteHandler from "../router/handler";
 import ServerHandler from "./handler";
 import hsts from "hsts";
 import env from "../config";
+import { assetsToArray } from "../utils/utils";
 
+/**
+ * Initialize Route handler
+ * @type {RouteHandler}
+ */
 const rHandler = new RouteHandler({
   env: _.assignIn({}, env),
   isServer: true,
@@ -13,9 +18,13 @@ const rHandler = new RouteHandler({
 let ProjectRoutes = require(`${process.env.__project_root}/src/routes`);
 if (ProjectRoutes.default) ProjectRoutes = ProjectRoutes.default;
 
+// Add route plugin
 rHandler.addPlugin(new ProjectRoutes({addPlugin: rHandler.addPlugin}));
 
-
+/**
+ * Initialize server handler
+ * @type {*}
+ */
 let ProjectServer = require(`${process.env.__project_root}/src/server`);
 if (ProjectServer.default) ProjectServer = ProjectServer.default;
 
@@ -23,9 +32,16 @@ const sHandler = new ServerHandler({
   env: _.assignIn({}, env)
 });
 
+/**
+ * Initialize express application
+ * @type {*|Function}
+ */
 const app = express();
 
-// Add hsts support
+/**
+ * HSTS settings
+ * @type {{enabled: *, maxAge: *, includeSubDomains: *, preload: *}}
+ */
 const hstsSettings = {
   enabled: env.hstsEnabled,
   maxAge: env.hstsMaxAge,
@@ -34,6 +50,8 @@ const hstsSettings = {
 };
 
 if (hstsSettings.enabled) {
+  // If HSTS is enabled and user is running on https protocol then add the hsts
+  // middleware
   app.use(hsts(_.assignIn(hstsSettings, {
     // Enable hsts for https sites
     setIf: function (req) {
@@ -42,27 +60,12 @@ if (hstsSettings.enabled) {
   })));
 }
 
-const assetsToArray = (assets) => {
-  let allAssets = [];
-  if (assets instanceof Object) {
-    _.each(assets, a => {
-      if (typeof a === "string") {
-        allAssets.push(a);
-      } else if (a instanceof Object) {
-        allAssets = allAssets.concat(assetsToArray(a));
-      }
-    });
-  } else if (typeof assets === "string") {
-    allAssets.push(assets);
-  }
-  allAssets = _.sortBy(allAssets, a => a.indexOf("hot-update") !== -1);
-  return _.uniq(allAssets);
-};
-
 app.get("*", (req, res, next) => {
   // Get the resources
   const assets = assetsToArray(res.locals.assets);
 
+  // If no server side rendering is necessary simply
+  // run the handler and return streamed data
   if (!env.serverSideRender) {
     return sHandler.run({
       req,
@@ -71,6 +74,7 @@ app.get("*", (req, res, next) => {
       assets
     });
   }
+  // If server side render is enabled then, then let the routes load
   // Wait for all routes to load everything!
   rHandler.hooks.initRoutes.callAsync(err => {
     if (err) {
@@ -79,6 +83,9 @@ app.get("*", (req, res, next) => {
       // @todo: Handle Error
       return next();
     }
+
+    // Once we have all the routes, pass the handler to the
+    // server run at this point we should have cssDependencyMap as well.
     return sHandler.run({
       routeHandler: rHandler,
       req,
@@ -91,6 +98,13 @@ app.get("*", (req, res, next) => {
 
 });
 
+/**
+ * Export this a middleware export.
+ * @param req
+ * @param res
+ * @param next
+ * @returns {*}
+ */
 export default (req, res, next) => {
   return app.handle(req, res, next);
 };
