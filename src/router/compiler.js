@@ -38,10 +38,24 @@ export default class RouteCompiler {
       delay: delay || routerService.getDefaultAllowedLoadDelay()
     };
 
+
+    let routeSeo = {};
+
+    const updateSeo = (userSeoData = {}) => {
+      routeSeo = Object.assign({}, seo, userSeoData);
+    };
+
     const loadableComponent = Loadable.Map({
       loader: {
+        // Router Component
         RouteComponent: async () => component,
-        LoadData: loadData ||  (async () => ({})),
+
+        // Load Data with ability to update SEO
+        LoadData: (typeof loadData !== "undefined" ? async() => {
+          return loadData({ updateSeo });
+        } : async () => ({})),
+
+        // Load layout as well
         Layout: async() => layout,
       },
       loading: (props) => {
@@ -71,6 +85,9 @@ export default class RouteCompiler {
     });
     loadableComponent.compiled = true;
     return {
+      getRouteSeo: () => {
+        return Object.assign({}, routeSeo);
+      },
       path,
       component: loadableComponent,
       seo: Object.assign({}, seo),

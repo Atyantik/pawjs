@@ -1,53 +1,17 @@
 import _ from "lodash";
 import {isBrowser} from "./utils";
 
-/**
- * Seo Schema. This can be used while using it in routes
- */
-const seoSchema = {
-  title: "",
-  description: "",
-  keywords: [],
-  image: "",
-  site_name: "",
-  twitter: {
-    site: "",
-    creator: ""
-  },
-  facebook: {
-    admins: [],
-  },
-  type: "article", // article/product/music/video
-  type_details: {
-    section: "", // Lifestyle/sports/news
-    published_time: "",
-    modified_time: "",
-  }
-};
-
-const pwaSchema = {
-  "name": "PawJS",
-  "short_name": "PawJS",
-
-  // Possible values ltr(left to right)/rtl(right to left)
-  "dir": "ltr",
-
-  // language: Default en-US
-  "lang": "en-US",
-
-  // Orientation of web-app possible:
-  // any, natural, landscape, landscape-primary, landscape-secondary, portrait, portrait-primary, portrait-secondary
-  "orientation": "any",
-  "start_url": "/",
-  "background_color": "#fff",
-  "theme_color": "#fff",
-  "display": "standalone",
-  "description": "A highly scalable & plug-able, Progressive Web Application foundation with the best Developer Experience."
-};
-
-const defaultMeta = [
+const defaultMeta = (pwaSchema) => [
   {
     charSet: "utf-8",
+  },
+  {
+    name: "robots",
+    content: "all",
+  },
+  {
+    name: "author",
+    content: "Atyantik Technologies Private Limited",
   },
   {
     httpEquiv: "x-ua-compatible",
@@ -112,7 +76,7 @@ const defaultMeta = [
  * Standard meta keys to differentiate
  * @type {[*]}
  */
-const metaKeys = [
+export const metaKeys = [
   "name",
   "itemProp",
   "property",
@@ -139,9 +103,9 @@ const getFullUrl = (url, baseUrl = "") => {
  * @param options
  * @returns {Array}
  */
-export const generateMeta = (data = {}, options = {baseUrl: "", url: ""}) => {
+export const generateMeta = (data = {}, options = {baseUrl: "", url: "", pwaSchema: {}, seoSchema: {}}) => {
   // deep defaults the seoSchema we have in config file and the data provided to us.
-  let seoData = _.defaultsDeep(data, seoSchema);
+  let seoData = _.defaultsDeep(data, options.seoSchema);
 
   // Let store the generated Schema in following variable
   let generatedSchema = [];
@@ -160,7 +124,7 @@ export const generateMeta = (data = {}, options = {baseUrl: "", url: ""}) => {
   const baseUrl = options.baseUrl.replace(/\/$/, "");
 
   // Add meta required for at top of head
-  addUpdateMeta(generatedSchema, _.cloneDeep(defaultMeta));
+  addUpdateMeta(generatedSchema, _.cloneDeep(defaultMeta(options.pwaSchema)));
 
   /**
    * Manage name/title

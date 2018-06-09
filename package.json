@@ -53,6 +53,7 @@
     "node-sass": "^4.9.0",
     "postcss-loader": "^2.1.5",
     "postcss-preset-env": "^5.1.0",
+    "prop-types": "^15.6.1",
     "react": "^16.4.0",
     "react-dom": "^16.4.0",
     "react-hot-loader": "^4.3.0",

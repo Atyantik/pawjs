@@ -114,6 +114,7 @@ function createLoadableComponent(loadFn, options) {
   }
 
   return class LoadableComponent extends React.Component {
+
     constructor(props) {
       super(props);
       init();

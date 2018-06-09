@@ -1,13 +1,65 @@
 import React, { Component } from "react";
+import { metaKeys } from "../utils/seo";
+import PropTypes from "prop-types";
 
 class Html extends Component {
+  static propTypes = {
+    metaTags: PropTypes.array,
+    pwaSchema: PropTypes.object,
+    cssFiles: PropTypes.array,
+    assets: PropTypes.array
+  };
+
+  static defaultProps = {
+    metaTags: [],
+    pwaSchema: {},
+    cssFiles: [],
+    assets: [],
+  };
+
+  getPwaValue(key, defaultValue = "") {
+    if (typeof this.props.pwaSchema[key] !== "undefined") {
+      return this.props.pwaSchema[key];
+    }
+    return defaultValue;
+  }
+
+  /**
+   * Get meta tag after searching through meta tags
+   * @param key
+   * @param defaultValue
+   * @returns {object}
+   */
+  getMetaValue(key, defaultValue = "") {
+    let metaTag = {};
+    this.props.metaTags.forEach(m => {
+      if (Object.keys(metaTag).length) return;
+      metaKeys.forEach(mKey => {
+        if (m[mKey] && m[mKey] === key) {
+          metaTag = Object.assign({}, m);
+        }
+      });
+    });
+    let handler = {
+      get: function(target, name) {
+        return name in target ? target[name] : defaultValue;
+      }
+    };
+    return new Proxy(metaTag, handler);
+  }
+
+  /**
+   * Render the code
+   * @returns {*}
+   */
   render() {
     const { preloadedData } = this.props;
     return (
-      <html lang="en" dir="ltr">
+      <html lang={this.getPwaValue("lang")} dir={this.getPwaValue("dir")}>
         <head>
+          <title>{this.getMetaValue("title").content}</title>
           {
-            this.props.meta.map((m, i) => {
+            this.props.metaTags.map((m, i) => {
               return <meta key={`meta_${i}`} {...m} />;
             })
           }
@@ -19,8 +71,7 @@ class Html extends Component {
             }}
           />
           {
-            this.props.css &&
-            this.props.css
+            this.props.cssFiles
               .map(path => <link rel="stylesheet" type="text/css" key={path} href={path} async={true} />)
           }
         </head>

@@ -37,24 +37,6 @@ export default {
     "description": "A highly scalable, Progressive Web Application foundation with the best Developer Experience."
   },
   seo: {
-    title: "ReactPWA | Progressive web application with ReactJS",
-    site_name: "ReactPWA",
-    description: "A highly scalable, Progressive Web Application foundation with the best Developer Experience.",
-    twitter: {
-      site: "@atyantik_tech",
-      creator: "@tirthbodawala"
-    },
-    facebook: {
-      admins: [
-        "1501220844",
-        "765904161",
-      ],
-    },
-    meta: [
-      {
-        name:"theme-color",
-        content: "#f6f6f6"
-      }
-    ],
+
   },
 };

@@ -1,29 +1,110 @@
 import {
   Tapable,
   AsyncParallelHook,
+  AsyncParallelBailHook,
   SyncHook,
 } from "tapable";
 import _ from "lodash";
 import React from "react";
 import { renderRoutes, matchRoutes } from "react-router-config";
-import { BrowserRouter } from "react-router-dom";
+import { Router } from "react-router";
+import { createBrowserHistory } from "history";
 import { render, hydrate } from "react-dom";
 import ErrorBoundary from "../components/ErrorBoundary";
+import {generateMeta} from "../utils/seo";
+import possibleStandardNames from "../utils/reactPossibleStandardNames";
 
-export default class ClientService extends Tapable {
+
+const possibleHtmlNames = _.invert(possibleStandardNames);
+const getPossibleHtmlName = (key) => {
+  return possibleHtmlNames[key] || key;
+};
+
+export default class ClientHandler extends Tapable {
+  historyUnlistener = null;
+  routeHandler = null;
 
   constructor(options) {
     super();
-    this.hooks = {
 
-    };
+    this.manageHistoryChange = this.manageHistoryChange.bind(this);
+    this.history = window.__history = window.__history || createBrowserHistory();
+    this.historyUnlistener = this.history.listen(this.manageHistoryChange);
+
     this.hooks = {
-      "locationChange": new AsyncParallelHook(["page", "title", "location"]),
+      "locationChange": new AsyncParallelBailHook(["location", "action"]),
       "beforeRender": new AsyncParallelHook(),
       "renderComplete": new SyncHook(),
     };
     this.options = options;
     this.addServiceWorker();
+  }
+
+  manageHistoryChange(location, action) {
+    this.hooks.locationChange.callAsync(location, action, function () {return null;});
+    this.routeHandler && this.updatePageMeta(location);
+  }
+
+  updatePageMeta(location) {
+    const routes = this.routeHandler.getRoutes();
+    const currentRoutes = matchRoutes(routes, location.pathname);
+    let promises = [];
+
+    let seoData = {};
+    let pwaSchema = this.routeHandler.getPwaSchema();
+    let seoSchema = this.routeHandler.getDefaultSeoSchema();
+    currentRoutes.forEach(r => {
+      if (r.route && r.route.component && r.route.component.preload) {
+        promises.push(r.route.component.preload());
+      }
+    });
+
+
+    Promise.all(promises).then(() => {
+      currentRoutes.forEach(r => {
+        seoData = _.assignIn(seoData, r.route.seo, r.route.getRouteSeo());
+      });
+
+      const metaTags = generateMeta(seoData, {
+        baseUrl: window.location.origin,
+        url: window.location.href,
+        seoSchema,
+        pwaSchema,
+      });
+
+      metaTags.forEach(meta => {
+        let metaSearchStr = "meta";
+        let firstMetaSearchStr = "";
+        let htmlMeta = {};
+
+        if(meta.name === "title") {
+          document.title = meta.content;
+        }
+
+        Object.keys(meta).forEach(key => {
+          htmlMeta[getPossibleHtmlName(key)] = meta[key];
+          if (!firstMetaSearchStr) {
+            firstMetaSearchStr = `meta[${getPossibleHtmlName(key)}=${JSON.stringify(meta[key])}]`;
+          }
+          metaSearchStr += `[${getPossibleHtmlName(key)}=${JSON.stringify(meta[key])}]`;
+        });
+
+        const alreadyExists = document.querySelector(metaSearchStr);
+        if (!alreadyExists) {
+          const previousExists = document.querySelector(firstMetaSearchStr);
+          if (previousExists) {
+            previousExists.remove();
+          }
+
+          const metaElement = document.createElement("meta");
+          Object.keys(htmlMeta).forEach(htmlMetaKey => {
+            metaElement.setAttribute(htmlMetaKey, htmlMeta[htmlMetaKey]);
+          });
+          document.getElementsByTagName("head")[0].appendChild(metaElement);
+        }
+      });
+    });
+
   }
 
   addServiceWorker() {
@@ -33,11 +114,6 @@ export default class ClientService extends Tapable {
       if ("serviceWorker" in navigator) {
         window.addEventListener("load", () => {
           navigator.serviceWorker.register("/sw.js");
-          // .then(registration => {
-          //   console.log("SW registered: ", registration);
-          // }).catch(registrationError => {
-          //   console.log("SW registration failed: ", registrationError);
-          // });
         });
       }
     });
@@ -56,6 +132,7 @@ export default class ClientService extends Tapable {
   }
 
   run({ routeHandler }) {
+    this.routeHandler = routeHandler;
     const {env} = this.options;
     const root = _.get(env, "clientRootElementId", "app");
 
@@ -77,7 +154,7 @@ export default class ClientService extends Tapable {
       if (window.__preloaded_data) {
         currentPageRoutes.forEach((r,i) => {
 
-          window.__preloaded_data[i] &&
+          (typeof window.__preloaded_data[i] !== "undefined") &&
           r.route && r.route.component && r.route.component.preload &&
           (promises.push(r.route.component.preload(window.__preloaded_data[i])));
         });
@@ -87,9 +164,9 @@ export default class ClientService extends Tapable {
         // Render according to routes!
         renderer(
           <ErrorBoundary ErrorComponent={routeHandler.getErrorComponent()}>
-            <BrowserRouter>
+            <Router history={this.history}>
               {renderRoutes(routes)}
-            </BrowserRouter>
+            </Router>
           </ErrorBoundary>,
           domRootReference,
           //div,

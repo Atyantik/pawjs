@@ -10,7 +10,7 @@ import Html from "../components/Html";
 import {matchRoutes, renderRoutes} from "react-router-config";
 import { StaticRouter } from "react-router";
 import ErrorBoundary from "../components/ErrorBoundary";
-import {generateMeta} from "../utils/seo";
+import { generateMeta } from "../utils/seo";
 
 export default class ServerHandler extends Tapable {
 
@@ -52,20 +52,16 @@ export default class ServerHandler extends Tapable {
       modulesInRoutes = ["./app"];
     }
 
+    let seoSchema = routeHandler.getDefaultSeoSchema();
+    let pwaSchema = routeHandler.getPwaSchema();
     let seoData = {};
 
     currentPageRoutes.forEach(({route}) => {
-      seoData = _.assignIn(seoData, route.seo);
       !asyncCSS && route.modules && modulesInRoutes.push(...route.modules);
       if (route.component.preload) {
         promises.push(route.component.preload());
       }
     });
-
-    const baseUrl = `${req.protocol}://${req.get("host")}`;
-    const fullUrl = `${baseUrl}${req.originalUrl}`;
-
-    const meta = generateMeta(seoData, {baseUrl, url: fullUrl});
 
     modulesInRoutes.forEach(mod => {
       //eslint-disable-next-line
@@ -78,18 +74,28 @@ export default class ServerHandler extends Tapable {
 
     Promise.all(promises).then(args => {
       currentPageRoutes.forEach((r,i) => {
+        seoData = _.assignIn(seoData, r.route.seo, r.route.getRouteSeo());
         args[i] && preloadedData.push(args[i][1]);
       });
 
+      const baseUrl = `${req.protocol}://${req.get("host")}`;
+      const fullUrl = `${baseUrl}${req.originalUrl}`;
+
+      const metaTags = generateMeta(seoData, {
+        baseUrl,
+        url: fullUrl,
+        seoSchema,
+        pwaSchema,
+      });
 
       let renderedHtml = "";
       try {
         renderedHtml = renderToString(
           <Html
             assets={assets}
-            css={cssToBeIncluded}
+            cssFiles={cssToBeIncluded}
             preloadedData={preloadedData}
-            meta={meta}
+            metaTags={metaTags}
           >
             <ErrorBoundary ErrorComponent={routeHandler.getErrorComponent()}>
               <StaticRouter location={req.url}  context={context}>
@@ -103,7 +109,7 @@ export default class ServerHandler extends Tapable {
         renderedHtml = renderToString(
           <Html
             assets={assets}
-            css={cssToBeIncluded}
+            cssFiles={cssToBeIncluded}
             preloadedData={preloadedData}
           >
             <ErrorComponent error={err} />
