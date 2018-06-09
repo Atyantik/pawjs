@@ -72,7 +72,7 @@ class Html extends Component {
           />
           {
             this.props.cssFiles
-              .map(path => <link rel="stylesheet" type="text/css" key={path} href={path} async={true} />)
+              .map(path => <link rel="stylesheet" type="text/css" key={path} href={path} />)
           }
         </head>
         <body>

@@ -52,8 +52,8 @@ export default class ServerHandler extends Tapable {
       modulesInRoutes = ["./app"];
     }
 
-    let seoSchema = routeHandler.getDefaultSeoSchema();
-    let pwaSchema = routeHandler.getPwaSchema();
+    const seoSchema = routeHandler.getDefaultSeoSchema();
+    const pwaSchema = routeHandler.getPwaSchema();
     let seoData = {};
 
     currentPageRoutes.forEach(({route}) => {
@@ -96,6 +96,7 @@ export default class ServerHandler extends Tapable {
             cssFiles={cssToBeIncluded}
             preloadedData={preloadedData}
             metaTags={metaTags}
+            pwaSchema={pwaSchema}
           >
             <ErrorBoundary ErrorComponent={routeHandler.getErrorComponent()}>
               <StaticRouter location={req.url}  context={context}>
@@ -111,6 +112,8 @@ export default class ServerHandler extends Tapable {
             assets={assets}
             cssFiles={cssToBeIncluded}
             preloadedData={preloadedData}
+            metaTags={metaTags}
+            pwaSchema={pwaSchema}
           >
             <ErrorComponent error={err} />
           </Html>

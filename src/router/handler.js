@@ -78,19 +78,19 @@ export default class RouteHandler extends Tapable {
     let timeout = 10000;
 
     this.setDefaultSeoSchema = (schema = {}) => {
-      seoSchema = _.assignIn(seoSchema, schema);
+      seoSchema = Object.assign(seoSchema, schema);
     };
 
     this.getDefaultSeoSchema = () => {
-      return _.assignIn({}, seoSchema);
+      return Object.assign({}, seoSchema);
     };
 
     this.setPwaSchema = (schema = {}) => {
-      pwaSchema = _.assignIn(pwaSchema, schema);
+      pwaSchema = Object.assign(pwaSchema, schema);
     };
 
     this.getPwaSchema = () => {
-      return _.assignIn({}, pwaSchema);
+      return Object.assign({}, pwaSchema);
     };
 
     this.setDefaultLoadErrorComponent = component => {
