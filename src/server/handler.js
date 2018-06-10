@@ -1,8 +1,8 @@
 import {
   Tapable,
-  AsyncParallelHook,
-  SyncHook
+  AsyncSeriesHook
 } from "tapable";
+
 import React from "react";
 import _ from "lodash";
 import { renderToNodeStream, renderToString } from "react-dom/server";
@@ -17,13 +17,13 @@ export default class ServerHandler extends Tapable {
   constructor(options) {
     super();
     this.hooks = {
-      "clientBeforeRender": new AsyncParallelHook(),
-      "clientRenderComplete": new SyncHook(),
+      "html": new AsyncSeriesHook(["props", "request", "response", "currentRoutes", "allRoutes"]),
+      "app": new AsyncSeriesHook(["application", "request", "response", "currentRoutes", "allRoutes"])
     };
     this.options = options;
   }
 
-  run({ routeHandler, req, res, next, assets , cssDependencyMap}) {
+  async run({ routeHandler, req, res, next, assets , cssDependencyMap}) {
 
     const { asyncCSS, serverSideRender } = this.options.env;
 
@@ -72,11 +72,16 @@ export default class ServerHandler extends Tapable {
       });
     });
 
-    Promise.all(promises).then(args => {
+
+    let renderedHtml = "";
+    try {
+      const promisesData = await Promise.all(promises);
+
       currentPageRoutes.forEach((r,i) => {
-        if (!r.route.getRouteSeo) return;
-        seoData = _.assignIn(seoData, r.route.seo, r.route.getRouteSeo());
-        args[i] && preloadedData.push(args[i][1]);
+        if (r.route.getRouteSeo) {
+          seoData = _.assignIn(seoData, r.route.seo, r.route.getRouteSeo());
+        }
+        promisesData[i] && preloadedData.push(promisesData[i][1]);
       });
 
       const baseUrl = `${req.protocol}://${req.get("host")}`;
@@ -89,38 +94,40 @@ export default class ServerHandler extends Tapable {
         pwaSchema,
       });
 
-      let renderedHtml = "";
-      try {
-        renderedHtml = renderToString(
-          <Html
-            assets={assets}
-            cssFiles={cssToBeIncluded}
-            preloadedData={preloadedData}
-            metaTags={metaTags}
-            pwaSchema={pwaSchema}
-          >
-            <ErrorBoundary ErrorComponent={routeHandler.getErrorComponent()}>
-              <StaticRouter location={req.url}  context={context}>
-                {renderRoutes(routes)}
-              </StaticRouter>
-            </ErrorBoundary>
-          </Html>
-        );
-      } catch (err) {
-        const ErrorComponent = routeHandler.getErrorComponent();
-        renderedHtml = renderToString(
-          <Html
-            assets={assets}
-            cssFiles={cssToBeIncluded}
-            preloadedData={preloadedData}
-            metaTags={metaTags}
-            pwaSchema={pwaSchema}
-          >
-            <ErrorComponent error={err} />
-          </Html>
-        );
-      }
+      let htmlProps = {
+        assets,
+        cssFiles: cssToBeIncluded,
+        preloadedData: preloadedData,
+        metaTags,
+        pwaSchema,
+        head: [],
+        footer: [],
+      };
 
+      let Application = {
+        children: (
+          <StaticRouter location={req.url}  context={context}>
+            {renderRoutes(routes)}
+          </StaticRouter>
+        ),
+        context: context
+      };
+
+      // Do not send reference of routes but send a copy instead.
+      await new Promise (r => this.hooks.app.callAsync(Application, req, res, currentPageRoutes.slice(0), routes.slice(0), r ));
+
+      // Do not send reference of routes but send a copy instead.
+      await new Promise (r => this.hooks.html.callAsync(htmlProps, req, res, currentPageRoutes.slice(0), routes.slice(0), r));
+
+      renderedHtml = renderToString(
+        <Html
+          {...htmlProps}
+        >
+          <ErrorBoundary ErrorComponent={routeHandler.getErrorComponent()}>
+            {Application.children}
+          </ErrorBoundary>
+        </Html>
+      );
 
       if (context.url) {
         // can use the `context.status` that
@@ -133,7 +140,6 @@ export default class ServerHandler extends Tapable {
           .send(`<!DOCTYPE html>${renderedHtml}`);
       }
 
-
       // Free some memory
       routes = null;
       currentPageRoutes = null;
@@ -141,6 +147,23 @@ export default class ServerHandler extends Tapable {
       promises = null;
 
       return next();
-    });
+
+
+    } catch (ex) {
+      const ErrorComponent = routeHandler.getErrorComponent();
+      renderedHtml = renderToString(
+        <Html
+          assets={assets}
+          cssFiles={cssToBeIncluded}
+          pwaSchema={pwaSchema}
+        >
+          <ErrorComponent error={ex} />
+        </Html>
+      );
+    }
+    res
+      .status(context.status || 200)
+      .type("html")
+      .send(`<!DOCTYPE html>${renderedHtml}`);
   }
 }

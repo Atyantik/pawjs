@@ -7,7 +7,9 @@ class Html extends Component {
     metaTags: PropTypes.array,
     pwaSchema: PropTypes.object,
     cssFiles: PropTypes.array,
-    assets: PropTypes.array
+    assets: PropTypes.array,
+    head: PropTypes.array,
+    footer: PropTypes.array,
   };
 
   static defaultProps = {
@@ -15,6 +17,8 @@ class Html extends Component {
     pwaSchema: {},
     cssFiles: [],
     assets: [],
+    head: [],
+    footer: [],
   };
 
   getPwaValue(key, defaultValue = "") {
@@ -75,9 +79,11 @@ class Html extends Component {
             this.props.cssFiles
               .map(path => <link rel="stylesheet" type="text/css" key={path} href={path} />)
           }
+          {this.props.head}
         </head>
         <body>
           <div id="app">{this.props.children}</div>
+          {this.props.footer}
           {
             this.props.assets
               .filter(path => path.endsWith(".js"))
