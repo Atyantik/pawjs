@@ -11,7 +11,7 @@ const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const CleanWebpackPlugin = require("clean-webpack-plugin");
 const SwVariables = require("./plugins/sw-variables");
 const workboxPlugin = require("workbox-webpack-plugin");
-const MinifyPlugin = require("babel-minify-webpack-plugin");
+const CopyWebpackPlugin = require("copy-webpack-plugin");
 
 const ExtractEmittedAssets = require("./plugins/extract-emitted-assets");
 const SyncedFilesPlugin = require("./plugins/synced-files-plugin");
@@ -69,8 +69,8 @@ module.exports = module.exports.default = class WebpackHandler extends Tapable {
             output: {
               path: path.join(directories.dist, "build"),
               publicPath: "/",
-              filename: "[hash].js",
-              chunkFilename: "[chunkhash].js"
+              filename: "js/[hash].js",
+              chunkFilename: "js/[chunkhash].js"
             },
             module: {
               rules: [
@@ -95,8 +95,8 @@ module.exports = module.exports.default = class WebpackHandler extends Tapable {
               new MiniCssExtractPlugin({
                 // Options similar to the same options in webpackOptions.output
                 // both options are optional
-                filename: "[hash].css",
-                chunkFilename: "[chunkhash].css"
+                filename: "css/[hash].css",
+                chunkFilename: "css/[chunkhash].css"
               }),
               ...(pawConfig.serviceWorker? [
                 new workboxPlugin.InjectManifest({
@@ -105,7 +105,7 @@ module.exports = module.exports.default = class WebpackHandler extends Tapable {
                 }),
                 new SwVariables({
                   fileName: "sw.js",
-                  variables: pawConfig,
+                  variables: Object.assign({workboxDebug: true}, pawConfig),
                   text: projectSW
                 }),
               ] :[])
@@ -132,6 +132,7 @@ module.exports = module.exports.default = class WebpackHandler extends Tapable {
               port: pawConfig.port,
               host: pawConfig.host,
               serverSideRender: pawConfig.serverSideRender,
+              contentBase: path.join(directories.src, "public")
             },
             optimization: {
               splitChunks: false
@@ -174,8 +175,8 @@ module.exports = module.exports.default = class WebpackHandler extends Tapable {
             output: {
               path: path.join(directories.dist, "build"),
               publicPath: "/",
-              filename: "[hash].js",
-              chunkFilename: "[chunkhash].js"
+              filename: "js/[hash].js",
+              chunkFilename: "js/[chunkhash].js"
             },
             module: {
               rules: [
@@ -215,14 +216,19 @@ module.exports = module.exports.default = class WebpackHandler extends Tapable {
               new MiniCssExtractPlugin({
                 // Options similar to the same options in webpackOptions.output
                 // both options are optional
-                filename: "[hash].css",
-                chunkFilename: "[chunkhash].css"
+                filename: "css/[hash].css",
+                chunkFilename: "css/[chunkhash].css"
               }),
               new CleanWebpackPlugin([
                 directories.dist.split(path.sep).pop(),
               ], {
                 root: path.dirname(directories.dist),
               }),
+
+              new CopyWebpackPlugin([{
+                from: path.join(directories.src, "public"),
+                to: path.join(directories.dist, "build"),
+              }]),
               new ExtractEmittedAssets({
                 outputPath: directories.dist
               }),
@@ -236,7 +242,7 @@ module.exports = module.exports.default = class WebpackHandler extends Tapable {
                 }),
                 new SwVariables({
                   fileName: "sw.js",
-                  variables: pawConfig,
+                  variables: Object.assign({workboxDebug: true}, pawConfig),
                   text: projectSW
                 }),
               ] :[])

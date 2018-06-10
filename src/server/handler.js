@@ -74,6 +74,7 @@ export default class ServerHandler extends Tapable {
 
     Promise.all(promises).then(args => {
       currentPageRoutes.forEach((r,i) => {
+        if (!r.route.getRouteSeo) return;
         seoData = _.assignIn(seoData, r.route.seo, r.route.getRouteSeo());
         args[i] && preloadedData.push(args[i][1]);
       });

@@ -42,6 +42,7 @@ export default class Routes {
         }
       ],
     });
+
     // Adding application routes to application routes
     router.hooks.initRoutes.tap("AddAppRoutes", () => {
       router.addRoutes(appRoutes);

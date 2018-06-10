@@ -3,7 +3,7 @@
   "host": "0.0.0.0",
   "rootUrl": "/",
   "staticSite": false,
-  "serviceWorker": false,
+  "serviceWorker": true,
   "serverSideRender": true,
   "clientRootElementId": "app",
   "asyncCSS": false,

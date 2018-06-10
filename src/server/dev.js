@@ -5,7 +5,6 @@ console.log("Compiling files, please wait...");
 
 const path = require("path");
 const express = require("express");
-const compression = require("compression");
 const webpack = require("webpack");
 const webpackMiddleware = require("webpack-dev-middleware");
 const webpackHotMiddleware = require("webpack-hot-middleware");
@@ -84,7 +83,9 @@ const webOptions = Object.assign({}, {
 });
 
 const app = express();
-app.use(compression());
+
+// Disable x-powered-by for all requests
+app.set("x-powered-by", "PawJS");
 
 // Add server middleware
 const serverMiddleware = webpackMiddleware(serverCompiler, devServerOptions);
@@ -97,8 +98,6 @@ const webMiddleware = webpackMiddleware(webCompiler, webOptions);
 // res.locals but its not needed anyway.
 app.use(webMiddleware);
 
-
-
 // Add hot middleware to the update
 app.use(webpackHotMiddleware(webCompiler, {
   log: false,
@@ -106,6 +105,7 @@ app.use(webpackHotMiddleware(webCompiler, {
   heartbeat: 2000,
 }));
 
+app.use(express.static(devServerOptions.contentBase));
 
 /**
  * Below is where the magic happens!

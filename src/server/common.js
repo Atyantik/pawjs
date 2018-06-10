@@ -38,6 +38,12 @@ const sHandler = new ServerHandler({
  */
 const app = express();
 
+// Disable x-powered-by (security issues)
+app.use(function (req, res, next) {
+  res.setHeader("X-Powered-By", "PawJS");
+  next();
+});
+
 /**
  * HSTS settings
  * @type {{enabled: *, maxAge: *, includeSubDomains: *, preload: *}}
@@ -59,6 +65,10 @@ if (hstsSettings.enabled) {
     }
   })));
 }
+
+app.get("/manifest.json", (req, res) => {
+  res.json(rHandler.getPwaSchema());
+});
 
 app.get("*", (req, res, next) => {
   // Get the resources
@@ -95,7 +105,6 @@ app.get("*", (req, res, next) => {
       cssDependencyMap: res.locals.cssDependencyMap
     });
   });
-
 });
 
 /**

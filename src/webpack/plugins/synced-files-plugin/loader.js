@@ -32,8 +32,6 @@ module.exports = function () {
   const publicPath = `${this._compiler.options.output.publicPath}${fileLoaderOptions ? fileLoaderOptions.publicPath: ""}`;
 
   if(syncPlugin && (syncSource = syncPlugin.get(syncKey))) {
-    // eslint-disable-next-line
-    console.log(`Using cached file: ${this.resourcePath} :: ${syncSource.replace("__webpack_public_path__","")}`);
     callback(null, syncSource.replace("__webpack_public_path__", JSON.stringify(publicPath)));
     return;
   }

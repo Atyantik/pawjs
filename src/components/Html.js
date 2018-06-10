@@ -58,6 +58,7 @@ class Html extends Component {
       <html lang={this.getPwaValue("lang")} dir={this.getPwaValue("dir")}>
         <head>
           <title>{this.getMetaValue("title").content}</title>
+          <link rel="manifest" href={"/manifest.json"} />
           {
             this.props.metaTags.map((m, i) => {
               return <meta key={`meta_${i}`} {...m} />;

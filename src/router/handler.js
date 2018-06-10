@@ -4,6 +4,8 @@ import AsyncRouteLoaderComponent from "../components/AsyncRouteLoader";
 import NotFoundComponent from "../components/NotFound";
 import ErrorComponent from "../components/Error";
 import RouteCompiler from "./compiler";
+import PwaIcon192 from "../resources/images/pwa-icon-192x192.png";
+import PwaIcon512 from "../resources/images/pwa-icon-512x512.png";
 import _ from "lodash";
 
 
@@ -26,7 +28,17 @@ export default class RouteHandler extends Tapable {
     "background_color": "#fff",
     "theme_color": "#fff",
     "display": "standalone",
-    "description": "A highly scalable & plug-able, Progressive Web Application foundation with the best Developer Experience."
+    "description": "A highly scalable & plug-able, Progressive Web Application foundation with the best Developer Experience.",
+    "icons": [
+      {
+        "src": PwaIcon192,
+        sizes: "192x192"
+      },
+      {
+        "src": PwaIcon512,
+        sizes: "512x512"
+      }
+    ]
   };
 
   static defaultSeoSchema = {
