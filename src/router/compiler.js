@@ -17,7 +17,7 @@ export default class RouteCompiler {
 
   compileRoute(route, routerService) {
 
-    const {
+    let {
       path,
       skeleton,
       error,

@@ -1,5 +1,6 @@
 import HomeRoutes from "./pages/home";
 import FeaturesRoutes from "./pages/features";
+import DummyLogo from "./resources/images/reactpwa-logo.png";
 
 const appRoutes = [
   ...HomeRoutes,
@@ -25,6 +26,7 @@ export default class Routes {
       title: "ReactPWA | Progressive web application with React",
       site_name: "ReactPWA",
       description: "A highly scalable, Progressive Web Application foundation with the best Developer Experience built with React & Webpack.",
+      image: DummyLogo,
       twitter: {
         site: "@atyantik_tech",
         creator: "@tirthbodawala"

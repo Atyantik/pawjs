@@ -28,7 +28,7 @@ app.use(compression());
 // Disable x-powered-by for all requests
 app.set("x-powered-by", "PawJS");
 
-app.use("/sw.js", express.static(path.join(currentDir, "build", "sw.js"), {
+app.use(`${process.env.__config_appRootUrl}/sw.js`, express.static(path.join(currentDir, "build", "sw.js"), {
   maxAge: 0,
   setHeaders: (res) => {
     res.set("Cache-Control", "no-cache");
@@ -36,7 +36,7 @@ app.use("/sw.js", express.static(path.join(currentDir, "build", "sw.js"), {
 }));
 
 const cacheTime = 86400000*30;     // 30 days;
-app.use(express.static(path.join(currentDir, "build"), {
+app.use(process.env.__config_appRootUrl, express.static(path.join(currentDir, "build"), {
   maxAge: cacheTime
 }));
 

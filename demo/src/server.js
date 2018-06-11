@@ -1,14 +1,26 @@
+import ReduxServer from "../../packages/pawjs-redux/src/server";
+
 export default class Server {
-  apply(serviceManager) {
 
-    serviceManager.hooks.initRoutes.tap("AddReduxSupport", (Routes) => {
-      Routes.addRoute({
+  constructor({addPlugin}) {
+    const reduxServer = new ReduxServer();
+    reduxServer.setReducers({
+      counter: function(state = null) {
+        return state;
+      }
+    });
 
+    addPlugin(reduxServer);
+  }
+
+  apply(serverHandler) {
+    serverHandler
+      .hooks
+      .reduxInitialState
+      .tapPromise("AppInitialState", async (reduxState) => {
+        reduxState.setInitialState({
+          counter: 1
+        });
       });
-    });
-
-    serviceManager.hooks.onCompile.tap("Console Log Success:", () => {
-      console.log("compilation completed");
-    });
   }
 }

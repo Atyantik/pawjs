@@ -9,5 +9,8 @@ try {
   config = {};
 }
 config = defaultsDeep(config, defaultConfig);
+if (config.appRootUrl.endsWith("/")) {
+  config.appRootUrl = config.appRootUrl.replace(/\/$/, "");
+}
 
 module.exports = Object.assign({}, config);

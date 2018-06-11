@@ -1,3 +1,5 @@
+import DummyLogoWhite from "../resources/images/reactpwa-logo-white.png";
+
 const routes = [
   {
     component: import("../app/components/features/layout"),
@@ -7,7 +9,8 @@ const routes = [
       title: "Features | React PWA",
       description: "Get started with your own Progressive web application in the most simplest way.",
       keywords: "pwa,progressive web application,code splitting,ssr,server side rendering,social sharing,react,boilerplate,caching,hot reloading,next gen js,isomorphic/universal routing,seo,bundling,image optimization,hsts",
-      type: "article"
+      type: "article",
+      image: DummyLogoWhite
     },
     routes: [
       {

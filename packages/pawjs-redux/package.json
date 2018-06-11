@@ -1,0 +1,16 @@
+{
+  "name": "pawjs-redux",
+  "version": "1.0.0",
+  "description": "Add Redux support to your application",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "author": "Atyantik Technologies Private Limited <tirthbodawala@atyantik.com>",
+  "license": "ISC",
+  "devDependencies": {
+    "react-redux": "^5.0.7",
+    "redux": "^4.0.0"
+  }
+}

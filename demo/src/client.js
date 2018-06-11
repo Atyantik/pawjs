@@ -1,11 +1,18 @@
+import ReduxClient from "../../packages/pawjs-redux/src/client";
+
 import "./resources/css/style.scss";
 
 export default class Client {
+  constructor({addPlugin}) {
 
-  apply(serviceManager) {
-    // serviceManager.hooks.locationChange.tap("TrackPageChange", (page, title, location) => {
-    //   console.log(page, title, location);
-    // });
+    const reduxClient = new ReduxClient();
+    reduxClient.setReducers({
+      counter: function(state = null) {
+        return state;
+      }
+    });
+
+    addPlugin(reduxClient);
   }
 }
 if (module.hot) module.hot.accept();

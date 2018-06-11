@@ -36,6 +36,10 @@ _.each(pawConfig, (value, key) => {
   configEnvVars[`__config_${key}`] = value;
 });
 
+let resourcesBaseUrl = pawConfig.cdnUrl?pawConfig.cdnUrl: pawConfig.appRootUrl;
+if (!resourcesBaseUrl.endsWith("/")) {
+  resourcesBaseUrl = `${resourcesBaseUrl}/`;
+}
 
 module.exports = module.exports.default = class WebpackHandler extends Tapable {
 
@@ -68,7 +72,7 @@ module.exports = module.exports.default = class WebpackHandler extends Tapable {
             },
             output: {
               path: path.join(directories.dist, "build"),
-              publicPath: "/",
+              publicPath: resourcesBaseUrl,
               filename: "js/[hash].js",
               chunkFilename: "js/[chunkhash].js"
             },
@@ -139,7 +143,7 @@ module.exports = module.exports.default = class WebpackHandler extends Tapable {
             },
             output: {
               filename: "server.js",
-              publicPath: "/",
+              publicPath: resourcesBaseUrl,
               path: directories.dist,
               library: "dev-server",
               libraryTarget: "umd"
@@ -174,19 +178,22 @@ module.exports = module.exports.default = class WebpackHandler extends Tapable {
             },
             output: {
               path: path.join(directories.dist, "build"),
-              publicPath: "/",
+              publicPath: resourcesBaseUrl,
               filename: "js/[hash].js",
               chunkFilename: "js/[chunkhash].js"
             },
             module: {
               rules: [
-                webRule({cacheDirectory: true}),
+                webRule({cacheDirectory: false}),
                 ...cssRule({
                   sourceMap: false,
                   localIdentName: "[hash:base64:5]",
                   compress: true,
                 }),
-                fontRule(),
+                fontRule({
+                  outputPath: "fonts/",
+                  publicPath: `${resourcesBaseUrl}fonts/`
+                }),
                 {
                   test: /\.(jpe?g|png|gif|svg|webp)$/i,
                   use: SyncedFilesPlugin.loader([
@@ -194,6 +201,7 @@ module.exports = module.exports.default = class WebpackHandler extends Tapable {
                       loader: "file-loader",
                       options: {
                         outputPath: "images/",
+                        publicPath: `${resourcesBaseUrl}images/`,
                         name: "[hash].[ext]",
                         context: directories.src,
                       }
@@ -232,9 +240,9 @@ module.exports = module.exports.default = class WebpackHandler extends Tapable {
               new ExtractEmittedAssets({
                 outputPath: directories.dist
               }),
-              new SyncedFilesPlugin({
-                outputPath: directories.dist
-              }),
+              // new SyncedFilesPlugin({
+              //   outputPath: directories.dist
+              // }),
               ...(pawConfig.serviceWorker? [
                 new workboxPlugin.InjectManifest({
                   swSrc: path.resolve(process.env.__lib_root, "src","service-worker.js"),
@@ -256,7 +264,7 @@ module.exports = module.exports.default = class WebpackHandler extends Tapable {
             entry: path.resolve(process.env.__lib_root, "./src/server/prod.js"),
             module: {
               rules: [
-                serverRule({noChunk: true, cacheDirectory: true}),
+                serverRule({noChunk: true, cacheDirectory: false}),
                 ...cssRule({
                   sourceMap: false,
                   localIdentName: "[hash:base64:5]",
@@ -265,7 +273,7 @@ module.exports = module.exports.default = class WebpackHandler extends Tapable {
                 fontRule({
                   emitFile: false,
                   outputPath: "build/fonts/",
-                  publicPath: "fonts/"
+                  publicPath: `${resourcesBaseUrl}fonts/`
                 }),
                 {
                   test: /\.(jpe?g|png|gif|svg|webp)$/i,
@@ -274,7 +282,7 @@ module.exports = module.exports.default = class WebpackHandler extends Tapable {
                       loader: "file-loader",
                       options: {
                         outputPath: "build/images/",
-                        publicPath: "images/",
+                        publicPath: `${resourcesBaseUrl}images/`,
                         name: "[hash].[ext]",
                         context: directories.src,
                       }
@@ -289,7 +297,7 @@ module.exports = module.exports.default = class WebpackHandler extends Tapable {
             },
             output: {
               filename: "server.js",
-              publicPath: "/",
+              publicPath: resourcesBaseUrl,
               path: directories.dist,
               library: "dev-server",
               libraryTarget: "umd"
@@ -307,15 +315,29 @@ module.exports = module.exports.default = class WebpackHandler extends Tapable {
                 "__lib_root": process.env.__lib_root,
               }, configEnvVars)),
               new MiniCssExtractPlugin({filename: "server.css"}),
-              new SyncedFilesPlugin({
-                deleteAfterCompile: true,
-                outputPath: directories.dist
-              })
+              // new SyncedFilesPlugin({
+              //   deleteAfterCompile: true,
+              //   outputPath: directories.dist
+              // })
             ]
           }
         ],
       },
     };
+  }
+
+  addPlugin(plugin) {
+    try {
+      if (plugin.hooks && Object.keys(plugin.hooks).length) {
+        _.each(plugin.hooks, (hookValue, hookName) => {
+          this.hooks[hookName] = hookValue;
+        });
+      }
+    } catch(ex) {
+      // eslint-disable-next-line
+      console.log(ex);
+    }
+    plugin.apply && plugin.apply(this);
   }
 
   getConfig(env = "development", type = "web") {

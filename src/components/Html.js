@@ -10,6 +10,10 @@ class Html extends Component {
     assets: PropTypes.array,
     head: PropTypes.array,
     footer: PropTypes.array,
+    appRootUrl: PropTypes.string,
+    dangerouslySetInnerHTML: PropTypes.shape({
+      __html: PropTypes.string,
+    })
   };
 
   static defaultProps = {
@@ -19,6 +23,10 @@ class Html extends Component {
     assets: [],
     head: [],
     footer: [],
+    appRootUrl: "/",
+    dangerouslySetInnerHTML: {
+      __html: ""
+    }
   };
 
   getPwaValue(key, defaultValue = "") {
@@ -62,7 +70,7 @@ class Html extends Component {
       <html lang={this.getPwaValue("lang")} dir={this.getPwaValue("dir")}>
         <head>
           <title>{this.getMetaValue("title").content}</title>
-          <link rel="manifest" href={"/manifest.json"} />
+          <link rel="manifest" href={`${this.props.appRootUrl}/manifest.json`} />
           {
             this.props.metaTags.map((m, i) => {
               return <meta key={`meta_${i}`} {...m} />;
@@ -82,7 +90,17 @@ class Html extends Component {
           {this.props.head}
         </head>
         <body>
-          <div id="app">{this.props.children}</div>
+          {
+            this.props.dangerouslySetInnerHTML.__html.length && (
+              <div id="app" dangerouslySetInnerHTML={this.props.dangerouslySetInnerHTML} />
+            )
+          }
+          {
+            !this.props.dangerouslySetInnerHTML.__html.length &&
+            this.props.children && (
+              <div id="app" dangerouslySetInnerHTML={this.props.dangerouslySetInnerHTML} />
+            )
+          }
           {this.props.footer}
           {
             this.props.assets

@@ -16,22 +16,38 @@ export default class ServerHandler extends Tapable {
 
   constructor(options) {
     super();
+    this.addPlugin = this.addPlugin.bind(this);
     this.hooks = {
-      "html": new AsyncSeriesHook(["props", "request", "response", "currentRoutes", "allRoutes"]),
-      "app": new AsyncSeriesHook(["application", "request", "response", "currentRoutes", "allRoutes"])
+      "beforeAppRender": new AsyncSeriesHook(["application", "request", "response"]),
+      "beforeHtmlRender": new AsyncSeriesHook(["application", "request", "response"])
     };
     this.options = options;
   }
 
+  addPlugin(plugin) {
+    try {
+      if (plugin.hooks && Object.keys(plugin.hooks).length) {
+        _.each(plugin.hooks, (hookValue, hookName) => {
+          this.hooks[hookName] = hookValue;
+        });
+      }
+    } catch(ex) {
+      // eslint-disable-next-line
+      console.log(ex);
+    }
+    plugin.apply && plugin.apply(this);
+  }
+
   async run({ routeHandler, req, res, next, assets , cssDependencyMap}) {
 
-    const { asyncCSS, serverSideRender } = this.options.env;
+    const { asyncCSS, serverSideRender, appRootUrl } = this.options.env;
 
     if (!serverSideRender) {
       res.write("<!DOCTYPE html>");
       renderToNodeStream(
         <Html
           assets={assets}
+          appRootUrl={appRootUrl}
         />
       ).pipe(res);
       return next();
@@ -39,7 +55,7 @@ export default class ServerHandler extends Tapable {
 
     let routes = routeHandler.getRoutes();
 
-    let currentPageRoutes = matchRoutes(routes, req.path);
+    let currentPageRoutes = matchRoutes(routes, req.path.replace(appRootUrl, ""));
 
     let context = {};
 
@@ -84,6 +100,7 @@ export default class ServerHandler extends Tapable {
         promisesData[i] && preloadedData.push(promisesData[i][1]);
       });
 
+
       const baseUrl = `${req.protocol}://${req.get("host")}`;
       const fullUrl = `${baseUrl}${req.originalUrl}`;
 
@@ -105,28 +122,36 @@ export default class ServerHandler extends Tapable {
       };
 
       let Application = {
+        htmlProps,
         children: (
-          <StaticRouter location={req.url}  context={context}>
+          <StaticRouter location={req.url} context={context} basename={appRootUrl}>
             {renderRoutes(routes)}
           </StaticRouter>
         ),
-        context: context
+        context: context,
+        currentRoutes: currentPageRoutes.slice(0),
+        routes: routes.slice(0),
+
       };
 
-      // Do not send reference of routes but send a copy instead.
-      await new Promise (r => this.hooks.app.callAsync(Application, req, res, currentPageRoutes.slice(0), routes.slice(0), r ));
+      await new Promise (r => this.hooks.beforeAppRender.callAsync(Application, req, res, r));
 
-      // Do not send reference of routes but send a copy instead.
-      await new Promise (r => this.hooks.html.callAsync(htmlProps, req, res, currentPageRoutes.slice(0), routes.slice(0), r));
+      let htmlContent = renderToString(
+        <ErrorBoundary ErrorComponent={routeHandler.getErrorComponent()}>
+          {Application.children}
+        </ErrorBoundary>
+      );
+
+      await new Promise (r => this.hooks.beforeHtmlRender.callAsync(Application, req, res, r ));
 
       renderedHtml = renderToString(
         <Html
-          {...htmlProps}
-        >
-          <ErrorBoundary ErrorComponent={routeHandler.getErrorComponent()}>
-            {Application.children}
-          </ErrorBoundary>
-        </Html>
+          {...Application.htmlProps}
+          appRootUrl={appRootUrl}
+          dangerouslySetInnerHTML={{
+            __html: htmlContent,
+          }}
+        />
       );
 
       if (context.url) {

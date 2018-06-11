@@ -1,9 +1,8 @@
 {
   "port": "9090",
   "host": "0.0.0.0",
-  "rootUrl": "/",
-  "staticSite": false,
-  "serviceWorker": true,
+  "appRootUrl": "/",
+  "serviceWorker": false,
   "serverSideRender": true,
   "clientRootElementId": "app",
   "asyncCSS": false,

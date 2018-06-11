@@ -1,6 +1,6 @@
 import {
   Tapable,
-  AsyncParallelHook,
+  AsyncSeriesHook,
   AsyncParallelBailHook,
   SyncHook,
 } from "tapable";
@@ -27,13 +27,17 @@ export default class ClientHandler extends Tapable {
   constructor(options) {
     super();
 
+    this.addPlugin = this.addPlugin.bind(this);
     this.manageHistoryChange = this.manageHistoryChange.bind(this);
-    this.history = window.__history = window.__history || createBrowserHistory();
+
+    this.history = window.__history = window.__history || createBrowserHistory({
+      basename: options.env.appRootUrl,
+    });
     this.historyUnlistener = this.history.listen(this.manageHistoryChange);
 
     this.hooks = {
       "locationChange": new AsyncParallelBailHook(["location", "action"]),
-      "beforeRender": new AsyncParallelHook(),
+      "beforeRender": new AsyncSeriesHook(["Application"]),
       "renderComplete": new SyncHook(),
     };
     this.options = options;
@@ -47,7 +51,7 @@ export default class ClientHandler extends Tapable {
 
   updatePageMeta(location) {
     const routes = this.routeHandler.getRoutes();
-    const currentRoutes = matchRoutes(routes, location.pathname);
+    const currentRoutes = matchRoutes(routes, location.pathname.replace(this.options.env.appRootUrl, ""));
     let promises = [];
 
     let seoData = {};
@@ -113,7 +117,7 @@ export default class ClientHandler extends Tapable {
       if (err) return;
       if ("serviceWorker" in navigator) {
         window.addEventListener("load", () => {
-          navigator.serviceWorker.register("/sw.js");
+          navigator.serviceWorker.register(`${this.options.env.appRootUrl}/sw.js`);
         });
       }
     });
@@ -121,14 +125,16 @@ export default class ClientHandler extends Tapable {
 
   addPlugin(plugin) {
     try {
-      _.each(plugin.hooks, (hookValue, hookName) => {
-        this.hooks[hookName] = hookValue;
-      });
+      if (plugin.hooks && Object.keys(plugin.hooks).length) {
+        _.each(plugin.hooks, (hookValue, hookName) => {
+          this.hooks[hookName] = hookValue;
+        });
+      }
     } catch(ex) {
       // eslint-disable-next-line
       console.log(ex);
     }
-    plugin.apply(this);
+    plugin.apply && plugin.apply(this);
   }
 
   run({ routeHandler }) {
@@ -143,30 +149,38 @@ export default class ClientHandler extends Tapable {
     const domRootReference = document.getElementById(root);
     const renderer = env.serverSideRender ? hydrate: render;
 
-    this.hooks.beforeRender.callAsync(() => {
+    const routes = routeHandler.getRoutes();
 
-      const routes = routeHandler.getRoutes();
+    let currentPageRoutes = matchRoutes(routes, location.pathname.replace(this.options.env.appRootUrl, ""));
 
-      let currentPageRoutes = matchRoutes(routes, window.location.pathname);
+    let promises = [];
 
-      let promises = [];
+    if (window.__preloaded_data) {
+      currentPageRoutes.forEach((r,i) => {
 
-      if (window.__preloaded_data) {
-        currentPageRoutes.forEach((r,i) => {
+        (typeof window.__preloaded_data[i] !== "undefined") &&
+        r.route && r.route.component && r.route.component.preload &&
+        (promises.push(r.route.component.preload(window.__preloaded_data[i])));
+      });
+    }
 
-          (typeof window.__preloaded_data[i] !== "undefined") &&
-          r.route && r.route.component && r.route.component.preload &&
-          (promises.push(r.route.component.preload(window.__preloaded_data[i])));
-        });
-      }
+    Promise.all(promises).then(() => {
+      let children = (
+        <Router basename={env.appRootUrl} history={this.history}>
+          {renderRoutes(routes)}
+        </Router>
+      );
+      let Application = {
+        children,
+        currentRoutes: currentPageRoutes.slice(0),
+        routes: routes.slice(0),
+      };
 
-      Promise.all(promises).then(() => {
+      this.hooks.beforeRender.callAsync(Application, () => {
         // Render according to routes!
         renderer(
           <ErrorBoundary ErrorComponent={routeHandler.getErrorComponent()}>
-            <Router history={this.history}>
-              {renderRoutes(routes)}
-            </Router>
+            {Application.children}
           </ErrorBoundary>,
           domRootReference,
           //div,

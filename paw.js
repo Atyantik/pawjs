@@ -15,6 +15,9 @@ process.env.__project_root = projectRoot = path.isAbsolute(process.env.__project
 // PawJS library root, i.e. the folder where the script file is located
 process.env.__lib_root = libRoot = __dirname;
 
+// Disable babel cache
+process.env.BABEL_DISABLE_CACHE = 1;
+
 // Arguments passed to the script
 const allArgs = (process.argv.slice(2));
 let userCommand = "start";
@@ -39,14 +42,11 @@ process.on("SIGTERM", cleanExit); // catch kill
 
 switch(userCommand) {
   case "start:dev": {
-    // Disable babel cache
-    process.env.BABEL_DISABLE_CACHE = 1;
     // Simply include the server/dev.js
     require(path.resolve(libRoot, "src/server/dev.js"));
     break;
   }
   case "build:prod": {
-    process.env.BABEL_DISABLE_CACHE = 1;
     const spawn = require("child_process").spawn;
 
     const childSpawn = spawn(

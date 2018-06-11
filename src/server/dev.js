@@ -8,6 +8,7 @@ const express = require("express");
 const webpack = require("webpack");
 const webpackMiddleware = require("webpack-dev-middleware");
 const webpackHotMiddleware = require("webpack-hot-middleware");
+const env = require("../config/index");
 
 // Utils
 // -- Require from string. create an export from string like `module.export = "Something";`
@@ -47,14 +48,14 @@ const devServerOptions = Object.assign({}, devServerConfig, {
     reasons: false,
     entrypoints: false,
     maxModules: 0,
-    chunks: false,
-    assets: false,
-    children: false,
-    hash: false,
-    modules: false,
-    publicPath: false,
-    timings: false,
-    version: false
+    // chunks: false,
+    // assets: false,
+    // children: false,
+    // hash: false,
+    // modules: false,
+    // publicPath: false,
+    // timings: false,
+    // version: false
   },
   noInfo: true,
   publicPath: firstServerConfig.output.publicPath
@@ -71,13 +72,13 @@ const webOptions = Object.assign({}, {
     entrypoints: false,
     maxModules: 0,
     moduleTrace: false,
-    chunks: false,
-    children: false,
-    hash: false,
-    modules: false,
-    publicPath: false,
-    timings: false,
-    version: false
+    // chunks: false,
+    // children: false,
+    // hash: false,
+    // modules: false,
+    // publicPath: false,
+    // timings: false,
+    // version: false
   },
   publicPath: webConfig[0].output.publicPath
 });
@@ -105,7 +106,7 @@ app.use(webpackHotMiddleware(webCompiler, {
   heartbeat: 2000,
 }));
 
-app.use(express.static(devServerOptions.contentBase));
+app.use(env.appRootUrl, express.static(devServerOptions.contentBase));
 
 /**
  * Below is where the magic happens!

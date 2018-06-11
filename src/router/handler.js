@@ -8,7 +8,6 @@ import PwaIcon192 from "../resources/images/pwa-icon-192x192.png";
 import PwaIcon512 from "../resources/images/pwa-icon-512x512.png";
 import _ from "lodash";
 
-
 export default class RouteHandler extends Tapable {
 
   static defaultPwaSchema = {
@@ -72,7 +71,8 @@ export default class RouteHandler extends Tapable {
     super();
 
     this.routeCompiler = new RouteCompiler({
-      isServer: Boolean(options.isServer)
+      isServer: Boolean(options.isServer),
+      env: options.env
     });
     this.hooks = {
       "initRoutes": new AsyncSeriesHook(),
@@ -85,6 +85,7 @@ export default class RouteHandler extends Tapable {
     let errorComponent = ErrorComponent;
     let seoSchema = Object.assign({}, RouteHandler.defaultSeoSchema);
     let pwaSchema = Object.assign({}, RouteHandler.defaultPwaSchema);
+    pwaSchema.start_url = options.env.appRootUrl;
 
     let delay = 300;
     let timeout = 10000;
@@ -171,14 +172,16 @@ export default class RouteHandler extends Tapable {
 
   addPlugin(plugin) {
     try {
-      _.each(plugin.hooks, (hookValue, hookName) => {
-        this.hooks[hookName] = hookValue;
-      });
-      plugin.apply && plugin.apply(this);
+      if (plugin.hooks && Object.keys(plugin.hooks).length) {
+        _.each(plugin.hooks, (hookValue, hookName) => {
+          this.hooks[hookName] = hookValue;
+        });
+      }
     } catch(ex) {
       // eslint-disable-next-line
       console.log(ex);
     }
+    plugin.apply && plugin.apply(this);
   }
 
   getRoutes() {

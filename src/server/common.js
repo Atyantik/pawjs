@@ -32,6 +32,8 @@ const sHandler = new ServerHandler({
   env: _.assignIn({}, env)
 });
 
+sHandler.addPlugin(new ProjectServer({addPlugin: sHandler.addPlugin}));
+
 /**
  * Initialize express application
  * @type {*|Function}
@@ -66,7 +68,7 @@ if (hstsSettings.enabled) {
   })));
 }
 
-app.get("/manifest.json", (req, res) => {
+app.get(`${env.appRootUrl}/manifest.json`, (req, res) => {
   res.json(rHandler.getPwaSchema());
 });
 
