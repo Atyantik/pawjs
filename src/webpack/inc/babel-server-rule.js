@@ -5,12 +5,12 @@ module.exports = module.exports.default = (options) => ({
     options: {
       presets: [
         [
-          "@babel/preset-env",
+          require("@babel/preset-env"),
           {
             "targets": { "node": "8.11.2" }
           }
         ],
-        "@babel/preset-react",
+        require("@babel/preset-react"),
       ],
       cacheDirectory: options.cacheDirectory,
       plugins: require("./babel-plugins")(options)
