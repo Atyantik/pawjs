@@ -2,14 +2,12 @@ import _ from "lodash";
 import ClientHandler from "./handler";
 import RouteHandler from "../router/handler";
 import env from "../config/index";
+import ProjectClient from "pawProjectClient";
 
 try {
 
   let ProjectRoutes = require(`${process.env.__project_root}/src/routes`);
   if (ProjectRoutes.default) ProjectRoutes = ProjectRoutes.default;
-
-  let ProjectClient = require(`${process.env.__project_root}/src/client`);
-  if (ProjectClient.default) ProjectClient = ProjectClient.default;
 
   let rHandler = new RouteHandler({
     env: _.assignIn({}, env),

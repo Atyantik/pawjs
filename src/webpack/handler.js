@@ -148,8 +148,9 @@ module.exports = module.exports.default = class WebpackHandler extends Tapable {
               library: "dev-server",
               libraryTarget: "umd"
             },
+
             externals: {
-              express: "express"
+              express: "express",
             },
             ...resolverConfig,
             plugins: [

@@ -5,6 +5,7 @@ import ServerHandler from "./handler";
 import hsts from "hsts";
 import env from "../config";
 import { assetsToArray } from "../utils/utils";
+import ProjectServer from "pawProjectServer";
 
 /**
  * Initialize Route handler
@@ -25,9 +26,6 @@ rHandler.addPlugin(new ProjectRoutes({addPlugin: rHandler.addPlugin}));
  * Initialize server handler
  * @type {*}
  */
-let ProjectServer = require(`${process.env.__project_root}/src/server`);
-if (ProjectServer.default) ProjectServer = ProjectServer.default;
-
 const sHandler = new ServerHandler({
   env: _.assignIn({}, env)
 });
