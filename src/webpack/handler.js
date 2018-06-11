@@ -236,7 +236,7 @@ module.exports = module.exports.default = class WebpackHandler extends Tapable {
               }),
 
               ...(
-                fs.existsSync(directories.src, "public") ? [
+                fs.existsSync(path.join(directories.src, "public")) ? [
                   new CopyWebpackPlugin([{
                     from: path.join(directories.src, "public"),
                     to: path.join(directories.dist, "build"),
