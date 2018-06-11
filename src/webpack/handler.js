@@ -26,6 +26,7 @@ const imageRule = require("./inc/babel-image-rule");
 const resolverConfig =  require("./inc/webpack-resolver-config");
 const cssRule = require("./inc/babel-css-rule");
 
+
 let projectSW = "";
 if (fs.existsSync(path.join(directories.src, "sw.js"))) {
   projectSW = fs.readFileSync(path.join(directories.src, "sw.js"), "utf-8");
@@ -234,10 +235,15 @@ module.exports = module.exports.default = class WebpackHandler extends Tapable {
                 root: path.dirname(directories.dist),
               }),
 
-              new CopyWebpackPlugin([{
-                from: path.join(directories.src, "public"),
-                to: path.join(directories.dist, "build"),
-              }]),
+              ...(
+                fs.existsSync(directories.src, "public") ? [
+                  new CopyWebpackPlugin([{
+                    from: path.join(directories.src, "public"),
+                    to: path.join(directories.dist, "build"),
+                  }]),
+                ] : []
+              ),
+
               new ExtractEmittedAssets({
                 outputPath: directories.dist
               }),
