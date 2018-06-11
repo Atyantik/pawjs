@@ -30,7 +30,13 @@ const sHandler = new ServerHandler({
   env: _.assignIn({}, env)
 });
 
-sHandler.addPlugin(new ProjectServer({addPlugin: sHandler.addPlugin}));
+const serverMiddlewares = [];
+sHandler.addPlugin(new ProjectServer({
+  addPlugin: sHandler.addPlugin,
+  addMiddleware: (middleware) => {
+    serverMiddlewares.push(middleware);
+  }
+}));
 
 /**
  * Initialize express application
@@ -42,6 +48,10 @@ const app = express();
 app.use(function (req, res, next) {
   res.setHeader("X-Powered-By", "PawJS");
   next();
+});
+
+serverMiddlewares.forEach(middleware => {
+  app.use(middleware);
 });
 
 /**

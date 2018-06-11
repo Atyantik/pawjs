@@ -3,6 +3,7 @@ import ReduxServer from "../../packages/pawjs-redux/src/server";
 export default class Server {
 
   constructor({addPlugin}) {
+
     const reduxServer = new ReduxServer();
     reduxServer.setReducers({
       counter: function(state = null) {
