@@ -1,9 +1,22 @@
-const devWebConfig = require("../../webpack/dev/web.config");
-const devNodeServerConfig = require("../../webpack/dev/node-server.config");
+const path = require("path");
+
+process.env.__lib_root = path.resolve(__dirname, "../../../");
+process.env.__project_root = path.resolve(process.env.__lib_root, "demo");
+
+let WebpackHandler = require("../../webpack").handler;
+
+WebpackHandler = WebpackHandler.default? WebpackHandler.default: WebpackHandler;
+
+const wHandler = new WebpackHandler();
+
+const devWebConfig = wHandler.getConfig("development", "web");
+const devNodeServerConfig = wHandler.getConfig("development", "server");
+
 const webpack = require("webpack");
-const testUtils = require("../utils/util");
+const testUtils = require("../__test_utils/util");
 
 describe("WEB --env=dev", () => {
+
 
   test("should be an object", () => {
     expect(devWebConfig)
@@ -11,13 +24,19 @@ describe("WEB --env=dev", () => {
   });
 
   test("Should have only single entry point", () => {
-    expect(devWebConfig.entry)
-      .toBeInstanceOf(Object);
+    devWebConfig.forEach(dwc => {
+      expect(dwc.entry)
+        .toBeInstanceOf(Object);
+    });
+
   });
 
   test("Client Entry should be an array", () => {
-    expect(devWebConfig.entry.client)
-      .toBeInstanceOf(Array);
+    devWebConfig.forEach(dwc => {
+      expect(dwc.entry.client)
+        .toBeInstanceOf(Array);
+    });
+
   });
 
   test("Configuration should be valid webpack schema", () => {
@@ -29,20 +48,23 @@ describe("WEB --env=dev", () => {
   test("Configuration should be compilable", () => {
     const compiler = webpack(devWebConfig);
     expect(compiler)
-      .toBeInstanceOf(webpack.Compiler);
+      .toBeInstanceOf(webpack.MultiCompiler);
   });
 });
 
 describe("Node Server --env=dev", () => {
 
   test("should be an object", () => {
+
     expect(devNodeServerConfig)
       .toBeInstanceOf(Object);
   });
 
   test("Should have only single entry point (string)", () => {
-    expect(typeof devNodeServerConfig.entry)
-      .toBe("string");
+    devNodeServerConfig.forEach(dnc => {
+      expect(typeof dnc.entry)
+        .toBe("string");
+    });
   });
 
   test("Configuration should be valid webpack schema", () => {
@@ -54,7 +76,7 @@ describe("Node Server --env=dev", () => {
   test("Configuration should be compilable", () => {
     const compiler = webpack(devNodeServerConfig);
     expect(compiler)
-      .toBeInstanceOf(webpack.Compiler);
+      .toBeInstanceOf(webpack.MultiCompiler);
   });
 
 });

@@ -1,31 +1,28 @@
 #! /usr/bin/env node
-// eslint-disable-next-line
-const fs = require("fs");
 const path = require("path");
-const _ = require("lodash");
+const spawn = require("child_process").spawn;
 
 const processDir = process.cwd();
-// eslint-disable-next-line
-let libRoot, projectRoot;
+let libRoot;
 
 // Project root - Assuming the command is executed from project root
 process.env.__project_root = process.env.__project_root || process.env.PROJECT_ROOT || (processDir + path.sep);
-process.env.__project_root = projectRoot = path.isAbsolute(process.env.__project_root) ? process.env.__project_root: path.resolve(processDir, process.env.__project_root);
+process.env.__project_root = path.isAbsolute(process.env.__project_root) ? process.env.__project_root: path.resolve(processDir, process.env.__project_root);
 
 // PawJS library root, i.e. the folder where the script file is located
 process.env.__lib_root = libRoot = __dirname;
 
-// Disable babel cache
+// Disable babel cache for good. Compilation can be tricky
 process.env.BABEL_DISABLE_CACHE = 1;
 
 // Arguments passed to the script
 const allArgs = (process.argv.slice(2));
 let userCommand = "start";
+
 let otherCommands = [];
 
 // If we are provided with set of commands then
 if (allArgs.length) {
-
   [userCommand, ...otherCommands] = allArgs;
 }
 
@@ -35,6 +32,7 @@ process.env.NODE_PATH = allExecutablePaths.join(path.delimiter);
 process.env.PATH = allExecutablePaths.join(path.delimiter);
 
 const get_cmd = require("./scripts/find-command").factory(allExecutablePaths);
+const webpackConfigPath = path.resolve(path.join(libRoot, "src", "webpack", "index.js"));
 
 const cleanExit = function() { process.exit(); };
 process.on("SIGINT", cleanExit); // catch ctrl-c
@@ -47,58 +45,68 @@ switch(userCommand) {
     break;
   }
   case "build:prod": {
-    const spawn = require("child_process").spawn;
+
+    const webEnv= Object.create(process.env);
+
+    webEnv.NODE_ENV = "production";
+    webEnv.WEBPACK_TARGET = "web";
+
 
     const childSpawn = spawn(
       get_cmd("webpack"), [
         "--config",
-        path.resolve(path.join(libRoot, "src", "webpack", "prod", "web.config.js")),
-
-      ]
+        webpackConfigPath,
+      ], {
+        env: webEnv,
+        stdio: [process.stdin, process.stdout, "pipe"]
+      }
     );
 
     childSpawn.on("close", code => {
+
+      const serverEnv = Object.create(process.env);
+      serverEnv.NODE_ENV = "production";
+      serverEnv.WEBPACK_TARGET = "server";
+
       if (!code) {
-        const childSpawn2 = spawn(
+        spawn(
           get_cmd("webpack"), [
             "--config",
-            path.resolve(path.join(libRoot, "src", "webpack", "prod", "node-server.config.js")),
-
-          ]
+            webpackConfigPath,
+          ], {
+            env: serverEnv,
+            stdio: [process.stdin, process.stdout, "pipe"]
+          }
         );
-        childSpawn2.stdout.pipe(process.stdout);
-        childSpawn2.stderr.pipe(process.stderr);
       }
     });
-
-    childSpawn.stdout.pipe(process.stdout);
-    childSpawn.stderr.pipe(process.stderr);
     break;
   }
   case "webpack": {
     // Disable babel cache
     process.env.BABEL_DISABLE_CACHE = 0;
-    const spawn = require("child_process").spawn;
-
-    const childSpawn = spawn(
+    const env = Object.create(process.env);
+    spawn(
       get_cmd("webpack"), [
         "--config",
         path.resolve(path.join(libRoot, "src", "webpack")),
         ...otherCommands
-      ]
+      ], {
+        env: env,
+        stdio: [process.stdin, process.stdout, "pipe"]
+      }
     );
-
-    childSpawn.stdout.pipe(process.stdout);
-    childSpawn.stderr.pipe(process.stderr);
     break;
   }
   case "test": {
-    const
-      spawn = require("child_process").spawn,
-      childSpawn = spawn("jest");
-
-    childSpawn.stdout.pipe(process.stdout);
-    childSpawn.stderr.pipe(process.stderr);
+    const env = Object.create(process.env);
+    env.NODE_ENV = "test";
+    spawn(get_cmd("jest"), [
+      ...otherCommands
+    ], {
+      env,
+      stdio: [process.stdin, process.stdout, "pipe"]
+    });
     break;
   }
 }

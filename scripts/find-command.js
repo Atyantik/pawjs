@@ -19,7 +19,7 @@ function findCommandPath(com, pathList) {
     });
   });
   if (!execPath.length) throw new Error(`Cannot find command ${com}.`);
-  return execPath;
+  return `${execPath}`;
 }
 
 module.exports = findCommandPath;

@@ -33,12 +33,6 @@ class MockWebpackAssets {
           assetsByChunkName: [
             "test.js"
           ]
-        },
-        {
-          publicPath: "/",
-          assetsByChunkName: [
-            "test.js"
-          ]
         }
       ]
     };

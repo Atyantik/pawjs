@@ -1,31 +1,25 @@
-const {
-  Tapable,
-  SyncHook
-} = require("tapable");
+import _ from "lodash";
+import CleanWebpackPlugin from "clean-webpack-plugin";
+import CopyWebpackPlugin from "copy-webpack-plugin";
+import fs from "fs";
+import MiniCssExtractPlugin from "mini-css-extract-plugin";
+import path from "path";
+import { Tapable, SyncHook } from "tapable";
+import webpack from "webpack";
+import WorkboxPlugin from "workbox-webpack-plugin";
 
-const path = require("path");
-const fs = require("fs");
-const _ = require("lodash");
-const webpack = require("webpack");
-const MiniCssExtractPlugin = require("mini-css-extract-plugin");
-const CleanWebpackPlugin = require("clean-webpack-plugin");
-const SwVariables = require("./plugins/sw-variables");
-const workboxPlugin = require("workbox-webpack-plugin");
-const CopyWebpackPlugin = require("copy-webpack-plugin");
-
-const ExtractEmittedAssets = require("./plugins/extract-emitted-assets");
-const SyncedFilesPlugin = require("./plugins/synced-files-plugin");
-
-const directories = require("./utils/directories");
-const pawConfig = require("./../config");
-
-const serverRule = require("./inc/babel-server-rule");
-const webRule = require("./inc/babel-web-rule");
-const fontRule = require("./inc/babel-font-rule");
-const imageRule = require("./inc/babel-image-rule");
-const resolverConfig =  require("./inc/webpack-resolver-config");
-const cssRule = require("./inc/babel-css-rule");
-
+// non npm imports
+import SwVariables from "./plugins/sw-variables";
+import ExtractEmittedAssets from "./plugins/extract-emitted-assets";
+import SyncedFilesPlugin from "./plugins/synced-files-plugin";
+import directories from "./utils/directories";
+import pawConfig from "./../config";
+import serverRule from "./inc/babel-server-rule";
+import webRule from "./inc/babel-web-rule";
+import fontRule from "./inc/babel-font-rule";
+import imageRule from "./inc/babel-image-rule";
+import resolverConfig from "./inc/webpack-resolver-config";
+import cssRule from "./inc/babel-css-rule";
 
 let projectSW = "";
 if (fs.existsSync(path.join(directories.src, "sw.js"))) {
@@ -42,7 +36,7 @@ if (!resourcesBaseUrl.endsWith("/")) {
   resourcesBaseUrl = `${resourcesBaseUrl}/`;
 }
 
-module.exports = module.exports.default = class WebpackHandler extends Tapable {
+export default class WebpackHandler extends Tapable {
 
   constructor(options) {
     super();
@@ -68,7 +62,7 @@ module.exports = module.exports.default = class WebpackHandler extends Tapable {
                 "webpack-hot-middleware/client?name=web&path=/__hmr_update&timeout=2000&overlay=true&quiet=true",
 
                 // Initial entry point for dev
-                path.resolve(process.env.__lib_root, "./src/client/dev.js"),
+                path.resolve(process.env.__lib_root, "./src/client/app.js"),
               ],
             },
             output: {
@@ -104,7 +98,7 @@ module.exports = module.exports.default = class WebpackHandler extends Tapable {
                 chunkFilename: "css/[chunkhash].css"
               }),
               ...(pawConfig.serviceWorker? [
-                new workboxPlugin.InjectManifest({
+                new WorkboxPlugin.InjectManifest({
                   swSrc: path.resolve(process.env.__lib_root, "src","service-worker.js"),
                   swDest: "sw.js"
                 }),
@@ -175,7 +169,7 @@ module.exports = module.exports.default = class WebpackHandler extends Tapable {
               client: [
                 "@babel/polyfill",
                 // Initial entry point for dev
-                path.resolve(process.env.__lib_root, "./src/client/dev.js"),
+                path.resolve(process.env.__lib_root, "./src/client/app.js"),
               ],
             },
             output: {
@@ -183,6 +177,10 @@ module.exports = module.exports.default = class WebpackHandler extends Tapable {
               publicPath: resourcesBaseUrl,
               filename: "js/[hash].js",
               chunkFilename: "js/[chunkhash].js"
+            },
+            stats: {
+              warnings: false,
+              colors: true,
             },
             module: {
               rules: [
@@ -251,7 +249,7 @@ module.exports = module.exports.default = class WebpackHandler extends Tapable {
               //   outputPath: directories.dist
               // }),
               ...(pawConfig.serviceWorker? [
-                new workboxPlugin.InjectManifest({
+                new WorkboxPlugin.InjectManifest({
                   swSrc: path.resolve(process.env.__lib_root, "src","service-worker.js"),
                   swDest: "sw.js"
                 }),
@@ -310,7 +308,8 @@ module.exports = module.exports.default = class WebpackHandler extends Tapable {
               libraryTarget: "umd"
             },
             stats: {
-              warnings: false
+              warnings: false,
+              colors: true,
             },
             externals: {
               "pwa-assets": "./assets.json",
@@ -351,7 +350,7 @@ module.exports = module.exports.default = class WebpackHandler extends Tapable {
     if (this.envConfigs[env] && this.envConfigs[env][type]) {
       return this.envConfigs[env][type];
     }
+    if (env === "test") return {};
     throw new Error(`Cannot find appropriate config for environment ${env} & type ${type}`);
   }
-
 };

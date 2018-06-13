@@ -1,5 +1,11 @@
 // eslint-disable-next-line
-console.log("Compiling files, please wait...");
+console.log(`
+===================================================
+  Compiling files.
+  This may take time depending on the application size.
+  Thank you for your patience.
+===================================================
+`);
 
 // Notify the user that compilation has started and should be done soon.
 
@@ -8,7 +14,9 @@ const express = require("express");
 const webpack = require("webpack");
 const webpackMiddleware = require("webpack-dev-middleware");
 const webpackHotMiddleware = require("webpack-hot-middleware");
+const WebpackHandler = require("../webpack").handler;
 const env = require("../config/index");
+const weblog = require("webpack-log");
 
 // Utils
 // -- Require from string. create an export from string like `module.export = "Something";`
@@ -18,15 +26,19 @@ const requireFromString = require("../webpack/utils/requireFromString");
 const normalizeAssets = require("../webpack/utils/normalizeAssets");
 
 // Server configurations
-const serverConfig = require("../webpack/dev/node-server.config");
+const wHandler = new WebpackHandler();
+const serverConfig = wHandler.getConfig("development", "server");
 const firstServerConfig = serverConfig[0];
 const devServerConfig = firstServerConfig.devServer;
 
 // Web client configurations
-const webConfig = require("../webpack/dev/web.config");
+const webConfig = wHandler.getConfig("development", "web");
 
 // Create a webpack server compiler from the server config
 const serverCompiler = webpack(serverConfig);
+const log = weblog({
+  name: "pawjs"
+});
 
 // for core development
 /**
@@ -44,19 +56,17 @@ const serverCompiler = webpack(serverConfig);
 const devServerOptions = Object.assign({}, devServerConfig, {
   stats: {
     colors: true,
-    moduleTrace: false,
     reasons: false,
     entrypoints: false,
-    maxModules: 0,
-    // chunks: false,
-    // assets: false,
-    // children: false,
-    // hash: false,
-    // modules: false,
-    // publicPath: false,
-    // timings: false,
-    // version: false
+    modules: false,
+    moduleTrace: false,
+    assets: true,
+    errors: true,
+    cachedAssets: false,
+    version: false,
   },
+  logger: log,
+  logLevel: "debug",
   noInfo: true,
   publicPath: firstServerConfig.output.publicPath
 });
@@ -70,16 +80,16 @@ const webOptions = Object.assign({}, {
   stats: {
     colors: true,
     entrypoints: false,
-    maxModules: 0,
+    modules: false,
     moduleTrace: false,
-    // chunks: false,
-    // children: false,
-    // hash: false,
-    // modules: false,
-    // publicPath: false,
-    // timings: false,
-    // version: false
+    assets: true,
+    reasons: false,
+    errors: true,
+    cachedAssets: false,
+    version: false,
   },
+  logger: log,
+  logLevel: "debug",
   publicPath: webConfig[0].output.publicPath
 });
 
@@ -169,11 +179,19 @@ serverCompiler.hooks.done.tap("InformServerCompiled", () => {
 });
 
 let serverStarted = false;
+
 const startServer = () => {
   if (serverStarted) return;
   app.listen(devServerConfig.port, devServerConfig.host, () => {
+
     serverStarted = true;
     // eslint-disable-next-line
-    console.log(`Listening to http://${devServerConfig.host}:${devServerConfig.port}`);
+    console.log(`
+
+===================================================
+  Listening to http://${devServerConfig.host}:${devServerConfig.port}
+  Open the above url in your browser.        
+===================================================
+    `);
   });
 };

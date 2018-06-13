@@ -1,6 +1,0 @@
-{
-  "name": "pawjs",
-  "verbose": true,
-  "collectCoverage": true,
-  "coverageDirectory": "./coverage"
-}

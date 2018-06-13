@@ -1,3 +1,9 @@
+let presetEnv = require("@babel/preset-env");
+presetEnv = presetEnv.default ? presetEnv.default: presetEnv;
+
+let presetReact = require("@babel/preset-react");
+presetReact = presetReact.default ? presetReact.default: presetReact;
+
 module.exports = module.exports.default = (options) => ({
   test: /\.jsx?$/,
   use: {
@@ -5,12 +11,12 @@ module.exports = module.exports.default = (options) => ({
     options: {
       presets: [
         [
-          require("@babel/preset-env"),
+          presetEnv,
           {
             "targets": { "node": "8.11.2" }
           }
         ],
-        require("@babel/preset-react"),
+        presetReact,
       ],
       cacheDirectory: options.cacheDirectory,
       plugins: require("./babel-plugins")(options)

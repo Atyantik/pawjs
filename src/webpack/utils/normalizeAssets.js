@@ -19,6 +19,7 @@ module.exports = function(webpackStats) {
     const assetsByChunkName = stat.assetsByChunkName;
 
     const publicPath = stat.publicPath;
+
     _.each(assetsByChunkName, (chunkValue, chunkName) => {
 
       // If its array then it just contains chunk value as array
@@ -28,9 +29,15 @@ module.exports = function(webpackStats) {
         });
       } else if (_.isObject(chunkValue)) {
         _.each(chunkValue, (subChunkValues, subChunkType) => {
-          _.each(subChunkValues, (subChunkValue, subChunkIndex) => {
-            assetsByChunkName[chunkName][subChunkType][subChunkIndex] = `${publicPath}${subChunkValue}`;
-          });
+
+          if (_.isArray(subChunkValues) || _.isObject(subChunkValues)) {
+            _.each(subChunkValues, (subChunkValue, subChunkIndex) => {
+              assetsByChunkName[chunkName][subChunkType][subChunkIndex] = `${publicPath}${subChunkValue}`;
+            });
+          } else if (_.isString(subChunkValues)) {
+            assetsByChunkName[chunkName][subChunkType] = `${publicPath}${subChunkValues}`;
+          }
+
         });
       } else if (_.isString(chunkValue)) {
         assetsByChunkName[chunkName] = `${publicPath}${chunkValue}`;
