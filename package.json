@@ -1,6 +1,6 @@
 {
-  "name": "weby",
-  "version": "2.1.0",
+  "name": "pawjs",
+  "version": "0.8.0",
   "description": "",
   "main": "scripts.js",
   "scripts": {
@@ -11,8 +11,8 @@
     "test": "cross-env PROJECT_ROOT=./demo node ./paw.js test"
   },
   "bin": {
-    "weby": "./paw.js",
-    "webyjs": "./paw.js"
+    "paw": "./paw.js",
+    "pawjs": "./paw.js"
   },
   "keywords": [],
   "author": "Atyantik Technologies Private Limited <tirthbodawala@atyantik.com>",
