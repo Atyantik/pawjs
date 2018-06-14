@@ -6,6 +6,9 @@ require("@babel/register")({
   presets: babelServer.presets.default?babelServer.presets.default: babelServer.presets,
   plugins: babelServer.plugins,
   cache: false,
+  ignore: [
+    /node_modules\/(?!(weby|pawjs|imli|paw|webyjs|imlijs)).*/
+  ]
 });
 
 const env = typeof process.env.NODE_ENV !== "undefined" ?
