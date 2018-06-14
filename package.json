@@ -1,6 +1,6 @@
 {
   "name": "pawjs",
-  "version": "0.8.0",
+  "version": "0.8.1",
   "description": "",
   "main": "scripts.js",
   "scripts": {
@@ -8,7 +8,8 @@
     "build:prod": "cross-env PROJECT_ROOT=./demo node ./paw.js build:prod",
     "lint": "eslint -c ./.eslintrc --ignore-path ./.gitignore ./src",
     "lint:fix": "eslint -c ./.eslintrc --ignore-path ./.gitignore --fix ./src",
-    "test": "cross-env PROJECT_ROOT=./demo node ./paw.js test"
+    "test": "cross-env PROJECT_ROOT=./demo node ./paw.js test",
+    "publish-npm:beta": "npm publish --tag=next"
   },
   "bin": {
     "paw": "./paw.js",
