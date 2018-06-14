@@ -124,7 +124,7 @@ app.use(env.appRootUrl, express.static(devServerOptions.contentBase));
  * thus we can get a fast experience of compilation and developer can
  * develop code with SSR enabled.
  */
-app.get("*", function (req, res, next) {
+app.use(function (req, res, next) {
 
   const mfs = serverMiddleware.fileSystem;
   const fileNameFromUrl = serverMiddleware.getFilenameFromUrl(devServerOptions.publicPath + req.path);
