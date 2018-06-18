@@ -17,9 +17,11 @@ const _global = {};
 const filename = _.find(process.argv, arg => {
   return arg.indexOf("/server.js") !== -1;
 });
+
 if (filename) {
-  currentDir = path.dirname(filename);
+  currentDir = path.dirname(path.resolve(filename));
 }
+if (!currentDir) currentDir = __dirname;
 
 const app = express();
 

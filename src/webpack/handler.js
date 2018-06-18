@@ -44,6 +44,7 @@ export default class WebpackHandler extends Tapable {
       "init": new SyncHook(),
     };
     this.options = options;
+    this.addPlugin = this.addPlugin.bind(this);
     this.envConfigs = {
       "development": {
         web: [
@@ -144,6 +145,10 @@ export default class WebpackHandler extends Tapable {
               path: directories.dist,
               library: "dev-server",
               libraryTarget: "umd"
+            },
+            node: {
+              __dirname: false,
+              __filename: false,
             },
 
             externals: {
@@ -316,6 +321,10 @@ export default class WebpackHandler extends Tapable {
             externals: {
               "pwa-assets": "./assets.json",
             },
+            node: {
+              __dirname: false,
+              __filename: false,
+            },
             ...resolverConfig,
             plugins: [
               new webpack.EnvironmentPlugin(Object.assign({}, {
@@ -332,6 +341,7 @@ export default class WebpackHandler extends Tapable {
         ],
       },
     };
+
   }
 
   addPlugin(plugin) {
@@ -355,4 +365,4 @@ export default class WebpackHandler extends Tapable {
     if (env === "test") return {};
     throw new Error(`Cannot find appropriate config for environment ${env} & type ${type}`);
   }
-};
+}
