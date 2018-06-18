@@ -11,6 +11,7 @@ const {cssDependencyMap, ...assets} = pawAssets;
  * defining the current dir
  */
 let currentDir = __dirname;
+const _global = {};
 
 // Set appropriate currentDir when build and run in production mode
 const filename = _.find(process.argv, arg => {
@@ -45,15 +46,15 @@ app.use((req, res, next) => {
   res.locals.cssDependencyMap = cssDependencyMap;
   next();
 });
-app.use(server);
+app.use((req, res, next) => {
+  return server(req, res, next, _global);
+});
 
 
 const serverConfig = {
   port: process.env.__config_port,
   host: process.env.__config_host,
 };
-
-const _global = {};
 
 beforeStart(serverConfig, _global, (err) => {
   if (err) {

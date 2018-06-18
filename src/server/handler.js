@@ -18,8 +18,8 @@ export default class ServerHandler extends Tapable {
     super();
     this.addPlugin = this.addPlugin.bind(this);
     this.hooks = {
-      "beforeStart": new AsyncSeriesHook(["config", "globalVars"]),
-      "afterStart": new AsyncSeriesHook(["globalVars"]),
+      "beforeStart": new AsyncSeriesHook(["config", "appOptions"]),
+      "afterStart": new AsyncSeriesHook(["appOptions"]),
       "beforeAppRender": new AsyncSeriesHook(["application", "request", "response"]),
       "beforeHtmlRender": new AsyncSeriesHook(["application", "request", "response"])
     };

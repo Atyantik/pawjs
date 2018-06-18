@@ -32,6 +32,7 @@ const sHandler = new ServerHandler({
 
 const serverMiddlewares = [];
 sHandler.addPlugin(new ProjectServer({
+
   addPlugin: sHandler.addPlugin,
   addMiddleware: (middleware) => {
     serverMiddlewares.push(middleware);
@@ -81,6 +82,7 @@ app.get(`${env.appRootUrl}/manifest.json`, (req, res) => {
 });
 
 app.get("*", (req, res, next) => {
+
   // Get the resources
   const assets = assetsToArray(res.locals.assets);
 
@@ -124,16 +126,49 @@ app.get("*", (req, res, next) => {
  * @param next
  * @returns {*}
  */
-export default (req, res, next) => {
+export default (req, res, next, _global) => {
+
+  // Add global vars to middlewares and application
+  for (let key in _global) {
+    let val = _global[key];
+    app.locals[key] = val;
+    serverMiddlewares.forEach(sm => {
+      if (sm && sm.locals) {
+        sm.locals[key] = val;
+      }
+    });
+  }
+
   return app.handle(req, res, next);
 };
 export const beforeStart = (serverConfig, _global, cb = function() {}) => {
 
-  console.log(sHandler);
+  const setAppLocal = (key, value) => {
+    if (!key) return;
+    _global[key] = value;
+  };
+  const getAppLocal = (key, defaultValue = false) => {
+    if (!_global[key]) return defaultValue;
+    return _global[key];
+  };
 
-  sHandler.hooks.beforeStart.callAsync(serverConfig, _global, cb);
+  sHandler.hooks.beforeStart.callAsync(serverConfig, {
+    setAppLocal,
+    getAppLocal,
+  }, cb);
 };
 
 export const afterStart = (_global, cb = function() {}) => {
-  sHandler.hooks.afterStart.callAsync(_global, cb);
+  const setAppLocal = (key, value) => {
+    if (!key) return;
+    _global[key] = value;
+  };
+  const getAppLocal = (key, defaultValue = false) => {
+    if (!_global[key]) return defaultValue;
+    return _global[key];
+  };
+  sHandler.hooks.afterStart.callAsync({
+    setAppLocal,
+    getAppLocal,
+  }, cb);
 };

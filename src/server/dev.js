@@ -95,6 +95,9 @@ const webOptions = Object.assign({}, {
 
 const app = express();
 
+// Global for application
+const _global = {};
+
 // Disable x-powered-by for all requests
 app.set("x-powered-by", "PawJS");
 
@@ -107,7 +110,7 @@ const getCommonServer = () => {
   const mfs = serverMiddleware.fileSystem;
   // Get content of the server that is compiled!
   const serverContent = mfs.readFileSync(serverMiddleware.getFilenameFromUrl(devServerOptions.publicPath + "/server.js"), "utf-8");
-  
+
   return requireFromString(serverContent, {
     appendPaths: process.env.NODE_PATH.split(path.delimiter)
   });
@@ -135,7 +138,6 @@ app.use(env.appRootUrl, express.static(devServerOptions.contentBase));
  * develop code with SSR enabled.
  */
 app.use(function (req, res, next) {
-
   const mfs = serverMiddleware.fileSystem;
   const fileNameFromUrl = serverMiddleware.getFilenameFromUrl(devServerOptions.publicPath + req.path);
 
@@ -165,7 +167,7 @@ app.use(function (req, res, next) {
     res.locals.assets = assets;
     res.locals.cssDependencyMap = cssDependencyMap;
 
-    return CommonServerMiddleware(req, res, next);
+    return CommonServerMiddleware(req, res, next, _global);
   } catch(ex) {
     // eslint-disable-next-line
     console.log(ex);
@@ -207,7 +209,6 @@ const startServer = () => {
     port: devServerConfig.port,
     host: devServerConfig.host,
   };
-  const _global = {};
 
   beforeStart(serverConfig, _global, (err) => {
     if (err) {
