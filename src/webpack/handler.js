@@ -90,7 +90,9 @@ export default class WebpackHandler extends Tapable {
                 "__project_root": process.env.__project_root,
                 "__lib_root": process.env.__lib_root,
               })),
-              new webpack.HotModuleReplacementPlugin(),
+              new webpack.HotModuleReplacementPlugin({
+                multiStep: true,
+              }),
               new MiniCssExtractPlugin({
                 // Options similar to the same options in webpackOptions.output
                 // both options are optional

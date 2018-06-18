@@ -1,4 +1,5 @@
 import HomeSkeleton from "../app/components/skeleton/home";
+// something
 
 export default [
   {

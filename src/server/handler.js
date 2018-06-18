@@ -18,6 +18,8 @@ export default class ServerHandler extends Tapable {
     super();
     this.addPlugin = this.addPlugin.bind(this);
     this.hooks = {
+      "beforeStart": new AsyncSeriesHook(["config", "globalVars"]),
+      "afterStart": new AsyncSeriesHook(["globalVars"]),
       "beforeAppRender": new AsyncSeriesHook(["application", "request", "response"]),
       "beforeHtmlRender": new AsyncSeriesHook(["application", "request", "response"])
     };
@@ -65,7 +67,7 @@ export default class ServerHandler extends Tapable {
 
     let modulesInRoutes = [];
     if (!asyncCSS) {
-      modulesInRoutes = ["./app"];
+      modulesInRoutes = ["pawProjectClient"];
     }
 
     const seoSchema = routeHandler.getDefaultSeoSchema();

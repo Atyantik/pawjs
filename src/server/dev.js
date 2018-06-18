@@ -102,6 +102,16 @@ app.set("x-powered-by", "PawJS");
 const serverMiddleware = webpackMiddleware(serverCompiler, devServerOptions);
 app.use(serverMiddleware);
 
+
+const getCommonServer = () => {
+  const mfs = serverMiddleware.fileSystem;
+  // Get content of the server that is compiled!
+  const serverContent = mfs.readFileSync(serverMiddleware.getFilenameFromUrl(devServerOptions.publicPath + "/server.js"), "utf-8");
+  
+  return requireFromString(serverContent, {
+    appendPaths: process.env.NODE_PATH.split(path.delimiter)
+  });
+};
 // Add web middleware
 const webMiddleware = webpackMiddleware(webCompiler, webOptions);
 
@@ -144,15 +154,12 @@ app.use(function (req, res, next) {
     return next();
   }
 
-  // Get content of the server that is compiled!
-  const serverContent = mfs.readFileSync(serverMiddleware.getFilenameFromUrl(devServerOptions.publicPath + "/server.js"), "utf-8");
-
 
   let CommonServerMiddleware;
   try {
-    CommonServerMiddleware = requireFromString(serverContent, {
-      appendPaths: process.env.NODE_PATH.split(path.delimiter)
-    }).default;
+    // Get content of the server that is compiled!
+    const CommonServer = getCommonServer();
+    CommonServerMiddleware = CommonServer.default;
 
     const {cssDependencyMap,...assets} = normalizeAssets(res.locals.webpackStats);
     res.locals.assets = assets;
@@ -182,16 +189,45 @@ let serverStarted = false;
 
 const startServer = () => {
   if (serverStarted) return;
-  app.listen(devServerConfig.port, devServerConfig.host, () => {
 
-    serverStarted = true;
-    // eslint-disable-next-line
-    console.log(`
+
+  let beforeStart, afterStart = null;
+  try {
+    const CommonServer = getCommonServer();
+    beforeStart = CommonServer.beforeStart;
+    afterStart = CommonServer.afterStart;
+  } catch (ex) {
+    //eslint-disable-next-line
+    console.log(ex);
+  }
+
+
+
+  const serverConfig = {
+    port: devServerConfig.port,
+    host: devServerConfig.host,
+  };
+  const _global = {};
+
+  beforeStart(serverConfig, _global, (err) => {
+    if (err) {
+      //eslint-disable-next-line
+      console.error(err);
+      return;
+    }
+
+    app.listen(serverConfig.port, serverConfig.host, () => {
+
+      serverStarted = true;
+      // eslint-disable-next-line
+      console.log(`
 
 ===================================================
-  Listening to http://${devServerConfig.host}:${devServerConfig.port}
+  Listening to http://${serverConfig.host}:${serverConfig.port}
   Open the above url in your browser.        
 ===================================================
-    `);
+      `);
+      afterStart(_global);
+    });
   });
 };

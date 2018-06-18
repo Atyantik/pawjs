@@ -36,7 +36,7 @@ export default class ReduxClient extends ReduxTapable {
       const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 
       try {
-        providerProps.store = createStore(
+        providerProps.store = window.__reduxStore = window.__reduxStore || createStore(
           this.reducers,
           initialState,
           composeEnhancers(

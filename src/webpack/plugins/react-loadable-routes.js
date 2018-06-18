@@ -24,7 +24,7 @@ module.exports = ({types: t}) => ({
           newContainer.push(property);
         });
 
-        if (propertiesMap.webpack || propertiesMap.modules) {
+        if (propertiesMap.modules) {
           return;
         }
 

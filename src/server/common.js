@@ -127,3 +127,13 @@ app.get("*", (req, res, next) => {
 export default (req, res, next) => {
   return app.handle(req, res, next);
 };
+export const beforeStart = (serverConfig, _global, cb = function() {}) => {
+
+  console.log(sHandler);
+
+  sHandler.hooks.beforeStart.callAsync(serverConfig, _global, cb);
+};
+
+export const afterStart = (_global, cb = function() {}) => {
+  sHandler.hooks.afterStart.callAsync(_global, cb);
+};

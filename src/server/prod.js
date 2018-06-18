@@ -1,6 +1,6 @@
 import express from "express";
 import _ from "lodash";
-import server from "./common";
+import server, { beforeStart, afterStart } from "./common";
 import path from "path";
 import compression from "compression";
 // the below assets will be added by webpack. Don't worry about it
@@ -47,7 +47,25 @@ app.use((req, res, next) => {
 });
 app.use(server);
 
-app.listen(process.env.__config_port, process.env.__config_host, () => {
-  // eslint-disable-next-line
-  console.log(`Listening to http://${process.env.__config_host}:${process.env.__config_port}`);
+
+const serverConfig = {
+  port: process.env.__config_port,
+  host: process.env.__config_host,
+};
+
+const _global = {};
+
+beforeStart(serverConfig, _global, (err) => {
+  if (err) {
+    //eslint-disable-next-line
+    console.error(err);
+    return;
+  }
+
+  app.listen(serverConfig.port, serverConfig.host, () => {
+    // eslint-disable-next-line
+    console.log(`Listening to http://${serverConfig.host}:${serverConfig.port}`);
+    afterStart(_global);
+  });
 });
+
