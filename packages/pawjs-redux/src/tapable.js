@@ -1,10 +1,14 @@
 import { Tapable } from "tapable";
 import { combineReducers} from "redux";
+import "regenerator-runtime/runtime";
 
 export default class ReduxTapable extends Tapable {
-  reducers = null;
-  middlewares = [];
-  enhancers =[];
+  constructor() {
+    super();
+    this.reducers = null;
+    this.middlewares = [];
+    this.enhancers =[];
+  }
 
   addMiddleware(middleware) {
     this.middlewares.push(middleware);

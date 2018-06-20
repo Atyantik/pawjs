@@ -26,10 +26,14 @@ const staleHandler = self.workbox.strategies.staleWhileRevalidate();
 self.workbox.routing.setDefaultHandler(({event}) => {
 
   const request = event.request;
+  const requestMethod = request.method.toUpperCase();
+
+  if (requestMethod !== "GET") {
+    return fetch(event.request);
+  }
 
   if (
     request.url.indexOf(self.location.origin) !== -1 &&
-    request.method.toUpperCase() === "GET" &&
     assetsRegExp.test(request.url)
   ) {
     return cacheFirstHandler.handle({event});
@@ -37,7 +41,6 @@ self.workbox.routing.setDefaultHandler(({event}) => {
 
   if (
     request.url.indexOf(self.location.origin) === -1 &&
-    request.method.toUpperCase() === "GET" &&
     assetsRegExp.test(request.url)
   ) {
     return staleHandler.handle({event});
@@ -45,7 +48,6 @@ self.workbox.routing.setDefaultHandler(({event}) => {
 
   if (
     request.url.indexOf(self.location.origin) !== -1 &&
-    request.method.toUpperCase() === "GET" &&
     request.headers.get("accept").indexOf("html") !== -1
   ) {
     return networkFirstHandler.handle({event}).then(response => {

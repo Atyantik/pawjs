@@ -14,4 +14,3 @@ export default class Client {
     addPlugin(reduxClient);
   }
 }
-if (module.hot) module.hot.accept();

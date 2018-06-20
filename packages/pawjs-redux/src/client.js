@@ -1,9 +1,10 @@
 import React from "react";
-import _ from "lodash";
-import { AsyncSeriesHook } from "tapable";
+import {AsyncSeriesHook} from "tapable";
 import {applyMiddleware, compose, createStore} from "redux";
-import { Provider } from "react-redux";
+import {Provider} from "react-redux";
 import ReduxTapable from "./tapable";
+import {cloneDeep} from "./util";
+import "regenerator-runtime/runtime";
 
 export default class ReduxClient extends ReduxTapable {
   constructor() {
@@ -26,10 +27,10 @@ export default class ReduxClient extends ReduxTapable {
 
       const state = {
         setInitialState: (iState) => {
-          initialState = _.cloneDeep(iState);
+          initialState = cloneDeep(iState);
         },
         getInitialState: () => {
-          return _.cloneDeep(initialState);
+          return cloneDeep(initialState);
         }
       };
       await new Promise(r => this.hooks.reduxInitialState.callAsync(state, app, r));
