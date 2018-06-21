@@ -31,7 +31,7 @@ _.each(pawConfig, (value, key) => {
   configEnvVars[`__config_${key}`] = value;
 });
 
-let resourcesBaseUrl = pawConfig.cdnUrl?pawConfig.cdnUrl: pawConfig.appRootUrl;
+let resourcesBaseUrl = pawConfig.cdnUrl ? pawConfig.cdnUrl: pawConfig.appRootUrl;
 if (!resourcesBaseUrl.endsWith("/")) {
   resourcesBaseUrl = `${resourcesBaseUrl}/`;
 }
@@ -42,6 +42,7 @@ export default class WebpackHandler extends Tapable {
     super();
     this.hooks = {
       "init": new SyncHook(),
+      "beforeConfig": new SyncHook(["env", "type", "config"])
     };
     this.options = options;
     this.addPlugin = this.addPlugin.bind(this);
@@ -360,6 +361,12 @@ export default class WebpackHandler extends Tapable {
 
   getConfig(env = "development", type = "web") {
     if (this.envConfigs[env] && this.envConfigs[env][type]) {
+      this.hooks.beforeConfig.call(env, type, this.envConfigs[env][type], (err) => {
+        if (err) {
+          // eslint-disable-next-line
+          console.log(err);
+        }
+      });
       return this.envConfigs[env][type];
     }
     if (env === "test") return {};

@@ -14,7 +14,7 @@ const express = require("express");
 const webpack = require("webpack");
 const webpackMiddleware = require("webpack-dev-middleware");
 const webpackHotMiddleware = require("webpack-hot-middleware");
-const WebpackHandler = require("../webpack").handler;
+const wHandler = require("../webpack").handler;
 const env = require("../config/index");
 const weblog = require("webpack-log");
 
@@ -26,7 +26,6 @@ const requireFromString = require("../webpack/utils/requireFromString");
 const normalizeAssets = require("../webpack/utils/normalizeAssets");
 
 // Server configurations
-const wHandler = new WebpackHandler();
 const serverConfig = wHandler.getConfig("development", "server");
 const firstServerConfig = serverConfig[0];
 const devServerConfig = firstServerConfig.devServer;

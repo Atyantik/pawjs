@@ -2,6 +2,17 @@ import React, { Component } from "react";
 import { metaKeys } from "../utils/seo";
 import PropTypes from "prop-types";
 
+let toBase64;
+// Base64 polyfill
+if (typeof atob === "undefined" && typeof Buffer !== "undefined") {
+  toBase64 = function (str) {
+    return Buffer.from(str).toString("base64");
+  };
+} else if (typeof atob !== "undefined") {
+  toBase64 = atob;
+}
+
+
 class Html extends Component {
   static propTypes = {
     metaTags: PropTypes.array,
@@ -80,7 +91,7 @@ class Html extends Component {
             type="text/javascript"
             id="__pawjs_preloaded"
             dangerouslySetInnerHTML={{
-              __html: `window.__preloaded_data = ${JSON.stringify(preloadedData)};`
+              __html: `window.__preloaded_data = ${JSON.stringify(toBase64(JSON.stringify(preloadedData)))};`
             }}
           />
           {

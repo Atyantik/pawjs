@@ -14,7 +14,6 @@ import ErrorBoundary from "../components/ErrorBoundary";
 import {generateMeta} from "../utils/seo";
 import possibleStandardNames from "../utils/reactPossibleStandardNames";
 
-
 const possibleHtmlNames = _.invert(possibleStandardNames);
 const getPossibleHtmlName = (key) => {
   return possibleHtmlNames[key] || key;
@@ -156,11 +155,11 @@ export default class ClientHandler extends Tapable {
     let promises = [];
 
     if (window.__preloaded_data) {
+      const preloadedData = JSON.parse(atob(window.__preloaded_data));
       currentPageRoutes.forEach((r,i) => {
-
-        (typeof window.__preloaded_data[i] !== "undefined") &&
+        (typeof preloadedData[i] !== "undefined") &&
         r.route && r.route.component && r.route.component.preload &&
-        (promises.push(r.route.component.preload(window.__preloaded_data[i])));
+        (promises.push(r.route.component.preload(preloadedData[i])));
       });
     }
 

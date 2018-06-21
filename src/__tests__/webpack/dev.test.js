@@ -3,11 +3,7 @@ const path = require("path");
 process.env.__lib_root = path.resolve(__dirname, "../../../");
 process.env.__project_root = path.resolve(process.env.__lib_root, "demo");
 
-let WebpackHandler = require("../../webpack").handler;
-
-WebpackHandler = WebpackHandler.default? WebpackHandler.default: WebpackHandler;
-
-const wHandler = new WebpackHandler();
+const wHandler = require("../../webpack").handler;
 
 const devWebConfig = wHandler.getConfig("development", "web");
 const devNodeServerConfig = wHandler.getConfig("development", "server");
