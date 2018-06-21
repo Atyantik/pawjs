@@ -1,6 +1,6 @@
 {
   "name": "pawjs-image-optimizer",
-  "version": "0.8.6",
+  "version": "0.8.7",
   "description": "Add Wbpack Image Loader support to your PAWJS application",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",

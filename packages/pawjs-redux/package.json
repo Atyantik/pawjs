@@ -1,6 +1,6 @@
 {
   "name": "pawjs-redux",
-  "version": "0.8.9",
+  "version": "0.8.10",
   "description": "Add Redux support to your PAWJS application",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
