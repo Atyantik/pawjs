@@ -7,8 +7,8 @@
 
 <p align="center" style="text-align:center">
   <img src="https://www.atyantik.com/wp-content/uploads/2018/06/192-192.png" alt="Paw JS"/>
-  <h1 align="center" style="text-align:center">Paw JS - The plugable framework</h1>
 </p>
+<h1 align="center" style="text-align:center">Paw JS - The plugable framework</h1>
 
 
 A highly scalable & plugable, **Progressive Web Application *Framework*** with the best Developer Experience.
