@@ -7,7 +7,7 @@
 [![Join the chat at https://gitter.im/react-pwa](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/react-pwa/Lobby?utm_source=share-link&utm_medium=link&utm_campaign=share-link)
 
 
-<div style="text-align:center"><img src="https://www.atyantik.com/wp-content/uploads/2018/06/72-72.png" /></div>
+![Paw JS](https://www.atyantik.com/wp-content/uploads/2018/06/192-192.png)
 
 # Paw JS - The plugable framework
 A highly scalable & plugable, **Progressive Web Application *Framework*** with the best Developer Experience.
