@@ -1,13 +1,13 @@
 [![Backers on Open Collective](https://opencollective.com/react-pwa/backers/badge.svg)](#backers) [![Sponsors on Open Collective](https://opencollective.com/react-pwa/sponsors/badge.svg)](#sponsors) [![Dependencies Status](https://david-dm.org/Atyantik/react-pwa.svg)](https://david-dm.org/Atyantik/react-pwa)
 [![devDependencies Status](https://david-dm.org/Atyantik/pawjs/dev-status.svg)](https://david-dm.org/Atyantik/pawjs?type=dev)
-[![Build Status](https://travis-ci.org/Atyantik/pawjs.svg?branch=master)](https://travis-ci.org/Atyantik/pawjs)
-[![Known Vulnerabilities](https://snyk.io/test/github/Atyantik/pawjs/badge.svg)](https://snyk.io/test/github/Atyantik/pawjs)
-[![Greenkeeper badge](https://badges.greenkeeper.io/Atyantik/pawjs.svg)](https://greenkeeper.io/)  
+[![Known Vulnerabilities](https://snyk.io/test/github/Atyantik/pawjs/badge.svg)](https://snyk.io/test/github/Atyantik/pawjs)  
 
 [![Join the chat at https://gitter.im/react-pwa](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/react-pwa/Lobby?utm_source=share-link&utm_medium=link&utm_campaign=share-link)
 
 
-![Paw JS](https://www.atyantik.com/wp-content/uploads/2018/06/192-192.png)
+<p align="center" style="text-align:center">
+  <img src="https://www.atyantik.com/wp-content/uploads/2018/06/192-192.png" alt="Paw JS"/>
+</p>
 
 # Paw JS - The plugable framework
 A highly scalable & plugable, **Progressive Web Application *Framework*** with the best Developer Experience.
