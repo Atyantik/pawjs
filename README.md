@@ -7,9 +7,10 @@
 
 <p align="center" style="text-align:center">
   <img src="https://www.atyantik.com/wp-content/uploads/2018/06/192-192.png" alt="Paw JS"/>
+  <h1>Paw JS - The plugable framework</h1>
 </p>
 
-# Paw JS - The plugable framework
+
 A highly scalable & plugable, **Progressive Web Application *Framework*** with the best Developer Experience.
 This framework utilizes the power of React with Webpack and is build on top of webpack/tapable for unlimited extendability.
 
