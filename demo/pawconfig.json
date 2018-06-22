@@ -3,11 +3,5 @@
   "host": "0.0.0.0",
   "appRootUrl": "/",
   "serviceWorker": false,
-  "serverSideRender": true,
-  "clientRootElementId": "app",
-  "asyncCSS": false,
-  "hstsEnabled": true,
-  "hstsmaxAge": 31536000,
-  "hstsIncludeSubDomains": true,
-  "hstsPreload": false
+  "serverSideRender": true
 }

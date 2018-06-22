@@ -58,14 +58,21 @@ export default class ClientHandler extends Tapable {
     let seoSchema = this.routeHandler.getDefaultSeoSchema();
     currentRoutes.forEach(r => {
       if (r.route && r.route.component && r.route.component.preload) {
-        promises.push(r.route.component.preload());
+        promises.push(r.route.component.preload(undefined, {
+          route: r.route,
+          match: r.match,
+        }));
       }
     });
 
 
     Promise.all(promises).then(() => {
       currentRoutes.forEach(r => {
-        seoData = _.assignIn(seoData, r.route.seo, r.route.getRouteSeo());
+        let routeSeo = {};
+        if (r.route.getRouteSeo) {
+          routeSeo = r.route.getRouteSeo();
+        }
+        seoData = _.assignIn(seoData, r.route.seo, routeSeo);
       });
 
       const metaTags = generateMeta(seoData, {
@@ -159,7 +166,10 @@ export default class ClientHandler extends Tapable {
       currentPageRoutes.forEach((r,i) => {
         (typeof preloadedData[i] !== "undefined") &&
         r.route && r.route.component && r.route.component.preload &&
-        (promises.push(r.route.component.preload(preloadedData[i])));
+        (promises.push(r.route.component.preload(preloadedData[i], {
+          route: r.route,
+          match: r.match
+        })));
       });
     }
 

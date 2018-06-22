@@ -1,5 +1,5 @@
 {
-  "name": "pawjs-redux",
+  "name": "@pawjs/redux",
   "version": "0.8.10",
   "description": "Add Redux support to your PAWJS application",
   "scripts": {
@@ -29,5 +29,16 @@
   "dependencies": {
     "regenerator-runtime": "^0.11.1",
     "tapable": "^1.0.0"
-  }
+  },
+  "main": "index.js",
+  "directories": {
+    "lib": "lib"
+  },
+  "keywords": [
+    "pawjs",
+    "redux",
+    "react",
+    "redux",
+    "react-redux"
+  ]
 }

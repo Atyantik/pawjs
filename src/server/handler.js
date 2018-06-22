@@ -44,45 +44,20 @@ export default class ServerHandler extends Tapable {
 
     const { asyncCSS, serverSideRender, appRootUrl } = this.options.env;
 
-    if (!serverSideRender) {
-      res.write("<!DOCTYPE html>");
-      renderToNodeStream(
-        <Html
-          assets={assets}
-          appRootUrl={appRootUrl}
-        />
-      ).pipe(res);
-      return next();
-    }
-
     let routes = routeHandler.getRoutes();
-
     let currentPageRoutes = matchRoutes(routes, req.path.replace(appRootUrl, ""));
-
     let context = {};
-
     let promises = [];
     let preloadedData = [];
     let cssToBeIncluded = [];
 
-    let modulesInRoutes = [];
-    if (!asyncCSS) {
-      modulesInRoutes = ["pawProjectClient"];
-    }
+    let modulesInRoutes = ["pawProjectClient"];
+
 
     const seoSchema = routeHandler.getDefaultSeoSchema();
     const pwaSchema = routeHandler.getPwaSchema();
-    let seoData = {};
-
-    currentPageRoutes.forEach(({route}) => {
-      !asyncCSS && route.modules && modulesInRoutes.push(...route.modules);
-      if (route.component.preload) {
-        promises.push(route.component.preload());
-      }
-    });
 
     modulesInRoutes.forEach(mod => {
-      //eslint-disable-next-line
       cssDependencyMap.forEach(c => {
         if (_.indexOf(c.modules, mod) !== -1) {
           cssToBeIncluded.push(c.path);
@@ -90,11 +65,53 @@ export default class ServerHandler extends Tapable {
       });
     });
 
+    if (!asyncCSS) {
+      currentPageRoutes.forEach(({route}) => {
+        route.modules && modulesInRoutes.push(...route.modules);
+      });
+    }
+
+
+    if (!serverSideRender) {
+
+      const baseUrl = `${req.protocol}://${req.get("host")}`;
+      const fullUrl = `${baseUrl}${req.originalUrl}`;
+
+      const metaTags = generateMeta({}, {
+        baseUrl,
+        url: fullUrl,
+        seoSchema,
+        pwaSchema,
+      });
+
+      let htmlProps = {
+        assets,
+        cssFiles: cssToBeIncluded,
+        metaTags,
+        pwaSchema,
+      };
+
+      res.write("<!DOCTYPE html>");
+      renderToNodeStream(
+        <Html
+          {...htmlProps}
+          appRootUrl={appRootUrl}
+        />
+      ).pipe(res);
+      return next();
+    }
+
+    currentPageRoutes.forEach(({route, match}) => {
+      if (route.component.preload) {
+        promises.push(route.component.preload(undefined, {route, match}));
+      }
+    });
+
 
     let renderedHtml = "";
     try {
       const promisesData = await Promise.all(promises);
-
+      let seoData = {};
       currentPageRoutes.forEach((r,i) => {
         if (r.route.getRouteSeo) {
           seoData = _.assignIn(seoData, r.route.seo, r.route.getRouteSeo());

@@ -51,9 +51,9 @@ export default class RouteCompiler {
         RouteComponent: async () => component,
 
         // Load Data with ability to update SEO
-        LoadData: (typeof loadData !== "undefined" ? async() => {
-          return loadData({ updateSeo });
-        } : async () => ({})),
+        LoadData: (typeof loadData !== "undefined" ? async (props = {}) => {
+          return loadData({ updateSeo, ...props });
+        } : async() => ({})),
 
         // Load layout as well
         Layout: async() => layout,

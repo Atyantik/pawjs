@@ -1,12 +1,13 @@
 "use strict";
 import React from "react";
 import PropTypes from "prop-types";
+import { withRouter } from "react-router";
 
 const ALL_INITIALIZERS = [];
 const READY_INITIALIZERS = [];
 
-function load(loader) {
-  let promise = loader();
+function load(loader, props) {
+  let promise = loader(props);
 
   let state = {
     loading: true,
@@ -27,7 +28,7 @@ function load(loader) {
   return state;
 }
 
-function loadMap(obj, loadedData) {
+function loadMap(obj, loadedData, props) {
   let state = {
     loading: false,
     loaded: {},
@@ -47,7 +48,11 @@ function loadMap(obj, loadedData) {
           promise: (async () => loadedData)()
         };
       } else {
-        result = load(obj[key]);
+        if (key === "LoadData") {
+          result = load(obj[key], props);
+        } else {
+          result = load(obj[key]);
+        }
 
         if (!result.loading) {
           state.loaded[key] = result.loaded;
@@ -102,22 +107,23 @@ function createLoadableComponent(loadFn, options) {
     webpack: null,
     modules: null,
     loadedData: null,
+    loadDataCache: false,
   }, options);
 
   let res = null;
 
-  function init(loadedData) {
+  function init(loadedData, props) {
     if (!res) {
-      res = loadFn(opts.loader, loadedData);
+      res = loadFn(opts.loader, loadedData, props);
     }
     return res.promise;
   }
 
-  return class LoadableComponent extends React.Component {
+  class LoadableComponent extends React.Component {
 
     constructor(props) {
       super(props);
-      init();
+      init(undefined, {match: props.match, route: props.route});
 
       this.state = {
         error: res.error,
@@ -134,13 +140,26 @@ function createLoadableComponent(loadFn, options) {
       }),
     };
 
-    static preload(loadedData) {
-      return init(loadedData);
+    static preload(loadedData, props) {
+      return init(loadedData, props);
     }
 
     componentWillMount() {
       this._mounted = true;
       this._loadModule();
+    }
+
+    componentWillReceiveProps(nextProps) {
+      let prevLocation = {...this.props.location};
+      let newLocation = {...nextProps.location};
+      delete prevLocation.key;
+      delete newLocation.key;
+
+      if (JSON.stringify(prevLocation) !== JSON.stringify(newLocation)) {
+        res = null;
+        init(undefined, {route: nextProps.route, match: nextProps.match});
+        this._loadModule();
+      }
     }
 
     _loadModule() {
@@ -189,6 +208,12 @@ function createLoadableComponent(loadFn, options) {
     componentWillUnmount() {
       this._mounted = false;
       this._clearTimeouts();
+
+      // clear response if user does not want the
+      // data to be cached
+      if(!opts.loadDataCache) {
+        res = null;
+      }
     }
 
     _clearTimeouts() {
@@ -198,7 +223,7 @@ function createLoadableComponent(loadFn, options) {
 
     retry = () => {
       this.setState({ error: null, loading: true });
-      res = loadFn(opts.loader);
+      res = loadFn(opts.loader, undefined, {match: this.props.match, route: this.props.route});
       this._loadModule();
     };
 
@@ -217,7 +242,8 @@ function createLoadableComponent(loadFn, options) {
         return null;
       }
     }
-  };
+  }
+  return withRouter(LoadableComponent);
 }
 
 function Loadable(opts) {

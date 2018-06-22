@@ -93,7 +93,9 @@ app.get("*", (req, res, next) => {
       req,
       res,
       next,
-      assets
+      assets,
+      routeHandler: rHandler,
+      cssDependencyMap: res.locals.cssDependencyMap
     });
   }
   // If server side render is enabled then, then let the routes load

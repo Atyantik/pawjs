@@ -6,6 +6,7 @@ let toBase64;
 // Base64 polyfill
 if (typeof atob === "undefined" && typeof Buffer !== "undefined") {
   toBase64 = function (str) {
+    if (!str) return str;
     return Buffer.from(str).toString("base64");
   };
 } else if (typeof atob !== "undefined") {
@@ -102,14 +103,14 @@ class Html extends Component {
         </head>
         <body>
           {
-            this.props.dangerouslySetInnerHTML.__html.length && (
+            Boolean(this.props.dangerouslySetInnerHTML.__html.length) && (
               <div id="app" dangerouslySetInnerHTML={this.props.dangerouslySetInnerHTML} />
             )
           }
           {
             !this.props.dangerouslySetInnerHTML.__html.length &&
-            this.props.children && (
-              <div id="app" dangerouslySetInnerHTML={this.props.dangerouslySetInnerHTML} />
+            (
+              <div id="app">{this.props.children || null}</div>
             )
           }
           {this.props.footer}

@@ -1,7 +1,7 @@
 {
-  "name": "pawjs",
+  "name": "@pawjs/pawjs",
   "version": "0.8.8",
-  "description": "",
+  "description": "[![Backers on Open Collective](https://opencollective.com/react-pwa/backers/badge.svg)](#backers) [![Sponsors on Open Collective](https://opencollective.com/react-pwa/sponsors/badge.svg)](#sponsors) [![Dependencies Status](https://david-dm.org/Atyantik/react-pwa.svg)](https://david-dm.org/Atyantik/react-pwa) [![devDependencies Status](https://david-dm.org/Atyantik/pawjs/dev-status.svg)](https://david-dm.org/Atyantik/pawjs?type=dev) [![Build Status](https://travis-ci.org/Atyantik/pawjs.svg?branch=master)](https://travis-ci.org/Atyantik/pawjs) [![Known Vulnerabilities](https://snyk.io/test/github/Atyantik/pawjs/badge.svg)](https://snyk.io/test/github/Atyantik/pawjs) [![Greenkeeper badge](https://badges.greenkeeper.io/Atyantik/pawjs.svg)](https://greenkeeper.io/)",
   "main": "scripts.js",
   "scripts": {
     "dev": "cross-env PROJECT_ROOT=./demo node ./paw.js start:dev",
@@ -17,7 +17,7 @@
   },
   "keywords": [],
   "author": "Atyantik Technologies Private Limited <tirthbodawala@atyantik.com>",
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
     "@babel/cli": "^7.0.0-beta.51",
     "@babel/core": "^7.0.0-beta.51",
@@ -74,5 +74,13 @@
     "webpack-hot-middleware": "^2.22.2",
     "workbox-webpack-plugin": "^3.3.0"
   },
-  "devDependencies": {}
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Atyantik/pawjs.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Atyantik/pawjs/issues"
+  },
+  "homepage": "https://github.com/Atyantik/pawjs#readme"
 }

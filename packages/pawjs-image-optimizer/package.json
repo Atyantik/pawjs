@@ -1,5 +1,5 @@
 {
-  "name": "pawjs-image-optimizer",
+  "name": "@pawjs/image-optimizer",
   "version": "0.8.7",
   "description": "Add Wbpack Image Loader support to your PAWJS application",
   "scripts": {
@@ -26,5 +26,15 @@
     "image-webpack-loader": "^4.3.1",
     "regenerator-runtime": "^0.11.1",
     "tapable": "^1.0.0"
-  }
+  },
+  "main": "index.js",
+  "directories": {
+    "lib": "lib"
+  },
+  "keywords": [
+    "pawjs",
+    "image",
+    "webpack-image-loader",
+    "image-optimizer"
+  ]
 }

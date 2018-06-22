@@ -97,9 +97,8 @@ export default class PawImageOptimizerWebpack extends Tapable {
             imageRule.use.splice(fileLoaderIndex + 1, 0, optimizerConfig);
           });
         });
-        // const util = require("util");
-        // console.log(util.inspect(config, {depth: 10}));
       }catch (ex) {
+        //eslint-disable-next-line
         console.log(ex);
       }
 
