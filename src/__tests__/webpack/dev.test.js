@@ -37,8 +37,7 @@ describe("WEB --env=dev", () => {
 
   test("Configuration should be valid webpack schema", () => {
     const validationError = webpack.validate(devWebConfig);
-    expect(validationError.length)
-      .toBe(0);
+    expect(validationError).toHaveLength(0);
   });
 
   test("Configuration should be compilable", () => {
@@ -65,8 +64,7 @@ describe("Node Server --env=dev", () => {
 
   test("Configuration should be valid webpack schema", () => {
     const validationError = webpack.validate(devNodeServerConfig);
-    expect(validationError.length)
-      .toBe(0);
+    expect(validationError).toHaveLength(0);
   });
 
   test("Configuration should be compilable", () => {

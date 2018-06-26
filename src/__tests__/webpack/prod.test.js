@@ -37,8 +37,8 @@ describe("WEB --env=prod", () => {
 
   test("Configuration should be valid webpack schema", () => {
     const validationError = webpack.validate(prodWebConfig);
-    expect(validationError.length)
-      .toBe(0);
+    expect(validationError)
+      .toHaveLength(0);
   });
 
   test("Configuration should be compilable", () => {
@@ -65,8 +65,8 @@ describe("Node Server --env=prod", () => {
 
   test("Configuration should be valid webpack schema", () => {
     const validationError = webpack.validate(prodNodeServerConfig);
-    expect(validationError.length)
-      .toBe(0);
+    expect(validationError)
+      .toHaveLength(0);
   });
 
   test("Configuration should be compilable", () => {
