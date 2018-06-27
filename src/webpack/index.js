@@ -7,7 +7,7 @@ require("@babel/register")({
   plugins: babelServer.plugins,
   cache: false,
   ignore: [
-    /node_modules\/(?!(weby|pawjs|imli|paw|webyjs|imlijs)).*/
+    /node_modules\/(?!(@pawjs)).*/
   ]
 });
 
