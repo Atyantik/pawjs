@@ -65,7 +65,7 @@ export default class PawImageOptimizerWebpack extends Tapable {
   constructor(options = {}) {
     super();
     this.hooks = {};
-    this.supportedEnv = options.supportedEnv || [ "production", "development" ];
+    this.supportedEnv = options.supportedEnv || [ "production" ];
     this.config = typeof options.config !== "undefined" ? options.config: null;
     this.configLabel = options.configLabel || "MEDIUM_QUALITY";
   }

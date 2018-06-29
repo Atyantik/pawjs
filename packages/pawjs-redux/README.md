@@ -1,5 +1,7 @@
 PawJS - Redux
 ===
+
+## Package: @pawjs/redux
 Add redux to your PawJS application.
 
 Redux is a powerful tool to manage store for your application, but implementing it with SSR is a bit tricky.
