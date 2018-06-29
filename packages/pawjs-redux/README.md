@@ -64,7 +64,9 @@ export default class Client {
 
 ### server.js
 For server side rendered application you will also need to update you server.js file
-The configuration of server is very very similar to client. 
+The configuration of server is very very similar to client.
+
+Edit/Create <project-root>/src/server.js
 ```javascript
 import ReduxServer from "@pawjs/redux/server";
 
