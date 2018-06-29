@@ -1,4 +1,5 @@
 import express from "express";
+import cluster from "cluster";
 import _ from "lodash";
 import server, { beforeStart, afterStart } from "./common";
 import path from "path";
@@ -66,9 +67,16 @@ beforeStart(serverConfig, _global, (err) => {
   }
 
   app.listen(serverConfig.port, serverConfig.host, () => {
-    // eslint-disable-next-line
-    console.log(`Listening to http://${serverConfig.host}:${serverConfig.port}`);
+    if (!cluster.isMaster) {
+      // notify master about the request
+      process.send({
+        cmd: "notifyServerStart",
+        message: `Listening to http://${serverConfig.host}:${serverConfig.port}`
+      });
+    } else {
+      // eslint-disable-next-line
+      console.log(`Listening to http://${serverConfig.host}:${serverConfig.port}`);
+    }
     afterStart(_global);
   });
 });
-

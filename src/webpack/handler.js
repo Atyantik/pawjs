@@ -274,7 +274,7 @@ export default class WebpackHandler extends Tapable {
           {
             mode: "production",
             target: "node",
-            entry: path.resolve(process.env.__lib_root, "./src/server/prod.js"),
+            entry: path.resolve(process.env.__lib_root, "./src/server/prod-cluster.js"),
             module: {
               rules: [
                 serverRule({noChunk: true, cacheDirectory: false}),
