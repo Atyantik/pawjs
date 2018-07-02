@@ -14,8 +14,7 @@
 A highly scalable & plugable, **Progressive Web Application *Framework*** with the best Developer Experience.
 This framework utilizes the power of React with Webpack and is build on top of webpack/tapable for unlimited extendability.
 
-
-[https://www.reactpwa.com is built with this awesome framework. Why don't you check it out.](https://www.reactpwa.com/)  
+  
 
 
 #### Current Repo in Action
