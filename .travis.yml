@@ -1,5 +1,6 @@
 language: node_js
-install: true
+node_js:
+  - "10.5"
 cache:
   directories:
     - "node_modules"
