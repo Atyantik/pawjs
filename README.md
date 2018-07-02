@@ -1,4 +1,6 @@
-[![Backers on Open Collective](https://opencollective.com/react-pwa/backers/badge.svg)](#backers) [![Sponsors on Open Collective](https://opencollective.com/react-pwa/sponsors/badge.svg)](#sponsors) [![Dependencies Status](https://david-dm.org/Atyantik/react-pwa.svg)](https://david-dm.org/Atyantik/react-pwa)
+[![Backers on Open Collective](https://opencollective.com/react-pwa/backers/badge.svg)](https://opencollective.com/react-pwa) 
+[![Sponsors on Open Collective](https://opencollective.com/react-pwa/sponsors/badge.svg)](https://opencollective.com/react-pwa) 
+[![Dependencies Status](https://david-dm.org/Atyantik/pawjs.svg)](https://david-dm.org/Atyantik/pawjs)
 [![devDependencies Status](https://david-dm.org/Atyantik/pawjs/dev-status.svg)](https://david-dm.org/Atyantik/pawjs?type=dev)
 [![Known Vulnerabilities](https://snyk.io/test/github/Atyantik/pawjs/badge.svg)](https://snyk.io/test/github/Atyantik/pawjs)  
 
