@@ -3,6 +3,7 @@ import CleanWebpackPlugin from "clean-webpack-plugin";
 import CopyWebpackPlugin from "copy-webpack-plugin";
 import fs from "fs";
 import MiniCssExtractPlugin from "mini-css-extract-plugin";
+import HtmlWebpackPlugin from "html-webpack-plugin";
 import path from "path";
 import { Tapable, SyncHook } from "tapable";
 import webpack from "webpack";
@@ -116,7 +117,7 @@ export default class WebpackHandler extends Tapable {
             ]
           }
         ],
-        server: [
+        server: pawConfig.staticOutput ? [] : [
           {
             mode: "development",
             devtool: "cheap-module-source-map",
@@ -229,6 +230,13 @@ export default class WebpackHandler extends Tapable {
                 "__project_root": process.env.__project_root,
                 "__lib_root": process.env.__lib_root,
               })),
+              ...(pawConfig.staticOutput ? [
+                new HtmlWebpackPlugin({
+                  inject: false,
+                  template: require("html-webpack-template"),
+                  appMountId: pawConfig.clientRootElementId,
+                })
+              ]: []),
               new MiniCssExtractPlugin({
                 // Options similar to the same options in webpackOptions.output
                 // both options are optional
@@ -266,11 +274,11 @@ export default class WebpackHandler extends Tapable {
                   variables: Object.assign({workboxDebug: true}, pawConfig),
                   text: projectSW
                 }),
-              ] :[])
+              ] :[]),
             ]
           }
         ],
-        server: [
+        server: pawConfig.staticOutput ? [] : [
           {
             mode: "production",
             target: "node",

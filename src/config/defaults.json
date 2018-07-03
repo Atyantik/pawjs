@@ -5,6 +5,7 @@
   "cdnUrl": "",
   "serverSideRender": true,
   "serviceWorker": true,
+  "staticOutput": false,
   "asyncCSS": true,
   "clientRootElementId": "app",
   "hstsEnabled": true,
