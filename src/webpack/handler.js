@@ -369,6 +369,7 @@ export default class WebpackHandler extends Tapable {
 
   getConfig(env = "development", type = "web") {
     if (this.envConfigs[env] && this.envConfigs[env][type]) {
+      if (type === "server") return [];
       this.hooks.beforeConfig.call(env, type, this.envConfigs[env][type], (err) => {
         if (err) {
           // eslint-disable-next-line
