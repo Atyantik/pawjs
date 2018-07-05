@@ -4,8 +4,8 @@
   "description": "A minimal pluggable reactjs framework to develop a progressive web application",
   "main": "scripts.js",
   "scripts": {
-    "dev": "cross-env PROJECT_ROOT=./demo node ./paw.js start:dev",
-    "build:prod": "cross-env PROJECT_ROOT=./demo node ./paw.js build:prod",
+    "dev": "cross-env PROJECT_ROOT=./demo node ./paw.js start",
+    "build:prod": "cross-env PROJECT_ROOT=./demo node ./paw.js build",
     "lint": "eslint -c ./.eslintrc --ignore-path ./.gitignore ./src",
     "lint:fix": "eslint -c ./.eslintrc --ignore-path ./.gitignore --fix ./src",
     "test": "cross-env PROJECT_ROOT=./demo node ./paw.js test",
@@ -47,6 +47,7 @@
     "babel-plugin-syntax-dynamic-import": "^6.18.0",
     "babel-template": "^6.26.0",
     "clean-webpack-plugin": "^0.1.19",
+    "commander": "^2.16.0",
     "compression": "^1.7.2",
     "copy-webpack-plugin": "^4.5.2",
     "cross-env": "^5.2.0",
