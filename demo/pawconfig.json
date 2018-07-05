@@ -1,8 +1,8 @@
 {
-  "port": "9090",
+  "port": "1234",
   "host": "0.0.0.0",
   "appRootUrl": "/",
   "serviceWorker": false,
-  "serverSideRender": true,
+  "serverSideRender": false,
   "staticOutput": true
 }

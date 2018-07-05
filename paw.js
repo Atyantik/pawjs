@@ -46,6 +46,8 @@ switch(userCommand) {
   }
   case "build:prod": {
 
+    const config = require("./src/config/index");
+
     const webEnv= Object.create(process.env);
 
     webEnv.NODE_ENV = "production";
@@ -67,9 +69,8 @@ switch(userCommand) {
       const serverEnv = Object.create(process.env);
       serverEnv.NODE_ENV = "production";
       serverEnv.WEBPACK_TARGET = "server";
-
       if (!code) {
-        spawn(
+        const serverSpawn = spawn(
           get_cmd("webpack"), [
             "--config",
             webpackConfigPath,
@@ -78,6 +79,88 @@ switch(userCommand) {
             stdio: [process.stdin, process.stdout, "pipe"]
           }
         );
+
+        serverSpawn.on("close", () => {
+          if(!config.staticOutput) return;
+          const directories = require("./src/webpack/utils/directories");
+
+
+          const deploySpawn = spawn(`node ${path.join(directories.dist, "server.js")}`, [], {shell: true, detached: true});
+          deploySpawn.stdout.on("data", (data) => {
+            if(data.includes("Listening")) {
+              const http = require("http");
+              const fs = require("fs");
+
+              const getFile = (url, dir, fileName, type) => {
+                return new Promise ((resolve, reject) => {
+                  http.get(url, (res) => {
+                    const {statusCode} = res;
+                    let error;
+                    if (statusCode !== 200) {
+                      error = new Error("Request Failed.\n" +
+                        `Status Code: ${statusCode}`);
+                    }
+                    if (error) {
+                      //eslint-disable-next-line
+                      console.error(error.message);
+                      // consume response data to free up memory
+                      res.resume();
+                      return;
+                    }
+
+                    res.setEncoding("utf8");
+                    let rawData = "";
+                    res.on("data", (chunk) => {
+                      rawData += chunk;
+                    });
+                    res.on("end", () => {
+                      try {
+                        fs.writeFileSync(path.join(dir, fileName), rawData, type);
+                        resolve(res);
+                      } catch (e) {
+                        //eslint-disable-next-line
+                        console.error(e.message);
+                        reject(e.message);
+                      }
+                    });
+                  }).on("error", (e) => {
+                    //eslint-disable-next-line
+                    console.error(`Got error: ${e.message}`);
+                    reject(e.message);
+                  });
+                });
+              };
+
+              Promise.all([
+                getFile(`http://${config.host}:${config.port}`, directories.build, "index.html", "utf-8"),
+                getFile(`http://${config.host}:${config.port}/manifest.json`, directories.build, "manifest.json", "utf-8")
+              ]).then(() => {
+                const rmFilesInDir = (dirPath) => {
+                  let files = [];
+                  try {
+                    files = fs.readdirSync(dirPath);
+                  }
+                  catch(e) {
+                    return;
+                  }
+                  if (files.length > 0)
+                    for (let i = 0; i < files.length; i++) {
+                      const filePath = dirPath + "/" + files[i];
+                      if (fs.statSync(filePath).isFile())
+                        fs.unlinkSync(filePath);
+                    }
+                };
+                rmFilesInDir(directories.dist);
+                //eslint-disable-next-line
+                console.log("\n\n=================================\nUse the build folder inside dist \nto deploy your current app.\n=================================");
+                process.kill(-deploySpawn.pid, "SIGTERM");
+                process.kill(-deploySpawn.pid, "SIGKILL");
+              });
+
+            }
+          });
+        });
+
       }
     });
     break;

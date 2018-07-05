@@ -13,13 +13,10 @@ const path = require("path");
 const express = require("express");
 const webpack = require("webpack");
 const webpackMiddleware = require("webpack-dev-middleware");
-const webpackDevServer = require("webpack-dev-server");
-const HtmlWebpackPlugin = require("html-webpack-plugin");
 const webpackHotMiddleware = require("webpack-hot-middleware");
 const wHandler = require("../webpack").handler;
 const env = require("../config/index");
 const weblog = require("webpack-log");
-const directories = require("../webpack/utils/directories");
 
 // Utils
 // -- Require from string. create an export from string like `module.export = "Something";`
@@ -34,52 +31,14 @@ const serverConfig = wHandler.getConfig("development", "server");
 // Web client configurations
 const webConfig = wHandler.getConfig("development", "web");
 
-if (!serverConfig.length) {
-  webConfig[0].devServer = webConfig[0].devServer || {};
-  webConfig[0].devServer.hot = true;
-  webConfig[0].devServer.historyApiFallback = true;
-  webConfig[0].entry.client.push("webpack/hot/only-dev-server");
-  webConfig[0].entry.client.push(`webpack-dev-server/client/index.js?http://${env.host}:${env.port}`);
-  webConfig[0].plugins.push(new HtmlWebpackPlugin({
-    inject: false,
-    template: require("html-webpack-template"),
-    // template: 'node_modules/html-webpack-template/index.ejs',
-  
-    // Optional
-    appMountId: "app",
-  }));
-  const webCompiler = webpack(webConfig);
-  const server = new webpackDevServer(webCompiler, {
-    hot: true,
-    contentBase: directories.build,
-    historyApiFallback: true,
-  });
-  server.use(webpackHotMiddleware(webCompiler, {
-    log: false,
-    path: "/__hmr_update",
-    heartbeat: 2000,
-  }));
-  server.listen(env.port, env.host, () => {
-    // eslint-disable-next-line
-    console.log(`
+const firstServerConfig = serverConfig[0];
+const devServerConfig = firstServerConfig.devServer;
 
-===================================================
-  Listening to http://${env.host}:${env.port}
-  Open the above url in your browser.
-===================================================
-      `);
-  });
-} else {
-  
-  
-  const firstServerConfig = serverConfig[0];
-  const devServerConfig = firstServerConfig.devServer;
-
-  // Create a webpack server compiler from the server config
-  const serverCompiler = webpack(serverConfig);
-  const log = weblog({
-    name: "pawjs"
-  });
+// Create a webpack server compiler from the server config
+const serverCompiler = webpack(serverConfig);
+const log = weblog({
+  name: "pawjs"
+});
 
   // for core development
   /**
@@ -94,174 +53,174 @@ if (!serverConfig.length) {
   }
    *
    */
-  const devServerOptions = Object.assign({}, devServerConfig, {
-    stats: {
-      colors: true,
-      reasons: false,
-      entrypoints: false,
-      modules: false,
-      moduleTrace: false,
-      assets: true,
-      errors: true,
-      cachedAssets: false,
-      version: false,
-    },
-    logger: log,
-    logLevel: "debug",
-    noInfo: true,
-    publicPath: firstServerConfig.output.publicPath
-  });
+const devServerOptions = Object.assign({}, devServerConfig, {
+  stats: {
+    colors: true,
+    reasons: false,
+    entrypoints: false,
+    modules: false,
+    moduleTrace: false,
+    assets: true,
+    errors: true,
+    cachedAssets: false,
+    version: false,
+  },
+  logger: log,
+  logLevel: "debug",
+  noInfo: true,
+  publicPath: firstServerConfig.output.publicPath
+});
 
   // Create a webpack web compiler from the web configurations
-  const webCompiler = webpack(webConfig);
-  const webOptions = Object.assign({}, {
-    hot: true,
-    inline: true,
-    serverSideRender: true,
-    stats: {
-      colors: true,
-      entrypoints: false,
-      modules: false,
-      moduleTrace: false,
-      assets: true,
-      reasons: false,
-      errors: true,
-      cachedAssets: false,
-      version: false,
-    },
-    logger: log,
-    logLevel: "debug",
-    publicPath: webConfig[0].output.publicPath
-  });
+const webCompiler = webpack(webConfig);
+const webOptions = Object.assign({}, {
+  hot: true,
+  inline: true,
+  serverSideRender: true,
+  stats: {
+    colors: true,
+    entrypoints: false,
+    modules: false,
+    moduleTrace: false,
+    assets: true,
+    reasons: false,
+    errors: true,
+    cachedAssets: false,
+    version: false,
+  },
+  logger: log,
+  logLevel: "debug",
+  publicPath: webConfig[0].output.publicPath
+});
   
-  const app = express();
+const app = express();
 
-  // Global for application
-  const _global = {};
+// Global for application
+const _global = {};
 
-  // Disable x-powered-by for all requests
-  app.set("x-powered-by", "PawJS");
+// Disable x-powered-by for all requests
+app.set("x-powered-by", "PawJS");
 
-  // Add server middleware
-  const serverMiddleware = webpackMiddleware(serverCompiler, devServerOptions);
-  app.use(serverMiddleware);
+// Add server middleware
+const serverMiddleware = webpackMiddleware(serverCompiler, devServerOptions);
+app.use(serverMiddleware);
   
   
-  const getCommonServer = () => {
-    const mfs = serverMiddleware.fileSystem;
-    // Get content of the server that is compiled!
-    const serverContent = mfs.readFileSync(serverMiddleware.getFilenameFromUrl(devServerOptions.publicPath + "/server.js"), "utf-8");
+const getCommonServer = () => {
+  const mfs = serverMiddleware.fileSystem;
+  // Get content of the server that is compiled!
+  const serverContent = mfs.readFileSync(serverMiddleware.getFilenameFromUrl(devServerOptions.publicPath + "/server.js"), "utf-8");
     
-    return requireFromString(serverContent, {
-      appendPaths: process.env.NODE_PATH.split(path.delimiter)
-    });
-  };
+  return requireFromString(serverContent, {
+    appendPaths: process.env.NODE_PATH.split(path.delimiter)
+  });
+};
   // Add web middleware
-  const webMiddleware = webpackMiddleware(webCompiler, webOptions);
+const webMiddleware = webpackMiddleware(webCompiler, webOptions);
 
-  // On adding this middleware the SSR data to serverMiddleware will be lost in
-  // res.locals but its not needed anyway.
-  app.use(webMiddleware);
+// On adding this middleware the SSR data to serverMiddleware will be lost in
+// res.locals but its not needed anyway.
+app.use(webMiddleware);
 
-  // Add hot middleware to the update
-  app.use(webpackHotMiddleware(webCompiler, {
-    log: false,
-    path: "/__hmr_update",
-    heartbeat: 2000,
-  }));
+// Add hot middleware to the update
+app.use(webpackHotMiddleware(webCompiler, {
+  log: false,
+  path: "/__hmr_update",
+  heartbeat: 2000,
+}));
   
-  app.use(env.appRootUrl, express.static(devServerOptions.contentBase));
+app.use(env.appRootUrl, express.static(devServerOptions.contentBase));
   
-  /**
+/**
    * Below is where the magic happens!
    * We import the compiled server.js file as string and run it as module
    * thus we can get a fast experience of compilation and developer can
    * develop code with SSR enabled.
    */
-  app.use(function (req, res, next) {
-    const mfs = serverMiddleware.fileSystem;
-    const fileNameFromUrl = serverMiddleware.getFilenameFromUrl(devServerOptions.publicPath + req.path);
+app.use(function (req, res, next) {
+  const mfs = serverMiddleware.fileSystem;
+  const fileNameFromUrl = serverMiddleware.getFilenameFromUrl(devServerOptions.publicPath + req.path);
     
-    // If the request is for static file, do not compute or send data to
-    // server just execute the express default next functionality
-    // to let it manage itself.
-    if (
-      // if the request is for favicon
-      fileNameFromUrl.indexOf("favicon.ico") !== -1 || (
-        // if the request exists in middleware filesystem
-        mfs.existsSync(fileNameFromUrl) &&
+  // If the request is for static file, do not compute or send data to
+  // server just execute the express default next functionality
+  // to let it manage itself.
+  if (
+  // if the request is for favicon
+    fileNameFromUrl.indexOf("favicon.ico") !== -1 || (
+    // if the request exists in middleware filesystem
+      mfs.existsSync(fileNameFromUrl) &&
         // and the request is for a file
         mfs.statSync(fileNameFromUrl).isFile()
-      )
-    ) {
-      return next();
-    }
+    )
+  ) {
+    return next();
+  }
     
     
-    let CommonServerMiddleware;
-    try {
-      // Get content of the server that is compiled!
-      const CommonServer = getCommonServer();
-      CommonServerMiddleware = CommonServer.default;
+  let CommonServerMiddleware;
+  try {
+    // Get content of the server that is compiled!
+    const CommonServer = getCommonServer();
+    CommonServerMiddleware = CommonServer.default;
       
-      const {cssDependencyMap,...assets} = normalizeAssets(res.locals.webpackStats);
-      res.locals.assets = assets;
-      res.locals.cssDependencyMap = cssDependencyMap;
+    const {cssDependencyMap,...assets} = normalizeAssets(res.locals.webpackStats);
+    res.locals.assets = assets;
+    res.locals.cssDependencyMap = cssDependencyMap;
       
-      return CommonServerMiddleware(req, res, next, _global);
-    } catch(ex) {
-      // eslint-disable-next-line
+    return CommonServerMiddleware(req, res, next, _global);
+  } catch(ex) {
+    // eslint-disable-next-line
       console.log(ex);
-    }
-    // Console.log
-    next();
-  });
+  }
+  // Console.log
+  next();
+});
   
-  let totalCompilationComplete = 0;
-  webCompiler.hooks.done.tap("InformWebCompiled", () => {
-    totalCompilationComplete++;
-    if (totalCompilationComplete >=2 ) startServer();
-  });
+let totalCompilationComplete = 0;
+webCompiler.hooks.done.tap("InformWebCompiled", () => {
+  totalCompilationComplete++;
+  if (totalCompilationComplete >=2 ) startServer();
+});
   
-  serverCompiler.hooks.done.tap("InformServerCompiled", () => {
-    totalCompilationComplete++;
-    if (totalCompilationComplete >=2 ) startServer();
-  });
+serverCompiler.hooks.done.tap("InformServerCompiled", () => {
+  totalCompilationComplete++;
+  if (totalCompilationComplete >=2 ) startServer();
+});
   
-  let serverStarted = false;
+let serverStarted = false;
   
-  const startServer = () => {
-    if (serverStarted) return;
+const startServer = () => {
+  if (serverStarted) return;
     
     
-    let beforeStart, afterStart = null;
-    try {
-      const CommonServer = getCommonServer();
-      beforeStart = CommonServer.beforeStart;
-      afterStart = CommonServer.afterStart;
-    } catch (ex) {
+  let beforeStart, afterStart = null;
+  try {
+    const CommonServer = getCommonServer();
+    beforeStart = CommonServer.beforeStart;
+    afterStart = CommonServer.afterStart;
+  } catch (ex) {
+    //eslint-disable-next-line
+      console.log(ex);
+  }
+    
+    
+    
+  const serverConfig = {
+    port: devServerConfig.port,
+    host: devServerConfig.host,
+  };
+    
+  beforeStart(serverConfig, _global, (err) => {
+    if (err) {
       //eslint-disable-next-line
-      console.log(ex);
-    }
-    
-    
-    
-    const serverConfig = {
-      port: devServerConfig.port,
-      host: devServerConfig.host,
-    };
-    
-    beforeStart(serverConfig, _global, (err) => {
-      if (err) {
-        //eslint-disable-next-line
         console.error(err);
-        return;
-      }
-      
-      app.listen(serverConfig.port, serverConfig.host, () => {
+      return;
+    }
+
+    app.listen(serverConfig.port, serverConfig.host, () => {
         
-        serverStarted = true;
-        // eslint-disable-next-line
+      serverStarted = true;
+      // eslint-disable-next-line
         console.log(`
 
 ===================================================
@@ -269,8 +228,7 @@ if (!serverConfig.length) {
   Open the above url in your browser.
 ===================================================
       `);
-        afterStart(_global);
-      });
+      afterStart(_global);
     });
-  };
-}
+  });
+};

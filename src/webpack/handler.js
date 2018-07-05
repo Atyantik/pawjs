@@ -3,7 +3,6 @@ import CleanWebpackPlugin from "clean-webpack-plugin";
 import CopyWebpackPlugin from "copy-webpack-plugin";
 import fs from "fs";
 import MiniCssExtractPlugin from "mini-css-extract-plugin";
-import HtmlWebpackPlugin from "html-webpack-plugin";
 import path from "path";
 import { Tapable, SyncHook } from "tapable";
 import webpack from "webpack";
@@ -117,7 +116,7 @@ export default class WebpackHandler extends Tapable {
             ]
           }
         ],
-        server: pawConfig.staticOutput ? [] : [
+        server: [
           {
             mode: "development",
             devtool: "cheap-module-source-map",
@@ -230,13 +229,6 @@ export default class WebpackHandler extends Tapable {
                 "__project_root": process.env.__project_root,
                 "__lib_root": process.env.__lib_root,
               })),
-              ...(pawConfig.staticOutput ? [
-                new HtmlWebpackPlugin({
-                  inject: false,
-                  template: require("html-webpack-template"),
-                  appMountId: pawConfig.clientRootElementId,
-                })
-              ]: []),
               new MiniCssExtractPlugin({
                 // Options similar to the same options in webpackOptions.output
                 // both options are optional
@@ -278,7 +270,7 @@ export default class WebpackHandler extends Tapable {
             ]
           }
         ],
-        server: pawConfig.staticOutput ? [] : [
+        server: [
           {
             mode: "production",
             target: "node",
@@ -369,7 +361,6 @@ export default class WebpackHandler extends Tapable {
 
   getConfig(env = "development", type = "web") {
     if (this.envConfigs[env] && this.envConfigs[env][type]) {
-      if (type === "server") return [];
       this.hooks.beforeConfig.call(env, type, this.envConfigs[env][type], (err) => {
         if (err) {
           // eslint-disable-next-line
