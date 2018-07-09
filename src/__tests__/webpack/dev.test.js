@@ -72,7 +72,6 @@ describe("Node Server --env=dev", () => {
     expect(compiler)
       .toBeInstanceOf(webpack.MultiCompiler);
   });
-
 });
 
 
