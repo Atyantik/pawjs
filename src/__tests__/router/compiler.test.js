@@ -1,6 +1,6 @@
 let RouterCompiler = require("../../router/compiler");
 RouterCompiler = RouterCompiler.default ? RouterCompiler.default : RouterCompiler;
-let RouteHandlerMock = require("../webpack/fixtures/RouteHandler");
+let RouteHandlerMock = require("./fixtures/RouteHandler");
 RouteHandlerMock = RouteHandlerMock.default ? RouteHandlerMock.default : RouteHandlerMock;
 //const RouterService = require("../../router/handler");
 describe("Router Compiler", () => {
