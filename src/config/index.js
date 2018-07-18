@@ -12,4 +12,9 @@ if (config.appRootUrl.endsWith("/")) {
   config.appRootUrl = config.appRootUrl.replace(/\/$/, "");
 }
 
+// Give higher priority to env PORT than any other settings, until and unless changed by user
+// in hook beforeStart!
+if (process.env.PORT.length && process.env.PORT.trim().length) {
+  config.port = process.env.PORT.trim();
+}
 module.exports = Object.assign({}, config);
