@@ -1,6 +1,6 @@
 import express from "express";
 import cluster from "cluster";
-import _ from "lodash";
+import _find from "lodash/find";
 import server, { beforeStart, afterStart } from "./common";
 import path from "path";
 import compression from "compression";
@@ -15,7 +15,7 @@ let currentDir = __dirname;
 const _global = {};
 
 // Set appropriate currentDir when build and run in production mode
-const filename = _.find(process.argv, arg => {
+const filename = _find(process.argv, arg => {
   return arg.indexOf("/server.js") !== -1;
 });
 

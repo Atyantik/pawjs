@@ -5,9 +5,9 @@ const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const _ = require("lodash");
 
 const defaultOptions = {
-  sourceMap: true,
-  localIdentName: "[path][name]__[local]",
-  compress: false,
+  sourceMap: process.env.PAW_ENV !== "production",
+  localIdentName: process.env.PAW_ENV === "production"? "[hash:base64:5]": "[path][name]__[local]",
+  compress: process.env.PAW_ENV === "production",
 };
 
 module.exports = module.exports.default = (options) => {

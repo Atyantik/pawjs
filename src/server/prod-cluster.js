@@ -36,6 +36,6 @@ if (cluster.isMaster) {
 
 } else {
   // Worker processes have a http server.
-  require("./prod");
+  require("./build");
 
 }
