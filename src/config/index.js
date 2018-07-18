@@ -14,7 +14,11 @@ if (config.appRootUrl.endsWith("/")) {
 
 // Give higher priority to env PORT than any other settings, until and unless changed by user
 // in hook beforeStart!
-if (process.env.PORT.length && process.env.PORT.trim().length) {
+if (
+  typeof process.env.PORT === "string" &&
+  process.env.PORT.length &&
+  process.env.PORT.trim().length
+) {
   config.port = process.env.PORT.trim();
 }
 module.exports = Object.assign({}, config);
