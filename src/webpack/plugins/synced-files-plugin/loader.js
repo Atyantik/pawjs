@@ -31,6 +31,7 @@ module.exports = function () {
   let syncSource;
   const publicPath = `${this._compiler.options.output.publicPath}${fileLoaderOptions ? fileLoaderOptions.publicPath: ""}`;
 
+  //console.log(syncPlugin.get(syncKey));
   if(syncPlugin && (syncSource = syncPlugin.get(syncKey))) {
     callback(null, syncSource.replace("__webpack_public_path__", JSON.stringify(publicPath)));
     return;
@@ -39,7 +40,7 @@ module.exports = function () {
   this.loadModule(requestString, function  (error, source) {
     if (!error) {
       if (syncPlugin) {
-        syncPlugin.add(syncKey, source.replace(fileLoaderOptions.outputPath, ""));
+        syncPlugin.add(syncKey, source);
       }
     }
     callback(error, source);

@@ -137,80 +137,11 @@ export default class CliHandler {
    * Start server depending on the env variable
    */
   startServer() {
-    require(path.resolve(this.libRoot, "src/server/start.js"));
+    require(path.resolve(this.libRoot, "src/server/webpack-start.js"));
   }
 
   buildProd = () => {
-    throw "working on it.";
-    
-    // const config = require("../src/config/index");
-    //
-    // const webEnv= Object.create(process.env);
-    //
-    // webEnv.NODE_ENV = "production";
-    // webEnv.WEBPACK_TARGET = "web";
-    //
-    //
-    // const childSpawn = spawn(
-    //   this.searchCommand("webpack"), [
-    //     "--config",
-    //     this.webpackConfigPath,
-    //   ], {
-    //     env: webEnv,
-    //     stdio: [process.stdin, process.stdout, "pipe"]
-    //   }
-    // );
-    //
-    // childSpawn.on("close", code => {
-    //   const serverEnv = Object.create(process.env);
-    //   serverEnv.NODE_ENV = "production";
-    //   serverEnv.WEBPACK_TARGET = "server";
-    //   if (!code) {
-    //     const serverSpawn = spawn(
-    //       this.searchCommand("webpack"), [
-    //         "--config",
-    //         this.webpackConfigPath,
-    //       ], {
-    //         env: serverEnv,
-    //         stdio: [process.stdin, process.stdout, "pipe"]
-    //       }
-    //     );
-    //
-    //     serverSpawn.on("close", () => {
-    //       if(!config.staticOutput) return;
-    //       const directories = require("../src/webpack/utils/directories");
-    //       const childServer = spawn(`node ${path.join(directories.dist, "server.js")}`, [], {shell: true, detached: true});
-    //       childServer.stdout.on("data", (data) => {
-    //         if(data.includes("Listening")) {
-    //           Promise.all([
-    //             getDataFromUrl(`http://${config.host}:${config.port}`),
-    //             getDataFromUrl(`http://${config.host}:${config.port}/manifest.json`),
-    //           ]).then(res => {
-    //             const [data1, data2] = res;
-    //             Promise.all([
-    //               saveDataToFile(data1, path.join(directories.build, "index.html")),
-    //               saveDataToFile(data2, path.join(directories.build, "manifest.json")),
-    //             ]).then(() => {
-    //               rmFilesInDir(directories.dist);
-    //               //eslint-disable-next-line
-    //               console.log("\n\n=================================\nUse the build folder inside dist \nto deploy your current app.\n=================================");
-    //               process.kill(-childServer.pid, "SIGTERM");
-    //               process.kill(-childServer.pid, "SIGKILL");
-    //             });
-    //           });
-    //         }
-    //       });
-    //       childServer.stderr.on("data", data => {
-    //         //eslint-disable-next-line
-    //         console.log(data.toString("utf8"));
-    //         deleteFolderRecursive(directories.dist);
-    //         //eslint-disable-next-line
-    //         process.kill(-childServer.pid, "SIGTERM");
-    //         process.kill(-childServer.pid, "SIGKILL");
-    //       });
-    //     });
-    //   }
-    // });
+    require(path.resolve(this.libRoot, "src/server/webpack-build.js"));
   };
 
   test() {
@@ -269,6 +200,11 @@ export default class CliHandler {
         env = "production";
       }
       process.env.PAW_ENV = env;
+      
+      // Force set NODE_ENV to production
+      if (process.env.PAW_ENV === "production" && typeof process.env.NODE_ENV === "undefined") {
+        process.env.NODE_ENV = "production";
+      }
       
     });
     

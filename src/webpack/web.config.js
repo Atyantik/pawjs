@@ -35,10 +35,7 @@ export default {
     filename: "js/[hash].js",
     chunkFilename: "js/[chunkhash].js"
   },
-  stats: {
-    warnings: process.env.PAW_VERBOSE === "true",
-    colors: true,
-  },
+  stats: true,
   module: {
     rules: [
       webRule(),

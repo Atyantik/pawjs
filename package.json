@@ -1,16 +1,16 @@
 {
   "name": "@pawjs/pawjs",
-  "version": "2.0.0",
+  "version": "2.0.2",
   "description": "A minimal pluggable reactjs framework to develop a progressive web application",
   "main": "scripts.js",
   "scripts": {
-    "build:dev": "node ./paw.js --root=./demo --env=development --verbose build",
+    "build:dev": "node ./paw.js --no-cache --root=./demo --env=development --verbose build",
     "build:prod": "node ./paw.js --root=./demo --env=production build",
     "lint": "eslint -c ./.eslintrc --ignore-path ./.gitignore ./src",
     "lint:fix": "eslint -c ./.eslintrc --ignore-path ./.gitignore --fix ./src",
     "publish-npm:beta": "npm publish --tag=next",
     "start": "npm run start:dev",
-    "start:dev": "node ./paw.js --root=./demo --env=development --verbose start",
+    "start:dev": "node ./paw.js --no-cache --root=./demo --env=development --verbose start",
     "start:prod": "node ./paw.js --root=./demo --env=production start",
     "test": "cross-env PROJECT_ROOT=./demo node ./paw.js test"
   },
@@ -79,6 +79,7 @@
     "regenerator-runtime": "^0.12.0",
     "sass-loader": "^7.0.3",
     "style-loader": "^0.21.0",
+    "supertest": "^3.1.0",
     "tapable": "^1.0.0",
     "webpack": "^4.16.0",
     "webpack-cli": "^3.0.8",

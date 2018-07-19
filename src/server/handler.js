@@ -96,6 +96,7 @@ export default class ServerHandler extends Tapable {
         <Html
           {...htmlProps}
           appRootUrl={appRootUrl}
+          clientRootElementId={this.options.env.clientRootElementId}
         />
       ).pipe(res);
       return next();
@@ -155,7 +156,7 @@ export default class ServerHandler extends Tapable {
 
       await new Promise (r => this.hooks.beforeAppRender.callAsync(Application, req, res, r));
 
-      let htmlContent = renderToString(
+      let htmlContent = this.options.env.staticOutput ? "" : renderToString(
         <ErrorBoundary ErrorComponent={routeHandler.getErrorComponent()}>
           {Application.children}
         </ErrorBoundary>
@@ -167,6 +168,7 @@ export default class ServerHandler extends Tapable {
         <Html
           {...Application.htmlProps}
           appRootUrl={appRootUrl}
+          clientRootElementId={this.options.env.clientRootElementId}
           dangerouslySetInnerHTML={{
             __html: htmlContent,
           }}
@@ -197,6 +199,7 @@ export default class ServerHandler extends Tapable {
       const ErrorComponent = routeHandler.getErrorComponent();
       renderedHtml = renderToString(
         <Html
+          clientRootElementId={this.options.env.clientRootElementId}
           assets={assets}
           cssFiles={cssToBeIncluded}
           pwaSchema={pwaSchema}

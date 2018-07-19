@@ -9,19 +9,17 @@ import webpack from "webpack";
 import serverRule from "./inc/babel-server-rule";
 import fontRule from "./inc/babel-font-rule";
 
+const isProduction = process.env.PAW_ENV === "production";
+
 export default {
   name: "server",
-  mode: process.env.PAW_ENV !== "production"? "development": "production",
+  mode: isProduction? "production": "development",
   target: "node",
-  entry: path.resolve(process.env.__lib_root, "./src/server/common.js"),
+  entry: path.resolve(process.env.__lib_root, "./src/server/build.js"),
   module: {
     rules: [
-      serverRule({noChunk: true, cacheDirectory: false}),
-      ...cssRule({
-        sourceMap: false,
-        localIdentName: "[hash:base64:5]",
-        compress: true,
-      }),
+      serverRule({noChunk: true, cacheDirectory: process.env.PAW_CACHE}),
+      ...cssRule(),
       fontRule({
         emitFile: false,
         outputPath: "build/fonts/",
@@ -46,10 +44,7 @@ export default {
     library: "dev-server",
     libraryTarget: "umd"
   },
-  stats: {
-    warnings: false,
-    colors: true,
-  },
+  stats: true,
   externals: {
     "pwa-assets": "./assets.json",
   },
