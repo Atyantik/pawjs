@@ -188,6 +188,7 @@ function createLoadableComponent(loadFn, options) {
         if (!this._mounted) {
           return;
         }
+        if (!res) return;
 
         this.setState({
           error: res.error,

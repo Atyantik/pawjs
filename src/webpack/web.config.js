@@ -17,6 +17,18 @@ if (fs.existsSync(path.join(directories.src, "sw.js"))) {
   projectSW = fs.readFileSync(path.join(directories.src, "sw.js"), "utf-8");
 }
 
+const devPlugins = [];
+// try {
+//   if (require.resolve("webpack-bundle-analyzer")) {
+//     const WebpackBundleAnalyzer = require("webpack-bundle-analyzer").BundleAnalyzerPlugin;
+//     devPlugins.push(new WebpackBundleAnalyzer);
+//   }
+// } catch(e) {
+//   // eslint-disable-next-line
+//   console.warn("Webpack bundle analyzer not found!");
+// }
+
+
 export default {
   name: "web",
   target: "web",
@@ -77,5 +89,6 @@ export default {
         text: projectSW
       }),
     ] :[]),
+    ...devPlugins
   ]
 };

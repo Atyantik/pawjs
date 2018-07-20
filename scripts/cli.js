@@ -2,15 +2,9 @@ import Program from "commander";
 import path from "path";
 import fs from "fs";
 import ChildProcess from "child_process";
-import {deleteFolderRecursive} from "../src/__tests__/__test_utils/util";
 import executablePaths from "./executable-paths";
 import FindCommand from "./find-command";
 import packageDetails from "../package.json";
-import {
-  getDataFromUrl,
-  rmFilesInDir,
-  saveDataToFile
-} from "./cli-fucntions";
 
 const spawn = ChildProcess.spawn;
 
@@ -190,30 +184,33 @@ export default class CliHandler {
       env = env.toLowerCase();
       if (env === "dev") {
         // eslint-disable-next-line
-        console.info("Note:: Setting env to development. Please use --env=development instead");
+        console.info("NOTE:: Setting env to development. Please use --env=development instead");
         env = "development";
       }
   
       if (env === "prod") {
         // eslint-disable-next-line
-        console.info("Note:: Setting env to production. Please use --env=production instead");
+        console.info("NOTE:: Setting env to production. Please use --env=production instead");
         env = "production";
       }
       process.env.PAW_ENV = env;
       
-      // Force set NODE_ENV to production
+      // Force set NODE_ENV & ENV to production
       if (process.env.PAW_ENV === "production" && typeof process.env.NODE_ENV === "undefined") {
         process.env.NODE_ENV = "production";
+        process.env.ENV = "production";
       }
-      
     });
     
-    this.program.on("option:no-cache", () => {
-      // set PAW_CACHE to false
-      process.env.PAW_CACHE = "false";
+    this.program.on("option:cache", () => {
+      if (!this.program.cache) {
+        // set PAW_CACHE to false
+        process.env.PAW_CACHE = "false";
+  
+        // Disable babel cache if no-cache is specified
+        process.env.BABEL_DISABLE_CACHE = true;
+      }
       
-      // Disable babel cache if no-cache is specified
-      process.env.BABEL_DISABLE_CACHE = true;
     });
   
     // Update the project root based on the root option
@@ -227,7 +224,7 @@ export default class CliHandler {
       console.error("Invalid command: %s\nSee --help for a list of available commands.", Program.args.join(" "));
       process.exit(1);
     });
-  
+    
     this.program.parse(process.argv);
   
     if (!process.argv.slice(2).length) {

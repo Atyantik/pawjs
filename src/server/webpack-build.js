@@ -1,18 +1,133 @@
 import path from "path";
 import fs from "fs";
+import os from "os";
+import del from "del";
+import mv from "mv";
 import request from "supertest";
 import directories from "../webpack/utils/directories";
 import pawConfig from "../config";
-import express from "express";
 import webpack from "webpack";
-import webLog from "webpack-log";
 import CleanWebpackPlugin from "clean-webpack-plugin";
 import CopyWebpackPlugin from "copy-webpack-plugin";
 
-import env from "../config/index";
+
 import wHandler from "../webpack";
+import webRule from "../webpack/inc/babel-web-rule";
+import serverRule from "../webpack/inc/babel-server-rule";
 import SyncedFilesPlugin from "../webpack/plugins/synced-files-plugin";
 import ExtractEmittedAssets from "../webpack/plugins/extract-emitted-assets";
+
+const isVerbose = process.env.PAW_VERBOSE === "true";
+
+const stats = {
+  // fallback value for stats options when an option is not defined (has precedence over local webpack defaults)
+  all: undefined,
+  
+  // Add asset Information
+  assets: true,
+  
+  // Sort assets by a field
+  // You can reverse the sort with `!field`.
+  assetsSort: "field",
+  
+  // Add build date and time information
+  builtAt: true,
+  
+  // Add information about cached (not built) modules
+  cached: isVerbose,
+  
+  // Show cached assets (setting this to `false` only shows emitted files)
+  cachedAssets: isVerbose,
+  
+  // Add children information
+  children: true,
+  
+  // Add chunk information (setting this to `false` allows for a less verbose output)
+  chunks: isVerbose,
+  
+  // Add namedChunkGroups information
+  chunkGroups: isVerbose,
+  
+  // Add built modules information to chunk information
+  chunkModules: isVerbose,
+  
+  // Add the origins of chunks and chunk merging info
+  chunkOrigins: isVerbose,
+  
+  // Sort the chunks by a field
+  // You can reverse the sort with `!field`. Default is `id`.
+  chunksSort: "field",
+  
+  // Context directory for request shortening
+  context: directories.src,
+  
+  // `webpack --colors` equivalent
+  colors: true,
+  
+  // Display the distance from the entry point for each module
+  depth: isVerbose,
+  
+  // Display the entry points with the corresponding bundles
+  entrypoints: isVerbose,
+  
+  // Add --env information
+  env: true,
+  
+  // Add errors
+  errors: true,
+  
+  // Add details to errors (like resolving log)
+  errorDetails: true,
+  
+  // Add the hash of the compilation
+  hash: true,
+  
+  // Set the maximum number of modules to be shown
+  maxModules: 0,
+  
+  // Add built modules information
+  modules: isVerbose,
+  
+  // Sort the modules by a field
+  // You can reverse the sort with `!field`. Default is `id`.
+  modulesSort: "field",
+  
+  // Show dependencies and origin of warnings/errors (since webpack 2.5.0)
+  moduleTrace: isVerbose,
+  
+  // Show performance hint when file size exceeds `performance.maxAssetSize`
+  performance: true,
+  
+  // Show the exports of the modules
+  providedExports: false,
+  
+  // Add public path information
+  publicPath: true,
+  
+  // Add information about the reasons why modules are included
+  reasons: isVerbose,
+  
+  // Add the source code of modules
+  source: false,
+  
+  // Add timing information
+  timings: true,
+  
+  // Show which exports of a module are used
+  usedExports: false,
+  
+  // Add webpack version information
+  version: isVerbose,
+  
+  // Add warnings
+  warnings: true,
+  profile: true,
+  
+  // Filter warnings to be shown (since webpack 2.4.0),
+  // can be a String, Regexp, a function getting the warning and returning a boolean
+  // or an Array of a combination of the above. First match wins.
+  warningsFilter: (warning) => warning.indexOf("node_modules/express") !== -1
+};
 
 // Notify the user that compilation has started and should be done soon.
 
@@ -39,6 +154,25 @@ const isImageRule = (rule) => {
     isValid = rule.test.test(`.${ext}`);
   });
   return isValid;
+};
+
+
+const isBabelRule = (rule) => {
+  if(
+    rule &&
+    rule.use &&
+    Array.isArray(rule.use) &&
+    rule.use.some(u => u.loader === "babel-loader")
+  ) {
+    return true;
+  }
+  
+  return (
+    rule &&
+    rule.use &&
+    typeof rule.use === "object" &&
+    rule.use.loader === "babel-loader"
+  );
 };
 const hasSyncedFileLoader = rule => {
   let hasSyncFile = false;
@@ -84,10 +218,14 @@ wHandler.hooks.beforeConfig.tap("AddSyncedFilesPlugin", (wEnv, wType, wConfigs) 
           to: directories.build,
         }]));
         copyPublicFolder = true;
-        
       }
       
-      wConfig.module.rules.forEach(rule => {
+      wConfig.module.rules.forEach((rule,index) => {
+        if(isBabelRule(rule)) {
+          wConfig.module.rules[index] = webRule({hot: false});
+        }
+        
+        
         if (isImageRule(rule) && !hasSyncedFileLoader(rule)) {
           rule.use = SyncedFilesPlugin.loader(rule.use);
         }
@@ -113,6 +251,10 @@ wHandler.hooks.beforeConfig.tap("AddSyncedFilesPlugin", (wEnv, wType, wConfigs) 
   
   if (wType === "server") {
     wConfigs.forEach(wConfig => {
+      
+      if (wConfig.entry === path.resolve(process.env.__lib_root, "./src/server/server.js")) {
+        wConfig.entry = path.resolve(process.env.__lib_root, "./src/server/build.js");
+      }
       if (!wConfig.externals) {
         wConfig.externals = {};
       }
@@ -122,7 +264,15 @@ wHandler.hooks.beforeConfig.tap("AddSyncedFilesPlugin", (wEnv, wType, wConfigs) 
         wConfig.externals["pwa-assets"] = "./assets.json";
       }
   
-      wConfig.module.rules.forEach(rule => {
+      wConfig.module.rules.forEach((rule, index) => {
+  
+        if(isBabelRule(rule)) {
+          wConfig.module.rules[index] = serverRule({
+            noChunk: true,
+            hot: false,
+          });
+        }
+        
         if (isImageRule(rule) && !hasSyncedFileLoader(rule)) {
           rule.use = SyncedFilesPlugin.loader(rule.use);
         }
@@ -148,26 +298,81 @@ try {
   const webConfig = wHandler.getConfig(process.env.PAW_ENV, "web");
   
   // Create a webpack web compiler from the web configurations
-  const webCompiler = webpack(webConfig);
-  webCompiler.hooks.done.tap("CompileServer", () => {
-    // Create a webpack server compiler from the server config
-    const serverCompiler = webpack(serverConfig);
-    serverCompiler.hooks.done.tap("exportStatic", () => {
-      const outputConfig = serverConfig[0].output;
-      let server = require(path.resolve(outputConfig.path, outputConfig.filename));
-      server = server.default ? server.default: server;
+  webpack(webConfig, (webErr, webStats) => {
+    if (webErr || webStats.hasErrors()) {
+      // Handle errors here
+      // eslint-disable-next-line
+      console.log("Web compiler error occurred. Please handle error here");
+      return;
+    }
+    // eslint-disable-next-line
+    console.log(webStats.toString(stats));
+    webpack(serverConfig, (serverErr, serverStats) => {
+      if (serverErr || serverStats.hasErrors()) {
+        // Handle errors here
+        // eslint-disable-next-line
+        console.log("Server Compiler error occurred. Please handle error here");
+        return;
+      }
+  
+      // eslint-disable-next-line
+      console.log(serverStats.toString(stats));
+      
       if (pawConfig.staticOutput) {
-        request(server).get("/").then(response => {
-          fs.writeFileSync(path.join(directories.build, "index.html"), response.text, "utf-8");
-        });
-        request(server).get("/manifest.json").then(response => {
-          fs.writeFileSync(path.join(directories.build, "manifest.json"), response.text, "utf-8");
+        
+        // eslint-disable-next-line
+        console.log("Creating static files...");
+        // eslint-disable-next-line
+        console.log("Generating index.html");
+        
+        const outputConfig = serverConfig[0].output;
+        let server = require(path.resolve(outputConfig.path, outputConfig.filename));
+        server = server.default ? server.default: server;
+        
+        // eslint-disable-next-line
+        console.log("Generating index.html & manifest.json");
+        
+        Promise.all([
+          request(server).get("/"),
+          request(server).get("/manifest.json")
+        ]).then(([indexResponse, manifestResponse]) => {
+          fs.writeFileSync(path.join(directories.build, "index.html"), indexResponse.text, "utf-8");
+          fs.writeFileSync(path.join(directories.build, "manifest.json"), manifestResponse.text, "utf-8");
+          
+          // eslint-disable-next-line
+          console.log(`Successfully created: ${path.join(directories.build, "index.html")}`);
+          // eslint-disable-next-line
+          console.log(`Successfully created: ${path.join(directories.build, "manifest.json")}`);
+        }).then(() => {
+  
+          console.log("Deleting inside dist other than build");
+          try {
+            const tempPawJSBuildPath = path.join(os.tmpdir(), "pawjs-build");
+            // Move to tempFolder
+            del([tempPawJSBuildPath]).then(() => {
+              mv(directories.build, tempPawJSBuildPath, {mkdir: true, clobber: true}, (err) => {
+                del([`${directories.dist}/**/*`])
+                  .then(() => {
+      
+                    mv(tempPawJSBuildPath, directories.dist, {clobber: true}, (err) => {
+                      console.log("am here as well");
+                      console.log(err);
+                    });
+                  });
+              });
+            });
+            // Delete everything other than build folder
+            
+          } catch (ex) {
+            console.log(ex);
+          }
+          
+          
+          
         });
       }
     });
-    serverCompiler.run();
   });
-  webCompiler.run();
 }catch (ex) {
   // eslint-disable-next-line
   console.log(ex);

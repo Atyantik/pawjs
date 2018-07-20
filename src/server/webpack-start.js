@@ -43,20 +43,27 @@ wHandler.hooks.beforeConfig.tap("AddHotReplacementPlugin", (wEnv, wType, wConfig
         wConfig.entry.client &&
         Array.isArray(wConfig.entry.client)
       ) {
+  
+        let clientIndex = wConfig.entry.client.indexOf(path.resolve(process.env.__lib_root, "src", "client", "app.js"));
         
         // Add webpack-hot-middleware as entry point
-        if (!wConfig.entry.client.includes("webpack-hot-middleware/client?name=web&path=/__hmr_update&timeout=2000&overlay=true&quiet=true")) {
-          wConfig.entry.client.unshift("webpack-hot-middleware/client?name=web&path=/__hmr_update&timeout=2000&overlay=true&quiet=true");
+        const hotMiddlewareString = "webpack-hot-middleware/client?name=web&path=/__hmr_update&timeout=2000&overlay=true&quiet=false";
+        if (!wConfig.entry.client.includes(hotMiddlewareString)) {
+          if (clientIndex === -1) {
+            wConfig.entry.client.unshift(hotMiddlewareString);
+          } else {
+            wConfig.entry.client.splice(clientIndex, 0, hotMiddlewareString);
+            clientIndex++;
+          }
+        }
+  
+        // Replace app with hot-app
+        if (wConfig.entry.client.includes(path.resolve(process.env.__lib_root, "src", "client", "app.js"))) {
+          wConfig.entry.client[clientIndex] = path.resolve(process.env.__lib_root, "src", "client", "hot-app.js");
         }
         
         // check for Hot Module replacement plugin and add it if necessary
-        let hasHotPlugin = false;
-        wConfig.plugins.forEach(plugin => {
-          if (plugin instanceof webpack.HotModuleReplacementPlugin) {
-            hasHotPlugin = true;
-          }
-        });
-        
+        let hasHotPlugin = wConfig.plugins.some(plugin => plugin instanceof webpack.HotModuleReplacementPlugin);
         if (!hasHotPlugin) {
           wConfig.plugins.unshift(new webpack.HotModuleReplacementPlugin({
             multiStep: true,
@@ -131,15 +138,18 @@ try {
     logger: log,
     logLevel: "debug",
     noInfo: !isVerbose,
+    hot: true,
   };
   
   const serverOptions = Object.assign( {} , commonOptions, devServerConfig );
   const webOptions = Object.assign({}, commonOptions, {
-    hot: processEnv.PAW_ENV === "development",
-    inline: processEnv.PAW_ENV === "development",
+    inline: true,
     serverSideRender: true,
     publicPath: pawConfig.resourcesBaseUrl
   });
+  
+  // console.log(util.inspect(webConfig, {depth: 10}));
+  // process.exit();
   
   // Create a webpack server compiler from the server config
   const serverCompiler = webpack(serverConfig);
@@ -230,17 +240,6 @@ try {
     next();
   });
   
-  let totalCompilationComplete = 0;
-  webCompiler.hooks.done.tap("InformWebCompiled", () => {
-    totalCompilationComplete++;
-    if (totalCompilationComplete >=2 ) startServer();
-  });
-  
-  serverCompiler.hooks.done.tap("InformServerCompiled", () => {
-    totalCompilationComplete++;
-    if (totalCompilationComplete >=2 ) startServer();
-  });
-  
   let serverStarted = false;
   
   const startServer = () => {
@@ -286,6 +285,17 @@ try {
       });
     });
   };
+  
+  let totalCompilationComplete = 0;
+  webCompiler.hooks.done.tap("InformWebCompiled", () => {
+    totalCompilationComplete++;
+    if (totalCompilationComplete >=2 ) startServer();
+  });
+  
+  serverCompiler.hooks.done.tap("InformServerCompiled", () => {
+    totalCompilationComplete++;
+    if (totalCompilationComplete >=2 ) startServer();
+  });
 }catch (ex) {
   // eslint-disable-next-line
   console.log(ex);

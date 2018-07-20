@@ -23,7 +23,7 @@ module.exports = module.exports.default = (options = {}) => {
             require("@babel/preset-react"),
           ],
           cacheDirectory: o.cacheDirectory,
-          plugins: require("./babel-plugins")()
+          plugins: require("./babel-plugins")(o)
         }
       },
       {

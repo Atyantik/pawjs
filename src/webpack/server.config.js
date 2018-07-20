@@ -15,10 +15,10 @@ export default {
   name: "server",
   mode: isProduction? "production": "development",
   target: "node",
-  entry: path.resolve(process.env.__lib_root, "./src/server/build.js"),
+  entry: path.resolve(process.env.__lib_root, "./src/server/server.js"),
   module: {
     rules: [
-      serverRule({noChunk: true, cacheDirectory: process.env.PAW_CACHE}),
+      serverRule({noChunk: true, cacheDirectory: process.env.PAW_CACHE === "true"}),
       ...cssRule(),
       fontRule({
         emitFile: false,

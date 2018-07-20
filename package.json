@@ -4,14 +4,15 @@
   "description": "A minimal pluggable reactjs framework to develop a progressive web application",
   "main": "scripts.js",
   "scripts": {
+    "build": "npm run build:prod",
     "build:dev": "node ./paw.js --no-cache --root=./demo --env=development --verbose build",
-    "build:prod": "node ./paw.js --root=./demo --env=production build",
+    "build:prod": "node ./paw.js --no-cache --root=./demo --env=production build",
     "lint": "eslint -c ./.eslintrc --ignore-path ./.gitignore ./src",
     "lint:fix": "eslint -c ./.eslintrc --ignore-path ./.gitignore --fix ./src",
     "publish-npm:beta": "npm publish --tag=next",
     "start": "npm run start:dev",
     "start:dev": "node ./paw.js --no-cache --root=./demo --env=development --verbose start",
-    "start:prod": "node ./paw.js --root=./demo --env=production start",
+    "start:prod": "node ./paw.js --no-cache --root=./demo --env=production start",
     "test": "cross-env PROJECT_ROOT=./demo node ./paw.js test"
   },
   "bin": {
@@ -55,6 +56,7 @@
     "copy-webpack-plugin": "^4.5.2",
     "cross-env": "^5.2.0",
     "css-loader": "^1.0.0",
+    "del": "^3.0.0",
     "eslint": "^5.1.0",
     "eslint-plugin-jest": "^21.17.0",
     "eslint-plugin-react": "^7.10.0",
@@ -64,6 +66,7 @@
     "jest": "^23.4.0",
     "lodash": "^4.17.10",
     "mini-css-extract-plugin": "^0.4.0",
+    "mv": "^2.1.1",
     "node-sass": "^4.9.2",
     "postcss-loader": "^2.1.6",
     "postcss-preset-env": "^5.2.0",
@@ -96,5 +99,8 @@
   "bugs": {
     "url": "https://github.com/Atyantik/pawjs/issues"
   },
-  "homepage": "https://github.com/Atyantik/pawjs#readme"
+  "homepage": "https://github.com/Atyantik/pawjs#readme",
+  "devDependencies": {
+    "webpack-bundle-analyzer": "^2.13.1"
+  }
 }

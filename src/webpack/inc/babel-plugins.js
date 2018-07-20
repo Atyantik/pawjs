@@ -25,23 +25,27 @@ lodash = lodash.default ? lodash.default: lodash;
 let reactHotLoader = require("react-hot-loader/babel");
 reactHotLoader = reactHotLoader.default? reactHotLoader.default: reactHotLoader;
 
-module.exports = module.exports.default =  (options = {noChunk: false}) => [
-  reactLoadableRoutes,
-  options.noChunk ? dynamicImportWebpack: syntaxDynamicImport,
-  objectRestSpread,
-  [
-    decorators,
-    {
-      "legacy": true
-    }
-  ],
-  [
-    classProperties,
-    {
-      "loose": true
-    }
-  ],
-  generatorFunctions,
-  lodash,
-  reactHotLoader,
-];
+const defaults = {noChunk: false, hot: true};
+module.exports = module.exports.default =  (options = {noChunk: false, hot: true}) => {
+  options = Object.assign({}, defaults, options);
+  return [
+    reactLoadableRoutes,
+    options.noChunk ? dynamicImportWebpack: syntaxDynamicImport,
+    objectRestSpread,
+    [
+      decorators,
+      {
+        "legacy": true
+      }
+    ],
+    [
+      classProperties,
+      {
+        "loose": true
+      }
+    ],
+    generatorFunctions,
+    lodash,
+    ...(options.hot ? [reactHotLoader]: []),
+  ];
+};
