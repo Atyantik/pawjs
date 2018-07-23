@@ -31,7 +31,7 @@ if (
 }
 
 // If not set hashedRoutes, and staticoutput is set, then set hashedRoutes to true
-if (typeof config.hashedRoutes === "undefined" && config.staticOutput) {
+if (typeof config.hashedRoutes === "undefined" && config.singlePageApplication) {
   config.hashedRoutes = true;
 }
 

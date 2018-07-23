@@ -318,7 +318,7 @@ try {
       // eslint-disable-next-line
       console.log(serverStats.toString(stats));
       
-      if (pawConfig.staticOutput) {
+      if (pawConfig.singlePageApplication) {
         
         // eslint-disable-next-line
         console.log("Creating static files...");

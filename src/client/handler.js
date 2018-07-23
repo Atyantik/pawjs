@@ -168,7 +168,7 @@ export default class ClientHandler extends Tapable {
       console.warn(`#${root} element not found in html. thus cannot proceed further`);
     }
     const domRootReference = document.getElementById(root);
-    const renderer = env.serverSideRender ? hydrate: render;
+    const renderer = env.serverSideRender && !env.singlePageApplication? hydrate: render;
 
     const routes = routeHandler.getRoutes();
 
@@ -188,11 +188,18 @@ export default class ClientHandler extends Tapable {
       });
     }
     
-    let AppRouter = (this.options.env.staticOutput && this.options.env.hashedRoutes)? HashRouter: Router;
+    let AppRouter = (this.options.env.singlePageApplication && this.options.env.hashedRoutes)? HashRouter: Router;
+    
+    let RouterParams = {
+      history: this.history
+    };
+    if (this.options.env.singlePageApplication) {
+      RouterParams = {};
+    }
 
     Promise.all(promises).then(() => {
       let children = (
-        <AppRouter basename={env.appRootUrl} history={this.history}>
+        <AppRouter basename={env.appRootUrl} {...RouterParams}>
           {renderRoutes(routes)}
         </AppRouter>
       );

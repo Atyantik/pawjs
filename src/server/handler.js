@@ -156,7 +156,7 @@ export default class ServerHandler extends Tapable {
 
       await new Promise (r => this.hooks.beforeAppRender.callAsync(Application, req, res, r));
 
-      let htmlContent = this.options.env.staticOutput ? "" : renderToString(
+      let htmlContent = this.options.env.singlePageApplication ? "" : renderToString(
         <ErrorBoundary ErrorComponent={routeHandler.getErrorComponent()}>
           {Application.children}
         </ErrorBoundary>

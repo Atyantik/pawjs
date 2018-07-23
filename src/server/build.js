@@ -68,7 +68,7 @@ beforeStart(serverConfig, _global, (err) => {
     return;
   }
   
-  !pawConfig.staticOutput && app.listen(serverConfig.port, serverConfig.host, () => {
+  !pawConfig.singlePageApplication && app.listen(serverConfig.port, serverConfig.host, () => {
     // eslint-disable-next-line
     console.log(`Listening to http://${serverConfig.host}:${serverConfig.port}`);
     afterStart(_global);
