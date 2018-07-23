@@ -160,17 +160,17 @@ export default class CliHandler {
     this.program
       .command("start")
       .description("Start the application")
-      .action(this.startServer);
+      .action(this.startServer.bind(this));
   
     this.program
       .command("build")
       .description("Compile the project for production.")
-      .action(this.buildProd);
+      .action(this.buildProd.bind(this));
   
     this.program
       .command("test")
       .description("Run the test cases for the project.")
-      .action(this.test);
+      .action(this.test.bind(this));
 
 
     // Set PAW_VERBOSE to true

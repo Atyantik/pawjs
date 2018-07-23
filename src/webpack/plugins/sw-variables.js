@@ -44,6 +44,31 @@ class SwVariables {
         };
       }
     });
+  
+    compiler.hooks.emit.tap("AddEnvToSw",  (compilation) => {
+      
+      if (compilation.assets[fileName]) {
+        let src = compilation.assets[fileName].source();
+        
+        const pawEnv = Object.keys(process.env).filter(x => x.indexOf("PAW_") !== -1);
+        let env = {};
+        pawEnv.forEach(k => {
+          env[k] = process.env[k];
+        });
+        
+        src = `self.__env=${JSON.stringify(env)};${src}`;
+        
+      
+        compilation.assets[fileName] = {
+          source: function source() {
+            return src;
+          },
+          size: function size() {
+            return src.length;
+          }
+        };
+      }
+    });
   }
 }
 

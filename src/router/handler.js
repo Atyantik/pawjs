@@ -6,7 +6,8 @@ import ErrorComponent from "../components/Error";
 import RouteCompiler from "./compiler";
 import PwaIcon192 from "../resources/images/pwa-icon-192x192.png";
 import PwaIcon512 from "../resources/images/pwa-icon-512x512.png";
-import _ from "lodash";
+import _uniq from "lodash/uniq";
+import _cloneDeep from "lodash/cloneDeep";
 
 export default class RouteHandler extends Tapable {
 
@@ -85,7 +86,7 @@ export default class RouteHandler extends Tapable {
     let errorComponent = ErrorComponent;
     let seoSchema = Object.assign({}, RouteHandler.defaultSeoSchema);
     let pwaSchema = Object.assign({}, RouteHandler.defaultPwaSchema);
-    pwaSchema.start_url = options.env.appRootUrl;
+    pwaSchema.start_url = options.env.appRootUrl ? options.env.appRootUrl : "/";
 
     let delay = 300;
     let timeout = 10000;
@@ -161,19 +162,19 @@ export default class RouteHandler extends Tapable {
   addRoute(route) {
     const compiledRoute = this.routeCompiler.compileRoute(route, this);
     this.routes.push(compiledRoute);
-    this.routes = _.uniq(this.routes);
+    this.routes = _uniq(this.routes);
   }
 
   addRoutes(routes) {
     const compiledRoutes = this.routeCompiler.compileRoutes(routes, this);
     this.routes = this.routes.concat(compiledRoutes);
-    this.routes = _.uniq(this.routes);
+    this.routes = _uniq(this.routes);
   }
 
   addPlugin(plugin) {
     try {
       if (plugin.hooks && Object.keys(plugin.hooks).length) {
-        _.each(plugin.hooks, (hookValue, hookName) => {
+        plugin.hooks.forEach((hookValue, hookName) => {
           this.hooks[hookName] = hookValue;
         });
       }
@@ -185,7 +186,7 @@ export default class RouteHandler extends Tapable {
   }
 
   getRoutes() {
-    let routes = _.cloneDeep(this.routes);
+    let routes = _cloneDeep(this.routes);
     routes.push({
       component: this.get404Component()
     });

@@ -322,8 +322,6 @@ try {
         
         // eslint-disable-next-line
         console.log("Creating static files...");
-        // eslint-disable-next-line
-        console.log("Generating index.html");
         
         const outputConfig = serverConfig[0].output;
         let server = require(path.resolve(outputConfig.path, outputConfig.filename));
@@ -336,6 +334,7 @@ try {
           request(server).get("/"),
           request(server).get("/manifest.json")
         ]).then(([indexResponse, manifestResponse]) => {
+          
           fs.writeFileSync(path.join(directories.build, "index.html"), indexResponse.text, "utf-8");
           fs.writeFileSync(path.join(directories.build, "manifest.json"), manifestResponse.text, "utf-8");
           
@@ -344,31 +343,43 @@ try {
           // eslint-disable-next-line
           console.log(`Successfully created: ${path.join(directories.build, "manifest.json")}`);
         }).then(() => {
-  
-          console.log("Deleting inside dist other than build");
+          
+          // eslint-disable-next-line
+          console.log("\n\nRe-organizing files...\n");
           try {
             const tempPawJSBuildPath = path.join(os.tmpdir(), "pawjs-build");
             // Move to tempFolder
             del([tempPawJSBuildPath]).then(() => {
+              
               mv(directories.build, tempPawJSBuildPath, {mkdir: true, clobber: true}, (err) => {
+                if (err) {
+                  // eslint-disable-next-line
+                  console.error(err);
+                  return;
+                }
+                
                 del([`${directories.dist}/**/*`])
                   .then(() => {
       
                     mv(tempPawJSBuildPath, directories.dist, {clobber: true}, (err) => {
-                      console.log("am here as well");
-                      console.log(err);
+                      if (err) {
+                        // eslint-disable-next-line
+                        console.error(err);
+                        return;
+                      }
+  
+                      // eslint-disable-next-line
+                      console.log("Static site generated successfully.");
                     });
                   });
               });
             });
-            // Delete everything other than build folder
             
           } catch (ex) {
+            
+            // eslint-disable-next-line
             console.log(ex);
           }
-          
-          
-          
         });
       }
     });
