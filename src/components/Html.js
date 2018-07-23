@@ -23,6 +23,7 @@ class Html extends Component {
     head: PropTypes.array,
     footer: PropTypes.array,
     appRootUrl: PropTypes.string,
+    clientRootElementId: PropTypes.string,
     dangerouslySetInnerHTML: PropTypes.shape({
       __html: PropTypes.string,
     })
@@ -36,6 +37,7 @@ class Html extends Component {
     head: [],
     footer: [],
     appRootUrl: "/",
+    clientRootElementId: "app",
     dangerouslySetInnerHTML: {
       __html: ""
     }
@@ -104,13 +106,13 @@ class Html extends Component {
         <body>
           {
             Boolean(this.props.dangerouslySetInnerHTML.__html.length) && (
-              <div id="app" dangerouslySetInnerHTML={this.props.dangerouslySetInnerHTML} />
+              <div id={this.props.clientRootElementId} dangerouslySetInnerHTML={this.props.dangerouslySetInnerHTML} />
             )
           }
           {
             !this.props.dangerouslySetInnerHTML.__html.length &&
             (
-              <div id="app">{this.props.children || null}</div>
+              <div id={this.props.clientRootElementId}>{this.props.children || null}</div>
             )
           }
           {this.props.footer}

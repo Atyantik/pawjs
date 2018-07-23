@@ -1,11 +1,11 @@
 import express from "express";
-import cluster from "cluster";
-import _ from "lodash";
-import server, { beforeStart, afterStart } from "./common";
+import _find from "lodash/find";
+import server, { beforeStart, afterStart } from "./server";
 import path from "path";
 import compression from "compression";
 // the below assets will be added by webpack. Don't worry about it
 import pawAssets from "pwa-assets";
+import pawConfig from "../config";
 
 const {cssDependencyMap, ...assets} = pawAssets;
 /**
@@ -15,7 +15,7 @@ let currentDir = __dirname;
 const _global = {};
 
 // Set appropriate currentDir when build and run in production mode
-const filename = _.find(process.argv, arg => {
+const filename = _find(process.argv, arg => {
   return arg.indexOf("/server.js") !== -1;
 });
 
@@ -26,13 +26,13 @@ if (!currentDir) currentDir = __dirname;
 
 const app = express();
 
-// Enable compression in production mode only.
+// Enable compression while building.
 app.use(compression());
 
 // Disable x-powered-by for all requests
 app.set("x-powered-by", "PawJS");
 
-app.use(`${process.env.__config_appRootUrl}/sw.js`, express.static(path.join(currentDir, "build", "sw.js"), {
+app.use(`${pawConfig.appRootUrl}/sw.js`, express.static(path.join(currentDir, "build", "sw.js"), {
   maxAge: 0,
   setHeaders: (res) => {
     res.set("Cache-Control", "no-cache");
@@ -40,7 +40,7 @@ app.use(`${process.env.__config_appRootUrl}/sw.js`, express.static(path.join(cur
 }));
 
 const cacheTime = 86400000*30;     // 30 days;
-app.use(process.env.__config_appRootUrl, express.static(path.join(currentDir, "build"), {
+app.use(pawConfig.appRootUrl, express.static(path.join(currentDir, "build"), {
   maxAge: cacheTime
 }));
 
@@ -53,10 +53,12 @@ app.use((req, res, next) => {
   return server(req, res, next, _global);
 });
 
+export default app;
+
 
 const serverConfig = {
-  port: process.env.__config_port,
-  host: process.env.__config_host,
+  port: pawConfig.port,
+  host: pawConfig.host,
 };
 
 beforeStart(serverConfig, _global, (err) => {
@@ -65,18 +67,10 @@ beforeStart(serverConfig, _global, (err) => {
     console.error(err);
     return;
   }
-
-  app.listen(serverConfig.port, serverConfig.host, () => {
-    if (!cluster.isMaster) {
-      // notify master about the request
-      process.send({
-        cmd: "notifyServerStart",
-        message: `Listening to http://${serverConfig.host}:${serverConfig.port}`
-      });
-    } else {
-      // eslint-disable-next-line
-      console.log(`Listening to http://${serverConfig.host}:${serverConfig.port}`);
-    }
+  
+  !pawConfig.staticOutput && app.listen(serverConfig.port, serverConfig.host, () => {
+    // eslint-disable-next-line
+    console.log(`Listening to http://${serverConfig.host}:${serverConfig.port}`);
     afterStart(_global);
   });
 });

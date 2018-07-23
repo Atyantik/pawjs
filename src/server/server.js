@@ -143,6 +143,7 @@ export default (req, res, next, _global) => {
 
   return app.handle(req, res, next);
 };
+
 export const beforeStart = (serverConfig, _global, cb = function() {}) => {
 
   const setAppLocal = (key, value) => {

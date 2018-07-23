@@ -1,7 +1,7 @@
 const _ = require("lodash");
 
 const defaultOptions = {
-  cacheDirectory: false
+  cacheDirectory: process.env.PAW_CACHE === "true"
 };
 module.exports = module.exports.default = (options = {}) => {
   const o = _.assignIn({}, defaultOptions, options);
@@ -23,7 +23,7 @@ module.exports = module.exports.default = (options = {}) => {
             require("@babel/preset-react"),
           ],
           cacheDirectory: o.cacheDirectory,
-          plugins: require("./babel-plugins")()
+          plugins: require("./babel-plugins")(o)
         }
       },
       {

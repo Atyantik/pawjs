@@ -8,6 +8,7 @@ import _ from "lodash";
 import React from "react";
 import { renderRoutes, matchRoutes } from "react-router-config";
 import { Router } from "react-router";
+import { HashRouter } from "react-router-dom";
 import { createBrowserHistory } from "history";
 import { render, hydrate } from "react-dom";
 import ErrorBoundary from "../components/ErrorBoundary";
@@ -40,7 +41,7 @@ export default class ClientHandler extends Tapable {
       "renderComplete": new SyncHook(),
     };
     this.options = options;
-    this.addServiceWorker();
+    this.manageServiceWorker();
   }
 
   manageHistoryChange(location, action) {
@@ -117,16 +118,30 @@ export default class ClientHandler extends Tapable {
 
   }
 
-  addServiceWorker() {
-    if (!this.options.env.serviceWorker) return;
-    this.hooks.renderComplete.tap("AddServiceWorker", (err) => {
-      if (err) return;
-      if ("serviceWorker" in navigator) {
-        window.addEventListener("load", () => {
-          navigator.serviceWorker.register(`${this.options.env.appRootUrl}/sw.js`);
-        });
-      }
-    });
+  manageServiceWorker() {
+    if (this.options.env.serviceWorker) {
+      this.hooks.renderComplete.tap("AddServiceWorker", (err) => {
+        if (err) return;
+        if ("serviceWorker" in navigator) {
+          window.addEventListener("load", () => {
+            navigator.serviceWorker.register(`${this.options.env.appRootUrl}/sw.js`);
+          });
+        }
+      });
+    } else {
+      // remove previously registered service worker
+      this.hooks.renderComplete.tap("RemoveServiceWorker", (err) => {
+        if (err) return;
+        if ("serviceWorker" in navigator) {
+          navigator.serviceWorker.getRegistrations().then(registrations => {
+            for(let registration of registrations) {
+              registration.unregister();
+            }
+          });
+        }
+      });
+    }
+    
   }
 
   addPlugin(plugin) {
@@ -172,12 +187,14 @@ export default class ClientHandler extends Tapable {
         })));
       });
     }
+    
+    let AppRouter = (this.options.env.staticOutput && this.options.env.hashedRoutes)? HashRouter: Router;
 
     Promise.all(promises).then(() => {
       let children = (
-        <Router basename={env.appRootUrl} history={this.history}>
+        <AppRouter basename={env.appRootUrl} history={this.history}>
           {renderRoutes(routes)}
-        </Router>
+        </AppRouter>
       );
       let Application = {
         children,

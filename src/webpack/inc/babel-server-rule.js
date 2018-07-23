@@ -18,7 +18,7 @@ module.exports = module.exports.default = (options) => ({
         ],
         presetReact,
       ],
-      cacheDirectory: options.cacheDirectory,
+      cacheDirectory: typeof options.cacheDirectory !== "undefined" ? options.cacheDirectory : process.env.PAW_CACHE === "true",
       plugins: require("./babel-plugins")(options)
     }
   }

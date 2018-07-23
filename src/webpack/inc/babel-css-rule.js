@@ -3,11 +3,12 @@ const directories = require("../utils/directories");
 
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const _ = require("lodash");
+const isProduction = process.env.PAW_ENV === "production";
 
 const defaultOptions = {
-  sourceMap: true,
-  localIdentName: "[path][name]__[local]",
-  compress: false,
+  sourceMap: !isProduction,
+  localIdentName: isProduction? "[hash:base64:5]": "[path][name]__[local]",
+  compress: isProduction,
 };
 
 module.exports = module.exports.default = (options) => {

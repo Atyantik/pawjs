@@ -40,7 +40,7 @@ export default class Home extends Component {
             </div>
             <div className={`text-white mt-5 mt-md-0 ${styles["hero-right"]}`}>
               <p>
-                Its fast and developer friendly, already loaded with Docker support and deployable with no need to install with npm dependencies!
+                It's fast and developer friendly, already loaded with Docker support and deployable with no need to install with npm dependencies!
                 <br />
                 <strong>And more importantly its <i>UPGRADABLE!</i></strong>
                 <br />

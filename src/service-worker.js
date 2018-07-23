@@ -2,7 +2,7 @@ self.workbox.skipWaiting();
 self.workbox.clientsClaim();
 
 self.workbox.setConfig({
-  debug: true
+  debug: self.__env["PAW_ENV"] !== "production"
 });
 
 const getOfflineHtml = () => {

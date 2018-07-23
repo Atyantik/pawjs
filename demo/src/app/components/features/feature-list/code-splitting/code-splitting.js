@@ -1,7 +1,6 @@
 import React, { Component } from "react";
-import { hot } from "react-hot-loader";
 
-class CodeSplitting extends Component {
+export default class CodeSplitting extends Component {
   render() {
     return (
       <article>
@@ -25,6 +24,4 @@ class CodeSplitting extends Component {
       </article>
     );
   }
-}
-
-export default hot(module)(CodeSplitting);
+};

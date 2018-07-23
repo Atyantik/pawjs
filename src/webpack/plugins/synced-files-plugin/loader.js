@@ -39,7 +39,7 @@ module.exports = function () {
   this.loadModule(requestString, function  (error, source) {
     if (!error) {
       if (syncPlugin) {
-        syncPlugin.add(syncKey, source.replace(fileLoaderOptions.outputPath, ""));
+        syncPlugin.add(syncKey, source);
       }
     }
     callback(error, source);
