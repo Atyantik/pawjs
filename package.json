@@ -13,9 +13,7 @@
     "start": "npm run start:dev",
     "start:dev": "node ./paw.js --no-cache --root=./demo --env=development --verbose start",
     "start:prod": "node ./paw.js --no-cache --root=./demo --env=production start",
-    "test": "snyk test && cross-env PROJECT_ROOT=./demo node ./paw.js test",
-    "snyk-protect": "snyk protect",
-    "prepare": "npm run snyk-protect"
+    "test": "cross-env PROJECT_ROOT=./demo node ./paw.js test"
   },
   "bin": {
     "paw": "./paw.js",
@@ -78,7 +76,6 @@
     "react-router-config": "^1.0.0-beta.4",
     "react-router-dom": "^4.3.1",
     "regenerator-runtime": "^0.12.0",
-    "snyk": "^1.89.1",
     "style-loader": "^0.21.0",
     "supertest": "^3.1.0",
     "tapable": "^1.0.0",
@@ -100,6 +97,5 @@
   "homepage": "https://github.com/Atyantik/pawjs#readme",
   "devDependencies": {
     "webpack-bundle-analyzer": "^2.13.1"
-  },
-  "snyk": true
+  }
 }
