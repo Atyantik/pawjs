@@ -4,6 +4,7 @@ import { Tapable, SyncHook } from "tapable";
 // non npm imports
 import serverConfig from "./server.config";
 import webConfig from "./web.config";
+import babelCssRules from "./inc/babel-css-rule";
 
 export default class WebpackHandler extends Tapable {
 
@@ -25,6 +26,10 @@ export default class WebpackHandler extends Tapable {
         server: [ serverConfig ],
       },
     };
+  }
+  
+  getBabelCssRule() {
+    return babelCssRules;
   }
 
   addPlugin(plugin) {

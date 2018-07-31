@@ -3,7 +3,7 @@ const fs = require("fs");
 const _uniq = require("lodash/uniq");
 
 const pRoot = (process.env.__project_root) || (process.env.PROJECT_ROOT) || (process.cwd() + path.sep);
-const lRoot = process.env.__lib_root || path.resolve("../");
+const lRoot = process.env.__lib_root || path.resolve(__dirname, "../");
 
 /**
  *
@@ -40,6 +40,25 @@ module.exports = (projectRoot = pRoot,libRoot = lRoot) => {
   
   fs.existsSync(path.join(projectRoot, "node_modules", ".bin")) &&
   executablePaths.unshift(path.join(projectRoot, "node_modules", ".bin"));
+  
+  // If library root is current directory, i.e. we are developing pawjs,
+  // then include the node_modules from packages as well.
+  if(lRoot === process.cwd()) {
+    const packages = fs.readdirSync(path.join(libRoot, "packages"));
+    packages.forEach(p => {
+      const packagePath = path.join(libRoot, "packages", p);
+      
+      // Include package folder bin and node_modules's bin
+      fs.existsSync(path.join(packagePath, ".bin")) &&
+      executablePaths.unshift(path.join(packagePath, ".bin"));
+  
+      fs.existsSync(path.join(projectRoot, "node_modules")) &&
+      executablePaths.unshift(path.join(packagePath, "node_modules"));
+  
+      fs.existsSync(path.join(packagePath, "node_modules", ".bin")) &&
+      executablePaths.unshift(path.join(packagePath, "node_modules", ".bin"));
+    });
+  }
 
   // If there are duplicate entries clear them up
   executablePaths = _uniq(executablePaths);

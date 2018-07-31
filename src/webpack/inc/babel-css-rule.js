@@ -15,7 +15,7 @@ module.exports = module.exports.default = (options) => {
   const o = _.assignIn({}, defaultOptions, options);
   return [
     {
-      test: /\.(sass|scss|css)$/,
+      test: /\.css$/,
       exclude: [
         path.join(directories.src, "resources"),
         path.join(directories.root, "node_modules"),
@@ -31,29 +31,11 @@ module.exports = module.exports.default = (options) => {
             minimize: o.compress,
             importLoaders: 2
           }
-        },
-        {
-          loader: "postcss-loader",
-          options: {
-            sourceMap: o.sourceMap,
-            ident: "postcss",
-            plugins: () => [
-              require("postcss-preset-env")()
-            ]
-          }
-        },
-        {
-          loader: "sass-loader",
-          options: {
-            outputStyle: o.compress ? "compressed": "expanded",
-            sourceMap: o.sourceMap,
-            sourceMapContents: o.sourceMap,
-          }
         }
       ]
     },
     {
-      test: /\.(sass|scss|css)$/,
+      test: /\.css$/,
       include: [
         path.join(directories.src, "resources"),
         path.join(directories.root, "node_modules"),
@@ -70,24 +52,6 @@ module.exports = module.exports.default = (options) => {
             importLoaders: 2
           }
         },
-        {
-          loader: "postcss-loader",
-          options: {
-            sourceMap: o.sourceMap,
-            ident: "postcss",
-            plugins: () => [
-              require("postcss-preset-env")()
-            ]
-          }
-        },
-        {
-          loader: "sass-loader",
-          options: {
-            outputStyle: o.compress ? "compressed": "expanded",
-            sourceMap: o.sourceMap,
-            sourceMapContents: o.sourceMap,
-          }
-        }
       ]
     },
   ];

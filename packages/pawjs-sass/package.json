@@ -1,12 +1,12 @@
 {
-  "name": "@pawjs/image-optimizer",
-  "version": "2.1.1",
-  "description": "Add Wbpack Image Loader support to your PAWJS application",
+  "name": "@pawjs/sass",
+  "version": "2.1.3",
+  "description": "Add Sass support to your project",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "rimraf lib && babel src --out-dir lib --source-maps --presets=env,react --watch",
-    "build": "rimraf lib && babel src --out-dir lib --presets=env,react",
-    "npm-publish": "npm version patch && npm run build && cpr package.json lib/package.json && cd lib && npm publish && cd .."
+    "start": "rimraf lib && babel src --out-dir lib --source-maps --presets=env,react --plugins=transform-object-rest-spread --watch",
+    "build": "rimraf lib && babel src --out-dir lib --presets=env,react --plugins=transform-object-rest-spread",
+    "npm-publish": "npm version patch && npm run build && cpr package.json lib/package.json && cd lib && npm publish --access=public && cd .."
   },
   "author": "Atyantik Technologies Private Limited <tirthbodawala@atyantik.com>",
   "license": "MIT",
@@ -16,6 +16,7 @@
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",
+    "babel-plugin-transform-object-rest-spread": "^6.26.0",
     "babel-preset-env": "^1.7.0",
     "babel-preset-react": "^6.24.1",
     "cpr": "^3.0.1",
@@ -23,8 +24,9 @@
     "rimraf": "^2.6.2"
   },
   "dependencies": {
-    "image-webpack-loader": "^4.3.1",
-    "regenerator-runtime": "^0.12.0",
+    "node-sass": "^4.9.2",
+    "regenerator-runtime": "^0.11.1",
+    "sass-loader": "^7.0.3",
     "tapable": "^1.0.0"
   },
   "main": "index.js",
