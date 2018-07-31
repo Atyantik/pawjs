@@ -1,4 +1,4 @@
-PawJS - Image Optimizer
+PawJS - SASS
 ===  
 
 ## @pawjs/sass
