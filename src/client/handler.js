@@ -123,9 +123,7 @@ export default class ClientHandler extends Tapable {
       this.hooks.renderComplete.tap("AddServiceWorker", (err) => {
         if (err) return;
         if ("serviceWorker" in navigator) {
-          window.addEventListener("load", () => {
-            navigator.serviceWorker.register(`${this.options.env.appRootUrl}/sw.js`);
-          });
+          navigator.serviceWorker.register(`${this.options.env.appRootUrl}/sw.js`);
         }
       });
     } else {
