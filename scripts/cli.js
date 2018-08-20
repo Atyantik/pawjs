@@ -33,13 +33,13 @@ export default class CliHandler {
   }
   
   initProcessEnv() {
-  
+    
     // PawJS library root, i.e. the folder where the script file is located
     this.libRoot = process.env.__lib_root = path.resolve(path.join(__dirname, ".."));
-  
+    
     // Set paw cache to true by default
     process.env.PAW_CACHE = "true";
-  
+    
     process.env.PAW_VERBOSE = "false";
     
     // Set default env as development
@@ -61,9 +61,14 @@ export default class CliHandler {
     process.env.PAW_CONFIG_PATH = path.join(this.projectRoot, "pawconfig.json");
   }
   onSetProjectRoot() {
-  
-    process.env.NODE_PATH = executablePaths(this.projectRoot, this.libRoot).join(path.delimiter);
-    process.env.PATH = executablePaths(this.projectRoot, this.libRoot).join(path.delimiter);
+    
+    const newNodePath = executablePaths(this.projectRoot, this.libRoot).join(path.delimiter);
+    if (!process.env.NODE_PATH) {
+      process.env.NODE_PATH = newNodePath;
+    } else {
+      process.env.NODE_PATH = [process.env.NODE_ENV, newNodePath].join(path.delimiter);
+    }
+    process.env.PATH = process.env.NODE_PATH;
     
     if (!this.pawConfigManualPath) {
       process.env.PAW_CONFIG_PATH = path.join(this.projectRoot, "pawconfig.json");
@@ -100,7 +105,7 @@ export default class CliHandler {
     }
     
     process.env.PAW_CONFIG_PATH = pawConfig;
-  
+    
   }
   
   /**
@@ -133,11 +138,11 @@ export default class CliHandler {
   startServer() {
     require(path.resolve(this.libRoot, "src/server/webpack-start.js"));
   }
-
+  
   buildProd = () => {
     require(path.resolve(this.libRoot, "src/server/webpack-build.js"));
   };
-
+  
   test() {
     const env = Object.create(process.env);
     env.NODE_ENV = "test";
@@ -146,11 +151,11 @@ export default class CliHandler {
       stdio: [process.stdin, process.stdout, "pipe"]
     });
   }
-
+  
   run() {
     this.program
       .version(packageDetails.version, "-V, --version");
-  
+    
     this.program.option("-v, --verbose", "Start with detailed comments and explanation");
     this.program.option("-e, --env <env>","Set the application environment default is dev env");
     this.program.option("-nc, --no-cache","Disable cache. Ideal for PawJS core/plugin development");
@@ -161,18 +166,18 @@ export default class CliHandler {
       .command("start")
       .description("Start the application")
       .action(this.startServer.bind(this));
-  
+    
     this.program
       .command("build")
       .description("Compile the project for production.")
       .action(this.buildProd.bind(this));
-  
+    
     this.program
       .command("test")
       .description("Run the test cases for the project.")
       .action(this.test.bind(this));
-
-
+    
+    
     // Set PAW_VERBOSE to true
     this.program.on("option:verbose", () => {
       process.env.PAW_VERBOSE = "true";
@@ -187,7 +192,7 @@ export default class CliHandler {
         console.info("NOTE:: Setting env to development. Please use --env=development instead");
         env = "development";
       }
-  
+      
       if (env === "prod") {
         // eslint-disable-next-line
         console.info("NOTE:: Setting env to production. Please use --env=production instead");
@@ -206,19 +211,19 @@ export default class CliHandler {
       if (!this.program.cache) {
         // set PAW_CACHE to false
         process.env.PAW_CACHE = "false";
-  
+        
         // Disable babel cache if no-cache is specified
         process.env.BABEL_DISABLE_CACHE = true;
       }
       
     });
-  
+    
     // Update the project root based on the root option
     this.program.on("option:root", this.updateProjectRoot);
     
     // Update the pawconfig path
     this.program.on("option:config", this.updateConfigPath);
-  
+    
     this.program.on("command:*", () => {
       //eslint-disable-next-line
       console.error("Invalid command: %s\nSee --help for a list of available commands.", Program.args.join(" "));
@@ -226,7 +231,7 @@ export default class CliHandler {
     });
     
     this.program.parse(process.argv);
-  
+    
     if (!process.argv.slice(2).length) {
       this.startServer();
     }
