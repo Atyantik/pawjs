@@ -19,6 +19,7 @@ class Html extends Component {
     metaTags: PropTypes.array,
     pwaSchema: PropTypes.object,
     cssFiles: PropTypes.array,
+    preloadCssFiles: PropTypes.array,
     assets: PropTypes.array,
     head: PropTypes.array,
     footer: PropTypes.array,
@@ -28,11 +29,12 @@ class Html extends Component {
       __html: PropTypes.string,
     })
   };
-
+  
   static defaultProps = {
     metaTags: [],
     pwaSchema: {},
     cssFiles: [],
+    preloadCssFiles: [],
     assets: [],
     head: [],
     footer: [],
@@ -42,14 +44,14 @@ class Html extends Component {
       __html: ""
     }
   };
-
+  
   getPwaValue(key, defaultValue = "") {
     if (typeof this.props.pwaSchema[key] !== "undefined") {
       return this.props.pwaSchema[key];
     }
     return defaultValue;
   }
-
+  
   /**
    * Get meta tag after searching through meta tags
    * @param key
@@ -73,7 +75,7 @@ class Html extends Component {
     };
     return new Proxy(metaTag, handler);
   }
-
+  
   /**
    * Render the code
    * @returns {*}
@@ -97,6 +99,7 @@ class Html extends Component {
               __html: `window.__preloaded_data = ${JSON.stringify(toBase64(JSON.stringify(preloadedData)))};`
             }}
           />
+          {Boolean(this.props.preloadCssFiles.length) && (<preload-css />)}
           {
             this.props.cssFiles
               .map(path => <link rel="stylesheet" type="text/css" key={path} href={path} />)
@@ -110,8 +113,7 @@ class Html extends Component {
             )
           }
           {
-            !this.props.dangerouslySetInnerHTML.__html.length &&
-            (
+            !this.props.dangerouslySetInnerHTML.__html.length && (
               <div id={this.props.clientRootElementId}>{this.props.children || null}</div>
             )
           }

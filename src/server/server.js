@@ -32,7 +32,7 @@ const sHandler = new ServerHandler({
 
 const serverMiddlewares = [];
 sHandler.addPlugin(new ProjectServer({
-
+  
   addPlugin: sHandler.addPlugin,
   addMiddleware: (middleware) => {
     serverMiddlewares.push(middleware);
@@ -82,10 +82,10 @@ app.get(`${env.appRootUrl}/manifest.json`, (req, res) => {
 });
 
 app.get("*", (req, res, next) => {
-
+  
   // Get the resources
   const assets = assetsToArray(res.locals.assets);
-
+  
   // If no server side rendering is necessary simply
   // run the handler and return streamed data
   if (!env.serverSideRender) {
@@ -107,7 +107,7 @@ app.get("*", (req, res, next) => {
       // @todo: Handle Error
       return next();
     }
-
+    
     // Once we have all the routes, pass the handler to the
     // server run at this point we should have cssDependencyMap as well.
     return sHandler.run({
@@ -129,7 +129,7 @@ app.get("*", (req, res, next) => {
  * @returns {*}
  */
 export default (req, res, next, _global) => {
-
+  
   // Add global vars to middlewares and application
   for (let key in _global) {
     let val = _global[key];
@@ -140,12 +140,12 @@ export default (req, res, next, _global) => {
       }
     });
   }
-
+  
   return app.handle(req, res, next);
 };
 
 export const beforeStart = (serverConfig, _global, cb = function() {}) => {
-
+  
   const setAppLocal = (key, value) => {
     if (!key) return;
     _global[key] = value;
@@ -154,7 +154,7 @@ export const beforeStart = (serverConfig, _global, cb = function() {}) => {
     if (!_global[key]) return defaultValue;
     return _global[key];
   };
-
+  
   sHandler.hooks.beforeStart.callAsync(serverConfig, {
     setAppLocal,
     getAppLocal,
