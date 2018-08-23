@@ -35,4 +35,4 @@ if (typeof config.hashedRoutes === "undefined" && config.singlePageApplication) 
   config.hashedRoutes = true;
 }
 
-module.exports = Object.assign({}, config);
+export default Object.assign({}, config);

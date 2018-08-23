@@ -1,9 +1,15 @@
 // import ReduxServer from "../../packages/pawjs-redux/src/server";
 
+import FirebaseServer from "../../packages/pawjs-firebase/src/server";
+import FirebaseOptions from "../firebase.json";
+import FirebaseServiceAccountDetails from "../serviceAccount.json";
+
+new FirebaseServer(FirebaseOptions, FirebaseServiceAccountDetails)
+
+
 export default class Server {
 
   constructor({addPlugin}) {
-
     // const reduxServer = new ReduxServer();
     // reduxServer.setReducers({
     //   counter: function(state = null) {

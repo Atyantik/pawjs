@@ -96,7 +96,11 @@
   },
   "homepage": "https://github.com/Atyantik/pawjs#readme",
   "devDependencies": {
+    "firebase": "^5.4.0",
+    "firebase-admin": "^6.0.0",
+    "node-pre-gyp": "^0.11.0",
     "node-sass": "^4.9.3",
+    "protobufjs": "^6.8.8",
     "sass-loader": "^7.1.0",
     "webpack-bundle-analyzer": "^2.13.1"
   }

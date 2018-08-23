@@ -11,6 +11,9 @@ import fontRule from "./inc/babel-font-rule";
 
 const isProduction = process.env.PAW_ENV === "production";
 
+let resolver = JSON.parse(JSON.stringify(resolverConfig));
+resolver.resolve.mainFields = ["main", "module"];
+
 export default {
   name: "server",
   mode: isProduction? "production": "development",
@@ -52,7 +55,7 @@ export default {
     __dirname: false,
     __filename: false,
   },
-  ...resolverConfig,
+  ...resolver,
   plugins: [
     new webpack.EnvironmentPlugin(Object.assign({}, process.env)),
     new MiniCssExtractPlugin({filename: "server.css"})
