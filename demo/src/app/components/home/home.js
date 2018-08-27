@@ -3,9 +3,9 @@ import { Link } from "react-router-dom";
 import Prism from "../prism";
 import AnimatedAtom from "../animated-atom";
 import * as styles from "./home.scss";
-import firebase from "../../../../../packages/pawjs-firebase";
+// import firebase from "../../../../../packages/pawjs-firebase";
 
-console.log(firebase.database());
+// console.log(firebase.database());
 
 const supportsServiceWorker = function() {
   if (typeof window === "undefined") return false;
