@@ -5,7 +5,11 @@ module.exports = function(webpackStats) {
   let cssDependencyMap = [];
   webpackStats = webpackStats.toJson();
   
-  if (webpackStats.children && webpackStats.children.length === 1) {
+  if (
+    (typeof webpackStats.assets === "undefined" || !webpackStats.assets.length) &&
+    webpackStats.children &&
+    webpackStats.children.length === 1
+  ) {
     webpackStats = webpackStats.children;
   }
   

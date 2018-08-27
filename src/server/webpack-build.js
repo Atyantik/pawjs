@@ -347,29 +347,26 @@ try {
           // eslint-disable-next-line
           console.log("\n\nRe-organizing files...\n");
           try {
-            const tempPawJSBuildPath = path.join(os.tmpdir(), "pawjs-build");
+            const tempPawJSBuildPath = path.join(directories.root, "pawjs-temp-build");
             // Move to tempFolder
             del([tempPawJSBuildPath]).then(() => {
-              
               mv(directories.build, tempPawJSBuildPath, {mkdir: true, clobber: true}, (err) => {
                 if (err) {
                   // eslint-disable-next-line
                   console.error(err);
                   return;
                 }
-                
-                del([`${directories.dist}/**/*`])
+                del([directories.dist])
                   .then(() => {
-      
                     mv(tempPawJSBuildPath, directories.dist, {clobber: true}, (err) => {
                       if (err) {
                         // eslint-disable-next-line
                         console.error(err);
                         return;
                       }
-  
                       // eslint-disable-next-line
                       console.log("Static site generated successfully.");
+                      process.exit(0);
                     });
                   });
               });
