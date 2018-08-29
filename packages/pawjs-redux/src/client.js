@@ -30,6 +30,7 @@ export default class ReduxClient extends ReduxTapable {
           initialState = cloneDeep(iState);
         },
         getInitialState: () => {
+          if (typeof initialState === "undefined") return {};
           return cloneDeep(initialState);
         }
       };

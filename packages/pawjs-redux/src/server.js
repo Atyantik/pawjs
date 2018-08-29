@@ -25,6 +25,7 @@ export default class ReduxServer extends ReduxTapable {
           initialState = cloneDeep(iState);
         },
         getInitialState: () => {
+          if (typeof initialState === "undefined") return {};
           return cloneDeep(initialState);
         }
       };
