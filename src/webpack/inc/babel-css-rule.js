@@ -1,6 +1,5 @@
 const path = require("path");
 const directories = require("../utils/directories");
-
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const _ = require("lodash");
 const isProduction = process.env.PAW_ENV === "production";
@@ -9,6 +8,7 @@ const defaultOptions = {
   sourceMap: !isProduction,
   localIdentName: isProduction? "[hash:base64:5]": "[path][name]__[local]",
   compress: isProduction,
+  hot: false,
 };
 
 module.exports = module.exports.default = (options) => {
@@ -21,7 +21,9 @@ module.exports = module.exports.default = (options) => {
         path.join(directories.root, "node_modules"),
       ],
       use: [
-        MiniCssExtractPlugin.loader,
+        {
+          loader: o.hot? "style-loader": MiniCssExtractPlugin.loader,
+        },
         {
           loader: "css-loader",
           options: {
@@ -41,7 +43,9 @@ module.exports = module.exports.default = (options) => {
         path.join(directories.root, "node_modules"),
       ],
       use: [
-        MiniCssExtractPlugin.loader,
+        {
+          loader: o.hot? "style-loader": MiniCssExtractPlugin.loader,
+        },
         {
           loader: "css-loader",
           options: {

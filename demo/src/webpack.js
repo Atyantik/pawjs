@@ -1,4 +1,4 @@
-import SassPlugin from "../../packages/pawjs-sass/src/webpack";
+import SassPlugin from "@pawjs/sass/webpack";
 export default class ClientWebpack {
   constructor({addPlugin}) {
     addPlugin(new SassPlugin);

@@ -1,6 +1,5 @@
 import path from "path";
 import fs from "fs";
-import os from "os";
 import del from "del";
 import mv from "mv";
 import request from "supertest";

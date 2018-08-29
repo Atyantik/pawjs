@@ -136,10 +136,12 @@ export default class CliHandler {
    * Start server depending on the env variable
    */
   startServer() {
+    process.env.PAW_HOT = typeof process.env.PAW_HOT !== "undefined" ? process.env.PAW_HOT: true;
     require(path.resolve(this.libRoot, "src/server/webpack-start.js"));
   }
   
   buildProd = () => {
+    process.env.PAW_HOT = typeof process.env.PAW_HOT !== "undefined" ? process.env.PAW_HOT: false;
     require(path.resolve(this.libRoot, "src/server/webpack-build.js"));
   };
   

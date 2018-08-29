@@ -17,6 +17,8 @@ if (fs.existsSync(path.join(directories.src, "sw.js"))) {
   projectSW = fs.readFileSync(path.join(directories.src, "sw.js"), "utf-8");
 }
 
+const isHot = typeof process.env.PAW_HOT !== "undefined"? Boolean(process.env.PAW_HOT): false;
+
 const devPlugins = [];
 // try {
 //   if (require.resolve("webpack-bundle-analyzer")) {
@@ -51,7 +53,7 @@ export default {
   module: {
     rules: [
       webRule(),
-      ...cssRule(),
+      ...cssRule({hot: isHot}),
       fontRule({
         outputPath: "fonts/",
         publicPath: `${pawConfig.resourcesBaseUrl}fonts/`
@@ -72,12 +74,12 @@ export default {
   },
   plugins: [
     new webpack.EnvironmentPlugin(Object.assign({}, process.env)),
-    new MiniCssExtractPlugin({
+    ...(isHot? []: [new MiniCssExtractPlugin({
       // Options similar to the same options in webpackOptions.output
       // both options are optional
       filename: "css/[hash].css",
       chunkFilename: "css/[chunkhash].css"
-    }),
+    })]),
     ...(pawConfig.serviceWorker? [
       new WorkboxPlugin.InjectManifest({
         swSrc: path.resolve(process.env.__lib_root, "src","service-worker.js"),
