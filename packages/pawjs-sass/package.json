@@ -1,6 +1,6 @@
 {
   "name": "@pawjs/sass",
-  "version": "2.1.6",
+  "version": "2.1.7",
   "description": "Add Sass support to your project",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
