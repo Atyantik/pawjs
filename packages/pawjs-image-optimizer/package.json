@@ -12,7 +12,7 @@
   "license": "MIT",
   "peerDependencies": {
     "react": "^16.4.1",
-    "pawjs": "^2.0.0"
+    "@pawjs/pawjs": "^2.0.0"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",
