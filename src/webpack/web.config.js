@@ -17,7 +17,7 @@ if (fs.existsSync(path.join(directories.src, "sw.js"))) {
   projectSW = fs.readFileSync(path.join(directories.src, "sw.js"), "utf-8");
 }
 
-const isHot = typeof process.env.PAW_HOT !== "undefined"? Boolean(process.env.PAW_HOT): false;
+const isHot = typeof process.env.PAW_HOT !== "undefined"? process.env.PAW_HOT === "true": false;
 
 const devPlugins = [];
 // try {
