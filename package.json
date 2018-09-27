@@ -1,6 +1,6 @@
 {
   "name": "@pawjs/pawjs",
-  "version": "2.1.11",
+  "version": "2.1.12",
   "description": "A minimal pluggable reactjs framework to develop a progressive web application",
   "main": "scripts.js",
   "scripts": {
