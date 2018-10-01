@@ -300,10 +300,6 @@ wHandler.hooks.beforeConfig.tap("AddSyncedFilesPlugin", (wEnv, wType, wConfigs) 
           outputPath: directories.dist
         }));
       }
-      const util = require("util");
-      console.log("\n\n\n\n\n------------\n\n\n\n\n");
-      console.log(util.inspect(wConfig, {depth: 20}));
-      console.log("\n\n\n\n\n------------\n\n\n\n\n");
     });
   }
 });
@@ -322,7 +318,9 @@ try {
     if (webErr || webStats.hasErrors()) {
       // Handle errors here
       // eslint-disable-next-line
-      console.log(webStats.toJson());console.log("Web compiler error occurred. Please handle error here");
+      console.log(webStats.toJson());
+      // eslint-disable-next-line
+      console.log("Web compiler error occurred. Please handle error here");
       return;
     }
     // eslint-disable-next-line

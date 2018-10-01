@@ -1,12 +1,12 @@
 import React, {Component} from "react";
 import {connect} from "react-redux";
 
-@connect(state => {
+export default @connect(state => {
   return {
     pathname: state.router.location.pathname
   };
 })
-export default class error404 extends Component {
+class error404 extends Component {
   render() {
     const { pathname, staticContext } = this.props;
     if (staticContext) {

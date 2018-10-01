@@ -2,8 +2,8 @@ import React, { Component } from "react";
 import { withRouter } from "react-router-dom";
 import * as styles from "./style.scss";
 
-@withRouter
-export default class SidebarNav extends Component {
+export default @withRouter
+class SidebarNav extends Component {
   constructor(props) {
     super(props);
     this.state = {

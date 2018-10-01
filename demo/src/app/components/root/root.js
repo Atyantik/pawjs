@@ -7,12 +7,12 @@ import { loadScript } from "pawjs/src/utils/utils";
 
 const __development = process.env.NODE_ENV === "development";
 
-@connect (state => {
+export default @connect (state => {
   return {
     screen: state.screen
   };
 })
-export default class CoreRoot extends Component {
+class CoreRoot extends Component {
   
   async loadPreloadCSS() {
     let linksPromise = [];

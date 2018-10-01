@@ -24,4 +24,4 @@ export default class CodeSplitting extends Component {
       </article>
     );
   }
-};
+}
