@@ -1,7 +1,8 @@
-import _ from "lodash";
+import _ from 'lodash';
 
 export default class Storage {
   request = null;
+
   response = null;
 
   constructor(req, res) {
@@ -34,7 +35,7 @@ export default class Storage {
    * Clear all cookies
    */
   clear() {
-    _.each(_.get(this.request, "cookies", {}), (value, key) => {
+    _.each(_.get(this.request, 'cookies', {}), (value, key) => {
       this.removeItem(key);
     });
   }
@@ -48,14 +49,15 @@ export default class Storage {
   }
 
   key(index) {
-    let keys = this.keys();
+    const keys = this.keys();
     if (index <= keys) {
       return keys[index];
     }
     return null;
   }
+
   keys() {
-    return _.keys(_.get(this.request, "cookies", {}));
+    return _.keys(_.get(this.request, 'cookies', {}));
   }
 
   /**
@@ -82,7 +84,7 @@ export default class Storage {
    * @returns {Storage}
    */
   removeItem(key) {
-    this.response.cookie(key, "", {expires: new Date(0)});
+    this.response.cookie(key, '', { expires: new Date(0) });
     return this;
   }
 }

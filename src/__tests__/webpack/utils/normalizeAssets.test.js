@@ -1,45 +1,46 @@
-const normalizeAssets = require("../../../webpack/utils/normalizeAssets");
+const normalizeAssets = require('../../../webpack/utils/normalizeAssets');
 
 class MockWebpackAssets {
-  constructor(type = "MIXED") {
+  constructor(type = 'MIXED') {
     this.type = type;
   }
+
   toJson() {
-    if (this.type === "MIXED") {
+    if (this.type === 'MIXED') {
       return {
-        publicPath: "/",
+        publicPath: '/',
         assetsByChunkName: [
-          "test.js",
+          'test.js',
           [
-            "test1.js"
+            'test1.js',
           ],
           {
-            "main": "main.3as122.js"
+            main: 'main.3as122.js',
           },
           {
-            "client": [
-              "client.bundle.js",
-              "client.css"
-            ]
-          }
-        ]
+            client: [
+              'client.bundle.js',
+              'client.css',
+            ],
+          },
+        ],
       };
     }
 
     return {
       children: [
         {
-          publicPath: "/",
+          publicPath: '/',
           assetsByChunkName: [
-            "test.js"
-          ]
-        }
-      ]
+            'test.js',
+          ],
+        },
+      ],
     };
   }
 }
 
-test("Normalize should take care of Mixed data", () => {
-  expect(normalizeAssets(new MockWebpackAssets())[0]).toBe("/test.js");
-  expect(normalizeAssets(new MockWebpackAssets("CHILDREN"))[0]).toBe("/test.js");
+test('Normalize should take care of Mixed data', () => {
+  expect(normalizeAssets(new MockWebpackAssets())[0]).toBe('/test.js');
+  expect(normalizeAssets(new MockWebpackAssets('CHILDREN'))[0]).toBe('/test.js');
 });

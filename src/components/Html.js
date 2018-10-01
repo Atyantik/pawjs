@@ -1,15 +1,15 @@
-import React, { Component } from "react";
-import { metaKeys } from "../utils/seo";
-import PropTypes from "prop-types";
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
+import { metaKeys } from '../utils/seo';
 
 let toBase64;
 // Base64 polyfill
-if (typeof atob === "undefined" && typeof Buffer !== "undefined") {
+if (typeof atob === 'undefined' && typeof Buffer !== 'undefined') {
   toBase64 = function (str) {
     if (!str) return str;
-    return Buffer.from(str).toString("base64");
+    return Buffer.from(str).toString('base64');
   };
-} else if (typeof atob !== "undefined") {
+} else if (typeof atob !== 'undefined') {
   toBase64 = atob;
 }
 
@@ -27,9 +27,9 @@ class Html extends Component {
     clientRootElementId: PropTypes.string,
     dangerouslySetInnerHTML: PropTypes.shape({
       __html: PropTypes.string,
-    })
+    }),
   };
-  
+
   static defaultProps = {
     metaTags: [],
     pwaSchema: {},
@@ -38,44 +38,44 @@ class Html extends Component {
     assets: [],
     head: [],
     footer: [],
-    appRootUrl: "/",
-    clientRootElementId: "app",
+    appRootUrl: '/',
+    clientRootElementId: 'app',
     dangerouslySetInnerHTML: {
-      __html: ""
-    }
+      __html: '',
+    },
   };
-  
-  getPwaValue(key, defaultValue = "") {
-    if (typeof this.props.pwaSchema[key] !== "undefined") {
+
+  getPwaValue(key, defaultValue = '') {
+    if (typeof this.props.pwaSchema[key] !== 'undefined') {
       return this.props.pwaSchema[key];
     }
     return defaultValue;
   }
-  
+
   /**
    * Get meta tag after searching through meta tags
    * @param key
    * @param defaultValue
    * @returns {object}
    */
-  getMetaValue(key, defaultValue = "") {
+  getMetaValue(key, defaultValue = '') {
     let metaTag = {};
-    this.props.metaTags.forEach(m => {
+    this.props.metaTags.forEach((m) => {
       if (Object.keys(metaTag).length) return;
-      metaKeys.forEach(mKey => {
+      metaKeys.forEach((mKey) => {
         if (m[mKey] && m[mKey] === key) {
           metaTag = Object.assign({}, m);
         }
       });
     });
-    let handler = {
-      get: function(target, name) {
+    const handler = {
+      get(target, name) {
         return name in target ? target[name] : defaultValue;
-      }
+      },
     };
     return new Proxy(metaTag, handler);
   }
-  
+
   /**
    * Render the code
    * @returns {*}
@@ -83,20 +83,18 @@ class Html extends Component {
   render() {
     const { preloadedData } = this.props;
     return (
-      <html lang={this.getPwaValue("lang")} dir={this.getPwaValue("dir")}>
+      <html lang={this.getPwaValue('lang')} dir={this.getPwaValue('dir')}>
         <head>
-          <title>{this.getMetaValue("title").content}</title>
+          <title>{this.getMetaValue('title').content}</title>
           <link rel="manifest" href={`${this.props.appRootUrl}/manifest.json`} />
           {
-            this.props.metaTags.map((m, i) => {
-              return <meta key={`meta_${i}`} {...m} />;
-            })
+            this.props.metaTags.map((m, i) => <meta key={`meta_${i}`} {...m} />)
           }
           <script
             type="text/javascript"
             id="__pawjs_preloaded"
             dangerouslySetInnerHTML={{
-              __html: `window.__preloaded_data = ${JSON.stringify(toBase64(JSON.stringify(preloadedData)))};`
+              __html: `window.PAW_PRELOADED_DATA = ${JSON.stringify(toBase64(JSON.stringify(preloadedData)))};`,
             }}
           />
           {Boolean(this.props.preloadCssFiles.length) && (<preload-css />)}
@@ -120,8 +118,8 @@ class Html extends Component {
           {this.props.footer}
           {
             this.props.assets
-              .filter(path => path.endsWith(".js"))
-              .map(path => <script key={path} src={path} async={true} />)
+              .filter(path => path.endsWith('.js'))
+              .map(path => <script key={path} src={path} async />)
           }
         </body>
       </html>

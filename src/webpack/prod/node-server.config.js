@@ -1,3 +1,4 @@
-const WebpackHandler = require("../handler");
+const WebpackHandler = require('../handler');
+
 const handler = new WebpackHandler();
-module.exports = handler.getConfig("production", "server");
+module.exports = handler.getConfig('production', 'server');

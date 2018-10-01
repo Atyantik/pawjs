@@ -1,7 +1,7 @@
-const _ = require("lodash");
+const _ = require('lodash');
 
 const defaultOptions = {
-  cacheDirectory: process.env.PAW_CACHE === "true"
+  cacheDirectory: process.env.PAW_CACHE === 'true',
 };
 module.exports = module.exports.default = (options = {}) => {
   const o = _.assignIn({}, defaultOptions, options);
@@ -9,26 +9,26 @@ module.exports = module.exports.default = (options = {}) => {
     test: /\.m?jsx?$/,
     use: [
       {
-        loader: "babel-loader",
+        loader: 'babel-loader',
         options: {
           presets: [
             [
-              require("@babel/preset-env"),
+              require('@babel/preset-env'),
               {
-                "targets": {
-                  "browsers": ["last 2 versions", "safari >= 7", "ie >= 9"]
-                }
-              }
+                targets: {
+                  browsers: ['last 2 versions', 'safari >= 7', 'ie >= 9'],
+                },
+              },
             ],
-            require("@babel/preset-react"),
+            require('@babel/preset-react'),
           ],
           cacheDirectory: o.cacheDirectory,
-          plugins: require("./babel-plugins")(o)
-        }
+          plugins: require('./babel-plugins')(o),
+        },
       },
       {
-        loader: "prefetch-loader",
-      }
-    ]
+        loader: 'prefetch-loader',
+      },
+    ],
   };
 };

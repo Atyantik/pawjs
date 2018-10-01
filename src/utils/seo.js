@@ -1,74 +1,74 @@
-import _ from "lodash";
-import {isBrowser} from "./utils";
+import _ from 'lodash';
+import { isBrowser } from './utils';
 
-const defaultMeta = (pwaSchema) => [
+const defaultMeta = pwaSchema => [
   {
-    charSet: "utf-8",
+    charSet: 'utf-8',
   },
   {
-    name: "robots",
-    content: "all",
+    name: 'robots',
+    content: 'all',
   },
   {
-    name: "author",
-    content: "Atyantik Technologies Private Limited",
+    name: 'author',
+    content: 'Atyantik Technologies Private Limited',
   },
   {
-    httpEquiv: "x-ua-compatible",
-    content: "ie=edge",
+    httpEquiv: 'x-ua-compatible',
+    content: 'ie=edge',
   },
   {
-    name: "viewport",
-    content: "width=device-width, initial-scale=1, shrink-to-fit=no",
+    name: 'viewport',
+    content: 'width=device-width, initial-scale=1, shrink-to-fit=no',
   },
   {
-    name: "application-name",
-    content: _.get(pwaSchema, "name", ""),
+    name: 'application-name',
+    content: _.get(pwaSchema, 'name', ''),
   },
   {
-    name: "generator",
-    content: "PawJS",
+    name: 'generator',
+    content: 'PawJS',
   },
   {
-    name: "rating",
-    content: "General"
+    name: 'rating',
+    content: 'General',
   },
   {
-    name: "mobile-web-app-capable",
-    content: "yes"
+    name: 'mobile-web-app-capable',
+    content: 'yes',
   },
   {
-    name: "apple-mobile-web-app-capable",
-    content: "yes"
+    name: 'apple-mobile-web-app-capable',
+    content: 'yes',
   },
   {
-    name: "apple-mobile-web-app-status-bar-style",
-    content: _.get(pwaSchema, "theme_color", "#fff"),
+    name: 'apple-mobile-web-app-status-bar-style',
+    content: _.get(pwaSchema, 'theme_color', '#fff'),
   },
   {
-    name: "apple-mobile-web-app-title",
-    content: _.get(pwaSchema, "name", ""),
+    name: 'apple-mobile-web-app-title',
+    content: _.get(pwaSchema, 'name', ''),
   },
   {
-    name: "msapplication-tooltip",
-    content: _.get(pwaSchema, "description", "")
+    name: 'msapplication-tooltip',
+    content: _.get(pwaSchema, 'description', ''),
   },
   {
-    name: "msapplication-starturl",
-    content: _.get(pwaSchema, "start_url", ""),
+    name: 'msapplication-starturl',
+    content: _.get(pwaSchema, 'start_url', ''),
   },
   {
-    name: "msapplication-TileColor",
-    content: _.get(pwaSchema, "background_color", "#fff"),
+    name: 'msapplication-TileColor',
+    content: _.get(pwaSchema, 'background_color', '#fff'),
   },
   {
-    name: "renderer",
-    content: "webkit|ie-comp|ie-stand"
+    name: 'renderer',
+    content: 'webkit|ie-comp|ie-stand',
   },
   {
-    name: "full-screen",
-    content: "yes",
-  }
+    name: 'full-screen',
+    content: 'yes',
+  },
 
 ];
 
@@ -77,10 +77,10 @@ const defaultMeta = (pwaSchema) => [
  * @type {[*]}
  */
 export const metaKeys = [
-  "name",
-  "itemProp",
-  "property",
-  "charSet"
+  'name',
+  'itemProp',
+  'property',
+  'charSet',
 ];
 
 /**
@@ -89,10 +89,10 @@ export const metaKeys = [
  * @param baseUrl
  * @returns {*}
  */
-const getFullUrl = (url, baseUrl = "") => {
+const getFullUrl = (url, baseUrl = '') => {
   let fullImageUrl = url;
-  if (!_.startsWith(fullImageUrl, "http")) {
-    fullImageUrl = `${baseUrl}${!_.startsWith(fullImageUrl, "/") ? "/" : ""}${fullImageUrl}`;
+  if (!_.startsWith(fullImageUrl, 'http')) {
+    fullImageUrl = `${baseUrl}${!_.startsWith(fullImageUrl, '/') ? '/' : ''}${fullImageUrl}`;
   }
   return fullImageUrl;
 };
@@ -103,9 +103,11 @@ const getFullUrl = (url, baseUrl = "") => {
  * @param options
  * @returns {Array}
  */
-export const generateMeta = (data = {}, options = {baseUrl: "", url: "", pwaSchema: {}, seoSchema: {}}) => {
+export const generateMeta = (data = {}, options = {
+  baseUrl: '', url: '', pwaSchema: {}, seoSchema: {},
+}) => {
   // deep defaults the seoSchema we have in config file and the data provided to us.
-  let seoData = _.defaultsDeep(data, options.seoSchema);
+  const seoData = _.defaultsDeep(data, options.seoSchema);
 
   // Let store the generated Schema in following variable
   let generatedSchema = [];
@@ -118,10 +120,10 @@ export const generateMeta = (data = {}, options = {baseUrl: "", url: "", pwaSche
   // Get 200 words out of description
   const desc200chars = descriptionText.slice(0, 200);
 
-  //const desc200words = trimTillLastSentence(seoData.description, 200);
+  // const desc200words = trimTillLastSentence(seoData.description, 200);
 
   // Base url after removing the end slash
-  const baseUrl = options.baseUrl.replace(/\/$/, "");
+  const baseUrl = options.baseUrl.replace(/\/$/, '');
 
   // Add meta required for at top of head
   addUpdateMeta(generatedSchema, _.cloneDeep(defaultMeta(options.pwaSchema)));
@@ -131,17 +133,17 @@ export const generateMeta = (data = {}, options = {baseUrl: "", url: "", pwaSche
    */
   // Meta name
   generatedSchema.push({
-    name: "title",
+    name: 'title',
     content: seoData.title,
   });
   // Twitter title
   generatedSchema.push({
-    name: "twitter:title",
-    content: seoData.title
+    name: 'twitter:title',
+    content: seoData.title,
   });
   generatedSchema.push({
-    property: "og:title",
-    content: seoData.title
+    property: 'og:title',
+    content: seoData.title,
   });
 
   /**
@@ -149,44 +151,44 @@ export const generateMeta = (data = {}, options = {baseUrl: "", url: "", pwaSche
    */
   if (_.isString(seoData.keywords) && seoData.keywords.trim().length) {
     generatedSchema.push({
-      name: "keywords",
+      name: 'keywords',
       content: seoData.keywords,
     });
   }
   if (_.isArray(seoData.keywords) && seoData.keywords.length) {
     generatedSchema.push({
-      name: "keywords",
-      content: seoData.keywords.join(","),
+      name: 'keywords',
+      content: seoData.keywords.join(','),
     });
   }
 
   /**
    * Manage twitter site & author
    */
-  const twitterSite = _.get(seoData, "twitter.site", "");
+  const twitterSite = _.get(seoData, 'twitter.site', '');
   if (twitterSite.length) {
     generatedSchema.push({
-      name: "twitter:site",
-      content: twitterSite
+      name: 'twitter:site',
+      content: twitterSite,
     });
   }
 
-  const twitterCreator = _.get(seoData, "twitter.creator", "");
+  const twitterCreator = _.get(seoData, 'twitter.creator', '');
   if (twitterCreator.length) {
     generatedSchema.push({
-      name: "twitter:creator",
-      content: twitterCreator
+      name: 'twitter:creator',
+      content: twitterCreator,
     });
   }
 
   /**
    * Manage facebook admins
    */
-  const fbAdmins = _.get(seoData, "facebook.admins", []);
+  const fbAdmins = _.get(seoData, 'facebook.admins', []);
   if (fbAdmins && fbAdmins.length) {
     generatedSchema.push({
-      property: "fb:admins",
-      content: fbAdmins.join(",")
+      property: 'fb:admins',
+      content: fbAdmins.join(','),
     });
   }
 
@@ -195,16 +197,16 @@ export const generateMeta = (data = {}, options = {baseUrl: "", url: "", pwaSche
    */
   // Meta description
   generatedSchema.push({
-    name: "description",
+    name: 'description',
     content: desc155chars,
   });
   generatedSchema.push({
-    name: "twitter:description",
+    name: 'twitter:description',
     content: desc200chars,
   });
   generatedSchema.push({
-    property: "og:description",
-    content: descriptionText
+    property: 'og:description',
+    content: descriptionText,
   });
 
   /**
@@ -212,7 +214,7 @@ export const generateMeta = (data = {}, options = {baseUrl: "", url: "", pwaSche
    */
   if (seoData.site_name.length) {
     generatedSchema.push({
-      property: "og:site_name",
+      property: 'og:site_name',
       content: seoData.site_name,
     });
   }
@@ -231,36 +233,36 @@ export const generateMeta = (data = {}, options = {baseUrl: "", url: "", pwaSche
     const image = _.first(images);
     const fullImageUrl = getFullUrl(image, baseUrl);
     generatedSchema.push({
-      itemProp: "image",
-      content: fullImageUrl
+      itemProp: 'image',
+      content: fullImageUrl,
     });
     generatedSchema.push({
-      name: "twitter:image:src",
-      content: fullImageUrl
+      name: 'twitter:image:src',
+      content: fullImageUrl,
     });
     if (image.length > 1) {
-      _.each(images, img => {
+      _.each(images, (img) => {
         generatedSchema.push({
-          property: "og:image",
-          content: getFullUrl(img, baseUrl)
+          property: 'og:image',
+          content: getFullUrl(img, baseUrl),
         });
       });
     } else {
       generatedSchema.push({
-        property: "og:image",
-        content: fullImageUrl
+        property: 'og:image',
+        content: fullImageUrl,
       });
     }
 
     // Add type of twitter card
     generatedSchema.push({
-      name: "twitter:card",
-      content: "summary_large_image"
+      name: 'twitter:card',
+      content: 'summary_large_image',
     });
   } else {
     generatedSchema.push({
-      name: "twitter:card",
-      content: "summary"
+      name: 'twitter:card',
+      content: 'summary',
     });
   }
 
@@ -268,7 +270,7 @@ export const generateMeta = (data = {}, options = {baseUrl: "", url: "", pwaSche
    * Manage Type article/product/music/movie etc
    */
   generatedSchema.push({
-    property: "og:type",
+    property: 'og:type',
     content: seoData.type,
   });
 
@@ -279,7 +281,7 @@ export const generateMeta = (data = {}, options = {baseUrl: "", url: "", pwaSche
         if (!_.isEmpty(subValue)) {
           generatedSchema.push({
             property: `${seoData.type}:${key}:${subKey}`,
-            content: subValue
+            content: subValue,
           });
           generatedSchema.push({
             name: `twitter:data${twitterDataCounter}`,
@@ -292,37 +294,35 @@ export const generateMeta = (data = {}, options = {baseUrl: "", url: "", pwaSche
           twitterDataCounter++;
         }
       });
-    } else {
-      if (!_.isEmpty(value)) {
-        generatedSchema.push({
-          property: `${seoData.type}:${key}`,
-          content: value
-        });
-        generatedSchema.push({
-          name: `twitter:data${twitterDataCounter}`,
-          content: value,
-        });
-        generatedSchema.push({
-          name: `twitter:label${twitterDataCounter}`,
-          content: key,
-        });
-        twitterDataCounter++;
-      }
+    } else if (!_.isEmpty(value)) {
+      generatedSchema.push({
+        property: `${seoData.type}:${key}`,
+        content: value,
+      });
+      generatedSchema.push({
+        name: `twitter:data${twitterDataCounter}`,
+        content: value,
+      });
+      generatedSchema.push({
+        name: `twitter:label${twitterDataCounter}`,
+        content: key,
+      });
+      twitterDataCounter++;
     }
   });
 
-  let url = _.get(seoData, "url", _.get(options, "url", ""));
+  let url = _.get(seoData, 'url', _.get(options, 'url', ''));
   if (!url.length && isBrowser()) {
-    url = _.get(window, "location.href", "");
+    url = _.get(window, 'location.href', '');
   }
   if (url.trim().length) {
     generatedSchema.push({
-      property: "og:url",
-      content: url
+      property: 'og:url',
+      content: url,
     });
   }
 
-  const userMeta = _.get(seoData, "meta", []);
+  const userMeta = _.get(seoData, 'meta', []);
   addUpdateMeta(generatedSchema, userMeta);
 
   generatedSchema = _.uniqWith(generatedSchema, _.isEqual);
@@ -338,7 +338,7 @@ export const generateMeta = (data = {}, options = {baseUrl: "", url: "", pwaSche
  */
 const getMetaKey = (meta) => {
   let selectedMetaKey = false;
-  _.each(metaKeys, key => {
+  _.each(metaKeys, (key) => {
     if (!selectedMetaKey && _.get(meta, key, false)) {
       selectedMetaKey = key;
     }
@@ -353,14 +353,13 @@ const getMetaKey = (meta) => {
  * @param customMetas {Array}
  */
 const addUpdateMeta = (source = [], customMetas = []) => {
-
-  _.each(customMetas, meta => {
+  _.each(customMetas, (meta) => {
     const metaKey = getMetaKey(meta);
     let metaUpdated = false;
     if (metaKey) {
       // Suppose we got a meta key in our generatedSchema
       // then we need to update the generated schema
-      let generatedSchemaObj = _.find(source, {[metaKey]: meta[metaKey]});
+      const generatedSchemaObj = _.find(source, { [metaKey]: meta[metaKey] });
 
       if (generatedSchemaObj) {
         _.each(meta, (value, key) => {
@@ -384,9 +383,7 @@ const addUpdateMeta = (source = [], customMetas = []) => {
  * @param str
  * @returns {string}
  */
-export const getTextFromHtml = (str = "") => {
-  return str.replace(/<(?:.|\n)*?>/gm, "").trim();
-};
+export const getTextFromHtml = (str = '') => str.replace(/<(?:.|\n)*?>/gm, '').trim();
 
 /**
  * Process string to get appropriate trimmed data
@@ -409,17 +406,17 @@ export const trimTillLastSentence = (str, length = 0) => {
   }
 
   // Add leading space to preserve string length
-  str += " ";
+  str += ' ';
 
-  //trim the string to the maximum length
+  // trim the string to the maximum length
   let trimmedString = str.substr(0, length + 1);
 
   // Re-trim if we are in the middle of a word
-  let separator = ".";
+  let separator = '.';
 
   // Check if there is a sentence and a "." exists
   if (trimmedString.lastIndexOf(separator) === -1) {
-    separator = " ";
+    separator = ' ';
     if (trimmedString.lastIndexOf(separator) === -1) {
       // if no space exists at all then return the string
       // with max length value

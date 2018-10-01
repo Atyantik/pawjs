@@ -2,8 +2,8 @@ const path = require("path");
 const fs = require("fs");
 const _uniq = require("lodash/uniq");
 
-const pRoot = (process.env.__project_root) || (process.env.PROJECT_ROOT) || (process.cwd() + path.sep);
-const lRoot = process.env.__lib_root || path.resolve(__dirname, "../");
+const pRoot = (process.env.PROJECT_ROOT) || (process.env.PROJECT_ROOT) || (process.cwd() + path.sep);
+const lRoot = process.env.LIB_ROOT || path.resolve(__dirname, "../");
 
 /**
  *

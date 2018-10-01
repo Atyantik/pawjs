@@ -1,31 +1,30 @@
 import {
   Tapable,
-  AsyncSeriesHook
-} from "tapable";
+  AsyncSeriesHook,
+} from 'tapable';
 
-import React from "react";
-import _ from "lodash";
-import { renderToString } from "react-dom/server";
-import Html from "../components/Html";
-import {matchRoutes, renderRoutes} from "react-router-config";
-import { StaticRouter } from "react-router";
-import ErrorBoundary from "../components/ErrorBoundary";
-import { generateMeta } from "../utils/seo";
+import React from 'react';
+import _ from 'lodash';
+import { renderToString } from 'react-dom/server';
+import { matchRoutes, renderRoutes } from 'react-router-config';
+import { StaticRouter } from 'react-router';
+import Html from '../components/Html';
+import ErrorBoundary from '../components/ErrorBoundary';
+import { generateMeta } from '../utils/seo';
 
 export default class ServerHandler extends Tapable {
-  
   constructor(options) {
     super();
     this.addPlugin = this.addPlugin.bind(this);
     this.hooks = {
-      "beforeStart": new AsyncSeriesHook(["config", "appOptions"]),
-      "afterStart": new AsyncSeriesHook(["appOptions"]),
-      "beforeAppRender": new AsyncSeriesHook(["application", "request", "response"]),
-      "beforeHtmlRender": new AsyncSeriesHook(["application", "request", "response"])
+      beforeStart: new AsyncSeriesHook(['config', 'appOptions']),
+      afterStart: new AsyncSeriesHook(['appOptions']),
+      beforeAppRender: new AsyncSeriesHook(['application', 'request', 'response']),
+      beforeHtmlRender: new AsyncSeriesHook(['application', 'request', 'response']),
     };
     this.options = options;
   }
-  
+
   addPlugin(plugin) {
     try {
       if (plugin.hooks && Object.keys(plugin.hooks).length) {
@@ -33,37 +32,38 @@ export default class ServerHandler extends Tapable {
           this.hooks[hookName] = hookValue;
         });
       }
-    } catch(ex) {
+    } catch (ex) {
       // eslint-disable-next-line
       console.log(ex);
     }
     plugin.apply && plugin.apply(this);
   }
-  
-  async run({ routeHandler, req, res, next, assets , cssDependencyMap}) {
-    
+
+  async run({
+    routeHandler, req, res, next, assets, cssDependencyMap,
+  }) {
     const { asyncCSS, serverSideRender, appRootUrl } = this.options.env;
-    
+
     let routes = routeHandler.getRoutes();
-    let currentPageRoutes = matchRoutes(routes, req.path.replace(appRootUrl, ""));
-    let renderedHtml = "";
+    let currentPageRoutes = matchRoutes(routes, req.path.replace(appRootUrl, ''));
+    let renderedHtml = '';
     let context = {};
     let promises = [];
-    let preloadedData = [];
-    let cssToBeIncluded = [];
-    let cssToBePreloaded = [];
-    let modulesInRoutes = [ "pawProjectClient" ];
-    
-    
+    const preloadedData = [];
+    const cssToBeIncluded = [];
+    const cssToBePreloaded = [];
+    const modulesInRoutes = ['pawProjectClient'];
+
+
     const seoSchema = routeHandler.getDefaultSeoSchema();
     const pwaSchema = routeHandler.getPwaSchema();
-  
-    currentPageRoutes.forEach(({route}) => {
+
+    currentPageRoutes.forEach(({ route }) => {
       route.modules && modulesInRoutes.push(...route.modules);
     });
-    
-    modulesInRoutes.forEach(mod => {
-      cssDependencyMap.forEach(c => {
+
+    modulesInRoutes.forEach((mod) => {
+      cssDependencyMap.forEach((c) => {
         if (_.indexOf(c.modules, mod) !== -1) {
           if (!asyncCSS) {
             cssToBeIncluded.push(c.path);
@@ -73,64 +73,63 @@ export default class ServerHandler extends Tapable {
         }
       });
     });
-    
+
     if (!serverSideRender) {
-      
-      const baseUrl = `${req.protocol}://${req.get("host")}`;
+      const baseUrl = `${req.protocol}://${req.get('host')}`;
       const fullUrl = `${baseUrl}${req.originalUrl}`;
-      
+
       const metaTags = generateMeta({}, {
         baseUrl,
         url: fullUrl,
         seoSchema,
         pwaSchema,
       });
-      
-      let htmlProps = {
+
+      const htmlProps = {
         assets,
         cssFiles: cssToBeIncluded,
         preloadCssFiles: cssToBePreloaded,
         metaTags,
         pwaSchema,
       };
-      
+
       renderedHtml = renderToString(
         <Html
           {...htmlProps}
           appRootUrl={appRootUrl}
           clientRootElementId={this.options.env.clientRootElementId}
-        />
+        />,
       );
-      renderedHtml = renderedHtml.replace (
-        "<preload-css></preload-css>",
-        cssToBePreloaded.map (
-          p => `<link rel="preload" href="${p}" as="style" onload="this.rel='stylesheet'"/>`
-        ).join("")
+      renderedHtml = renderedHtml.replace(
+        '<preload-css></preload-css>',
+        cssToBePreloaded.map(
+          p => `<link rel="preload" href="${p}" as="style" onload="this.rel='stylesheet'"/>`,
+        ).join(''),
       );
-      
+
       res
         .status(context.status || 200)
-        .type("html")
+        .type('html')
         .send(`<!DOCTYPE html>${renderedHtml}`);
       return next();
     }
-    
-    currentPageRoutes.forEach(({route, match}) => {
+
+    currentPageRoutes.forEach(({ route, match }) => {
       if (route.component.preload) {
-        promises.push(route.component.preload(undefined, {route, match}));
+        promises.push(route.component.preload(undefined, { route, match }));
       }
     });
-    
+
     try {
       const promisesData = await Promise.all(promises);
       let seoData = {};
-      currentPageRoutes.forEach((r,i) => {
+      currentPageRoutes.forEach((r, i) => {
         if (r.route.getRouteSeo) {
           seoData = _.assignIn(seoData, r.route.seo, r.route.getRouteSeo());
         }
         promisesData[i] && preloadedData.push(promisesData[i][1]);
       });
-      const baseUrl = `${req.protocol}://${req.get("host")}`;
+      const baseUrl = `${req.protocol}://${req.get('host')}`;
       const fullUrl = `${baseUrl}${req.originalUrl}`;
       const metaTags = generateMeta(seoData, {
         baseUrl,
@@ -138,39 +137,39 @@ export default class ServerHandler extends Tapable {
         seoSchema,
         pwaSchema,
       });
-      let htmlProps = {
+      const htmlProps = {
         assets,
         cssFiles: cssToBeIncluded,
         preloadCssFiles: cssToBePreloaded,
-        preloadedData: preloadedData,
+        preloadedData,
         metaTags,
         pwaSchema,
         head: [],
         footer: [],
       };
-      
-      let Application = {
+
+      const Application = {
         htmlProps,
         children: (
           <StaticRouter location={req.url} context={context} basename={appRootUrl}>
             {renderRoutes(routes)}
           </StaticRouter>
         ),
-        context: context,
+        context,
         currentRoutes: currentPageRoutes.slice(0),
         routes: routes.slice(0),
       };
-      
-      await new Promise (r => this.hooks.beforeAppRender.callAsync(Application, req, res, r));
-      
-      let htmlContent = this.options.env.singlePageApplication ? "" : renderToString(
+
+      await new Promise(r => this.hooks.beforeAppRender.callAsync(Application, req, res, r));
+
+      const htmlContent = this.options.env.singlePageApplication ? '' : renderToString(
         <ErrorBoundary ErrorComponent={routeHandler.getErrorComponent()}>
           {Application.children}
-        </ErrorBoundary>
+        </ErrorBoundary>,
       );
-      
-      await new Promise (r => this.hooks.beforeHtmlRender.callAsync(Application, req, res, r ));
-      
+
+      await new Promise(r => this.hooks.beforeHtmlRender.callAsync(Application, req, res, r));
+
       renderedHtml = renderToString(
         <Html
           {...Application.htmlProps}
@@ -179,16 +178,16 @@ export default class ServerHandler extends Tapable {
           dangerouslySetInnerHTML={{
             __html: htmlContent,
           }}
-        />
+        />,
       );
-      
-      renderedHtml = renderedHtml.replace (
-        "<preload-css></preload-css>",
-        cssToBePreloaded.map (
-          p => `<link rel="preload" href="${p}" as="style" onload="this.rel='stylesheet'"/>`
-        ).join("")
+
+      renderedHtml = renderedHtml.replace(
+        '<preload-css></preload-css>',
+        cssToBePreloaded.map(
+          p => `<link rel="preload" href="${p}" as="style" onload="this.rel='stylesheet'"/>`,
+        ).join(''),
       );
-      
+
       if (context.url) {
         // can use the `context.status` that
         // we added in RedirectWithStatus
@@ -196,17 +195,16 @@ export default class ServerHandler extends Tapable {
       } else {
         res
           .status(context.status || 200)
-          .type("html")
+          .type('html')
           .send(`<!DOCTYPE html>${renderedHtml}`);
       }
-      
+
       // Free some memory
       routes = null;
       currentPageRoutes = null;
       context = null;
       promises = null;
       return next();
-      
     } catch (ex) {
       const ErrorComponent = routeHandler.getErrorComponent();
       renderedHtml = renderToString(
@@ -218,20 +216,20 @@ export default class ServerHandler extends Tapable {
           pwaSchema={pwaSchema}
         >
           <ErrorComponent error={ex} />
-        </Html>
+        </Html>,
       );
-      
-      renderedHtml = renderedHtml.replace (
-        "<preload-css></preload-css>",
-        cssToBePreloaded.map (
-          p => `<link rel="preload" href="${p}" as="style" onload="this.rel='stylesheet'"/>`
-        ).join("")
+
+      renderedHtml = renderedHtml.replace(
+        '<preload-css></preload-css>',
+        cssToBePreloaded.map(
+          p => `<link rel="preload" href="${p}" as="style" onload="this.rel='stylesheet'"/>`,
+        ).join(''),
       );
     }
-    
+
     res
       .status(context.status || 200)
-      .type("html")
+      .type('html')
       .send(`<!DOCTYPE html>${renderedHtml}`);
   }
 }

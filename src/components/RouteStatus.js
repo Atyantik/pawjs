@@ -1,5 +1,5 @@
-import React from "react";
-import {Route} from "react-router";
+import React from 'react';
+import { Route } from 'react-router';
 
 export default ({ code, children }) => (
   <Route render={({ staticContext }) => {
@@ -7,5 +7,6 @@ export default ({ code, children }) => (
       staticContext.status = code;
     }
     return children;
-  }}/>
+  }}
+  />
 );

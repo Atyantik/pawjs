@@ -1,91 +1,90 @@
-let obj = {};
+const obj = {};
 /**
  * @todo This can be optimized an should not be used with Object.defineProperty
  * -------
  * Use simple class instead.
  * -------
  */
-Object.defineProperty(obj, "cookieHandler", new (function () {
-  let aKeys = [], oStorage = {};
+Object.defineProperty(obj, 'cookieHandler', new (function () {
+  const aKeys = []; const
+    oStorage = {};
 
-  Object.defineProperty(oStorage, "clear", {
-    value: function () {
-      aKeys.forEach(key => {
+  Object.defineProperty(oStorage, 'clear', {
+    value() {
+      aKeys.forEach((key) => {
         this.removeItem(key);
       });
     },
     writable: false,
     configurable: false,
-    enumerable: false
+    enumerable: false,
   });
 
-  Object.defineProperty(oStorage, "getItem", {
-    value: function (sKey) {
+  Object.defineProperty(oStorage, 'getItem', {
+    value(sKey) {
       return sKey ? this[sKey] : null;
     },
     writable: false,
     configurable: false,
-    enumerable: false
+    enumerable: false,
   });
-  Object.defineProperty(oStorage, "key", {
-    value: function (nKeyId) {
+  Object.defineProperty(oStorage, 'key', {
+    value(nKeyId) {
       return aKeys[nKeyId];
     },
     writable: false,
     configurable: false,
-    enumerable: false
+    enumerable: false,
   });
-  Object.defineProperty(oStorage, "keys", {
-    value: function () {
+  Object.defineProperty(oStorage, 'keys', {
+    value() {
       return aKeys;
     },
     writable: false,
     configurable: false,
-    enumerable: false
+    enumerable: false,
   });
 
-  Object.defineProperty(oStorage, "setItem", {
-    value: function (sKey, sValue) {
+  Object.defineProperty(oStorage, 'setItem', {
+    value(sKey, sValue) {
       if (!sKey) {
         return;
       }
       this[sKey] = sValue;
-      window.document.cookie = encodeURI(sKey) + "=" + encodeURI(sValue) + "; expires=Tue, 19 Jan 2038 03:14:07 GMT; path=/";
+      window.document.cookie = `${encodeURI(sKey)}=${encodeURI(sValue)}; expires=Tue, 19 Jan 2038 03:14:07 GMT; path=/`;
     },
     writable: false,
     configurable: false,
-    enumerable: false
+    enumerable: false,
   });
-  Object.defineProperty(oStorage, "length", {
-    get: function () {
+  Object.defineProperty(oStorage, 'length', {
+    get() {
       return aKeys.length;
     },
     configurable: false,
-    enumerable: false
+    enumerable: false,
   });
-  Object.defineProperty(oStorage, "removeItem", {
-    value: function (sKey) {
+  Object.defineProperty(oStorage, 'removeItem', {
+    value(sKey) {
       if (!sKey) {
         return;
       }
       if (this[sKey]) {
         delete this[sKey];
       }
-      document.cookie = encodeURI(sKey) + "=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";
-
+      document.cookie = `${encodeURI(sKey)}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/`;
     },
     writable: false,
     configurable: false,
-    enumerable: false
+    enumerable: false,
   });
   this.get = function () {
     let iThisIndx;
-    for (let sKey in oStorage) {
+    for (const sKey in oStorage) {
       iThisIndx = aKeys.indexOf(sKey);
       if (iThisIndx === -1) {
         oStorage.setItem(sKey, oStorage[sKey]);
-      }
-      else {
+      } else {
         aKeys.splice(iThisIndx, 1);
       }
       delete oStorage[sKey];
@@ -104,5 +103,5 @@ Object.defineProperty(obj, "cookieHandler", new (function () {
   };
   this.configurable = false;
   this.enumerable = true;
-}));
+})());
 export default obj.cookieHandler;

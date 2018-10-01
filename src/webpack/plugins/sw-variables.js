@@ -2,11 +2,11 @@ class SwVariables {
   constructor(options = {}) {
     this.options = options;
   }
-  apply(compiler) {
 
+  apply(compiler) {
     const { fileName, variables, text } = this.options;
 
-    compiler.hooks.emit.tap("AddVariableToSw",  (compilation) => {
+    compiler.hooks.emit.tap('AddVariableToSw', (compilation) => {
       const chunks = compilation.chunks;
 
       const publicPath = compilation.options.output.publicPath;
@@ -16,7 +16,7 @@ class SwVariables {
       for (const chunk of chunks) {
         if (!chunk.name) continue;
         for (const file of chunk.files) {
-          offlineAssetsMapping.push([publicPath, file].join(""));
+          offlineAssetsMapping.push([publicPath, file].join(''));
         }
       }
 
@@ -40,32 +40,31 @@ class SwVariables {
           },
           size: function size() {
             return src.length;
-          }
+          },
         };
       }
     });
-  
-    compiler.hooks.emit.tap("AddEnvToSw",  (compilation) => {
-      
+
+    compiler.hooks.emit.tap('AddEnvToSw', (compilation) => {
       if (compilation.assets[fileName]) {
         let src = compilation.assets[fileName].source();
-        
-        const pawEnv = Object.keys(process.env).filter(x => x.indexOf("PAW_") !== -1);
-        let env = {};
-        pawEnv.forEach(k => {
+
+        const pawEnv = Object.keys(process.env).filter(x => x.indexOf('PAW_') !== -1);
+        const env = {};
+        pawEnv.forEach((k) => {
           env[k] = process.env[k];
         });
-        
+
         src = `self.__env=${JSON.stringify(env)};${src}`;
-        
-      
+
+
         compilation.assets[fileName] = {
           source: function source() {
             return src;
           },
           size: function size() {
             return src.length;
-          }
+          },
         };
       }
     });

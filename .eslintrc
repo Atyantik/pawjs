@@ -10,7 +10,7 @@
   },
   "parser": "babel-eslint",
   "extends": [
-    "eslint:recommended",
+    "airbnb",
     "plugin:jest/recommended"
   ],
   "parserOptions": {
@@ -27,34 +27,19 @@
     "jest"
   ],
   "rules": {
-    "indent": [
-      "error",
-      2,
-      {
-        "SwitchCase": 1
-      }
-    ],
-    "linebreak-style": [
-      "error",
-      "unix"
-    ],
-    "quotes": [
-      "error",
-      "double"
-    ],
-    "semi": [
-      "error",
-      "always"
-    ],
-    "react/jsx-uses-react": 2,
-    "react/jsx-uses-vars": 2,
-    "react/react-in-jsx-scope": 2,
-
+    "react/jsx-filename-extension": [1, { "extensions": [".js", ".jsx"] }],
     // Jest Rules
     "jest/no-disabled-tests": "warn",
     "jest/no-focused-tests": "error",
     "jest/no-identical-title": "error",
     "jest/prefer-to-have-length": "warn",
     "jest/valid-expect": "error"
+  },
+  "settings": {
+    "import/resolver": {
+      "webpack": {
+        "config": "./src/webpack/inc/webpack-resolver-config.js"
+      }
+    }
   }
 }

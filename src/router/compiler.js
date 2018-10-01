@@ -1,9 +1,8 @@
-import React from "react";
-import _ from "lodash";
-import Loadable from "../components/Loadable";
+import React from 'react';
+import _ from 'lodash';
+import Loadable from '../components/Loadable';
 
 export default class RouteCompiler {
-
   constructor(options) {
     this.options = options;
   }
@@ -16,8 +15,7 @@ export default class RouteCompiler {
   }
 
   compileRoute(route, routerService) {
-
-    let {
+    const {
       path,
       skeleton,
       error,
@@ -35,7 +33,7 @@ export default class RouteCompiler {
       errorComponent: error || routerService.getDefaultLoadErrorComponent(),
       skeletonComponent: skeleton || routerService.getDefaultLoaderComponent(),
       timeout: timeout || routerService.getDefaultLoadTimeout(),
-      delay: delay || routerService.getDefaultAllowedLoadDelay()
+      delay: delay || routerService.getDefaultAllowedLoadDelay(),
     };
 
 
@@ -51,49 +49,43 @@ export default class RouteCompiler {
         RouteComponent: async () => component,
 
         // Load Data with ability to update SEO
-        LoadData: (typeof loadData !== "undefined" ? async (props = {}) => {
-          return loadData({ updateSeo, ...props });
-        } : async() => ({})),
+        LoadData: (typeof loadData !== 'undefined' ? async (props = {}) => loadData({ updateSeo, ...props }) : async () => ({})),
 
         // Load layout as well
-        Layout: async() => layout,
+        Layout: async () => layout,
       },
       loading: (props) => {
         if (props.error) {
           return <Params.errorComponent {...props} />;
-        } else if (props.pastDelay) {
+        } if (props.pastDelay) {
           return <Params.skeletonComponent {...props} />;
-        } else {
-          return null;
         }
+        return null;
       },
       render(loaded, props) {
-        let RouteComponent = loaded.RouteComponent.default? loaded.RouteComponent.default: loaded.RouteComponent;
-        let LoadedData = loaded.LoadData;
+        const RouteComponent = loaded.RouteComponent.default ? loaded.RouteComponent.default : loaded.RouteComponent;
+        const LoadedData = loaded.LoadData;
         let Layout = loaded.Layout;
-        if (Layout)  {
+        if (Layout) {
           Layout = loaded.Layout.default ? loaded.Layout.default : loaded.Layout;
           return (
             <Layout {...props} loadedData={LoadedData}>
-              <RouteComponent {...props} loadedData={LoadedData}/>
+              <RouteComponent {...props} loadedData={LoadedData} />
             </Layout>
           );
         }
-        return <RouteComponent {...props} loadedData={LoadedData}/>;
+        return <RouteComponent {...props} loadedData={LoadedData} />;
       },
-      ...(route.modules? {modules: route.modules}: {}),
+      ...(route.modules ? { modules: route.modules } : {}),
     });
     loadableComponent.compiled = true;
     return {
-      getRouteSeo: () => {
-        return Object.assign({}, routeSeo);
-      },
+      getRouteSeo: () => Object.assign({}, routeSeo),
       path,
       component: loadableComponent,
       seo: Object.assign({}, seo),
       ...others,
-      ...(route.routes ? {routes: this.compileRoutes(route.routes, routerService)} : {}),
+      ...(route.routes ? { routes: this.compileRoutes(route.routes, routerService) } : {}),
     };
-
   }
 }
