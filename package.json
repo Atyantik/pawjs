@@ -4,7 +4,7 @@
   "description": "A minimal pluggable reactjs framework to develop a progressive web application",
   "main": "scripts.js",
   "scripts": {
-    "prepare-demo": "node ./prepare-packages.js && cd demo && npm i && cd ..",
+    "prepare-demo": "node ./prepare-packages.js && cd demo && npm install && cd ..",
     "build": "npm run build:prod",
     "build:dev": "node ./paw.js --no-cache --root=./demo --env=development --verbose build",
     "build:prod": "node ./paw.js --no-cache --root=./demo --env=production build",
@@ -48,7 +48,7 @@
     "babel-core": "^7.0.0-bridge.0",
     "babel-eslint": "^10.0.1",
     "babel-jest": "^23.6.0",
-    "babel-loader": "^8.0.3",
+    "babel-loader": "^8.0.4",
     "babel-plugin-lodash": "^3.3.4",
     "babel-plugin-syntax-dynamic-import": "^6.18.0",
     "babel-template": "^6.26.0",

@@ -1,7 +1,7 @@
 import React, {Component} from "react";
 import { Link } from "react-router-dom";
-import WhiteLogo from "../../../resources/images/reactpwa-logo-white.png?sizes=64w";
-import GithubImage from "./github-icon-white.png?sizes=64w";
+import WhiteLogo from "../../../resources/images/reactpwa-logo-white.png";
+import GithubImage from "./github-icon-white.png";
 import Storage from "pawjs/src/libs/storage";
 
 export default class Header extends Component {

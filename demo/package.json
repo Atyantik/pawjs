@@ -17,13 +17,17 @@
   "author": "Tirth Bodawala",
   "license": "MIT",
   "devDependencies": {
-    "@pawjs/pawjs": "file:../",
-    "@pawjs/sass": "file:../packages/pawjs-sass/lib",
-    "@pawjs/redux": "file:../packages/pawjs-redux/lib",
     "@pawjs/image-optimizer": "file:../packages/pawjs-image-optimizer/lib",
+    "@pawjs/pawjs": "file:..",
+    "@pawjs/redux": "file:../packages/pawjs-redux/lib",
+    "@pawjs/sass": "file:../packages/pawjs-sass/lib",
+    "image-webpack-loader": "^4.3.1",
     "node-sass": "^4.9.3",
+    "pwa-srcset-loader": "^2.0.2",
     "sass-loader": "^7.1.0",
     "webpack-bundle-analyzer": "^2.13.1"
   },
-  "dependencies": {}
+  "dependencies": {
+    "webp-loader": "^0.4.0"
+  }
 }

@@ -19,6 +19,12 @@ class SyncedFilesPlugin {
       }
     }];
   }
+  static loaderOneOf(oneOf) {
+    return oneOf.map(oneF => {
+      oneF.use = SyncedFilesPlugin.loader(oneF.use);
+      return oneF;
+    });
+  }
   apply(compiler) {
     compiler.hooks.beforeRun.tap({name: "LoadPreviouslySyncedFilesMap"}, () => {
       const outputPath = this.outputPath || compiler.outputPath;

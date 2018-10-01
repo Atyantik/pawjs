@@ -175,17 +175,29 @@ const isBabelRule = (rule) => {
 };
 const hasSyncedFileLoader = rule => {
   let hasSyncFile = false;
-  if (!rule.use || !rule.use.length) {
-    return hasSyncFile;
-  }
-  rule.use.forEach(u => {
-    if (hasSyncFile) return;
+  if (rule.use && rule.use.length) {
+    rule.use.forEach(u => {
+      if (hasSyncFile) return;
     
-    if (u.loader === path.resolve(__dirname, "../webpack/plugins/synced-files-plugin/loader.js")) {
-      hasSyncFile = true;
-    }
-  });
+      if (u.loader === path.resolve(__dirname, "../webpack/plugins/synced-files-plugin/loader.js")) {
+        hasSyncFile = true;
+      }
+    });
+  }
   
+  if (rule.oneOf && rule.oneOf.length) {
+    rule.oneOf.forEach(oneOf => {
+      if (hasSyncFile) return;
+  
+      oneOf.use.forEach(u => {
+        if (hasSyncFile) return;
+    
+        if (u.loader === path.resolve(__dirname, "../webpack/plugins/synced-files-plugin/loader.js")) {
+          hasSyncFile = true;
+        }
+      });
+    });
+  }
   return hasSyncFile;
   
 };
@@ -226,7 +238,8 @@ wHandler.hooks.beforeConfig.tap("AddSyncedFilesPlugin", (wEnv, wType, wConfigs) 
         
         
         if (isImageRule(rule) && !hasSyncedFileLoader(rule)) {
-          rule.use = SyncedFilesPlugin.loader(rule.use);
+          rule.use && (rule.use = SyncedFilesPlugin.loader(rule.use));
+          rule.oneOf && (rule.oneOf = SyncedFilesPlugin.loaderOneOf(rule.oneOf));
         }
       });
       
@@ -243,7 +256,10 @@ wHandler.hooks.beforeConfig.tap("AddSyncedFilesPlugin", (wEnv, wType, wConfigs) 
           outputPath: directories.dist
         }));
       }
-      
+      // const util = require("util");
+      // console.log("\n\n\n\n\n------------\n\n\n\n\n");
+      // console.log(util.inspect(wConfig, {depth: 20}));
+      // console.log("\n\n\n\n\n------------\n\n\n\n\n");
     });
   }
   
@@ -271,9 +287,10 @@ wHandler.hooks.beforeConfig.tap("AddSyncedFilesPlugin", (wEnv, wType, wConfigs) 
             hot: false,
           });
         }
-        
+  
         if (isImageRule(rule) && !hasSyncedFileLoader(rule)) {
-          rule.use = SyncedFilesPlugin.loader(rule.use);
+          rule.use && (rule.use = SyncedFilesPlugin.loader(rule.use));
+          rule.oneOf && (rule.oneOf = SyncedFilesPlugin.loaderOneOf(rule.oneOf));
         }
       });
   
@@ -283,6 +300,10 @@ wHandler.hooks.beforeConfig.tap("AddSyncedFilesPlugin", (wEnv, wType, wConfigs) 
           outputPath: directories.dist
         }));
       }
+      const util = require("util");
+      console.log("\n\n\n\n\n------------\n\n\n\n\n");
+      console.log(util.inspect(wConfig, {depth: 20}));
+      console.log("\n\n\n\n\n------------\n\n\n\n\n");
     });
   }
 });
@@ -301,7 +322,7 @@ try {
     if (webErr || webStats.hasErrors()) {
       // Handle errors here
       // eslint-disable-next-line
-      console.log("Web compiler error occurred. Please handle error here");
+      console.log(webStats.toJson());console.log("Web compiler error occurred. Please handle error here");
       return;
     }
     // eslint-disable-next-line

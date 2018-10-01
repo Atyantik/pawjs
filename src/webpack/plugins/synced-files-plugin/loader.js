@@ -25,8 +25,8 @@ module.exports = function () {
     }
   });
 
-  requestString = `!${requestString}!${this.resourcePath}`;
-  syncKey = `!${syncKey}!${this.resourcePath}`;
+  requestString = `!${requestString}!${this.resourcePath}${this.resourceQuery}`;
+  syncKey = `!${syncKey}!${this.resourcePath}${this.resourceQuery}`;
 
   let syncSource;
   const publicPath = `${this._compiler.options.output.publicPath}${fileLoaderOptions ? fileLoaderOptions.publicPath: ""}`;
@@ -38,7 +38,7 @@ module.exports = function () {
 
   this.loadModule(requestString, function  (error, source) {
     if (!error) {
-      if (syncPlugin) {
+      if (syncPlugin && source.indexOf("require") === -1) {
         syncPlugin.add(syncKey, source);
       }
     }

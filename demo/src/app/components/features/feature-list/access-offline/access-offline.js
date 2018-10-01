@@ -6,7 +6,9 @@
 
 import React, { Component } from "react";
 
-import Offline from "./images/offline.png";
+import OfflineSrcset from "./images/offline.png?sizes=400w+800w&placeholder";
+import Picture from "../../../../../../../packages/pawjs-srcset/src/picture";
+// console.log(Offline, OfflineSrcset, 1);
 
 export default class AccessOffline extends Component {
   render() {
@@ -17,9 +19,9 @@ export default class AccessOffline extends Component {
           <hr/>
         </header>
         <section>
-          <p>
-            <img src={Offline} className="w-100"/>
-          </p>
+          {/*<p>*/}
+          {/*<img src={Offline} className="w-100"/>*/}
+          {/*</p>*/}
           <p>
             When you visit a website without an internet connection in Chrome, you see the
             offline dinosaur.
@@ -46,6 +48,7 @@ export default class AccessOffline extends Component {
             The Service Worker API is much more flexible than AppCache as it allows the developer to decide in minute detail
             what happens to each client-side web request — but with flexibility comes complexity.
           </p>
+          <Picture image={OfflineSrcset} imgClassName="w-100" alt="Offline" />
         </section>
       </article>
     );
