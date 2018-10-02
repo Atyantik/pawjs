@@ -6,7 +6,10 @@ const App = props => props.children;
 const HotApp = hot(module)(App);
 
 clientHandler.hooks.beforeRender.tap('AddHotModuleLoader', (app) => {
+  // eslint-disable-next-line
   app.children = <HotApp>{app.children}</HotApp>;
 });
 
-module && module.hot && module.hot.accept && module.hot.accept();
+if (module && module.hot && module.hot.accept) {
+  module.hot.accept();
+}

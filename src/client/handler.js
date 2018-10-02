@@ -222,7 +222,9 @@ export default class ClientHandler extends Tapable {
           () => {
             window.PAW_PRELOADED_DATA = null;
             delete window.PAW_PRELOADED_DATA;
-            document.getElementById('__pawjs_preloaded') && document.getElementById('__pawjs_preloaded').remove();
+            if (document.getElementById('__pawjs_preloaded')) {
+              document.getElementById('__pawjs_preloaded').remove();
+            }
             this.hooks.renderComplete.call();
           },
         );
