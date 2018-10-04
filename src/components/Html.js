@@ -5,7 +5,7 @@ import { metaKeys } from '../utils/seo';
 let toBase64;
 // Base64 polyfill
 if (typeof atob === 'undefined' && typeof Buffer !== 'undefined') {
-  toBase64 = function (str) {
+  toBase64 = (str) => {
     if (!str) return str;
     return Buffer.from(str).toString('base64');
   };
@@ -16,13 +16,13 @@ if (typeof atob === 'undefined' && typeof Buffer !== 'undefined') {
 
 class Html extends Component {
   static propTypes = {
-    metaTags: PropTypes.array,
-    pwaSchema: PropTypes.object,
-    cssFiles: PropTypes.array,
-    preloadCssFiles: PropTypes.array,
-    assets: PropTypes.array,
-    head: PropTypes.array,
-    footer: PropTypes.array,
+    metaTags: PropTypes.shape([]),
+    pwaSchema: PropTypes.shape({}),
+    cssFiles: PropTypes.shape([]),
+    preloadCssFiles: PropTypes.shape([]),
+    assets: PropTypes.shape([]),
+    head: PropTypes.shape([]),
+    footer: PropTypes.shape([]),
     appRootUrl: PropTypes.string,
     clientRootElementId: PropTypes.string,
     dangerouslySetInnerHTML: PropTypes.shape({
@@ -46,8 +46,9 @@ class Html extends Component {
   };
 
   getPwaValue(key, defaultValue = '') {
-    if (typeof this.props.pwaSchema[key] !== 'undefined') {
-      return this.props.pwaSchema[key];
+    const { pwaSchema } = this.props;
+    if (typeof pwaSchema[key] !== 'undefined') {
+      return pwaSchema[key];
     }
     return defaultValue;
   }
@@ -60,7 +61,8 @@ class Html extends Component {
    */
   getMetaValue(key, defaultValue = '') {
     let metaTag = {};
-    this.props.metaTags.forEach((m) => {
+    const { metaTags } = this.props;
+    metaTags.forEach((m) => {
       if (Object.keys(metaTag).length) return;
       metaKeys.forEach((mKey) => {
         if (m[mKey] && m[mKey] === key) {
@@ -81,14 +83,26 @@ class Html extends Component {
    * @returns {*}
    */
   render() {
-    const { preloadedData } = this.props;
+    const {
+      preloadedData,
+      metaTags,
+      appRootUrl,
+      preloadCssFiles,
+      cssFiles,
+      head,
+      dangerouslySetInnerHTML,
+      clientRootElementId,
+      children,
+      footer,
+      assets,
+    } = this.props;
     return (
       <html lang={this.getPwaValue('lang')} dir={this.getPwaValue('dir')}>
         <head>
           <title>{this.getMetaValue('title').content}</title>
-          <link rel="manifest" href={`${this.props.appRootUrl}/manifest.json`} />
+          <link rel="manifest" href={`${appRootUrl}/manifest.json`} />
           {
-            this.props.metaTags.map((m, i) => <meta key={`meta_${i}`} {...m} />)
+            metaTags.map(m => <meta key={JSON.stringify(m)} {...m} />)
           }
           <script
             type="text/javascript"
@@ -97,27 +111,29 @@ class Html extends Component {
               __html: `window.PAW_PRELOADED_DATA = ${JSON.stringify(toBase64(JSON.stringify(preloadedData)))};`,
             }}
           />
-          {Boolean(this.props.preloadCssFiles.length) && (<preload-css />)}
+          {Boolean(preloadCssFiles.length) && (<preload-css />)}
           {
-            this.props.cssFiles
+            cssFiles
               .map(path => <link rel="stylesheet" type="text/css" key={path} href={path} />)
           }
-          {this.props.head}
+          {head}
         </head>
         <body>
           {
-            Boolean(this.props.dangerouslySetInnerHTML.__html.length) && (
-              <div id={this.props.clientRootElementId} dangerouslySetInnerHTML={this.props.dangerouslySetInnerHTML} />
+            // eslint-disable-next-line
+            Boolean(dangerouslySetInnerHTML.__html.length) && (
+              <div id={clientRootElementId} dangerouslySetInnerHTML={dangerouslySetInnerHTML} />
             )
           }
           {
-            !this.props.dangerouslySetInnerHTML.__html.length && (
-              <div id={this.props.clientRootElementId}>{this.props.children || null}</div>
+            // eslint-disable-next-line
+            !dangerouslySetInnerHTML.__html.length && (
+              <div id={clientRootElementId}>{children || null}</div>
             )
           }
-          {this.props.footer}
+          {footer}
           {
-            this.props.assets
+            assets
               .filter(path => path.endsWith('.js'))
               .map(path => <script key={path} src={path} async />)
           }

@@ -3,6 +3,7 @@ import defaultConfig from './defaults';
 
 let config = {};
 try {
+  // eslint-disable-next-line
   config = require(process.env.PAW_CONFIG_PATH);
 } catch (ex) {
   config = {};

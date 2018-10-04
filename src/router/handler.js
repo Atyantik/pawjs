@@ -167,7 +167,9 @@ export default class RouteHandler extends Tapable {
       // eslint-disable-next-line
       console.log(ex);
     }
-    plugin.apply && plugin.apply(this);
+    if (typeof plugin.apply === 'function') {
+      plugin.apply(this);
+    }
   }
 
   getRoutes() {

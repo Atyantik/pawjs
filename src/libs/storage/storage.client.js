@@ -5,7 +5,7 @@ const obj = {};
  * Use simple class instead.
  * -------
  */
-Object.defineProperty(obj, 'cookieHandler', new (function () {
+Object.defineProperty(obj, 'cookieHandler', new (function cookieHandler() {
   const aKeys = []; const
     oStorage = {};
 
@@ -78,9 +78,9 @@ Object.defineProperty(obj, 'cookieHandler', new (function () {
     configurable: false,
     enumerable: false,
   });
-  this.get = function () {
+  this.get = function get() {
     let iThisIndx;
-    for (const sKey in oStorage) {
+    Object.keys(oStorage).forEach((sKey) => {
       iThisIndx = aKeys.indexOf(sKey);
       if (iThisIndx === -1) {
         oStorage.setItem(sKey, oStorage[sKey]);
@@ -88,11 +88,11 @@ Object.defineProperty(obj, 'cookieHandler', new (function () {
         aKeys.splice(iThisIndx, 1);
       }
       delete oStorage[sKey];
-    }
+    });
     for (aKeys; aKeys.length > 0; aKeys.splice(0, 1)) {
       oStorage.removeItem(aKeys[0]);
     }
-    for (let aCouple, iKey, nIdx = 0, aCouples = document.cookie.split(/\s*;\s*/); nIdx < aCouples.length; nIdx++) {
+    for (let aCouple, iKey, nIdx = 0, aCouples = document.cookie.split(/\s*;\s*/); nIdx < aCouples.length; nIdx += 1) {
       aCouple = aCouples[nIdx].split(/\s*=\s*/);
       if (aCouple.length > 1) {
         oStorage[iKey = decodeURI(aCouple[0])] = decodeURI(aCouple[1]);
