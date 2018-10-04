@@ -24,11 +24,11 @@ class SwVariables {
         let src = compilation.assets[fileName].source();
 
         if (offlineAssetsMapping && offlineAssetsMapping.length) {
-          src = `${src};self.__offline_assets = ${JSON.stringify(offlineAssetsMapping)}`;
+          src = `${src};self.paw__offline_assets = ${JSON.stringify(offlineAssetsMapping)}`;
         }
 
         if (variables) {
-          src = `${src};self.__injected_variables = ${JSON.stringify(variables)};`;
+          src = `${src};self.paw__injected_variables = ${JSON.stringify(variables)};`;
         }
         if (text && text.length) {
           src = `${src};${text}`;
@@ -55,7 +55,7 @@ class SwVariables {
           env[k] = process.env[k];
         });
 
-        src = `self.__env=${JSON.stringify(env)};${src}`;
+        src = `self.paw__env=${JSON.stringify(env)};${src}`;
 
 
         compilation.assets[fileName] = {

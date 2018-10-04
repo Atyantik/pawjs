@@ -253,26 +253,23 @@ wHandler.hooks.beforeConfig.tap('AddSyncedFilesPlugin', (wEnv, wType, wConfigs) 
           outputPath: directories.dist,
         }));
       }
-      // const util = require("util");
-      // console.log("\n\n\n\n\n------------\n\n\n\n\n");
-      // console.log(util.inspect(wConfig, {depth: 20}));
-      // console.log("\n\n\n\n\n------------\n\n\n\n\n");
     });
   }
 
 
   if (wType === 'server') {
     wConfigs.forEach((wConfig) => {
-      if (wConfig.entry === path.resolve(process.env.LIB_ROOT, './src/server/server.js')) {
-        wConfig.entry = path.resolve(process.env.LIB_ROOT, './src/server/build.js');
+      let { entry, externals } = wConfig;
+      if (entry === path.resolve(process.env.LIB_ROOT, './src/server/server.js')) {
+        entry = path.resolve(process.env.LIB_ROOT, './src/server/build.js');
       }
-      if (!wConfig.externals) {
-        wConfig.externals = {};
+      if (!externals) {
+        externals = {};
       }
 
       // Add paw-assets as externals
-      if (!wConfig.externals['pwa-assets']) {
-        wConfig.externals['pwa-assets'] = './assets.json';
+      if (!externals['pwa-assets']) {
+        externals['pwa-assets'] = './assets.json';
       }
 
       wConfig.module.rules.forEach((rule, index) => {
