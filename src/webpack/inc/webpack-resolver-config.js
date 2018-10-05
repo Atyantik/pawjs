@@ -16,6 +16,7 @@ require('@babel/register')({
 const CliHandler = require('../../../scripts/cli').default;
 
 if (!process.env.PROJECT_ROOT) {
+  // eslint-disable-next-line
   const cli = new CliHandler();
 }
 const directories = require('../utils/directories');
@@ -32,22 +33,25 @@ const commonResolvers = [
 ];
 
 
-fs.existsSync(path.join(process.env.LIB_ROOT, 'node_modules'))
-&& commonResolvers.push(path.join(process.env.LIB_ROOT, 'node_modules'));
+if (fs.existsSync(path.join(process.env.LIB_ROOT, 'node_modules'))) {
+  commonResolvers.push(path.join(process.env.LIB_ROOT, 'node_modules'));
+}
 
-fs.existsSync(path.join(process.env.LIB_ROOT, '..', 'node_modules'))
-&& commonResolvers.push(path.join(process.env.LIB_ROOT, '..', 'node_modules'));
+if (fs.existsSync(path.join(process.env.LIB_ROOT, '..', 'node_modules'))) {
+  commonResolvers.push(path.join(process.env.LIB_ROOT, '..', 'node_modules'));
+}
 
-fs.existsSync(path.join(process.env.LIB_ROOT, '..', '..', 'node_modules'))
-&& commonResolvers.push(path.join(process.env.LIB_ROOT, '..', '..', 'node_modules'));
+if (fs.existsSync(path.join(process.env.LIB_ROOT, '..', '..', 'node_modules'))) {
+  commonResolvers.push(path.join(process.env.LIB_ROOT, '..', '..', 'node_modules'));
+}
 
-fs.existsSync(path.join(process.env.LIB_ROOT, '..', '..', '..', 'node_modules'))
-&& commonResolvers.push(path.join(process.env.LIB_ROOT, '..', '..', '..', 'node_modules'));
+if (fs.existsSync(path.join(process.env.LIB_ROOT, '..', '..', '..', 'node_modules'))) {
+  commonResolvers.push(path.join(process.env.LIB_ROOT, '..', '..', '..', 'node_modules'));
+}
 
 const loaderResolver = commonResolvers.slice(0);
 loaderResolver.push(path.join(process.env.LIB_ROOT, 'src', 'webpack', 'loaders'));
-
-module.exports = module.exports.default = {
+const resolver = {
   resolve: {
     alias: {
       pawjs: path.resolve(path.join(process.env.LIB_ROOT)),
@@ -60,3 +64,4 @@ module.exports = module.exports.default = {
     modules: loaderResolver,
   },
 };
+module.exports = resolver;

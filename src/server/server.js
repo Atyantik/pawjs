@@ -16,6 +16,7 @@ const rHandler = new RouteHandler({
   isServer: true,
 });
 
+// eslint-disable-next-line
 let ProjectRoutes = require(`${process.env.PROJECT_ROOT}/src/routes`);
 if (ProjectRoutes.default) ProjectRoutes = ProjectRoutes.default;
 
@@ -99,7 +100,7 @@ app.get('*', (req, res, next) => {
   }
   // If server side render is enabled then, then let the routes load
   // Wait for all routes to load everything!
-  rHandler.hooks.initRoutes.callAsync((err) => {
+  return rHandler.hooks.initRoutes.callAsync((err) => {
     if (err) {
       // eslint-disable-next-line
       console.log(err);
@@ -125,31 +126,35 @@ app.get('*', (req, res, next) => {
  * @param req
  * @param res
  * @param next
+ * @param PAW_GLOBAL
  * @returns {*}
  */
-export default (req, res, next, _global) => {
+export default (req, res, next, PAW_GLOBAL) => {
   // Add global vars to middlewares and application
-  for (const key in _global) {
-    const val = _global[key];
+  Object.keys(PAW_GLOBAL).forEach((key) => {
+    const val = PAW_GLOBAL[key];
     app.locals[key] = val;
     serverMiddlewares.forEach((sm) => {
       if (sm && sm.locals) {
+        // eslint-disable-next-line
         sm.locals[key] = val;
       }
     });
-  }
+  });
 
   return app.handle(req, res, next);
 };
 
-export const beforeStart = (serverConfig, _global, cb = function () {}) => {
+export const beforeStart = (serverConfig, PAW_GLOBAL, cb = function callback() {}) => {
   const setAppLocal = (key, value) => {
     if (!key) return;
-    _global[key] = value;
+
+    // eslint-disable-next-line
+    PAW_GLOBAL[key] = value;
   };
   const getAppLocal = (key, defaultValue = false) => {
-    if (!_global[key]) return defaultValue;
-    return _global[key];
+    if (!PAW_GLOBAL[key]) return defaultValue;
+    return PAW_GLOBAL[key];
   };
 
   sHandler.hooks.beforeStart.callAsync(serverConfig, {
@@ -158,14 +163,15 @@ export const beforeStart = (serverConfig, _global, cb = function () {}) => {
   }, cb);
 };
 
-export const afterStart = (_global, cb = function () {}) => {
+export const afterStart = (PAW_GLOBAL, cb = function callback() {}) => {
   const setAppLocal = (key, value) => {
     if (!key) return;
-    _global[key] = value;
+    // eslint-disable-next-line
+    PAW_GLOBAL[key] = value;
   };
   const getAppLocal = (key, defaultValue = false) => {
-    if (!_global[key]) return defaultValue;
-    return _global[key];
+    if (!PAW_GLOBAL[key]) return defaultValue;
+    return PAW_GLOBAL[key];
   };
   sHandler.hooks.afterStart.callAsync({
     setAppLocal,

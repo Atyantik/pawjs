@@ -6,8 +6,6 @@ import webpackHotMiddleware from 'webpack-hot-middleware';
 import webLog from 'webpack-log';
 import pawConfig from '../config';
 import directories from '../webpack/utils/directories';
-
-import env from '../config/index';
 import wHandler from '../webpack';
 // Utils
 // -- Require from string. create an export from string like `module.export = "Something";`
@@ -29,6 +27,7 @@ wHandler.hooks.beforeConfig.tap('AddHotReplacementPlugin', (wEnv, wType, wConfig
   // Add eval devtool to all the configs
   wConfigs.forEach((wConfig) => {
     if (!wConfig.devtool) {
+      // eslint-disable-next-line
       wConfig.devtool = 'eval';
     }
   });
@@ -50,17 +49,21 @@ wHandler.hooks.beforeConfig.tap('AddHotReplacementPlugin', (wEnv, wType, wConfig
             wConfig.entry.client.unshift(hotMiddlewareString);
           } else {
             wConfig.entry.client.splice(clientIndex, 0, hotMiddlewareString);
-            clientIndex++;
+            clientIndex += 1;
           }
         }
 
         // Replace app with hot-app
         if (wConfig.entry.client.includes(path.resolve(process.env.LIB_ROOT, 'src', 'client', 'app.js'))) {
+          // eslint-disable-next-line
           wConfig.entry.client[clientIndex] = path.resolve(process.env.LIB_ROOT, 'src', 'client', 'hot-app.js');
         }
 
         // check for Hot Module replacement plugin and add it if necessary
-        const hasHotPlugin = wConfig.plugins.some(plugin => plugin instanceof webpack.HotModuleReplacementPlugin);
+        const hasHotPlugin = wConfig
+          .plugins
+          .some(p => p instanceof webpack.HotModuleReplacementPlugin);
+
         if (!hasHotPlugin) {
           wConfig.plugins.unshift(new webpack.HotModuleReplacementPlugin({
             multiStep: true,
@@ -75,16 +78,21 @@ wHandler.hooks.beforeConfig.tap('AddHotReplacementPlugin', (wEnv, wType, wConfig
     wConfigs.forEach((wConfig) => {
       // Add express as externals
       if (!wConfig.externals) {
+        // eslint-disable-next-line
         wConfig.externals = {};
       }
+      // eslint-disable-next-line
       wConfig.externals.express = 'express';
 
 
       // do not emit image files for server!
       wConfig.module.rules.forEach((rule) => {
+        // eslint-disable-next-line
         rule.use && Array.isArray(rule.use) && rule.use.forEach((u) => {
           if (u.loader && u.loader === 'file-loader') {
+            // eslint-disable-next-line
             if (!u.options) u.options = {};
+            // eslint-disable-next-line
             u.options.emitFile = typeof u.options.emitFile !== 'undefined' ? u.options.emitFile : false;
           }
         });
@@ -155,7 +163,7 @@ try {
   const app = express();
 
   // Global for application
-  const _global = {};
+  const PAW_GLOBAL = {};
 
   // Disable x-powered-by for all requests
   app.set('x-powered-by', 'PawJS');
@@ -188,7 +196,7 @@ try {
     heartbeat: 2000,
   }));
 
-  app.use(env.appRootUrl, express.static(serverOptions.contentBase));
+  app.use(pawConfig.appRootUrl, express.static(serverOptions.contentBase));
 
   /**
    * Below is where the magic happens!
@@ -198,7 +206,8 @@ try {
    */
   app.use((req, res, next) => {
     const mfs = serverMiddleware.fileSystem;
-    const fileNameFromUrl = serverMiddleware.getFilenameFromUrl(serverOptions.publicPath + req.path);
+    const fileNameFromUrl = serverMiddleware
+      .getFilenameFromUrl(serverOptions.publicPath + req.path);
 
     // If the request is for static file, do not compute or send data to
     // server just execute the express default next functionality
@@ -226,13 +235,13 @@ try {
       res.locals.assets = assets;
       res.locals.cssDependencyMap = cssDependencyMap;
 
-      return CommonServerMiddleware(req, res, next, _global);
+      return CommonServerMiddleware(req, res, next, PAW_GLOBAL);
     } catch (ex) {
       // eslint-disable-next-line
       console.log(ex);
     }
     // Console.log
-    next();
+    return next();
   });
 
   let serverStarted = false;
@@ -241,11 +250,12 @@ try {
     if (serverStarted) return;
 
 
-    let beforeStart; let
-      afterStart = null;
+    let beforeStart; let afterStart = null;
     try {
       const CommonServer = getCommonServer();
+      // eslint-disable-next-line
       beforeStart = CommonServer.beforeStart;
+      // eslint-disable-next-line
       afterStart = CommonServer.afterStart;
     } catch (ex) {
       // eslint-disable-next-line
@@ -253,41 +263,41 @@ try {
     }
 
 
-    const serverConfig = {
+    const nodeServerConfig = {
       port: devServerConfig.port,
       host: devServerConfig.host,
     };
 
-    beforeStart(serverConfig, _global, (err) => {
+    beforeStart(nodeServerConfig, PAW_GLOBAL, (err) => {
       if (err) {
         // eslint-disable-next-line
         console.error(err);
         return;
       }
 
-      app.listen(serverConfig.port, serverConfig.host, () => {
+      app.listen(nodeServerConfig.port, nodeServerConfig.host, () => {
         serverStarted = true;
         // eslint-disable-next-line
         console.log(`
 
 ===================================================
-  Listening to http://${serverConfig.host}:${serverConfig.port}
+  Listening to http://${nodeServerConfig.host}:${nodeServerConfig.port}
   Open the above url in your browser.
 ===================================================
       `);
-        afterStart(_global);
+        afterStart(PAW_GLOBAL);
       });
     });
   };
 
   let totalCompilationComplete = 0;
   webCompiler.hooks.done.tap('InformWebCompiled', () => {
-    totalCompilationComplete++;
+    totalCompilationComplete += 1;
     if (totalCompilationComplete >= 2) startServer();
   });
 
   serverCompiler.hooks.done.tap('InformServerCompiled', () => {
-    totalCompilationComplete++;
+    totalCompilationComplete += 1;
     if (totalCompilationComplete >= 2) startServer();
   });
 } catch (ex) {

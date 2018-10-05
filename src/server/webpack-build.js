@@ -19,7 +19,8 @@ import ExtractEmittedAssets from '../webpack/plugins/extract-emitted-assets';
 const isVerbose = process.env.PAW_VERBOSE === 'true';
 
 const stats = {
-  // fallback value for stats options when an option is not defined (has precedence over local webpack defaults)
+  // fallback value for stats options when
+  // an option is not defined (has precedence over local webpack defaults)
   all: undefined,
 
   // Add asset Information
@@ -230,13 +231,20 @@ wHandler.hooks.beforeConfig.tap('AddSyncedFilesPlugin', (wEnv, wType, wConfigs) 
 
       wConfig.module.rules.forEach((rule, index) => {
         if (isBabelRule(rule)) {
+          // eslint-disable-next-line
           wConfig.module.rules[index] = webRule({ hot: false });
         }
 
 
         if (isImageRule(rule) && !hasSyncedFileLoader(rule)) {
-          rule.use && (rule.use = SyncedFilesPlugin.loader(rule.use));
-          rule.oneOf && (rule.oneOf = SyncedFilesPlugin.loaderOneOf(rule.oneOf));
+          if (rule.use) {
+            // eslint-disable-next-line
+            rule.use = SyncedFilesPlugin.loader(rule.use)
+          }
+          if (rule.oneOf) {
+            // eslint-disable-next-line
+            rule.oneOf = SyncedFilesPlugin.loaderOneOf(rule.oneOf)
+          }
         }
       });
 
@@ -259,21 +267,24 @@ wHandler.hooks.beforeConfig.tap('AddSyncedFilesPlugin', (wEnv, wType, wConfigs) 
 
   if (wType === 'server') {
     wConfigs.forEach((wConfig) => {
-      let { entry, externals } = wConfig;
-      if (entry === path.resolve(process.env.LIB_ROOT, './src/server/server.js')) {
-        entry = path.resolve(process.env.LIB_ROOT, './src/server/build.js');
+      if (wConfig.entry === path.resolve(process.env.LIB_ROOT, './src/server/server.js')) {
+        // eslint-disable-next-line
+        wConfig.entry = path.resolve(process.env.LIB_ROOT, './src/server/build.js');
       }
-      if (!externals) {
-        externals = {};
+      if (!wConfig.externals) {
+        // eslint-disable-next-line
+        wConfig.externals = {};
       }
 
       // Add paw-assets as externals
-      if (!externals['pwa-assets']) {
-        externals['pwa-assets'] = './assets.json';
+      if (!wConfig.externals['pwa-assets']) {
+        // eslint-disable-next-line
+        wConfig.externals['pwa-assets'] = './assets.json';
       }
 
       wConfig.module.rules.forEach((rule, index) => {
         if (isBabelRule(rule)) {
+          // eslint-disable-next-line
           wConfig.module.rules[index] = serverRule({
             noChunk: true,
             hot: false,
@@ -281,8 +292,15 @@ wHandler.hooks.beforeConfig.tap('AddSyncedFilesPlugin', (wEnv, wType, wConfigs) 
         }
 
         if (isImageRule(rule) && !hasSyncedFileLoader(rule)) {
-          rule.use && (rule.use = SyncedFilesPlugin.loader(rule.use));
-          rule.oneOf && (rule.oneOf = SyncedFilesPlugin.loaderOneOf(rule.oneOf));
+          if (rule.use) {
+            // eslint-disable-next-line
+            rule.use = SyncedFilesPlugin.loader(rule.use);
+          }
+
+          if (rule.oneOf) {
+            // eslint-disable-next-line
+            rule.oneOf = SyncedFilesPlugin.loaderOneOf(rule.oneOf)
+          }
         }
       });
 
@@ -332,6 +350,7 @@ try {
         console.log("Creating static files...");
 
         const outputConfig = serverConfig[0].output;
+        // eslint-disable-next-line
         let server = require(path.resolve(outputConfig.path, outputConfig.filename));
         server = server.default ? server.default : server;
 
@@ -364,10 +383,10 @@ try {
                 }
                 del([directories.dist])
                   .then(() => {
-                    mv(tempPawJSBuildPath, directories.dist, { clobber: true }, (err) => {
-                      if (err) {
+                    mv(tempPawJSBuildPath, directories.dist, { clobber: true }, (err1) => {
+                      if (err1) {
                         // eslint-disable-next-line
-                        console.error(err);
+                        console.error(err1);
                         return;
                       }
                       // eslint-disable-next-line

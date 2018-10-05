@@ -27,6 +27,7 @@ export default class WebpackHandler extends Tapable {
     };
   }
 
+  // eslint-disable-next-line
   getBabelCssRule() {
     return babelCssRules;
   }
@@ -42,7 +43,9 @@ export default class WebpackHandler extends Tapable {
       // eslint-disable-next-line
       console.log(ex);
     }
-    plugin.apply && plugin.apply(this);
+    if (plugin.apply) {
+      plugin.apply(this);
+    }
   }
 
   getConfig(env = 'development', type = 'web') {

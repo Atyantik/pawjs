@@ -6,7 +6,11 @@ let presetReact = require('@babel/preset-react');
 
 presetReact = presetReact.default ? presetReact.default : presetReact;
 
-module.exports = module.exports.default = options => ({
+let babelPlugins = require('./babel-plugins');
+
+babelPlugins = babelPlugins.default ? babelPlugins.default : babelPlugins;
+
+const rule = options => ({
   test: /\.jsx?$/,
   use: {
     loader: 'babel-loader',
@@ -21,7 +25,9 @@ module.exports = module.exports.default = options => ({
         presetReact,
       ],
       cacheDirectory: typeof options.cacheDirectory !== 'undefined' ? options.cacheDirectory : process.env.PAW_CACHE === 'true',
-      plugins: require('./babel-plugins')(options),
+      plugins: babelPlugins(options),
     },
   },
 });
+
+module.exports = rule;

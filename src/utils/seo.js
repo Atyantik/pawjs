@@ -96,6 +96,62 @@ const getFullUrl = (url, baseUrl = '') => {
   }
   return fullImageUrl;
 };
+
+/**
+ * Return the meta key detected from the meta provided.
+ * if no meta key from our standard metaKeys is found then return false
+ * @param meta
+ * @returns {boolean|string}
+ */
+const getMetaKey = (meta) => {
+  let selectedMetaKey = false;
+  _.each(metaKeys, (key) => {
+    if (!selectedMetaKey && _.get(meta, key, false)) {
+      selectedMetaKey = key;
+    }
+  });
+  return selectedMetaKey;
+};
+
+/**
+ * Update the source directly,
+ * thus pass as array
+ * @param source {Array}
+ * @param customMetas {Array}
+ */
+const addUpdateMeta = (source = [], customMetas = []) => {
+  _.each(customMetas, (meta) => {
+    const metaKey = getMetaKey(meta);
+    let metaUpdated = false;
+    if (metaKey) {
+      // Suppose we got a meta key in our generatedSchema
+      // then we need to update the generated schema
+      const generatedSchemaObj = _.find(source, { [metaKey]: meta[metaKey] });
+
+      if (generatedSchemaObj) {
+        _.each(meta, (value, key) => {
+          _.set(generatedSchemaObj, key, value);
+        });
+        metaUpdated = true;
+      }
+    }
+    // This means user is trying to add some meta that does
+    // not match our standard criteria or is not present in our source, maybe for site verification
+    // or google webmaster meta key etc
+    if (!metaUpdated) {
+      // Add data to source
+      source.push(meta);
+    }
+  });
+};
+
+/**
+ * Get text from html string
+ * @param str
+ * @returns {string}
+ */
+export const getTextFromHtml = (str = '') => str.replace(/<(?:.|\n)*?>/gm, '').trim();
+
 /**
  * Return array of meta tags required for the route
  * Pass seo data to the function and get array of meta data
@@ -291,7 +347,7 @@ export const generateMeta = (data = {}, options = {
             name: `twitter:label${twitterDataCounter}`,
             content: subKey,
           });
-          twitterDataCounter++;
+          twitterDataCounter += 1;
         }
       });
     } else if (!_.isEmpty(value)) {
@@ -307,7 +363,7 @@ export const generateMeta = (data = {}, options = {
         name: `twitter:label${twitterDataCounter}`,
         content: key,
       });
-      twitterDataCounter++;
+      twitterDataCounter += 1;
     }
   });
 
@@ -331,61 +387,6 @@ export const generateMeta = (data = {}, options = {
 };
 
 /**
- * Return the meta key detected from the meta provided.
- * if no meta key from our standard metaKeys is found then return false
- * @param meta
- * @returns {boolean|string}
- */
-const getMetaKey = (meta) => {
-  let selectedMetaKey = false;
-  _.each(metaKeys, (key) => {
-    if (!selectedMetaKey && _.get(meta, key, false)) {
-      selectedMetaKey = key;
-    }
-  });
-  return selectedMetaKey;
-};
-
-/**
- * Update the source directly,
- * thus pass as array
- * @param source {Array}
- * @param customMetas {Array}
- */
-const addUpdateMeta = (source = [], customMetas = []) => {
-  _.each(customMetas, (meta) => {
-    const metaKey = getMetaKey(meta);
-    let metaUpdated = false;
-    if (metaKey) {
-      // Suppose we got a meta key in our generatedSchema
-      // then we need to update the generated schema
-      const generatedSchemaObj = _.find(source, { [metaKey]: meta[metaKey] });
-
-      if (generatedSchemaObj) {
-        _.each(meta, (value, key) => {
-          _.set(generatedSchemaObj, key, value);
-        });
-        metaUpdated = true;
-      }
-    }
-    // This means user is trying to add some meta that does
-    // not match our standard criteria or is not present in our source, maybe for site verification
-    // or google webmaster meta key etc
-    if (!metaUpdated) {
-      // Add data to source
-      source.push(meta);
-    }
-  });
-};
-
-/**
- * Get text from html string
- * @param str
- * @returns {string}
- */
-export const getTextFromHtml = (str = '') => str.replace(/<(?:.|\n)*?>/gm, '').trim();
-
-/**
  * Process string to get appropriate trimmed data
  * Thus string "Tirth Bodawala" should return "Tirth Bodawala" with length 14
  * & should return "Tirth" with length 13, first it tries to search for "." and then
@@ -397,19 +398,19 @@ export const getTextFromHtml = (str = '') => str.replace(/<(?:.|\n)*?>/gm, '').t
 export const trimTillLastSentence = (str, length = 0) => {
   // Get pure text from string provided, necessary
   // to remove html tags
-  str = getTextFromHtml(str);
+  let strr = getTextFromHtml(str);
 
   // If no min length specified or no string
   // length then return string
-  if (!length || !str.length) {
-    return str;
+  if (!length || !strr.length) {
+    return strr;
   }
 
   // Add leading space to preserve string length
-  str += ' ';
+  strr += ' ';
 
   // trim the string to the maximum length
-  let trimmedString = str.substr(0, length + 1);
+  let trimmedString = strr.substr(0, length + 1);
 
   // Re-trim if we are in the middle of a word
   let separator = '.';
@@ -424,5 +425,8 @@ export const trimTillLastSentence = (str, length = 0) => {
       return trimmedString;
     }
   }
-  return trimmedString.substr(0, Math.min(trimmedString.length - 1, trimmedString.lastIndexOf(separator))).trim();
+  return trimmedString.substr(
+    0,
+    Math.min(trimmedString.length - 1, trimmedString.lastIndexOf(separator)),
+  ).trim();
 };

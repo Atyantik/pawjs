@@ -21,6 +21,7 @@ class SyncedFilesPlugin {
 
   static loaderOneOf(oneOf) {
     return oneOf.map((oneF) => {
+      // eslint-disable-next-line
       oneF.use = SyncedFilesPlugin.loader(oneF.use);
       return oneF;
     });
@@ -44,18 +45,21 @@ class SyncedFilesPlugin {
       const outputPath = this.outputPath || webpackStats.outputPath;
 
       if (!fs.existsSync(path.resolve(outputPath))) {
-        throw `Invalid path: ${outputPath}. Cannot emit ${this.outputFileName}`;
+        throw new Error(`Invalid path: ${outputPath}. Cannot emit ${this.outputFileName}`);
       }
 
       const outputFile = path.join(path.resolve(outputPath), this.outputFileName);
 
       if (this.deleteAfterCompile) {
-        fs.existsSync(outputFile) && fs.unlinkSync(outputFile);
-        return;
+        if (fs.existsSync(outputFile)) {
+          fs.unlinkSync(outputFile);
+        }
+        return true;
       }
       if (webpackStats && Object.keys(webpackStats).length && webpackStats.assetsByChunkName) {
         fs.writeFileSync(outputFile, JSON.stringify(this.syncedFiles), 'utf-8');
       }
+      return true;
     });
   }
 

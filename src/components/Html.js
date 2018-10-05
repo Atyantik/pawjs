@@ -107,6 +107,7 @@ class Html extends Component {
           <script
             type="text/javascript"
             id="__pawjs_preloaded"
+            // eslint-disable-next-line
             dangerouslySetInnerHTML={{
               __html: `window.PAW_PRELOADED_DATA = ${JSON.stringify(toBase64(JSON.stringify(preloadedData)))};`,
             }}
@@ -122,6 +123,7 @@ class Html extends Component {
           {
             // eslint-disable-next-line
             Boolean(dangerouslySetInnerHTML.__html.length) && (
+              // eslint-disable-next-line
               <div id={clientRootElementId} dangerouslySetInnerHTML={dangerouslySetInnerHTML} />
             )
           }

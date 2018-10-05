@@ -5,7 +5,7 @@ module.exports = ({ types: t }) => ({
 
   visitor: {
     Import(path) {
-      const parent = path.parentPath.parent;
+      const { parent } = path.parentPath;
       if (parent.type !== 'ObjectProperty') return;
       if (parent.key.name !== 'component') return;
 

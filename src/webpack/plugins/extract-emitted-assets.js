@@ -17,6 +17,7 @@ class ExtractEmittedAssets {
       const assetsByChunkName = normalizeAssets(webpackStatsObj);
       const outputFile = path.join(path.resolve(outputPath), this.outputName);
       fs.writeFileSync(outputFile, JSON.stringify(assetsByChunkName), 'utf-8');
+      return true;
     });
   }
 }

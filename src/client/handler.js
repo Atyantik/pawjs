@@ -151,7 +151,7 @@ export default class ClientHandler extends Tapable {
       // eslint-disable-next-line
       console.log(ex);
     }
-    if (typeof plugin.apply === 'function') {
+    if (plugin.apply) {
       plugin.apply(this);
     }
   }

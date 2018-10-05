@@ -120,6 +120,15 @@ function createLoadableComponent(loadFn, options) {
   }
 
   class LoadableComponent extends React.Component {
+    static propTypes = {
+      // eslint-disable-next-line
+      match: PropTypes.any,
+      // eslint-disable-next-line
+      route: PropTypes.any,
+      // eslint-disable-next-line
+      location: PropTypes.any,
+    };
+
     static contextTypes = {
       loadable: PropTypes.shape({
         report: PropTypes.func.isRequired,
@@ -149,7 +158,8 @@ function createLoadableComponent(loadFn, options) {
     }
 
     componentWillReceiveProps(nextProps) {
-      const prevLocation = { ...this.props.location };
+      const { location } = this.props;
+      const prevLocation = { ...location };
       const newLocation = { ...nextProps.location };
       delete prevLocation.key;
       delete newLocation.key;

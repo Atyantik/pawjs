@@ -1,16 +1,16 @@
 const SynckedFilesPlugin = require('./index');
 
-module.exports = function () {
+module.exports = function SyncedFilesLoader() {
   const callback = this.async();
   const loaders = this.query.requestedLoaders;
   let syncPlugin = null;
 
+  // eslint-disable-next-line
   this._compiler.options.plugins.forEach((plugin) => {
     if (plugin instanceof SynckedFilesPlugin) {
       syncPlugin = plugin;
     }
   });
-
 
   let requestString = '';
   let syncKey = '';
@@ -29,8 +29,10 @@ module.exports = function () {
   syncKey = `!${syncKey}!${this.resourcePath}${this.resourceQuery}`;
 
   let syncSource;
+  // eslint-disable-next-line
   const publicPath = `${this._compiler.options.output.publicPath}${fileLoaderOptions ? fileLoaderOptions.publicPath : ''}`;
 
+  // eslint-disable-next-line
   if (syncPlugin && (syncSource = syncPlugin.get(syncKey))) {
     callback(null, syncSource.replace('__webpack_public_path__', JSON.stringify(publicPath)));
     return;

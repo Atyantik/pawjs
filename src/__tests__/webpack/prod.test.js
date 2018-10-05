@@ -1,4 +1,5 @@
 const path = require('path');
+const webpack = require('webpack');
 
 process.env.LIB_ROOT = path.resolve(__dirname, '../../../');
 process.env.PROJECT_ROOT = path.resolve(process.env.LIB_ROOT, 'demo');
@@ -7,8 +8,6 @@ const wHandler = require('../../webpack').handler;
 
 const prodWebConfig = wHandler.getConfig('production', 'web');
 const prodNodeServerConfig = wHandler.getConfig('production', 'server');
-
-const webpack = require('webpack');
 const testUtils = require('../__test_utils/util');
 
 describe('WEB --env=prod', () => {
@@ -82,7 +81,7 @@ describe('Total Compilation should work', () => {
         return reject(webStats.toString());
       }
 
-      webpack(prodNodeServerConfig, (nodeServerError, nodeServerStats) => {
+      return webpack(prodNodeServerConfig, (nodeServerError, nodeServerStats) => {
         // 2. Fail test if there are errors
         if (nodeServerError) {
           return reject(nodeServerError);
@@ -92,7 +91,7 @@ describe('Total Compilation should work', () => {
 
         testUtils.deleteFolderRecursive(webStats.toJson().outputPath);
         testUtils.deleteFolderRecursive(nodeServerStats.toJson().outputPath);
-        resolve();
+        return resolve();
       });
     });
   }));

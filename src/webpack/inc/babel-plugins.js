@@ -65,6 +65,4 @@ function babelPlugins(options = { noChunk: false, hot: true }) {
   ];
 }
 
-module.exports.default = babelPlugins;
-
 module.exports = babelPlugins;

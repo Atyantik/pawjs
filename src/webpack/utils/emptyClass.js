@@ -1,1 +1,3 @@
-module.exports = module.exports.default = class EmptyClass {};
+class EmptyClass {}
+module.exports = EmptyClass;
+module.exports.default = EmptyClass;

@@ -7,7 +7,7 @@ const defaultOptions = {
   context: directories.src,
 };
 
-module.exports = module.exports.default = options => ({
+const rule = options => ({
   test: /\.(eot|ttf|woff|woff2)$/,
   use: [
     {
@@ -16,3 +16,5 @@ module.exports = module.exports.default = options => ({
     },
   ],
 });
+
+module.exports = rule;

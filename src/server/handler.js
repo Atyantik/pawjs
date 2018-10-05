@@ -36,7 +36,9 @@ export default class ServerHandler extends Tapable {
       // eslint-disable-next-line
       console.log(ex);
     }
-    plugin.apply && plugin.apply(this);
+    if (plugin.apply) {
+      plugin.apply(this);
+    }
   }
 
   async run({
@@ -59,7 +61,9 @@ export default class ServerHandler extends Tapable {
     const pwaSchema = routeHandler.getPwaSchema();
 
     currentPageRoutes.forEach(({ route }) => {
-      route.modules && modulesInRoutes.push(...route.modules);
+      if (route.modules) {
+        modulesInRoutes.push(...route.modules);
+      }
     });
 
     modulesInRoutes.forEach((mod) => {
@@ -127,7 +131,9 @@ export default class ServerHandler extends Tapable {
         if (r.route.getRouteSeo) {
           seoData = _.assignIn(seoData, r.route.seo, r.route.getRouteSeo());
         }
-        promisesData[i] && preloadedData.push(promisesData[i][1]);
+        if (promisesData[i]) {
+          preloadedData.push(promisesData[i][1]);
+        }
       });
       const baseUrl = `${req.protocol}://${req.get('host')}`;
       const fullUrl = `${baseUrl}${req.originalUrl}`;
@@ -227,7 +233,7 @@ export default class ServerHandler extends Tapable {
       );
     }
 
-    res
+    return res
       .status(context.status || 200)
       .type('html')
       .send(`<!DOCTYPE html>${renderedHtml}`);

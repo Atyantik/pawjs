@@ -14,15 +14,17 @@ describe('Synced Files Plugin Tests:', () => {
           context: path.resolve(path.join(__dirname, '../fixtures')),
         });
         syncedFilesPlugin.apply(compiler);
-        compiler.hooks.done.callAsync({
+        return compiler.hooks.done.callAsync({
           hasErrors: () => {},
           toJson: () => {},
         }, (err) => {
+          // eslint-disable-next-line
           if (err) return reject(1);
-          resolve();
+          return resolve();
         });
       } catch (ex) {
-        reject(1);
+        // eslint-disable-next-line
+        return reject(1);
       }
     })).rejects.toEqual(1);
   });

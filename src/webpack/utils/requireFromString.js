@@ -1,7 +1,9 @@
 const Module = require('module');
 const path = require('path');
 
-module.exports = function requireFromString(code, filename, opts) {
+module.exports = function requireFromString(code, fname, options) {
+  let opts = options;
+  let filename = fname;
   if (typeof filename === 'object') {
     opts = filename;
     filename = undefined;
@@ -17,15 +19,19 @@ module.exports = function requireFromString(code, filename, opts) {
     throw new Error(`code must be a string, not ${typeof code}`);
   }
 
+  // eslint-disable-next-line
   const paths = Module._nodeModulePaths(path.dirname(filename));
 
-  const parent = module.parent;
+  const { parent } = module;
   const m = new Module(filename, parent);
   m.filename = filename;
   m.paths = [].concat(opts.prependPaths).concat(paths).concat(opts.appendPaths);
+  // eslint-disable-next-line
   m._compile(code, filename);
 
-  const exports = m.exports;
-  parent && parent.children && parent.children.splice(parent.children.indexOf(m), 1);
+  const { exports } = m;
+  if (parent && parent.children) {
+    parent.children.splice(parent.children.indexOf(m), 1);
+  }
   return exports;
 };

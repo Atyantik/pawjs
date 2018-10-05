@@ -7,14 +7,17 @@ class SwVariables {
     const { fileName, variables, text } = this.options;
 
     compiler.hooks.emit.tap('AddVariableToSw', (compilation) => {
-      const chunks = compilation.chunks;
+      const { chunks } = compilation;
 
-      const publicPath = compilation.options.output.publicPath;
+      const { publicPath } = compilation.options.output;
       const offlineAssetsMapping = [];
 
       // Start out by getting metadata for all the assets associated with a chunk.
+      // eslint-disable-next-line
       for (const chunk of chunks) {
+        // eslint-disable-next-line
         if (!chunk.name) continue;
+        // eslint-disable-next-line
         for (const file of chunk.files) {
           offlineAssetsMapping.push([publicPath, file].join(''));
         }
@@ -34,6 +37,7 @@ class SwVariables {
           src = `${src};${text}`;
         }
 
+        // eslint-disable-next-line
         compilation.assets[fileName] = {
           source: function source() {
             return src;
@@ -57,7 +61,7 @@ class SwVariables {
 
         src = `self.paw__env=${JSON.stringify(env)};${src}`;
 
-
+        // eslint-disable-next-line
         compilation.assets[fileName] = {
           source: function source() {
             return src;

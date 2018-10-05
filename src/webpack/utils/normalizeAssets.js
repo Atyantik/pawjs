@@ -1,9 +1,9 @@
 const _ = require('lodash');
 
-module.exports = function (webpackStats) {
+module.exports = function normalizeAssets(wStats) {
   let assets = {};
   const cssDependencyMap = [];
-  webpackStats = webpackStats.toJson();
+  let webpackStats = wStats.toJson();
 
   if (
     (typeof webpackStats.assets === 'undefined' || !webpackStats.assets.length)
@@ -19,9 +19,7 @@ module.exports = function (webpackStats) {
 
 
   _.each(webpackStats, (stat) => {
-    const assetsByChunkName = stat.assetsByChunkName;
-
-    const publicPath = stat.publicPath;
+    const { assetsByChunkName, publicPath } = stat;
 
     _.each(assetsByChunkName, (chunkValue, chunkName) => {
       // If its array then it just contains chunk value as array
