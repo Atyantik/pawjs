@@ -72,3 +72,6 @@ src/config/assets.js
 
 # Ignore sass cache
 .sass-cache
+
+# demo's package-lock.json
+demo/package-lock.json
