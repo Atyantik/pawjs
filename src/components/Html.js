@@ -16,13 +16,13 @@ if (typeof atob === 'undefined' && typeof Buffer !== 'undefined') {
 
 class Html extends Component {
   static propTypes = {
-    metaTags: PropTypes.shape([]),
+    metaTags: PropTypes.arrayOf(PropTypes.shape({})),
     pwaSchema: PropTypes.shape({}),
-    cssFiles: PropTypes.shape([]),
-    preloadCssFiles: PropTypes.shape([]),
-    assets: PropTypes.shape([]),
-    head: PropTypes.shape([]),
-    footer: PropTypes.shape([]),
+    cssFiles: PropTypes.arrayOf(PropTypes.shape({})),
+    preloadCssFiles: PropTypes.bool,
+    assets: PropTypes.arrayOf(PropTypes.string),
+    head: PropTypes.arrayOf(PropTypes.any),
+    footer: PropTypes.arrayOf(PropTypes.any),
     appRootUrl: PropTypes.string,
     clientRootElementId: PropTypes.string,
     dangerouslySetInnerHTML: PropTypes.shape({
@@ -34,7 +34,7 @@ class Html extends Component {
     metaTags: [],
     pwaSchema: {},
     cssFiles: [],
-    preloadCssFiles: [],
+    preloadCssFiles: false,
     assets: [],
     head: [],
     footer: [],
@@ -96,6 +96,7 @@ class Html extends Component {
       footer,
       assets,
     } = this.props;
+
     return (
       <html lang={this.getPwaValue('lang')} dir={this.getPwaValue('dir')}>
         <head>
@@ -112,7 +113,7 @@ class Html extends Component {
               __html: `window.PAW_PRELOADED_DATA = ${JSON.stringify(toBase64(JSON.stringify(preloadedData)))};`,
             }}
           />
-          {Boolean(preloadCssFiles.length) && (<preload-css />)}
+          {preloadCssFiles && (<preload-css />)}
           {
             cssFiles
               .map(path => <link rel="stylesheet" type="text/css" key={path} href={path} />)

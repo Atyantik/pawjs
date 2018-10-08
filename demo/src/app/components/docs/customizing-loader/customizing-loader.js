@@ -1,9 +1,8 @@
-import React, { Component } from "react";
-import Link from "pawjs/src/components/link";
-import Prism from "../../prism/prism";
+import React, { Component } from 'react';
+import Link from 'pawjs/src/components/link';
+import Prism from '../../prism/prism';
 
 export default class Docs extends Component {
-  
   render() {
     return (
       <article>
@@ -15,7 +14,12 @@ export default class Docs extends Component {
           <header>
             <h2>Creating the loader component</h2>
           </header>
-          <p>If you followed the <Link to="/docs" animateSection="docs-content"><i>Get Started - Starting Fresh</i></Link> tutorial then you are probably using the default loader shipped with the Boilerplate.</p>
+          <p>
+If you followed the
+            <Link to="/docs" animateSection="docs-content"><i>Get Started - Starting Fresh</i></Link>
+            {' '}
+tutorial then you are probably using the default loader shipped with the Boilerplate.
+          </p>
           <p>If not then lets delete the loader and create one from scratch</p>
           <div className="alert alert-primary">
             <strong className="alert-heading">Remove existing loader</strong>
@@ -24,9 +28,17 @@ export default class Docs extends Component {
             </p>
             <p><i><u>Please note, this step is not compulsory and should be executed only if you want to create your custom loader from scratch..</u></i></p>
           </div>
-  
+
           <div className="mt-4">
-            <p>Copy folder <strong>`src/core/components/loader`</strong> to <strong>`src/app/components/loader`</strong> as a start</p>
+            <p>
+Copy folder
+              <strong>`src/core/components/loader`</strong>
+              {' '}
+to
+              <strong>`src/app/components/loader`</strong>
+              {' '}
+as a start
+            </p>
             <p>A loader consists of typically 2 files only.</p>
             <ol>
               <li>loader.js</li>
@@ -36,9 +48,18 @@ export default class Docs extends Component {
               Do not forget to edit loader.js and loader.scss to correct the import paths after copying them
             </div>
           </div>
-  
+
           <div className="mt-4">
-            <p>Modify your config file at <strong>`src/config/classMap.js`</strong> to include the loader from <strong>`src/app`</strong> rather than using it from <strong>`src/core/components`</strong></p>
+            <p>
+Modify your config file at
+              <strong>`src/config/classMap.js`</strong>
+              {' '}
+to include the loader from
+              <strong>`src/app`</strong>
+              {' '}
+rather than using it from
+              <strong>`src/core/components`</strong>
+            </p>
             <Prism code={`// ... other imports
 import Loader from "../app/components/loader"; // Make sure the path is correct
 // ... other imports
@@ -48,7 +69,8 @@ export default {
   // ...
   "loader": Loader,
   // ...
-};`}/>
+};`}
+            />
           </div>
           <p>Voila! Now you can play with your custom loader.</p>
         </section>
@@ -76,7 +98,8 @@ export default {
     </Switch>
   </Loader>
 </RootComponent>
-//....`}/>
+//....`}
+          />
           <p>So however you modify the loader do not forget to add the below code in render else you will notice none of your data is rendered:</p>
           <Prism code="{this.props.children}" />
         </section>
@@ -90,7 +113,8 @@ export default {
   return {
     screenState: state.screen.state
   };
-})`} />
+})`}
+          />
           <p>Screen state consist of two main state.. "loading" & "loaded", accessible via SCREEN_STATE_LOADING. SCREEN_STATE_LOADED in `src/core/components/screen/action`. These states are used when a module bundle is loading or preLoad Promises are executed.</p>
           <p>Also as you see we show the loader as below:</p>
           <Prism code={`{
@@ -100,9 +124,14 @@ export default {
       <div className={styles["screen-loader"]} />
     </div>
   )
-}`} />
+}`}
+          />
           <p>You may customize the styles as you like or the content as per your needs.</p>
-          <p>Well this should give you a good start for modifying loaders. Will explain Transition component in "<Link to="/docs/page-transitions" animateSection="docs-content">Page Transition</Link>" section</p>
+          <p>
+Well this should give you a good start for modifying loaders. Will explain Transition component in "
+            <Link to="/docs/page-transitions" animateSection="docs-content">Page Transition</Link>
+" section
+          </p>
         </section>
       </article>
     );

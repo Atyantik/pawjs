@@ -65,4 +65,4 @@ serviceWorker.workbox.routing.setDefaultHandler(({ event }) => {
 });
 
 // eslint-disable-next-line
-serviceWorker.workbox.precaching.precacheAndRoute(serviceWorker__precacheManifest);
+serviceWorker.workbox.precaching.precacheAndRoute(serviceWorker.__precacheManifest);

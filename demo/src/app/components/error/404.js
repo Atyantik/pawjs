@@ -1,11 +1,9 @@
-import React, {Component} from "react";
-import {connect} from "react-redux";
+import React, { Component } from 'react';
+import { connect } from 'react-redux';
 
-export default @connect(state => {
-  return {
-    pathname: state.router.location.pathname
-  };
-})
+export default @connect(state => ({
+  pathname: state.router.location.pathname,
+}))
 class error404 extends Component {
   render() {
     const { pathname, staticContext } = this.props;
@@ -20,7 +18,7 @@ class error404 extends Component {
      * url is still loading and if so, go back
      * (as per history user will already on back page) and reload the url
      */
-    if (typeof window !== "undefined") {
+    if (typeof window !== 'undefined') {
       if (window.__URL_LOADING__) {
         window.location.reload(false);
         return null;

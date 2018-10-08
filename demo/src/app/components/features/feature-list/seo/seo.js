@@ -3,8 +3,8 @@
  * Date: 31/10/17
  * Time: 3:20 PM
  */
-import React, { Component } from "react";
-import { Link } from "react-router-dom";
+import React, { Component } from 'react';
+import { Link } from 'react-router-dom';
 
 export default class SEO extends Component {
   render() {
@@ -12,7 +12,7 @@ export default class SEO extends Component {
       <article>
         <header>
           <h1 className="mt-4">Search Engine Optimization - SEO</h1>
-          <hr/>
+          <hr />
         </header>
         <section>
           <header>

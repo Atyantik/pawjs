@@ -8,10 +8,6 @@ import pawAssets from 'pwa-assets';
 import server, { beforeStart, afterStart } from './server';
 import pawConfig from '../config';
 
-console.log("111 -------------- jajajaj");
-console.log(pawConfig);
-
-
 const { cssDependencyMap, ...assets } = pawAssets;
 /**
  * defining the current dir

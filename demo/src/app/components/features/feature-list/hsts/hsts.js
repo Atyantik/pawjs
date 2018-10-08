@@ -4,9 +4,9 @@
  * Time: 5:06 PM
  */
 
-import React, { Component } from "react";
-import Prism from "../../../prism/prism";
-import HSTSImage from "./images/hsts.gif";
+import React, { Component } from 'react';
+import Prism from '../../../prism/prism';
+import HSTSImage from './images/hsts.gif';
 
 export default class HSTS extends Component {
   render() {
@@ -14,12 +14,12 @@ export default class HSTS extends Component {
       <article>
         <header>
           <h1 className="mt-4">HTTP Strict Transport Security - HSTS</h1>
-          <hr/>
+          <hr />
         </header>
         <section>
           <section>
             <p>
-              <img className="mw-100" src={HSTSImage}/>
+              <img className="mw-100" src={HSTSImage} />
             </p>
             <header>
               <h3 className="mt-4">What is HSTS?</h3>
@@ -44,7 +44,7 @@ export default class HSTS extends Component {
               is sent, making it impossible for attackers to read or modify the data in transit.
             </p>
           </section>
-          <hr/>
+          <hr />
 
           <section>
             <header>
@@ -55,13 +55,14 @@ export default class HSTS extends Component {
             </p>
 
             <Prism
-              code={"Strict-Transport-Security: max-age=expireTime [; includeSubdomains]"}
-              language={"bash"}
-            /><br/>
+              code="Strict-Transport-Security: max-age=expireTime [; includeSubdomains]"
+              language="bash"
+            />
+            <br />
               For example:
             <Prism
-              code={"Strict-Transport-Security: max-age=16070400; includeSubDomains"}
-              language={"bash"}
+              code="Strict-Transport-Security: max-age=16070400; includeSubDomains"
+              language="bash"
             />
             <p>
               The minimum parameter is the 'max-age' in seconds. This specifies the time
@@ -87,7 +88,7 @@ export default class HSTS extends Component {
               After receiving the HSTS header, the browser sends an HTTPS request.
             </p>
           </section>
-          <hr/>
+          <hr />
 
           <section>
             <header>

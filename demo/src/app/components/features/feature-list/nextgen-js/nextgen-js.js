@@ -4,15 +4,15 @@
  * Time: 3:40 PM
  */
 
-import React, { Component } from "react";
+import React, { Component } from 'react';
 
 export default class NextGenJS extends Component {
   render() {
-    return(
+    return (
       <article>
         <header>
           <h1 className="mt-4">Next Generation JavaScript</h1>
-          <hr/>
+          <hr />
         </header>
         <section>
           <section>
@@ -32,27 +32,37 @@ export default class NextGenJS extends Component {
                 rel="nofollow noopener"
               >
                 babel
-              </a> comes into the picture.
+              </a>
+              {' '}
+comes into the picture.
             </p>
           </section>
-          <hr/>
+          <hr />
 
           <section>
             <header>
               <h3 className="mt-4">What is ECMAScript(ES)?</h3>
             </header>
             <p>
-              <span className="font-weight-bold">ECMAScript (or ES)</span> is a trademarked scripting-language specification standardized by Ecma International in ECMA-262 and ISO/IEC 16262.
+              <span className="font-weight-bold">ECMAScript (or ES)</span>
+              {' '}
+is a trademarked scripting-language specification standardized by Ecma International in ECMA-262 and ISO/IEC 16262.
               It was created to standardize JavaScript, so as to foster multiple independent implementations.
               JavaScript has remained the best-known implementation of ECMAScript since the standard was first published,
-              with other well-known implementations including <a href="https://en.wikipedia.org/wiki/JScript" target="_blank" rel="nofollow noopener">
-              JScript</a> and <a href="https://en.wikipedia.org/wiki/ActionScript" target="_blank" rel="nofollow noopener">ActionScript</a>.
+              with other well-known implementations including
+              <a href="https://en.wikipedia.org/wiki/JScript" target="_blank" rel="nofollow noopener">
+              JScript
+              </a>
+              {' '}
+and
+              <a href="https://en.wikipedia.org/wiki/ActionScript" target="_blank" rel="nofollow noopener">ActionScript</a>
+.
               Coders commonly use ECMAScript for client-side scripting on the World Wide Web,
               and it is increasingly being used for writing server applications and services using Node.js.
             </p>
 
           </section>
-          <hr/>
+          <hr />
 
           <section>
             <header>
@@ -71,7 +81,7 @@ export default class NextGenJS extends Component {
               Transpiling adds an extra step to build processes whereas polyfills allow adding extra functionalities by including another JavaScript file.
             </p>
           </section>
-          <hr/>
+          <hr />
 
           <section>
             <header>

@@ -4,17 +4,17 @@
  * Time: 2:20 PM
  */
 
-import React, { Component } from "react";
+import React, { Component } from 'react';
 
-import FoldImage from "./images/fold.png";
+import FoldImage from './images/fold.png';
 
 export default class ContentFolding extends Component {
   render() {
-    return(
+    return (
       <article>
         <header>
           <h1 className="mt-4">Content Folding</h1>
-          <hr/>
+          <hr />
         </header>
         <section>
           <section>
@@ -33,16 +33,20 @@ export default class ContentFolding extends Component {
               The story would thereby intrigue readers and coax&nbsp;a purchase.
             </p>
             <p>
-              On a webpage, the <strong>fold</strong> is the area of a page displayed to the user
+              On a webpage, the
+              {' '}
+              <strong>fold</strong>
+              {' '}
+is the area of a page displayed to the user
               without them having to scroll. Based on a 1366x768 pixel screen resolution (a little
               more on this choice later), the area highlighted in red is generally how content is
               presented to users on a landing page (i.e. above the fold)
             </p>
             <p>
-              <img src={FoldImage} alt="Content Folding Image" className="mw-100"/>
+              <img src={FoldImage} alt="Content Folding Image" className="mw-100" />
             </p>
           </section>
-          <hr/>
+          <hr />
 
           <section>
             <header>

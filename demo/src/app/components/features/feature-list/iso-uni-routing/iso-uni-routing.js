@@ -4,7 +4,7 @@
  * Time: 12:45 PM
  */
 
-import React, { Component } from "react";
+import React, { Component } from 'react';
 
 export default class UniversalRouting extends Component {
   render() {
@@ -12,7 +12,7 @@ export default class UniversalRouting extends Component {
       <article>
         <header>
           <h1 className="mt-4">Isomorphic/Universal Routing</h1>
-          <hr/>
+          <hr />
         </header>
         <section>
           <section>
@@ -26,7 +26,7 @@ export default class UniversalRouting extends Component {
               and the ever-growing complexity of developing and maintaining these applications.
             </p>
           </section>
-          <hr/>
+          <hr />
 
           <section>
             <header>

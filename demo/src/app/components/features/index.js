@@ -4,9 +4,9 @@
  * Time: 4:52 PM
  */
 
-import React, { Component } from "react";
-import { Link } from "react-router-dom";
-import Prism from "../prism";
+import React, { Component } from 'react';
+import { Link } from 'react-router-dom';
+import Prism from '../prism';
 
 export default class FeaturesIndex extends Component {
   render() {
@@ -14,7 +14,7 @@ export default class FeaturesIndex extends Component {
       <article>
         <header>
           <h1 className="mt-4">Features</h1>
-          <hr/>
+          <hr />
           <p>We have worked on many features. Checkout the list below:</p>
         </header>
         <section>
@@ -141,7 +141,7 @@ export default class FeaturesIndex extends Component {
                 <p className="card-text">
                   Well now you can cache a page in SSR. Pretty simple. just add cache option to your route
                 </p>
-                <Prism code={"{ cache: { enable: true, duration: 10000}}"} />
+                <Prism code={'{ cache: { enable: true, duration: 10000}}'} />
                 <p className="card-text">
                   this helps you cache page when rendered via server. Why increase server load when page is static and cacheable!
                 </p>

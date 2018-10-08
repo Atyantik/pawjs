@@ -1,12 +1,13 @@
-import React, { Component } from "react";
-import PropTypes from "prop-types";
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 // import * as styles from "./error-500.scss";
 
 export default class OfflinePage extends Component {
   static propTypes = {
     error: PropTypes.instanceOf(Error),
   };
-  render () {
+
+  render() {
     const { staticContext } = this.props;
     if (staticContext) {
       staticContext.status = 500;

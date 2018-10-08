@@ -9,6 +9,10 @@ try {
   config = {};
 }
 config = defaultsDeep(config, defaultConfig);
+
+if (config.appRootUrl.startsWith('http')) {
+  throw new Error('App root url cannot have a scheme in the string. should be like \'/\' or \'/subdir\'');
+}
 if (config.appRootUrl.endsWith('/')) {
   config.appRootUrl = config.appRootUrl.replace(/\/$/, '');
 }

@@ -4,10 +4,10 @@
  * Time: 11:56 AM
  */
 
-import React, { Component } from "react";
+import React, { Component } from 'react';
 
-import SSRImage from "./images/ssr.png";
-import CSRImage from "./images/csr.png";
+import SSRImage from './images/ssr.png';
+import CSRImage from './images/csr.png';
 
 export default class SSR extends Component {
   render() {
@@ -15,7 +15,7 @@ export default class SSR extends Component {
       <article>
         <header>
           <h1 className="mt-4">Server Side Rendering - SSR</h1>
-          <hr/>
+          <hr />
         </header>
         <section>
           <section>
@@ -30,7 +30,7 @@ export default class SSR extends Component {
               the client takes over rendering duties.
             </p>
           </section>
-          <hr/>
+          <hr />
 
           <section>
             <header>

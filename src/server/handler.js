@@ -47,7 +47,6 @@ export default class ServerHandler extends Tapable {
     const { asyncCSS, serverSideRender, appRootUrl } = this.options.env;
 
     let routes = routeHandler.getRoutes();
-    let currentPageRoutes = matchRoutes(routes, req.path.replace(appRootUrl, ''));
     let renderedHtml = '';
     let context = {};
     let promises = [];
@@ -56,29 +55,21 @@ export default class ServerHandler extends Tapable {
     const cssToBePreloaded = [];
     const modulesInRoutes = ['pawProjectClient'];
 
-
     const seoSchema = routeHandler.getDefaultSeoSchema();
     const pwaSchema = routeHandler.getPwaSchema();
 
-    currentPageRoutes.forEach(({ route }) => {
-      if (route.modules) {
-        modulesInRoutes.push(...route.modules);
-      }
-    });
-
-    modulesInRoutes.forEach((mod) => {
-      cssDependencyMap.forEach((c) => {
-        if (_.indexOf(c.modules, mod) !== -1) {
-          if (!asyncCSS) {
-            cssToBeIncluded.push(c.path);
-          } else {
-            cssToBePreloaded.push(c.path);
-          }
-        }
-      });
-    });
-
     if (!serverSideRender) {
+      modulesInRoutes.forEach((mod) => {
+        cssDependencyMap.forEach((c) => {
+          if (_.indexOf(c.modules, mod) !== -1) {
+            if (!asyncCSS) {
+              cssToBeIncluded.push(c.path);
+            } else {
+              cssToBePreloaded.push(c.path);
+            }
+          }
+        });
+      });
       const baseUrl = `${req.protocol}://${req.get('host')}`;
       const fullUrl = `${baseUrl}${req.originalUrl}`;
 
@@ -92,7 +83,7 @@ export default class ServerHandler extends Tapable {
       const htmlProps = {
         assets,
         cssFiles: cssToBeIncluded,
-        preloadCssFiles: cssToBePreloaded,
+        preloadCssFiles: cssToBePreloaded.length >= 1,
         metaTags,
         pwaSchema,
       };
@@ -117,6 +108,26 @@ export default class ServerHandler extends Tapable {
         .send(`<!DOCTYPE html>${renderedHtml}`);
       return next();
     }
+
+    let currentPageRoutes = matchRoutes(routes, req.path.replace(appRootUrl, ''));
+
+    currentPageRoutes.forEach(({ route }) => {
+      if (route.modules) {
+        modulesInRoutes.push(...route.modules);
+      }
+    });
+
+    modulesInRoutes.forEach((mod) => {
+      cssDependencyMap.forEach((c) => {
+        if (_.indexOf(c.modules, mod) !== -1) {
+          if (!asyncCSS) {
+            cssToBeIncluded.push(c.path);
+          } else {
+            cssToBePreloaded.push(c.path);
+          }
+        }
+      });
+    });
 
     currentPageRoutes.forEach(({ route, match }) => {
       if (route.component.preload) {
@@ -146,7 +157,7 @@ export default class ServerHandler extends Tapable {
       const htmlProps = {
         assets,
         cssFiles: cssToBeIncluded,
-        preloadCssFiles: cssToBePreloaded,
+        preloadCssFiles: cssToBePreloaded.length >= 1,
         preloadedData,
         metaTags,
         pwaSchema,
@@ -218,7 +229,7 @@ export default class ServerHandler extends Tapable {
           clientRootElementId={this.options.env.clientRootElementId}
           assets={assets}
           cssFiles={cssToBeIncluded}
-          preloadCssFiles={cssToBePreloaded}
+          preloadCssFiles={cssToBePreloaded.length >= 1}
           pwaSchema={pwaSchema}
         >
           <ErrorComponent error={ex} />

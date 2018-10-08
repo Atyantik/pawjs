@@ -4,10 +4,10 @@
  * Time: 1:07 PM
  */
 
-import React, { Component } from "react";
+import React, { Component } from 'react';
 
-import OfflineSrcset from "./images/offline.png?sizes=400w+800w&placeholder";
-import Picture from "../../../../../../../packages/pawjs-srcset/src/picture";
+import OfflineSrcset from './images/offline.png?sizes=400w+800w&placeholder';
+import Picture from '../../../../../../../packages/pawjs-srcset/src/picture';
 // console.log(Offline, OfflineSrcset, 1);
 
 export default class AccessOffline extends Component {
@@ -16,12 +16,12 @@ export default class AccessOffline extends Component {
       <article>
         <header>
           <h1 className="mt-4">Offline Access</h1>
-          <hr/>
+          <hr />
         </header>
         <section>
-          {/*<p>*/}
-          {/*<img src={Offline} className="w-100"/>*/}
-          {/*</p>*/}
+          {/* <p> */}
+          {/* <img src={Offline} className="w-100"/> */}
+          {/* </p> */}
           <p>
             When you visit a website without an internet connection in Chrome, you see the
             offline dinosaur.
@@ -30,15 +30,24 @@ export default class AccessOffline extends Component {
             No wonder we tend to think of websites as less reliable than mobile applications - we can't use them without the network.
           </p>
           <p>
-            At least, not typically. We could use <a href="http://diveintohtml5.info/offline.html" target="_blank" rel="nofollow noopener">
-            App Cache</a> and the Cache Manifest to create an offline experience. For&nbsp;
+            At least, not typically. We could use
+            {' '}
+            <a href="http://diveintohtml5.info/offline.html" target="_blank" rel="nofollow noopener">
+            App Cache
+            </a>
+            {' '}
+and the Cache Manifest to create an offline experience. For&nbsp;
             <a href="http://alistapart.com/article/application-cache-is-a-douchebag" target="_blank" rel="nofollow noopener">a number of reasons</a>
             , developers have found App Cache difficult to work with.
           </p>
 
           <p>
-            Luckily, there's a new web standard, <a href="https://developer.mozilla.org/en-US/docs/Web/API/Service_Worker_API" target="_blank" rel="nofollow noopener">
-            Service Worker</a>, that potentially supplants App Cache by providing more granular control over networking in JavaScript,
+            Luckily, there's a new web standard,
+            {' '}
+            <a href="https://developer.mozilla.org/en-US/docs/Web/API/Service_Worker_API" target="_blank" rel="nofollow noopener">
+            Service Worker
+            </a>
+, that potentially supplants App Cache by providing more granular control over networking in JavaScript,
             as opposed to manifest files.
           </p>
 
