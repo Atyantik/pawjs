@@ -1,4 +1,4 @@
-export default class PawImageOptimizerWebpack {
+export default class PawSrcsetWebpack {
   // eslint-disable-next-line
   apply(webpackHandler) {
     webpackHandler.hooks.beforeConfig.tap('AddPwaSrcsetLoader', (env, type, config) => {
@@ -34,7 +34,7 @@ export default class PawImageOptimizerWebpack {
             if (typeof imageRule.use === 'string') {
               ruleUseClone = imageRule.use;
             } else {
-              ruleUse = typeof imageRule.use === 'object'
+              ruleUseClone = typeof imageRule.use === 'object'
                 ? JSON.parse(JSON.stringify(imageRule.use)) : imageRule.use;
             }
 

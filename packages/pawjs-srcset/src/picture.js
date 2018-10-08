@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
 class Picture extends Component {
-
   static rearrange(image) {
     if (!Array.isArray(image)) return image;
     const webpSet = image.find(img => img.type.toLowerCase() === 'image/webp');
