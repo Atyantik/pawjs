@@ -1,6 +1,7 @@
 import { AsyncSeriesHook, Tapable } from 'tapable';
 import _uniq from 'lodash/uniq';
 import _cloneDeep from 'lodash/cloneDeep';
+import { matchPath } from 'react-router';
 import AsyncRouteLoadErrorComponent from '../components/AsyncRouteLoadError';
 import AsyncRouteLoaderComponent from '../components/AsyncRouteLoader';
 import NotFoundComponent from '../components/NotFound';
@@ -60,6 +61,38 @@ export default class RouteHandler extends Tapable {
       published_time: '',
       modified_time: '',
     },
+  };
+
+  static computeRootMatch = pathname => ({
+    path: '/', url: '/', params: {}, isExact: pathname === '/',
+  });
+
+  static matchRoutes = (...args) => {
+    const [routes, pathname] = args;
+    const branch = args.length > 2 && args[2] !== undefined ? args[2] : [];
+
+    routes.some((route) => {
+      let match;
+
+      if (route.path) {
+        match = matchPath(pathname, route);
+      } else {
+        match = branch.length ? branch[branch.length - 1].match // use parent match
+          : RouteHandler.computeRootMatch(pathname);
+      }
+
+      if (match) {
+        branch.push({ route, match });
+
+        if (route.routes) {
+          RouteHandler.matchRoutes(route.routes, pathname, branch);
+        }
+      }
+
+      return match;
+    });
+
+    return branch;
   };
 
   routes = [];

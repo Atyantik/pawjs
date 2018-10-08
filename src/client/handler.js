@@ -6,11 +6,12 @@ import {
 } from 'tapable';
 import _ from 'lodash';
 import React from 'react';
-import { renderRoutes, matchRoutes } from 'react-router-config';
+import { renderRoutes } from 'react-router-config';
 import { Router } from 'react-router';
 import { HashRouter } from 'react-router-dom';
 import { createBrowserHistory } from 'history';
 import { render, hydrate } from 'react-dom';
+import RouteHandler from '../router/handler';
 import ErrorBoundary from '../components/ErrorBoundary';
 import { generateMeta } from '../utils/seo';
 import possibleStandardNames from '../utils/reactPossibleStandardNames';
@@ -53,7 +54,7 @@ export default class ClientHandler extends Tapable {
 
   updatePageMeta(location) {
     const routes = this.routeHandler.getRoutes();
-    const currentRoutes = matchRoutes(routes, location.pathname.replace(this.options.env.appRootUrl, ''));
+    const currentRoutes = RouteHandler.matchRoutes(routes, location.pathname.replace(this.options.env.appRootUrl, ''));
     const promises = [];
 
     let seoData = {};
@@ -124,7 +125,7 @@ export default class ClientHandler extends Tapable {
       this.hooks.renderComplete.tap('AddServiceWorker', (err) => {
         if (err) return;
         if ('serviceWorker' in navigator) {
-          navigator.serviceWorker.register(`${this.options.env.appRootUrl}/sw.js`);
+          navigator.serviceWorker.register(`${this.options.env.appRootUrl}/sw.js`).catch(() => null);
         }
       });
     } else {
@@ -170,7 +171,7 @@ export default class ClientHandler extends Tapable {
 
     const routes = routeHandler.getRoutes();
 
-    const currentPageRoutes = matchRoutes(routes, window.location.pathname.replace(this.options.env.appRootUrl, ''));
+    const currentPageRoutes = RouteHandler.matchRoutes(routes, window.location.pathname.replace(this.options.env.appRootUrl, ''));
 
     const promises = [];
 

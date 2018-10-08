@@ -6,8 +6,9 @@ import {
 import React from 'react';
 import _ from 'lodash';
 import { renderToString } from 'react-dom/server';
-import { matchRoutes, renderRoutes } from 'react-router-config';
+import { renderRoutes } from 'react-router-config';
 import { StaticRouter } from 'react-router';
+import RouteHandler from '../router/handler';
 import Html from '../components/Html';
 import ErrorBoundary from '../components/ErrorBoundary';
 import { generateMeta } from '../utils/seo';
@@ -109,7 +110,7 @@ export default class ServerHandler extends Tapable {
       return next();
     }
 
-    let currentPageRoutes = matchRoutes(routes, req.path.replace(appRootUrl, ''));
+    let currentPageRoutes = RouteHandler.matchRoutes(routes, req.path.replace(appRootUrl, ''));
 
     currentPageRoutes.forEach(({ route }) => {
       if (route.modules) {
