@@ -83,6 +83,14 @@ app.get(`${env.appRootUrl}/manifest.json`, (req, res) => {
 });
 
 app.get('*', (req, res, next) => {
+  if (
+    req.path.endsWith('favicon.png') !== -1
+    || req.path.endsWith('favicon.ico') !== -1
+    || req.path.endsWith('favicon.jpg') !== -1
+    || req.path.endsWith('favicon.jpeg') !== -1
+  ) {
+    return next();
+  }
   // Get the resources
   const assets = assetsToArray(res.locals.assets);
 
