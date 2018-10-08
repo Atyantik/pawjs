@@ -1,62 +1,65 @@
-const path = require("path");
-const directories = require("../utils/directories");
-const MiniCssExtractPlugin = require("mini-css-extract-plugin");
-const _ = require("lodash");
-const isProduction = process.env.PAW_ENV === "production";
+const path = require('path');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const _ = require('lodash');
+const directories = require('../utils/directories');
+
+const isProduction = process.env.PAW_ENV === 'production';
 
 const defaultOptions = {
   sourceMap: !isProduction,
-  localIdentName: isProduction? "[hash:base64:5]": "[path][name]__[local]",
+  localIdentName: isProduction ? '[hash:base64:5]' : '[path][name]__[local]',
   compress: isProduction,
   hot: false,
 };
 
-module.exports = module.exports.default = (options) => {
+const rule = (options) => {
   const o = _.assignIn({}, defaultOptions, options);
   return [
     {
       test: /\.css$/,
       exclude: [
-        path.join(directories.src, "resources"),
-        path.join(directories.root, "node_modules"),
+        path.join(directories.src, 'resources'),
+        path.join(directories.root, 'node_modules'),
       ],
       use: [
         {
-          loader: o.hot? "style-loader": MiniCssExtractPlugin.loader,
+          loader: o.hot ? 'style-loader' : MiniCssExtractPlugin.loader,
         },
         {
-          loader: "css-loader",
+          loader: 'css-loader',
           options: {
             modules: true,
             localIdentName: o.localIdentName,
             sourceMap: o.sourceMap,
             minimize: o.compress,
-            importLoaders: 2
-          }
-        }
-      ]
+            importLoaders: 2,
+          },
+        },
+      ],
     },
     {
       test: /\.css$/,
       include: [
-        path.join(directories.src, "resources"),
-        path.join(directories.root, "node_modules"),
+        path.join(directories.src, 'resources'),
+        path.join(directories.root, 'node_modules'),
       ],
       use: [
         {
-          loader: o.hot? "style-loader": MiniCssExtractPlugin.loader,
+          loader: o.hot ? 'style-loader' : MiniCssExtractPlugin.loader,
         },
         {
-          loader: "css-loader",
+          loader: 'css-loader',
           options: {
             modules: true,
-            localIdentName: "[local]",
+            localIdentName: '[local]',
             sourceMap: o.sourceMap,
             minimize: o.compress,
-            importLoaders: 2
-          }
+            importLoaders: 2,
+          },
         },
-      ]
+      ],
     },
   ];
 };
+
+module.exports = rule;

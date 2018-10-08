@@ -1,14 +1,34 @@
-import _ from "lodash";
+import _ from 'lodash';
 
 /**
  * Check if current script is running in browser or not
  * @returns {boolean}
  */
-export const isBrowser = () => {
-  return typeof window !== "undefined" && typeof document !== "undefined";
-};
+export const isBrowser = () => typeof window !== 'undefined' && typeof document !== 'undefined';
 
-let loadPromises = {};
+const loadPromises = {};
+
+/**
+ * Simple numeric hash of a string, used for non-secure usage only
+ * @param str
+ * @param namespace
+ * @returns {string}
+ */
+export const generateStringHash = (str, namespace) => {
+  const nmspace = namespace || '';
+  let hash = 0; let i; let
+    chr;
+  if (str.length === 0) return `${nmspace}__${hash}`;
+  const strr = `${nmspace}_${str}`;
+  for (i = 0; i < strr.length; i += 1) {
+    chr = strr.charCodeAt(i);
+    // eslint-disable-next-line
+    hash = ((hash << 5) - hash) + chr;
+    // eslint-disable-next-line
+    hash |= 0; // Convert to 32bit integer
+  }
+  return `${nmspace}__${hash}`;
+};
 
 /**
  * Load stylesheet
@@ -16,77 +36,80 @@ let loadPromises = {};
  * @returns {Promise}
  */
 export const loadStyle = (path) => {
-  const pathHash = generateStringHash(path, "CSS");
-  
+  const pathHash = generateStringHash(path, 'CSS');
+
   if (loadPromises[pathHash]) return loadPromises[pathHash];
-  
+
   loadPromises[pathHash] = new Promise((resolve, reject) => {
     if (!isBrowser()) {
-      reject("Cannot call from server. Function can be executed only from browser");
+      return reject(new Error('Cannot call from server. Function can be executed only from browser'));
     }
-    
-    
+
+
     // Do not load css if already loaded
     const previousLink = document.getElementById(pathHash.toString());
     if (previousLink) {
       resolve();
       return previousLink;
     }
-    
-    const head = document.getElementsByTagName("head")[0], // reference to document.head for appending/ removing link nodes
-      link = document.createElement("link"); // create the link node
-    
-    link.setAttribute("href", path);
-    link.setAttribute("id", pathHash.toString());
-    link.setAttribute("rel", "stylesheet");
+
+    const head = document.getElementsByTagName('head')[0];
+    // reference to document.head for appending/ removing link nodes
+
+    const link = document.createElement('link'); // create the link node
+
+    link.setAttribute('href', path);
+    link.setAttribute('id', pathHash.toString());
+    link.setAttribute('rel', 'stylesheet');
     link.async = true;
     link.defer = true;
-    link.setAttribute("type", "text/css");
-    
-    let sheet, cssRules;
+    link.setAttribute('type', 'text/css');
+
+    let sheet; let
+      cssRules;
     // get the correct properties to check for depending on the browser
-    if ("sheet" in link) {
-      sheet = "sheet";
-      cssRules = "cssRules";
+    if ('sheet' in link) {
+      sheet = 'sheet';
+      cssRules = 'cssRules';
+    } else {
+      sheet = 'styleSheet';
+      cssRules = 'rules';
     }
-    else {
-      sheet = "styleSheet";
-      cssRules = "rules";
-    }
-    
+
     // start checking whether the style sheet has successfully loaded
-    let interval_id = setInterval(function () {
-        try {
-          // SUCCESS! our style sheet has loaded
-          if (link[sheet] && link[sheet][cssRules].length) {
-            
-            // clear the counters
-            clearInterval(interval_id);
-            
-            // Declared after "," so it will be available in Interval
-            clearTimeout(timeout_id);
-            resolve();
-          }
-        } catch (e) {
-          // Do nothing, timeout will handle it for fail after 15 seconds
+    const intervalId = setInterval(() => {
+      try {
+        // SUCCESS! our style sheet has loaded
+        if (link[sheet] && link[sheet][cssRules].length) {
+          // clear the counters
+          clearInterval(intervalId);
+
+          // Declared after "," so it will be available in Interval
+          // eslint-disable-next-line
+          clearTimeout(timeoutId);
+          resolve();
         }
-      }, 10),
-      // how often to check if the stylesheet is loaded
-      
-      // start counting down till fail
-      timeout_id = setTimeout(function () {
-        // clear the counters
-        clearInterval(interval_id);
-        clearTimeout(timeout_id);
-        
-        // since the style sheet didn't load, remove the link node from the DOM
-        head.removeChild(link);
-        reject("Timeout, unable to load css file");
-        // how long to wait before failing
-      }, 15000);
-    
+      } catch (e) {
+        // Do nothing, timeout will handle it for fail after 15 seconds
+      }
+    }, 10);
+
+    // how often to check if the stylesheet is loaded
+    // start counting down till fail
+
+    let timeoutId = setTimeout(() => {
+      // clear the counters
+      clearInterval(intervalId);
+      clearTimeout(timeoutId);
+
+      // since the style sheet didn't load, remove the link node from the DOM
+      head.removeChild(link);
+      return reject(new Error('Timeout, unable to load css file'));
+      // how long to wait before failing
+    }, 15000);
+
     // insert the link node into the DOM and start loading the style sheet
-    
+
     head.appendChild(link);
     // return the link node;
     return link;
@@ -101,67 +124,47 @@ export const loadStyle = (path) => {
  * @returns {Promise}
  */
 export const loadScript = (path, attributes = {}) => {
-  const pathHash = generateStringHash(path, "JS").toString();
+  const pathHash = generateStringHash(path, 'JS').toString();
   if (loadPromises[pathHash]) return loadPromises[pathHash];
-  
+
   loadPromises[pathHash] = new Promise((resolve, reject) => {
     if (!isBrowser()) {
       // If not a browser then do not allow loading of
       // css file, return with success->false
-      reject("Cannot call from server. Function can be executed only from browser");
-      return;
+      return reject(new Error('Cannot call from server. Function can be executed only from browser'));
     }
-    
-    
+
+
     // Do not load script if already loaded
     const previousLink = document.getElementById(pathHash);
     if (previousLink) {
       resolve();
       return previousLink;
     }
-    
-    let s, r, t;
+
+    let r;
     r = false;
-    s = document.createElement("script");
-    s.type = "text/javascript";
+    const s = document.createElement('script');
+    s.type = 'text/javascript';
     s.id = pathHash;
     s.src = path;
     s.defer = true;
+    // eslint-disable-next-line
     s.onload = s.onreadystatechange = function () {
-      if (!r && (!this.readyState || this.readyState === "complete")) {
+      if (!r && (!this.readyState || this.readyState === 'complete')) {
         r = true;
         resolve();
       }
     };
     // Add custom attribute added by user
-    for(let attr in attributes) {
+    Object.keys(attributes).forEach((attr) => {
       s[attr] = attributes[attr];
-    }
-    t = document.getElementsByTagName("script")[0];
+    });
+    const t = document.getElementsByTagName('script')[0];
     t.parentNode.insertBefore(s, t);
     return s;
   });
   return loadPromises[pathHash];
-};
-
-
-/**
- * Simple numeric hash of a string, used for non-secure usage only
- * @param str
- * @param namespace
- * @returns {string}
- */
-export const generateStringHash = (str, namespace) => {
-  namespace = namespace || "";
-  let hash = 0, i, chr;
-  if (str.length === 0) return `${namespace}__${hash}`;
-  str = `${namespace}_${str}`;
-  for (i = 0; i < str.length; i++) {
-    chr = str.charCodeAt(i);
-    hash = ((hash << 5) - hash) + chr;
-    hash |= 0; // Convert to 32bit integer
-  }
-  return `${namespace}__${hash}`;
 };
 
 
@@ -173,16 +176,16 @@ export const generateStringHash = (str, namespace) => {
 export const assetsToArray = (assets) => {
   let allAssets = [];
   if (assets instanceof Object) {
-    _.each(assets, a => {
-      if (typeof a === "string") {
+    _.each(assets, (a) => {
+      if (typeof a === 'string') {
         allAssets.push(a);
       } else if (a instanceof Object) {
         allAssets = allAssets.concat(assetsToArray(a));
       }
     });
-  } else if (typeof assets === "string") {
+  } else if (typeof assets === 'string') {
     allAssets.push(assets);
   }
-  allAssets = _.sortBy(allAssets, a => a.indexOf("hot-update") !== -1);
+  allAssets = _.sortBy(allAssets, a => a.indexOf('hot-update') !== -1);
   return _.uniq(allAssets);
 };

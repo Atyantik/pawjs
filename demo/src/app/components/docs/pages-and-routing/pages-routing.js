@@ -4,13 +4,13 @@
  * Time: 2:39 PM
  */
 
-import React, { Component } from "react";
-import Prism from "../../prism/prism";
-import Link from "pawjs/src/components/link/link";
+import React, { Component } from 'react';
+import Link from 'pawjs/src/components/link/link';
+import Prism from '../../prism/prism';
 
 export default class PagesAndRouting extends Component {
   render() {
-    return(
+    return (
       <article>
         <header>
           <h1>Pages and Routing</h1>
@@ -29,7 +29,9 @@ export default class PagesAndRouting extends Component {
                   rel="nofollow noopener"
                 >
                   React-Router
-                </a> what additionally we provide is mentioned below:
+                </a>
+                {' '}
+what additionally we provide is mentioned below:
               </p>
               <div className="mw-100">
                 <table className="w-100 table">
@@ -59,7 +61,10 @@ export default class PagesAndRouting extends Component {
                     <tr>
                       <td>seo</td>
                       <td>object</td>
-                      <td>You define the parameters for SEO in this option. <br/>Eg:
+                      <td>
+You define the parameters for SEO in this option.
+                        <br />
+Eg:
                         <Prism
                           code={`seo: {
   title: "Name",
@@ -69,16 +74,18 @@ export default class PagesAndRouting extends Component {
   image: "url to the image file"
 }`
                           }
-
                         />
                       </td>
                     </tr>
                     <tr>
                       <td>caching</td>
                       <td>object</td>
-                      <td>It defines the amount of time for which the page should be cached in the browser. <br/>Eg:
+                      <td>
+It defines the amount of time for which the page should be cached in the browser.
+                        <br />
+Eg:
                         <Prism
-                          code={"cache: { enable: true, duration: 10000 }"}
+                          code={'cache: { enable: true, duration: 10000 }'}
                         />
                       </td>
                     </tr>
@@ -88,7 +95,7 @@ export default class PagesAndRouting extends Component {
               </div>
             </header>
           </section>
-          <hr/>
+          <hr />
 
           <section>
             <header>

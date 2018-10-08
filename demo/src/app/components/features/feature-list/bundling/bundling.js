@@ -4,9 +4,9 @@
  * Time: 4:07 PM
  */
 
-import React, { Component } from "react";
+import React, { Component } from 'react';
 
-import WebpackImage from "./images/webpack.png";
+import WebpackImage from './images/webpack.png';
 
 export default class Bundling extends Component {
   render() {
@@ -14,10 +14,13 @@ export default class Bundling extends Component {
       <article>
         <header>
           <h1 className="mt-4">Bundling</h1>
-          <hr/>
+          <hr />
         </header>
         <section>
-          <h3 className="mt-4">Bundling using <strong>WebPack</strong></h3>
+          <h3 className="mt-4">
+Bundling using
+            <strong>WebPack</strong>
+          </h3>
           <p>
             <img src={WebpackImage} alt="WebPack Image" className="mw-100" />
           </p>

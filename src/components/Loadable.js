@@ -1,25 +1,24 @@
-"use strict";
-import React from "react";
-import PropTypes from "prop-types";
-import { withRouter } from "react-router";
+import React from 'react';
+import PropTypes from 'prop-types';
+import { withRouter } from 'react-router';
 
 const ALL_INITIALIZERS = [];
 const READY_INITIALIZERS = [];
 
 function load(loader, props) {
-  let promise = loader(props);
+  const promise = loader(props);
 
-  let state = {
+  const state = {
     loading: true,
     loaded: null,
-    error: null
+    error: null,
   };
 
-  state.promise = promise.then(loaded => {
+  state.promise = promise.then((loaded) => {
     state.loading = false;
     state.loaded = loaded;
     return loaded;
-  }).catch(err => {
+  }).catch((err) => {
     state.loading = false;
     state.error = err;
     throw err;
@@ -29,26 +28,26 @@ function load(loader, props) {
 }
 
 function loadMap(obj, loadedData, props) {
-  let state = {
+  const state = {
     loading: false,
     loaded: {},
-    error: null
+    error: null,
   };
 
-  let promises = [];
+  const promises = [];
 
   try {
-    Object.keys(obj).forEach(key => {
+    Object.keys(obj).forEach((key) => {
       let result = null;
-      if(key === "LoadData" && loadedData) {
+      if (key === 'LoadData' && loadedData) {
         result = {
           loading: false,
           loaded: loadedData,
           error: null,
-          promise: (async () => loadedData)()
+          promise: (async () => loadedData)(),
         };
       } else {
-        if (key === "LoadData") {
+        if (key === 'LoadData') {
           result = load(obj[key], props);
         } else {
           result = load(obj[key]);
@@ -64,9 +63,9 @@ function loadMap(obj, loadedData, props) {
 
       promises.push(result.promise);
 
-      result.promise.then(res => {
+      result.promise.then((res) => {
         state.loaded[key] = res;
-      }).catch(err => {
+      }).catch((err) => {
         state.error = err;
       });
     });
@@ -74,10 +73,10 @@ function loadMap(obj, loadedData, props) {
     state.error = err;
   }
 
-  state.promise = Promise.all(promises).then(res => {
+  state.promise = Promise.all(promises).then((res) => {
     state.loading = false;
     return res;
-  }).catch(err => {
+  }).catch((err) => {
     state.loading = false;
     throw err;
   });
@@ -86,6 +85,7 @@ function loadMap(obj, loadedData, props) {
 }
 
 function resolve(obj) {
+  // eslint-disable-next-line
   return obj && obj.__esModule ? obj.default : obj;
 }
 
@@ -95,15 +95,15 @@ function render(loaded, props) {
 
 function createLoadableComponent(loadFn, options) {
   if (!options.loading) {
-    throw new Error("react-loadable requires a `loading` component");
+    throw new Error('react-loadable requires a `loading` component');
   }
 
-  let opts = Object.assign({
+  const opts = Object.assign({
     loader: null,
     loading: null,
     delay: 200,
     timeout: null,
-    render: render,
+    render,
     webpack: null,
     modules: null,
     loadedData: null,
@@ -120,19 +120,14 @@ function createLoadableComponent(loadFn, options) {
   }
 
   class LoadableComponent extends React.Component {
-
-    constructor(props) {
-      super(props);
-      init(undefined, {match: props.match, route: props.route});
-
-      this.state = {
-        error: res.error,
-        pastDelay: false,
-        timedOut: false,
-        loading: res.loading,
-        loaded: res.loaded
-      };
-    }
+    static propTypes = {
+      // eslint-disable-next-line
+      match: PropTypes.any,
+      // eslint-disable-next-line
+      route: PropTypes.any,
+      // eslint-disable-next-line
+      location: PropTypes.any,
+    };
 
     static contextTypes = {
       loadable: PropTypes.shape({
@@ -144,48 +139,82 @@ function createLoadableComponent(loadFn, options) {
       return init(loadedData, props);
     }
 
+    constructor(props) {
+      super(props);
+      init(undefined, { match: props.match, route: props.route });
+
+      this.state = {
+        error: res.error,
+        pastDelay: false,
+        timedOut: false,
+        loading: res.loading,
+        loaded: res.loaded,
+      };
+    }
+
     componentWillMount() {
-      this._mounted = true;
-      this._loadModule();
+      this.mounted = true;
+      this.loadModule();
     }
 
     componentWillReceiveProps(nextProps) {
-      let prevLocation = {...this.props.location};
-      let newLocation = {...nextProps.location};
+      const { location } = this.props;
+      const prevLocation = { ...location };
+      const newLocation = { ...nextProps.location };
       delete prevLocation.key;
       delete newLocation.key;
 
       if (JSON.stringify(prevLocation) !== JSON.stringify(newLocation)) {
         res = null;
-        init(undefined, {route: nextProps.route, match: nextProps.match});
-        this._loadModule();
+        init(undefined, { route: nextProps.route, match: nextProps.match });
+        this.loadModule();
       }
     }
 
-    _loadModule() {
+    componentWillUnmount() {
+      this.mounted = false;
+      this.clearTimeouts();
 
+      // clear response if user does not want the
+      // data to be cached
+      if (!opts.loadDataCache) {
+        res = null;
+      }
+    }
+
+    retry = () => {
+      this.setState({ error: null, loading: true });
+      const {
+        match,
+        route,
+      } = this.props;
+      res = loadFn(opts.loader, undefined, { match, route });
+      this.loadModule();
+    };
+
+    loadModule() {
       if (!res.loading) {
         return;
       }
 
-      if (typeof opts.delay === "number") {
+      if (typeof opts.delay === 'number') {
         if (opts.delay === 0) {
           this.setState({ pastDelay: true });
         } else {
-          this._delay = setTimeout(() => {
+          this.delay = setTimeout(() => {
             this.setState({ pastDelay: true });
           }, opts.delay);
         }
       }
 
-      if (typeof opts.timeout === "number") {
-        this._timeout = setTimeout(() => {
+      if (typeof opts.timeout === 'number') {
+        this.timeout = setTimeout(() => {
           this.setState({ timedOut: true });
         }, opts.timeout);
       }
 
-      let update = () => {
-        if (!this._mounted) {
+      const update = () => {
+        if (!this.mounted) {
           return;
         }
         if (!res) return;
@@ -193,10 +222,10 @@ function createLoadableComponent(loadFn, options) {
         this.setState({
           error: res.error,
           loaded: res.loaded,
-          loading: res.loading
+          loading: res.loading,
         });
 
-        this._clearTimeouts();
+        this.clearTimeouts();
       };
 
       res.promise.then(() => {
@@ -206,42 +235,31 @@ function createLoadableComponent(loadFn, options) {
       });
     }
 
-    componentWillUnmount() {
-      this._mounted = false;
-      this._clearTimeouts();
-
-      // clear response if user does not want the
-      // data to be cached
-      if(!opts.loadDataCache) {
-        res = null;
-      }
+    clearTimeouts() {
+      clearTimeout(this.delay);
+      clearTimeout(this.timeout);
     }
-
-    _clearTimeouts() {
-      clearTimeout(this._delay);
-      clearTimeout(this._timeout);
-    }
-
-    retry = () => {
-      this.setState({ error: null, loading: true });
-      res = loadFn(opts.loader, undefined, {match: this.props.match, route: this.props.route});
-      this._loadModule();
-    };
 
     render() {
-      if (this.state.loading || this.state.error) {
+      const {
+        loading,
+        error,
+        pastDelay,
+        timedOut,
+        loaded,
+      } = this.state;
+      if (loading || error) {
         return React.createElement(opts.loading, {
-          isLoading: this.state.loading,
-          pastDelay: this.state.pastDelay,
-          timedOut: this.state.timedOut,
-          error: this.state.error,
-          retry: this.retry
+          pastDelay,
+          timedOut,
+          error,
+          isLoading: loading,
+          retry: this.retry,
         });
-      } else if (this.state.loaded) {
-        return opts.render(this.state.loaded, this.props);
-      } else {
-        return null;
+      } if (loaded) {
+        return opts.render(loaded, this.props);
       }
+      return null;
     }
   }
   return withRouter(LoadableComponent);
@@ -252,8 +270,8 @@ function Loadable(opts) {
 }
 
 function LoadableMap(opts) {
-  if (typeof opts.render !== "function") {
-    throw new Error("LoadableMap requires a `render(loaded, props)` function");
+  if (typeof opts.render !== 'function') {
+    throw new Error('LoadableMap requires a `render(loaded, props)` function');
   }
 
   return createLoadableComponent(loadMap, opts);
@@ -262,10 +280,10 @@ function LoadableMap(opts) {
 Loadable.Map = LoadableMap;
 
 function flushInitializers(initializers) {
-  let promises = [];
+  const promises = [];
 
   while (initializers.length) {
-    let init = initializers.pop();
+    const init = initializers.pop();
     promises.push(init());
   }
 
@@ -273,20 +291,17 @@ function flushInitializers(initializers) {
     if (initializers.length) {
       return flushInitializers(initializers);
     }
+    return false;
   });
 }
 
-Loadable.preloadAll = () => {
-  return new Promise((resolve, reject) => {
-    flushInitializers(ALL_INITIALIZERS).then(resolve, reject);
-  });
-};
+Loadable.preloadAll = () => new Promise((res, reject) => {
+  flushInitializers(ALL_INITIALIZERS).then(res, reject);
+});
 
-Loadable.preloadReady = () => {
-  return new Promise(resolve => {
-    // We always will resolve, errors should be handled within loading UIs.
-    flushInitializers(READY_INITIALIZERS).then(resolve, resolve);
-  });
-};
+Loadable.preloadReady = () => new Promise((res) => {
+  // We always will resolve, errors should be handled within loading UIs.
+  flushInitializers(READY_INITIALIZERS).then(res, res);
+});
 
 export default Loadable;

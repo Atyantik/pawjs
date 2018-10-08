@@ -4,14 +4,14 @@
  * Time: 5:00 PM
  */
 
-import React, { Component } from "react";
-import { Link } from "react-router-dom";
-import * as styles from "./features.scss";
+import React, { Component } from 'react';
+import { Link } from 'react-router-dom';
+import * as styles from './features.scss';
 
 export default class SidebarLinks extends Component {
   render() {
     return (
-      <ul className={`list-unstyled ${styles["padded-nav"]}`}>
+      <ul className={`list-unstyled ${styles['padded-nav']}`}>
         <li>
           <Link to="/features" className="text-lead">Features</Link>
         </li>

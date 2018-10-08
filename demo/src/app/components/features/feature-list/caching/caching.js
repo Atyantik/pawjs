@@ -4,7 +4,7 @@
  * Time: 4:46 PM
  */
 
-import React, { Component } from "react";
+import React, { Component } from 'react';
 
 export default class Caching extends Component {
   render() {
@@ -12,7 +12,7 @@ export default class Caching extends Component {
       <article>
         <header>
           <h1 className="mt-4">Caching</h1>
-          <hr/>
+          <hr />
         </header>
         <section>
           <section>
@@ -20,7 +20,9 @@ export default class Caching extends Component {
               <h3 className="mt-4">What is Caching?</h3>
             </header>
             <p>
-              <b>Caching</b> is an area of a computer’s memory devoted to temporarily storing recently used
+              <b>Caching</b>
+              {' '}
+is an area of a computer’s memory devoted to temporarily storing recently used
               information. The content, which includes HTML pages, images, files and Web objects, is
               stored on the local hard drive in order to make it faster for the user to access it,
               which helps improve the efficiency of the computer and its overall performance.
@@ -30,10 +32,11 @@ export default class Caching extends Component {
               returns to a Web page they have recently accessed, the browser can pull those files
               from the cache instead of the original server because it has stored the user’s activity.
               The storing of that information saves the user time by getting to it faster, and lessens
-              the traffic on the network.<br/>
+              the traffic on the network.
+              <br />
             </p>
           </section>
-          <hr/>
+          <hr />
 
           <section>
             <header>
@@ -61,7 +64,7 @@ export default class Caching extends Component {
               already stored (cached) version of the page.
             </p>
           </section>
-          <hr/>
+          <hr />
 
         </section>
       </article>

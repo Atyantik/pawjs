@@ -4,13 +4,12 @@
  * Time: 3:38 PM
  */
 
-import React, { Component } from "react";
-import Prism from "../../prism/prism";
+import React, { Component } from 'react';
+import Prism from '../../prism/prism';
 
 export default class ConfiguringRedux extends Component {
-
   render() {
-    return(
+    return (
       <article>
         <header>
           <h1>Configuring Redux</h1>
@@ -24,7 +23,9 @@ export default class ConfiguringRedux extends Component {
             Here we will take an example of Increment counter.
           </p>
           <p>
-            Create a reducer <strong>`src/app/components/counter/reducer.js`</strong>
+            Create a reducer
+            {' '}
+            <strong>`src/app/components/counter/reducer.js`</strong>
           </p>
           <Prism code={`import _ from "lodash";
 
@@ -48,9 +49,13 @@ switch (action.type) {
   default:
     return state;
 }
-};`}/><br/>
+};`}
+          />
+          <br />
           <p>
-            Create an action for the same reducer <strong>`src/app/components/counter/action.js`</strong>
+            Create an action for the same reducer
+            {' '}
+            <strong>`src/app/components/counter/action.js`</strong>
           </p>
           <Prism code={`import { INCREMENT_COUNT, DECREMENT_COUNT } from "./reducer";
 
@@ -63,21 +68,25 @@ export const decrementCounter = () => {
   return {
     type: DECREMENT_COUNT,
   };
-};`}/>
+};`}
+          />
         </section>
-        <hr/>
+        <hr />
         <section>
           <header>
             <h2>Exporting reducers</h2>
           </header>
           <p>
-            Create a file reducers.js. i.e. <strong>`src/app/reducers.js`</strong>
+            Create a file reducers.js. i.e.
+            {' '}
+            <strong>`src/app/reducers.js`</strong>
           </p>
           <Prism code={`//export all the reducers using this file
 export * from "./components/counter/reducer";
-`}/>
+`}
+          />
         </section>
-        <hr/>
+        <hr />
         <section>
           <header>
             <h2>
@@ -90,7 +99,9 @@ import * as appReducers from "./app/reducers";
 // ...
 export const reduxReducers = appReducers;
 // ...
-`}/><br/>
+`}
+            />
+            <br />
             <p>Import the appReducers from app and export from server.js</p>
             <Prism code={`// ...other imports
 import * as appReducers from "./app/reducers";
@@ -108,18 +119,22 @@ app.use((req, res, next) => {
  * --- Your custom code END ---
  */
  // ...
-`}/>
+`}
+            />
 
           </header>
         </section>
-        <hr/>
+        <hr />
         <section>
           <h2>Configuring Redux InitialState</h2>
           <p>
             Suppose in the example above, We want to start the counter from '5' instead of '0'.
             Hence to do it you can set the initial state for the redux store.
           </p>
-          <p>You can set reduxInitialState for <strong>client.js</strong></p>
+          <p>
+You can set reduxInitialState for
+            <strong>client.js</strong>
+          </p>
           <Prism code={`// ...other imports
 
 // ...
@@ -130,8 +145,13 @@ export const reduxInitialState = {
   }
 }
 // ...
-`}/><br/>
-          <p>Set the same initialState for <strong>server.js</strong></p>
+`}
+          />
+          <br />
+          <p>
+Set the same initialState for
+            <strong>server.js</strong>
+          </p>
           <Prism code={`// ...other imports
 
 // ...
@@ -152,7 +172,8 @@ app.use((req, res, next) => {
  * --- Your custom code END ---
  */
  // ...
-`}/>
+`}
+          />
         </section>
       </article>
     );

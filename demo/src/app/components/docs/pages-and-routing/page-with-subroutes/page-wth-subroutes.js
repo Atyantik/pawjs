@@ -4,22 +4,27 @@
  * Time: 2:27 PM
  */
 
-import React, { Component } from "react";
-import Prism from "../../../prism/prism";
+import React, { Component } from 'react';
+import Prism from '../../../prism/prism';
 
 export default class PageWithSubroutes extends Component {
   render() {
-    return(
+    return (
       <article>
         <header>
           <h1 className="mt-4">Creating a Page with Sub-Routes</h1>
-          <hr/>
+          <hr />
         </header>
         <div>
           <p>
             Suppose you want to create pages such that a component/function remains common
-            in both the pages. Eg: SideBar.<br/>
-            Here we can use <strong>Page with Sub-Routes</strong> to create such a page.
+            in both the pages. Eg: SideBar.
+            <br />
+            Here we can use
+            {' '}
+            <strong>Page with Sub-Routes</strong>
+            {' '}
+to create such a page.
           </p>
           <ul className="list-unstyled">
             <li className="mt-4">
@@ -33,7 +38,8 @@ export default class Home extends Component {
       <h1>Hello World!</h1>
     );
   }
-}`} />
+}`}
+              />
             </li>
             <li className="mt-4">
               2) Create another React Component for the Page, eg: Welcome component in file `src/app/components/welcome.js`
@@ -46,7 +52,8 @@ export default class Welcome extends Component {
       <h1>Welcome to the ReactPWA boilerplate!</h1>
     );
   }
-}`} />
+}`}
+              />
             </li>
             <li className="mt-4">
               3) Create a Component that will work as an Abstract Component for the Page,
@@ -74,7 +81,8 @@ export default class Index extends Component {
       </div>
     );
   }
-}`} />
+}`}
+              />
             </li>
             <li className="mt-4">
               4) Create a new page in `src/pages/home.js`
@@ -102,10 +110,15 @@ const routes = [
   }
 ];
 export default routes;
-`} />
+`}
+              />
             </li>
             <li className="mt-4">
-              5) Edit <i>`src/routes.js`</i> and add route for home page.
+              5) Edit
+              {' '}
+              <i>`src/routes.js`</i>
+              {' '}
+and add route for home page.
               <Prism code={`import { configureRoutes } from "pawjs/src/utils/bundler";
 
 // routes
@@ -113,9 +126,12 @@ import * as Home from "./pages/home";
 
 export default configureRoutes([
   Home
-]);`} />
+]);`}
+              />
               <p className="alert alert-info">
-                <strong>NOTE:</strong> Please maintain the import syntax as above, because we add bundleKey to the route via route-loader.
+                <strong>NOTE:</strong>
+                {' '}
+Please maintain the import syntax as above, because we add bundleKey to the route via route-loader.
               </p>
             </li>
           </ul>

@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { Component } from 'react';
 
 export default class CodeSplitting extends Component {
   render() {
@@ -6,7 +6,7 @@ export default class CodeSplitting extends Component {
       <article>
         <header>
           <h1 className="mt-4">Code Splitting</h1>
-          <hr/>
+          <hr />
         </header>
         <section>
           <p>
@@ -17,7 +17,10 @@ export default class CodeSplitting extends Component {
           <p>
             Even though splitting bundles can help a notch, they are not the only solution,
             and you can still end up having to download a lot of data.
-            Fortunately, it's possible to do better thanks to <strong>code splitting</strong>.
+            Fortunately, it's possible to do better thanks to
+            {' '}
+            <strong>code splitting</strong>
+.
             It allows to load code lazily as you need it.
           </p>
         </section>

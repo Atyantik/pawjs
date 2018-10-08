@@ -1,127 +1,144 @@
-import React, { Component } from "react";
-import { metaKeys } from "../utils/seo";
-import PropTypes from "prop-types";
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
+import { metaKeys } from '../utils/seo';
 
 let toBase64;
 // Base64 polyfill
-if (typeof atob === "undefined" && typeof Buffer !== "undefined") {
-  toBase64 = function (str) {
+if (typeof atob === 'undefined' && typeof Buffer !== 'undefined') {
+  toBase64 = (str) => {
     if (!str) return str;
-    return Buffer.from(str).toString("base64");
+    return Buffer.from(str).toString('base64');
   };
-} else if (typeof atob !== "undefined") {
+} else if (typeof atob !== 'undefined') {
   toBase64 = atob;
 }
 
 
 class Html extends Component {
   static propTypes = {
-    metaTags: PropTypes.array,
-    pwaSchema: PropTypes.object,
-    cssFiles: PropTypes.array,
-    preloadCssFiles: PropTypes.array,
-    assets: PropTypes.array,
-    head: PropTypes.array,
-    footer: PropTypes.array,
+    metaTags: PropTypes.arrayOf(PropTypes.shape({})),
+    pwaSchema: PropTypes.shape({}),
+    cssFiles: PropTypes.arrayOf(PropTypes.shape({})),
+    preloadCssFiles: PropTypes.bool,
+    assets: PropTypes.arrayOf(PropTypes.string),
+    head: PropTypes.arrayOf(PropTypes.any),
+    footer: PropTypes.arrayOf(PropTypes.any),
     appRootUrl: PropTypes.string,
     clientRootElementId: PropTypes.string,
     dangerouslySetInnerHTML: PropTypes.shape({
       __html: PropTypes.string,
-    })
+    }),
   };
-  
+
   static defaultProps = {
     metaTags: [],
     pwaSchema: {},
     cssFiles: [],
-    preloadCssFiles: [],
+    preloadCssFiles: false,
     assets: [],
     head: [],
     footer: [],
-    appRootUrl: "/",
-    clientRootElementId: "app",
+    appRootUrl: '/',
+    clientRootElementId: 'app',
     dangerouslySetInnerHTML: {
-      __html: ""
-    }
+      __html: '',
+    },
   };
-  
-  getPwaValue(key, defaultValue = "") {
-    if (typeof this.props.pwaSchema[key] !== "undefined") {
-      return this.props.pwaSchema[key];
+
+  getPwaValue(key, defaultValue = '') {
+    const { pwaSchema } = this.props;
+    if (typeof pwaSchema[key] !== 'undefined') {
+      return pwaSchema[key];
     }
     return defaultValue;
   }
-  
+
   /**
    * Get meta tag after searching through meta tags
    * @param key
    * @param defaultValue
    * @returns {object}
    */
-  getMetaValue(key, defaultValue = "") {
+  getMetaValue(key, defaultValue = '') {
     let metaTag = {};
-    this.props.metaTags.forEach(m => {
+    const { metaTags } = this.props;
+    metaTags.forEach((m) => {
       if (Object.keys(metaTag).length) return;
-      metaKeys.forEach(mKey => {
+      metaKeys.forEach((mKey) => {
         if (m[mKey] && m[mKey] === key) {
           metaTag = Object.assign({}, m);
         }
       });
     });
-    let handler = {
-      get: function(target, name) {
+    const handler = {
+      get(target, name) {
         return name in target ? target[name] : defaultValue;
-      }
+      },
     };
     return new Proxy(metaTag, handler);
   }
-  
+
   /**
    * Render the code
    * @returns {*}
    */
   render() {
-    const { preloadedData } = this.props;
+    const {
+      preloadedData,
+      metaTags,
+      appRootUrl,
+      preloadCssFiles,
+      cssFiles,
+      head,
+      dangerouslySetInnerHTML,
+      clientRootElementId,
+      children,
+      footer,
+      assets,
+    } = this.props;
+
     return (
-      <html lang={this.getPwaValue("lang")} dir={this.getPwaValue("dir")}>
+      <html lang={this.getPwaValue('lang')} dir={this.getPwaValue('dir')}>
         <head>
-          <title>{this.getMetaValue("title").content}</title>
-          <link rel="manifest" href={`${this.props.appRootUrl}/manifest.json`} />
+          <title>{this.getMetaValue('title').content}</title>
+          <link rel="manifest" href={`${appRootUrl}/manifest.json`} />
           {
-            this.props.metaTags.map((m, i) => {
-              return <meta key={`meta_${i}`} {...m} />;
-            })
+            metaTags.map(m => <meta key={JSON.stringify(m)} {...m} />)
           }
           <script
             type="text/javascript"
             id="__pawjs_preloaded"
+            // eslint-disable-next-line
             dangerouslySetInnerHTML={{
-              __html: `window.__preloaded_data = ${JSON.stringify(toBase64(JSON.stringify(preloadedData)))};`
+              __html: `window.PAW_PRELOADED_DATA = ${JSON.stringify(toBase64(JSON.stringify(preloadedData)))};`,
             }}
           />
-          {Boolean(this.props.preloadCssFiles.length) && (<preload-css />)}
+          {preloadCssFiles && (<preload-css />)}
           {
-            this.props.cssFiles
+            cssFiles
               .map(path => <link rel="stylesheet" type="text/css" key={path} href={path} />)
           }
-          {this.props.head}
+          {head}
         </head>
         <body>
           {
-            Boolean(this.props.dangerouslySetInnerHTML.__html.length) && (
-              <div id={this.props.clientRootElementId} dangerouslySetInnerHTML={this.props.dangerouslySetInnerHTML} />
+            // eslint-disable-next-line
+            Boolean(dangerouslySetInnerHTML.__html.length) && (
+              // eslint-disable-next-line
+              <div id={clientRootElementId} dangerouslySetInnerHTML={dangerouslySetInnerHTML} />
             )
           }
           {
-            !this.props.dangerouslySetInnerHTML.__html.length && (
-              <div id={this.props.clientRootElementId}>{this.props.children || null}</div>
+            // eslint-disable-next-line
+            !dangerouslySetInnerHTML.__html.length && (
+              <div id={clientRootElementId}>{children || null}</div>
             )
           }
-          {this.props.footer}
+          {footer}
           {
-            this.props.assets
-              .filter(path => path.endsWith(".js"))
-              .map(path => <script key={path} src={path} async={true} />)
+            assets
+              .filter(path => path.endsWith('.js'))
+              .map(path => <script key={path} src={path} async />)
           }
         </body>
       </html>

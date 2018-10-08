@@ -1,23 +1,23 @@
-const path = require("path");
-const fs = require("fs");
+const path = require('path');
+const fs = require('fs');
+const defaultsDeep = require('lodash/defaultsDeep');
 
 /**
  * Default directory list
  * @type {{root: *, src: *, dist: *, build: *}}
  */
 const defaultDirectories = {
-  root: process.env.__project_root,
-  src: path.resolve(process.env.__project_root, "src"),
-  dist: path.join(process.env.__project_root, "dist"),
-  build: path.join(process.env.__project_root, "dist", "build"),
+  root: process.env.PROJECT_ROOT,
+  src: path.resolve(process.env.PROJECT_ROOT, 'src'),
+  dist: path.join(process.env.PROJECT_ROOT, 'dist'),
+  build: path.join(process.env.PROJECT_ROOT, 'dist', 'build'),
 };
-
-const defaultsDeep = require("lodash/defaultsDeep");
 
 let directories = {};
 try {
-  const directoriesConfigPath = `${process.env.__project_root}/directories.js`;
+  const directoriesConfigPath = `${process.env.PROJECT_ROOT}/directories.js`;
   if (fs.existsSync(directoriesConfigPath)) {
+    // eslint-disable-next-line
     directories = require(directoriesConfigPath);
   }
 } catch (ex) {
