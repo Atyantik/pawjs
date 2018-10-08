@@ -1,13 +1,13 @@
-import { Tapable } from "tapable";
-import { combineReducers} from "redux";
-import "regenerator-runtime/runtime";
+import { Tapable } from 'tapable';
+import { combineReducers } from 'redux';
+import 'regenerator-runtime/runtime';
 
 export default class ReduxTapable extends Tapable {
   constructor() {
     super();
     this.reducers = null;
     this.middlewares = [];
-    this.enhancers =[];
+    this.enhancers = [];
   }
 
   addMiddleware(middleware) {
@@ -21,7 +21,7 @@ export default class ReduxTapable extends Tapable {
   }
 
   setReducers(reducers) {
-    if (typeof reducers === "function") {
+    if (typeof reducers === 'function') {
       this.reducers = reducers;
       return;
     }
