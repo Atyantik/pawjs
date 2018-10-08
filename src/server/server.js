@@ -84,10 +84,10 @@ app.get(`${env.appRootUrl}/manifest.json`, (req, res) => {
 
 app.get('*', (req, res, next) => {
   if (
-    req.path.endsWith('favicon.png') !== -1
-    || req.path.endsWith('favicon.ico') !== -1
-    || req.path.endsWith('favicon.jpg') !== -1
-    || req.path.endsWith('favicon.jpeg') !== -1
+    req.path.endsWith('favicon.png')
+    || req.path.endsWith('favicon.ico')
+    || req.path.endsWith('favicon.jpg')
+    || req.path.endsWith('favicon.jpeg')
   ) {
     return next();
   }
