@@ -213,8 +213,7 @@ export default class ClientHandler extends Tapable {
       this.hooks.renderRoutes.callAsync({
         setRenderedRoutes: AppRoutes.setRenderedRoutes,
         getRenderedRoutes: AppRoutes.getRenderedRoutes,
-      }, () => {
-      });
+      }, () => null);
       const children = (
         <AppRouter basename={env.appRootUrl} {...RouterParams}>
           {AppRoutes.renderedRoutes}
