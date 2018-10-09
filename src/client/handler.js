@@ -39,6 +39,7 @@ export default class ClientHandler extends Tapable {
     this.hooks = {
       locationChange: new AsyncParallelBailHook(['location', 'action']),
       beforeRender: new AsyncSeriesHook(['Application']),
+      renderRoutes: new AsyncSeriesHook(['AppRoutes']),
       renderComplete: new SyncHook(),
     };
     this.options = options;
@@ -200,10 +201,23 @@ export default class ClientHandler extends Tapable {
       RouterParams = {};
     }
 
+    const AppRoutes = {
+      renderedRoutes: renderRoutes(routes),
+      setRenderedRoutes: (r) => {
+        AppRoutes.renderedRoutes = r;
+      },
+      getRenderedRoutes: () => AppRoutes.renderedRoutes,
+    };
+
     Promise.all(promises).then(() => {
+      this.hooks.renderRoutes.callAsync({
+        setRenderedRoutes: AppRoutes.setRenderedRoutes,
+        getRenderedRoutes: AppRoutes.getRenderedRoutes,
+      }, () => {
+      });
       const children = (
         <AppRouter basename={env.appRootUrl} {...RouterParams}>
-          {renderRoutes(routes)}
+          {AppRoutes.renderedRoutes}
         </AppRouter>
       );
       const Application = {

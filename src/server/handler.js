@@ -22,6 +22,7 @@ export default class ServerHandler extends Tapable {
       afterStart: new AsyncSeriesHook(['appOptions']),
       beforeAppRender: new AsyncSeriesHook(['application', 'request', 'response']),
       beforeHtmlRender: new AsyncSeriesHook(['application', 'request', 'response']),
+      renderRoutes: new AsyncSeriesHook(['appRoutes']),
     };
     this.options = options;
   }
@@ -166,11 +167,23 @@ export default class ServerHandler extends Tapable {
         footer: [],
       };
 
+      const AppRoutes = {
+        renderedRoutes: renderRoutes(routes),
+        setRenderedRoutes: (r) => {
+          AppRoutes.renderedRoutes = r;
+        },
+        getRenderedRoutes: () => AppRoutes.renderedRoutes,
+      };
+      await new Promise(r => this.hooks.renderRoutes.callAsync({
+        setRenderedRoutes: AppRoutes.setRenderedRoutes,
+        getRenderedRoutes: AppRoutes.getRenderedRoutes,
+      }, r));
+
       const Application = {
         htmlProps,
         children: (
           <StaticRouter location={req.url} context={context} basename={appRootUrl}>
-            {renderRoutes(routes)}
+            {AppRoutes.renderedRoutes}
           </StaticRouter>
         ),
         context,
