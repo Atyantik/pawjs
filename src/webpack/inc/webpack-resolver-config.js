@@ -29,24 +29,29 @@ const projectServerPath = `${process.env.PROJECT_ROOT}/src/server.js`;
 const projectServerExists = fs.existsSync(projectServerPath);
 
 const commonResolvers = [
+  'node_modules',
   path.resolve(path.join(directories.root, 'node_modules')),
 ];
 
+if (
+  process.env.LIB_ROOT !== process.cwd()
+  && process.env.LIB_ROOT !== path.resolve(process.cwd(), '..')
+) {
+  if (fs.existsSync(path.join(process.env.LIB_ROOT, 'node_modules'))) {
+    commonResolvers.push(path.join(process.env.LIB_ROOT, 'node_modules'));
+  }
 
-if (fs.existsSync(path.join(process.env.LIB_ROOT, 'node_modules'))) {
-  commonResolvers.push(path.join(process.env.LIB_ROOT, 'node_modules'));
-}
+  if (fs.existsSync(path.join(process.env.LIB_ROOT, '..', 'node_modules'))) {
+    commonResolvers.push(path.join(process.env.LIB_ROOT, '..', 'node_modules'));
+  }
 
-if (fs.existsSync(path.join(process.env.LIB_ROOT, '..', 'node_modules'))) {
-  commonResolvers.push(path.join(process.env.LIB_ROOT, '..', 'node_modules'));
-}
+  if (fs.existsSync(path.join(process.env.LIB_ROOT, '..', '..', 'node_modules'))) {
+    commonResolvers.push(path.join(process.env.LIB_ROOT, '..', '..', 'node_modules'));
+  }
 
-if (fs.existsSync(path.join(process.env.LIB_ROOT, '..', '..', 'node_modules'))) {
-  commonResolvers.push(path.join(process.env.LIB_ROOT, '..', '..', 'node_modules'));
-}
-
-if (fs.existsSync(path.join(process.env.LIB_ROOT, '..', '..', '..', 'node_modules'))) {
-  commonResolvers.push(path.join(process.env.LIB_ROOT, '..', '..', '..', 'node_modules'));
+  if (fs.existsSync(path.join(process.env.LIB_ROOT, '..', '..', '..', 'node_modules'))) {
+    commonResolvers.push(path.join(process.env.LIB_ROOT, '..', '..', '..', 'node_modules'));
+  }
 }
 
 const loaderResolver = commonResolvers.slice(0);
