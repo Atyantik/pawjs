@@ -16,7 +16,7 @@ export default class Client {
   //   // addPlugin(reduxClient);
   // }
   apply(clientHandler) {
-    clientHandler.hooks.renderRoutes.tap('AddShell', (AppRoutes) => {
+    clientHandler.hooks.renderRoutes.tapPromise('AddShell', async (AppRoutes) => {
       AppRoutes.setRenderedRoutes(
         <div>
           <Link to="/home">Home</Link>

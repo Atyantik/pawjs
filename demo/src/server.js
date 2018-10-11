@@ -16,8 +16,8 @@ export default class Server {
   // }
   //
   apply(serverHandler) {
-    serverHandler.hooks.renderRoutes.tap('AddShell', (AppRoutes) => {
-      AppRoutes.setRenderedRoutes(
+    serverHandler.hooks.renderRoutes.tapPromise('AddShell', async (AppRoutes) => {
+      return AppRoutes.setRenderedRoutes(
         <div>
           <Link to="/home">Home</Link>
           {AppRoutes.getRenderedRoutes()}

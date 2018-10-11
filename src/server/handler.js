@@ -106,7 +106,7 @@ export default class ServerHandler extends Tapable {
 
       res
         .status(context.status || 200)
-        .type('html')
+        .type('text/html')
         .send(`<!DOCTYPE html>${renderedHtml}`);
       return next();
     }
@@ -201,16 +201,21 @@ export default class ServerHandler extends Tapable {
 
       await new Promise(r => this.hooks.beforeHtmlRender.callAsync(Application, req, res, r));
 
-      renderedHtml = renderToString(
-        <Html
-          {...Application.htmlProps}
-          appRootUrl={appRootUrl}
-          clientRootElementId={this.options.env.clientRootElementId}
-          dangerouslySetInnerHTML={{
-            __html: htmlContent,
-          }}
-        />,
-      );
+      try {
+        renderedHtml = renderToString(
+          <Html
+            {...Application.htmlProps}
+            appRootUrl={appRootUrl}
+            clientRootElementId={this.options.env.clientRootElementId}
+            dangerouslySetInnerHTML={{
+              __html: htmlContent,
+            }}
+          />,
+        );
+      } catch (ex) {
+        // eslint-disable-next-line
+        console.log(ex);
+      }
 
       renderedHtml = renderedHtml.replace(
         '<preload-css></preload-css>',
@@ -226,7 +231,7 @@ export default class ServerHandler extends Tapable {
       } else {
         res
           .status(context.status || 200)
-          .type('html')
+          .type('text/html')
           .send(`<!DOCTYPE html>${renderedHtml}`);
       }
 
@@ -257,10 +262,9 @@ export default class ServerHandler extends Tapable {
         ).join(''),
       );
     }
-
     return res
       .status(context.status || 200)
-      .type('html')
+      .type('text/html')
       .send(`<!DOCTYPE html>${renderedHtml}`);
   }
 }
