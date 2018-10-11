@@ -200,22 +200,16 @@ export default class ServerHandler extends Tapable {
       );
 
       await new Promise(r => this.hooks.beforeHtmlRender.callAsync(Application, req, res, r));
-
-      try {
-        renderedHtml = renderToString(
-          <Html
-            {...Application.htmlProps}
-            appRootUrl={appRootUrl}
-            clientRootElementId={this.options.env.clientRootElementId}
-            dangerouslySetInnerHTML={{
-              __html: htmlContent,
-            }}
-          />,
-        );
-      } catch (ex) {
-        // eslint-disable-next-line
-        console.log(ex);
-      }
+      renderedHtml = renderToString(
+        <Html
+          {...Application.htmlProps}
+          appRootUrl={appRootUrl}
+          clientRootElementId={this.options.env.clientRootElementId}
+          dangerouslySetInnerHTML={{
+            __html: htmlContent,
+          }}
+        />,
+      );
 
       renderedHtml = renderedHtml.replace(
         '<preload-css></preload-css>',

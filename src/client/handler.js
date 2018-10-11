@@ -212,10 +212,10 @@ export default class ClientHandler extends Tapable {
 
     await Promise.all(promises).catch();
 
-    await (new Promise(() => this.hooks.renderRoutes.callAsync({
+    await (new Promise(r => this.hooks.renderRoutes.callAsync({
       setRenderedRoutes: AppRoutes.setRenderedRoutes,
       getRenderedRoutes: AppRoutes.getRenderedRoutes,
-    }, () => null)));
+    }, r)));
 
     // await this.hooks.renderRoutes.callAsync({
     //   setRenderedRoutes: AppRoutes.setRenderedRoutes,
