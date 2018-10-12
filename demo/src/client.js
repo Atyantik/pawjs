@@ -1,5 +1,7 @@
 // import ReduxClient from "../../packages/pawjs-redux/src/client";
 import './resources/css/style.scss';
+import React from 'react';
+import { Link } from 'react-router-dom';
 
 export default class Client {
   // constructor({addPlugin}) {
@@ -13,4 +15,14 @@ export default class Client {
   //
   //   // addPlugin(reduxClient);
   // }
+  apply(clientHandler) {
+    clientHandler.hooks.renderRoutes.tapPromise('AddShell', async (AppRoutes) => {
+      AppRoutes.setRenderedRoutes(
+        <div>
+          <Link to="/home">Home</Link>
+          {AppRoutes.getRenderedRoutes()}
+        </div>,
+      );
+    });
+  }
 }

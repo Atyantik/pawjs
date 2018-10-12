@@ -22,6 +22,7 @@ export default class ServerHandler extends Tapable {
       afterStart: new AsyncSeriesHook(['appOptions']),
       beforeAppRender: new AsyncSeriesHook(['application', 'request', 'response']),
       beforeHtmlRender: new AsyncSeriesHook(['application', 'request', 'response']),
+      renderRoutes: new AsyncSeriesHook(['appRoutes']),
     };
     this.options = options;
   }
@@ -105,7 +106,7 @@ export default class ServerHandler extends Tapable {
 
       res
         .status(context.status || 200)
-        .type('html')
+        .type('text/html')
         .send(`<!DOCTYPE html>${renderedHtml}`);
       return next();
     }
@@ -166,11 +167,23 @@ export default class ServerHandler extends Tapable {
         footer: [],
       };
 
+      const AppRoutes = {
+        renderedRoutes: renderRoutes(routes),
+        setRenderedRoutes: (r) => {
+          AppRoutes.renderedRoutes = r;
+        },
+        getRenderedRoutes: () => AppRoutes.renderedRoutes,
+      };
+      await new Promise(r => this.hooks.renderRoutes.callAsync({
+        setRenderedRoutes: AppRoutes.setRenderedRoutes,
+        getRenderedRoutes: AppRoutes.getRenderedRoutes,
+      }, r));
+
       const Application = {
         htmlProps,
         children: (
           <StaticRouter location={req.url} context={context} basename={appRootUrl}>
-            {renderRoutes(routes)}
+            {AppRoutes.renderedRoutes}
           </StaticRouter>
         ),
         context,
@@ -187,7 +200,6 @@ export default class ServerHandler extends Tapable {
       );
 
       await new Promise(r => this.hooks.beforeHtmlRender.callAsync(Application, req, res, r));
-
       renderedHtml = renderToString(
         <Html
           {...Application.htmlProps}
@@ -213,7 +225,7 @@ export default class ServerHandler extends Tapable {
       } else {
         res
           .status(context.status || 200)
-          .type('html')
+          .type('text/html')
           .send(`<!DOCTYPE html>${renderedHtml}`);
       }
 
@@ -244,10 +256,9 @@ export default class ServerHandler extends Tapable {
         ).join(''),
       );
     }
-
     return res
       .status(context.status || 200)
-      .type('html')
+      .type('text/html')
       .send(`<!DOCTYPE html>${renderedHtml}`);
   }
 }
