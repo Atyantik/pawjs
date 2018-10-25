@@ -1,8 +1,7 @@
-import React, { Component } from "react";
-import Prism from "../../prism/prism";
+import React, { Component } from 'react';
+import Prism from '../../prism/prism';
 
 export default class Docs extends Component {
-  
   render() {
     return (
       <article>
@@ -61,9 +60,10 @@ export default class Docs extends Component {
 		"src": "/build/images/resources/images/pwa/3a8136a792cfe525ff82f7488883fa1d.png",
 		"sizes": "512x512"
 	}]
-}`} />
+}`}
+            />
           </div>
-  
+
           <div className="mt-4">
             <p>This can be easily managed by configuring few settings and adding appropriate images in resources. Let start with simple configuration:</p>
             <p>1) Open file `src/config/config.js` and edit the following section: </p>
@@ -97,13 +97,19 @@ export default class Docs extends Component {
 };`}
             />
             <div className="alert alert-danger">
-              Do not copy paste the above code to `src/config/config.js`. We just need to update the <strong>pwa</strong> section.
+              Do not copy paste the above code to `src/config/config.js`. We just need to update the
+              {' '}
+              <strong>pwa</strong>
+              {' '}
+section.
               Modify it with your app details.
             </div>
-            More details about Web App Manifest can be found at <a href="https://developer.mozilla.org/en-US/docs/Web/Manifest" target="_blank" rel="nofollow noopener">https://developer.mozilla.org/en-US/docs/Web/Manifest</a>
+            More details about Web App Manifest can be found at
+            {' '}
+            <a href="https://developer.mozilla.org/en-US/docs/Web/Manifest" target="_blank" rel="nofollow noopener">https://developer.mozilla.org/en-US/docs/Web/Manifest</a>
           </div>
         </section>
-  
+
         <hr />
         <section className="mt-4">
           <header>
@@ -123,11 +129,13 @@ export default class Docs extends Component {
 		"sizes": "96x96"
 	}
 	//...
-]`} />
+]`}
+            />
             <p>
               The reason we didn't included then is because we are including the Images directly from `src/resources/images/pwa` and it is mandatory to use the same naming convention:
             </p>
-            <Prism code={`icon-72x72.png
+            <Prism
+              code="icon-72x72.png
 icon-96x96.png
 icon-128x128.png
 icon-144x144.png
@@ -135,7 +143,9 @@ icon-152x152.png
 icon-192x192.png
 icon-384x384.png
 icon-512x512.png
-`} language="text" />
+"
+              language="text"
+            />
             <p>
               Create and replace files in `src/resources/images/pwa` folder with your own application logo-images making sure you have all the above sizes included or the application won't work as expected.
             </p>

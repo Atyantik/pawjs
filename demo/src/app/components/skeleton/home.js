@@ -1,6 +1,6 @@
-import React, {Component} from "react";
+import React, { Component } from 'react';
 
-export default class HomeSkeleton extends Component{
+export default class HomeSkeleton extends Component {
   render() {
     return (
       <div>

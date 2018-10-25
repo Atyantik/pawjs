@@ -4,15 +4,16 @@
  * Time: 11:56 AM
  */
 
-import React, { Component } from "react";
-import SocialCard from "./images/social-card.png";
+import React, { Component } from 'react';
+import SocialCard from './images/social-card.png';
+
 export default class SocialSharing extends Component {
   render() {
     return (
       <article>
         <header>
           <h1 className="mt-4">Social Sharing</h1>
-          <hr/>
+          <hr />
         </header>
         <section>
           <section>
@@ -25,7 +26,7 @@ export default class SocialSharing extends Component {
               or that the post description reads like:
             </p>
             <p>
-              <img src={SocialCard} alt="Social Card" className="mw-100"/>
+              <img src={SocialCard} alt="Social Card" className="mw-100" />
             </p>
             <p>
               The above image is an example of social card. You can control the social media
@@ -36,7 +37,7 @@ export default class SocialSharing extends Component {
               and is more likely to get a click.
             </p>
           </section>
-          <hr/>
+          <hr />
 
           <section>
             <header>
@@ -44,8 +45,16 @@ export default class SocialSharing extends Component {
             </header>
             <p>
               We strive to include social media metadata in all new pieces of content that we publish.
-              This allows us to optimize for sharing <strong>Twitter</strong>, <strong>Facebook</strong>, and&nbsp;
-              <strong>Google+</strong> by defining exactly how titles,
+              This allows us to optimize for sharing
+              {' '}
+              <strong>Twitter</strong>
+,
+              {' '}
+              <strong>Facebook</strong>
+, and&nbsp;
+              <strong>Google+</strong>
+              {' '}
+by defining exactly how titles,
               descriptions, images and more appear in social streams.
             </p>
             <p>

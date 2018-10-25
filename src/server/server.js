@@ -1,11 +1,11 @@
-import express from "express";
-import _ from "lodash";
-import RouteHandler from "../router/handler";
-import ServerHandler from "./handler";
-import hsts from "hsts";
-import env from "../config";
-import { assetsToArray } from "../utils/utils";
-import ProjectServer from "pawProjectServer";
+import express from 'express';
+import _ from 'lodash';
+import hsts from 'hsts';
+import ProjectServer from 'pawProjectServer';
+import RouteHandler from '../router/handler';
+import ServerHandler from './handler';
+import env from '../config';
+import { assetsToArray } from '../utils/utils';
 
 /**
  * Initialize Route handler
@@ -16,27 +16,28 @@ const rHandler = new RouteHandler({
   isServer: true,
 });
 
-let ProjectRoutes = require(`${process.env.__project_root}/src/routes`);
+// eslint-disable-next-line
+let ProjectRoutes = require(`${process.env.PROJECT_ROOT}/src/routes`);
 if (ProjectRoutes.default) ProjectRoutes = ProjectRoutes.default;
 
 // Add route plugin
-rHandler.addPlugin(new ProjectRoutes({addPlugin: rHandler.addPlugin}));
+rHandler.addPlugin(new ProjectRoutes({ addPlugin: rHandler.addPlugin }));
 
 /**
  * Initialize server handler
  * @type {*}
  */
 const sHandler = new ServerHandler({
-  env: _.assignIn({}, env)
+  env: _.assignIn({}, env),
 });
 
 const serverMiddlewares = [];
 sHandler.addPlugin(new ProjectServer({
-  
+
   addPlugin: sHandler.addPlugin,
   addMiddleware: (middleware) => {
     serverMiddlewares.push(middleware);
-  }
+  },
 }));
 
 /**
@@ -46,12 +47,12 @@ sHandler.addPlugin(new ProjectServer({
 const app = express();
 
 // Disable x-powered-by (security issues)
-app.use(function (req, res, next) {
-  res.setHeader("X-Powered-By", "PawJS");
+app.use((req, res, next) => {
+  res.setHeader('X-Powered-By', 'PawJS');
   next();
 });
 
-serverMiddlewares.forEach(middleware => {
+serverMiddlewares.forEach((middleware) => {
   app.use(middleware);
 });
 
@@ -71,9 +72,9 @@ if (hstsSettings.enabled) {
   // middleware
   app.use(hsts(_.assignIn(hstsSettings, {
     // Enable hsts for https sites
-    setIf: function (req) {
-      return req.secure || (req.headers["x-forwarded-proto"] === "https");
-    }
+    setIf(req) {
+      return req.secure || (req.headers['x-forwarded-proto'] === 'https');
+    },
   })));
 }
 
@@ -81,11 +82,18 @@ app.get(`${env.appRootUrl}/manifest.json`, (req, res) => {
   res.json(rHandler.getPwaSchema());
 });
 
-app.get("*", (req, res, next) => {
-  
+app.get('*', (req, res, next) => {
+  if (
+    req.path.endsWith('favicon.png')
+    || req.path.endsWith('favicon.ico')
+    || req.path.endsWith('favicon.jpg')
+    || req.path.endsWith('favicon.jpeg')
+  ) {
+    return next();
+  }
   // Get the resources
   const assets = assetsToArray(res.locals.assets);
-  
+
   // If no server side rendering is necessary simply
   // run the handler and return streamed data
   if (!env.serverSideRender) {
@@ -95,19 +103,19 @@ app.get("*", (req, res, next) => {
       next,
       assets,
       routeHandler: rHandler,
-      cssDependencyMap: res.locals.cssDependencyMap
+      cssDependencyMap: res.locals.cssDependencyMap,
     });
   }
   // If server side render is enabled then, then let the routes load
   // Wait for all routes to load everything!
-  rHandler.hooks.initRoutes.callAsync(err => {
+  return rHandler.hooks.initRoutes.callAsync((err) => {
     if (err) {
       // eslint-disable-next-line
       console.log(err);
       // @todo: Handle Error
       return next();
     }
-    
+
     // Once we have all the routes, pass the handler to the
     // server run at this point we should have cssDependencyMap as well.
     return sHandler.run({
@@ -116,7 +124,7 @@ app.get("*", (req, res, next) => {
       res,
       next,
       assets,
-      cssDependencyMap: res.locals.cssDependencyMap
+      cssDependencyMap: res.locals.cssDependencyMap,
     });
   });
 });
@@ -126,49 +134,52 @@ app.get("*", (req, res, next) => {
  * @param req
  * @param res
  * @param next
+ * @param PAW_GLOBAL
  * @returns {*}
  */
-export default (req, res, next, _global) => {
-  
+export default (req, res, next, PAW_GLOBAL) => {
   // Add global vars to middlewares and application
-  for (let key in _global) {
-    let val = _global[key];
+  Object.keys(PAW_GLOBAL).forEach((key) => {
+    const val = PAW_GLOBAL[key];
     app.locals[key] = val;
-    serverMiddlewares.forEach(sm => {
+    serverMiddlewares.forEach((sm) => {
       if (sm && sm.locals) {
+        // eslint-disable-next-line
         sm.locals[key] = val;
       }
     });
-  }
-  
+  });
+
   return app.handle(req, res, next);
 };
 
-export const beforeStart = (serverConfig, _global, cb = function() {}) => {
-  
+export const beforeStart = (serverConfig, PAW_GLOBAL, cb = function callback() {}) => {
   const setAppLocal = (key, value) => {
     if (!key) return;
-    _global[key] = value;
+
+    // eslint-disable-next-line
+    PAW_GLOBAL[key] = value;
   };
   const getAppLocal = (key, defaultValue = false) => {
-    if (!_global[key]) return defaultValue;
-    return _global[key];
+    if (!PAW_GLOBAL[key]) return defaultValue;
+    return PAW_GLOBAL[key];
   };
-  
+
   sHandler.hooks.beforeStart.callAsync(serverConfig, {
     setAppLocal,
     getAppLocal,
   }, cb);
 };
 
-export const afterStart = (_global, cb = function() {}) => {
+export const afterStart = (PAW_GLOBAL, cb = function callback() {}) => {
   const setAppLocal = (key, value) => {
     if (!key) return;
-    _global[key] = value;
+    // eslint-disable-next-line
+    PAW_GLOBAL[key] = value;
   };
   const getAppLocal = (key, defaultValue = false) => {
-    if (!_global[key]) return defaultValue;
-    return _global[key];
+    if (!PAW_GLOBAL[key]) return defaultValue;
+    return PAW_GLOBAL[key];
   };
   sHandler.hooks.afterStart.callAsync({
     setAppLocal,

@@ -16,14 +16,34 @@
 A highly scalable & plugable, **Progressive Web Application *Framework*** with the best Developer Experience.
 This framework utilizes the power of React with Webpack and is build on top of webpack/tapable for unlimited extendability.
 
-  
 
-
-#### Current Repo in Action
-To view how the current repository is running please visit [https://demo.reactpwa.com](https://demo.reactpwa.com)
 
 #### No configuration required
 You start the development with nothing but just one single file i.e. `src/routes.js`
+
+### Getting Started
+To install and get started with PawJS execute the following commands:
+
+##### 1. Clone the repo to your local PC and go to the installation
+```bash
+git clone https://github.com/Atyantik/pawjs.git && cd pawjs
+```
+  
+##### 2. Install the dependencies
+```bash
+npm install
+```
+  
+
+##### 3. Prepare the packages and demo project  
+```bash
+npm run prepare-demo
+```  
+
+##### 4. Start the demo project
+```bash
+npm run start
+```
 
 #### Features
 ##### PWA - Progressive Web Applications
@@ -54,6 +74,11 @@ Our customized routes enable creating meta tags to create Twitter, Google+, Link
 ##### HSTS Supported
 Enable HSTS for secure sites. Options to define maxAge and preload of HSTS. All with very simple configuration.  
 
+### Supporters
+##### Atyantik Technologies Private Limited
+Everyone at Atyantik Technologies is contributing their free time for contributing to the project and core discussions.  
+<a href="https://www.atyantik.com" target="_blank"><img width="150px" src="https://www.reactpwa.com/img/supporters/atyantik.svg"></a>
+
 
 ### License
-This project is licensed under the MIT license, Copyright (c) 2018 Atyantik Technologies Private Limited. For more information see [LICENSE.md]("https://github.com/Atyantik/pawjs/blob/master/LICENSE.md").  
+This project is licensed under the MIT license, Copyright (c) 2018 [Atyantik Technologies Private Limited](https://www.atyantik.com). For more information see [LICENSE.md]("https://github.com/Atyantik/pawjs/blob/master/LICENSE.md").  

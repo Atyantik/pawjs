@@ -1,18 +1,18 @@
 {
   "name": "@pawjs/sass",
-  "version": "2.1.5",
+  "version": "2.1.7",
   "description": "Add Sass support to your project",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "rimraf lib && babel src --out-dir lib --source-maps --presets=env,react --plugins=transform-object-rest-spread --watch",
-    "build": "rimraf lib && babel src --out-dir lib --presets=env,react --plugins=transform-object-rest-spread",
-    "npm-publish": "npm version patch && npm run build && cpr package.json lib/package.json && cpr README.md lib/README.md && cd lib && npm publish --access=public && cd .."
+    "start": "npm run build && babel src --out-dir lib --source-maps --presets=env,react --plugins=transform-object-rest-spread --watch",
+    "build": "rimraf lib && babel src --out-dir lib --presets=env,react --plugins=transform-object-rest-spread  && cpr package.json lib/package.json && cpr README.md lib/README.md",
+    "npm-publish": "npm version patch && npm run build && cd lib && npm publish --access=public && cd .."
   },
   "author": "Atyantik Technologies Private Limited <tirthbodawala@atyantik.com>",
   "license": "MIT",
   "peerDependencies": {
     "react": "^16.4.1",
-    "pawjs": "^2.0.0"
+    "@pawjs/pawjs": "^2.0.0"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",

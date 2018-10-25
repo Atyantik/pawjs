@@ -1,51 +1,68 @@
-let reactLoadableRoutes = require("../plugins/react-loadable-routes");
-reactLoadableRoutes = reactLoadableRoutes.default ? reactLoadableRoutes.default : reactLoadableRoutes;
+let reactHotLoader = require('react-hot-loader/babel');
 
-let dynamicImportWebpack = require("../plugins/dynamic-import-webpack");
-dynamicImportWebpack = dynamicImportWebpack.default ? dynamicImportWebpack.default: dynamicImportWebpack;
+reactHotLoader = reactHotLoader.default ? reactHotLoader.default : reactHotLoader;
 
-let syntaxDynamicImport = require("@babel/plugin-syntax-dynamic-import");
-syntaxDynamicImport = syntaxDynamicImport.default ? syntaxDynamicImport.default: syntaxDynamicImport;
+let lodash = require('babel-plugin-lodash');
 
-let objectRestSpread = require("@babel/plugin-proposal-object-rest-spread");
-objectRestSpread = objectRestSpread.default ? objectRestSpread.default: objectRestSpread;
+lodash = lodash.default ? lodash.default : lodash;
 
-let decorators = require("@babel/plugin-proposal-decorators");
-decorators = decorators.default ? decorators.default: decorators;
+let syntaxDynamicImport = require('@babel/plugin-syntax-dynamic-import');
 
-let classProperties = require("@babel/plugin-proposal-class-properties");
-classProperties = classProperties.default ? classProperties.default: classProperties;
+syntaxDynamicImport = syntaxDynamicImport.default
+  ? syntaxDynamicImport.default : syntaxDynamicImport;
 
-let generatorFunctions = require("@babel/plugin-proposal-async-generator-functions");
-generatorFunctions = generatorFunctions.default? generatorFunctions.default : generatorFunctions;
+let objectRestSpread = require('@babel/plugin-proposal-object-rest-spread');
 
-let lodash = require("babel-plugin-lodash");
-lodash = lodash.default ? lodash.default: lodash;
+objectRestSpread = objectRestSpread.default
+  ? objectRestSpread.default : objectRestSpread;
 
-let reactHotLoader = require("react-hot-loader/babel");
-reactHotLoader = reactHotLoader.default? reactHotLoader.default: reactHotLoader;
+let decorators = require('@babel/plugin-proposal-decorators');
 
-const defaults = {noChunk: false, hot: true};
-module.exports = module.exports.default =  (options = {noChunk: false, hot: true}) => {
-  options = Object.assign({}, defaults, options);
+decorators = decorators.default ? decorators.default : decorators;
+
+let classProperties = require('@babel/plugin-proposal-class-properties');
+
+classProperties = classProperties.default ? classProperties.default : classProperties;
+
+let generatorFunctions = require('@babel/plugin-proposal-async-generator-functions');
+
+generatorFunctions = generatorFunctions.default ? generatorFunctions.default : generatorFunctions;
+
+let reactLoadableRoutes = require('../plugins/react-loadable-routes');
+
+reactLoadableRoutes = reactLoadableRoutes.default
+  ? reactLoadableRoutes.default : reactLoadableRoutes;
+
+let dynamicImportWebpack = require('../plugins/dynamic-import-webpack');
+
+dynamicImportWebpack = dynamicImportWebpack.default
+  ? dynamicImportWebpack.default : dynamicImportWebpack;
+
+
+const defaults = { noChunk: false, hot: true };
+
+function babelPlugins(options = { noChunk: false, hot: true }) {
+  const o = Object.assign({}, defaults, options);
   return [
     reactLoadableRoutes,
-    options.noChunk ? dynamicImportWebpack: syntaxDynamicImport,
+    o.noChunk ? dynamicImportWebpack : syntaxDynamicImport,
     objectRestSpread,
     [
       decorators,
       {
-        "legacy": true
-      }
+        legacy: true,
+      },
     ],
     [
       classProperties,
       {
-        "loose": true
-      }
+        loose: true,
+      },
     ],
     generatorFunctions,
     lodash,
-    ...(options.hot ? [reactHotLoader]: []),
+    ...(o.hot ? [reactHotLoader] : []),
   ];
-};
+}
+
+module.exports = babelPlugins;

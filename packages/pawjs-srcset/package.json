@@ -1,0 +1,50 @@
+{
+  "name": "@pawjs/srcset",
+  "version": "2.0.1",
+  "description": "Add pwa-srcset-loader for image resize and proper srcset loading",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "npm run build && babel src --out-dir lib --source-maps --presets=env,react --watch",
+    "build": "rimraf lib && babel src --out-dir lib --presets=env,react && cpr package.json lib/package.json && cpr README.md lib/README.md ",
+    "npm-publish": "npm version patch && npm run build && cd lib && npm publish && cd .."
+  },
+  "author": "Atyantik Technologies Private Limited <tirthbodawala@atyantik.com>",
+  "license": "MIT",
+  "peerDependencies": {
+    "@pawjs/pawjs": "^2.0.0",
+    "file-loader": "^2.0.0",
+    "react": "^16.4.1"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-preset-env": "^1.7.0",
+    "babel-preset-react": "^6.24.1",
+    "cpr": "^3.0.1",
+    "react": "^16.4.2",
+    "rimraf": "^2.6.2"
+  },
+  "dependencies": {
+    "prop-types": "^15.6.2",
+    "pwa-srcset-loader": "^2.0.0",
+    "regenerator-runtime": "^0.12.1",
+    "webp-loader": "^0.4.0"
+  },
+  "main": "index.js",
+  "directories": {
+    "lib": "lib"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Atyantik/pawjs.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Atyantik/pawjs/issues"
+  },
+  "keywords": [
+    "pawjs",
+    "image",
+    "srcset",
+    "webp",
+    "optimization"
+  ]
+}

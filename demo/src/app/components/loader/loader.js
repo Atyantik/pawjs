@@ -6,12 +6,12 @@ import Header from "../header";
 import Footer from "../footer";
 import Transition from "pawjs/src/components/transition";
 
-@connect( state => {
+export default @connect( state => {
   return {
     screenState: state.screen.state
   };
 })
-export default class Loader extends Component {
+class Loader extends Component {
   render() {
     return (
       <div style={{ backgroundColor: "#f6f6f6"}}>

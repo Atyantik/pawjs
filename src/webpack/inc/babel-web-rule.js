@@ -1,34 +1,47 @@
-const _ = require("lodash");
+const _ = require('lodash');
+let babelPresetEnv = require('@babel/preset-env');
+
+babelPresetEnv = babelPresetEnv.default ? babelPresetEnv.default : babelPresetEnv;
+
+let babelPresetReact = require('@babel/preset-react');
+
+babelPresetReact = babelPresetReact.default ? babelPresetReact.default : babelPresetReact;
+
+let babelPlugins = require('./babel-plugins');
+
+babelPlugins = babelPlugins.default ? babelPlugins.default : babelPlugins;
 
 const defaultOptions = {
-  cacheDirectory: process.env.PAW_CACHE === "true"
+  cacheDirectory: process.env.PAW_CACHE === 'true',
 };
-module.exports = module.exports.default = (options = {}) => {
+
+const rule = (options = {}) => {
   const o = _.assignIn({}, defaultOptions, options);
   return {
     test: /\.m?jsx?$/,
     use: [
       {
-        loader: "babel-loader",
+        loader: 'babel-loader',
         options: {
           presets: [
             [
-              require("@babel/preset-env"),
+              babelPresetEnv,
               {
-                "targets": {
-                  "browsers": ["last 2 versions", "safari >= 7", "ie >= 9"]
-                }
-              }
+                targets: {
+                  browsers: ['last 2 versions', 'safari >= 7', 'ie >= 9'],
+                },
+              },
             ],
-            require("@babel/preset-react"),
+            babelPresetReact,
           ],
           cacheDirectory: o.cacheDirectory,
-          plugins: require("./babel-plugins")(o)
-        }
+          plugins: babelPlugins(o),
+        },
       },
       {
-        loader: "prefetch-loader",
-      }
-    ]
+        loader: 'prefetch-loader',
+      },
+    ],
   };
 };
+module.exports = rule;

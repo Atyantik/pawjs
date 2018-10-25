@@ -10,6 +10,7 @@ const setup = (options, serviceAccountDetails) => {
 
 let handler = {
   get: function(target, name) {
+    console.log(name);
     if (name === "setup") {
       return setup;
     }

@@ -4,17 +4,17 @@
  * Time: 12:26 PM
  */
 
-import React, { Component } from "react";
-import Prism from "../../prism/prism";
-import Link from "pawjs/src/components/link/link";
+import React, { Component } from 'react';
+import Link from 'pawjs/src/components/link/link';
+import Prism from '../../prism/prism';
 
 export default class OverrideCore extends Component {
-  render(){
-    return(
+  render() {
+    return (
       <article>
         <header>
           <h1>Overriding Core Components</h1>
-          <hr/>
+          <hr />
         </header>
         <section>
           <section>
@@ -25,11 +25,17 @@ export default class OverrideCore extends Component {
             </p>
             <p>
               We have already defined how to override the&nbsp;
-              <Link to="/docs/customizing-loader">loader</Link> and&nbsp;
-              <Link to="/docs/error-pages">error pages</Link>.
+              <Link to="/docs/customizing-loader">loader</Link>
+              {' '}
+and&nbsp;
+              <Link to="/docs/error-pages">error pages</Link>
+.
             </p>
             <p>
-              To override the core components the most important file is : <i>`src/config/classMap.js`</i>&nbsp;
+              To override the core components the most important file is :
+              {' '}
+              <i>`src/config/classMap.js`</i>
+&nbsp;
               which contains all the core components.
             </p>
             <Prism
@@ -56,7 +62,7 @@ import Root from "pawjs/src/components/root";
   `}
             />
           </section>
-          <hr/>
+          <hr />
 
           <section>
             <header>
@@ -64,7 +70,11 @@ import Root from "pawjs/src/components/root";
             </header>
             <div>
               <p>
-                Root component is the component that will be loaded as a <i>parent</i> of all
+                Root component is the component that will be loaded as a
+                {' '}
+                <i>parent</i>
+                {' '}
+of all
                 pages. Hence you can put the CSS and JS, to be loaded in head tags, here.
               </p>
               <p>
@@ -72,7 +82,9 @@ import Root from "pawjs/src/components/root";
               </p>
               <ul className="list-unstyled">
                 <li className="mt-4">
-                  1) Make a Root component in <i>`src/app/components/root.js`</i>
+                  1) Make a Root component in
+                  {' '}
+                  <i>`src/app/components/root.js`</i>
                   <Prism code={`import { Component } from "react";
 
 export default class AppRoot extends Component {
@@ -82,10 +94,15 @@ export default class AppRoot extends Component {
   render() {
     return (this.props.children || null);
   }
-}`} />
+}`}
+                  />
                 </li>
                 <li className="mt-4">
-                  2) import the AppRoot component in <i>`src/config/classMap.js`</i> and replace it with Root of core.
+                  2) import the AppRoot component in
+                  {' '}
+                  <i>`src/config/classMap.js`</i>
+                  {' '}
+and replace it with Root of core.
                   <Prism code={`import Err404 from "pawjs/src/components/error/404";
 import Err500 from "pawjs/src/components/error/500";
 import Offline from "pawjs/src/components/error/offline";
@@ -106,12 +123,13 @@ import AppRoot from "../app/components/root";
     "fold": Fold,
     "root": AppRoot
   };
-  `} />
+  `}
+                  />
                 </li>
               </ul>
             </div>
           </section>
-          <hr/>
+          <hr />
 
           <section>
             <header>
@@ -119,12 +137,18 @@ import AppRoot from "../app/components/root";
             </header>
             <div>
               <p>
-                Similar to the <strong>Root</strong> component you can override the&nbsp;
-                <strong>Fold</strong> component.
+                Similar to the
+                {' '}
+                <strong>Root</strong>
+                {' '}
+component you can override the&nbsp;
+                <strong>Fold</strong>
+                {' '}
+component.
               </p>
             </div>
           </section>
-          <hr/>
+          <hr />
 
           <section>
             <header>
@@ -140,7 +164,9 @@ import AppRoot from "../app/components/root";
               </p>
               <ul className="list-unstyled">
                 <li>
-                  1) Make a component for Offline <i>`src/app/components/offline/offline.js`</i>
+                  1) Make a component for Offline
+                  {' '}
+                  <i>`src/app/components/offline/offline.js`</i>
                   <Prism
                     code={`import React, { Component } from "react";
 
@@ -160,7 +186,11 @@ export default class OfflinePage extends Component {
                   />
                 </li>
                 <li className="mt-4">
-                  2) import the OfflinePage component in <i>`src/config/classMap.js`</i> and replace it with Offline of core.
+                  2) import the OfflinePage component in
+                  {' '}
+                  <i>`src/config/classMap.js`</i>
+                  {' '}
+and replace it with Offline of core.
                   <Prism code={`import Err404 from "pawjs/src/components/error/404";
 import Err500 from "pawjs/src/components/error/500";
 import OfflinePage from "../app/components/offline";
@@ -181,7 +211,8 @@ import AppRoot from "../app/components/root";
     "fold": Fold,
     "root": AppRoot
   };
-  `} />
+  `}
+                  />
                 </li>
               </ul>
             </div>

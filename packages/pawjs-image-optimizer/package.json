@@ -1,18 +1,18 @@
 {
   "name": "@pawjs/image-optimizer",
-  "version": "2.1.3",
+  "version": "2.1.5",
   "description": "Add Wbpack Image Loader support to your PAWJS application",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "rimraf lib && babel src --out-dir lib --source-maps --presets=env,react --watch",
-    "build": "rimraf lib && babel src --out-dir lib --presets=env,react",
-    "npm-publish": "npm version patch && npm run build && cpr package.json lib/package.json && cpr README.md lib/README.md && cd lib && npm publish && cd .."
+    "start": "npm run build && babel src --out-dir lib --source-maps --presets=env,react --watch",
+    "build": "rimraf lib && babel src --out-dir lib --presets=env,react && cpr package.json lib/package.json && cpr README.md lib/README.md ",
+    "npm-publish": "npm version patch && npm run build && cd lib && npm publish && cd .."
   },
   "author": "Atyantik Technologies Private Limited <tirthbodawala@atyantik.com>",
   "license": "MIT",
   "peerDependencies": {
     "react": "^16.4.1",
-    "pawjs": "^2.0.0"
+    "@pawjs/pawjs": "^2.0.0"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",
@@ -24,8 +24,7 @@
   },
   "dependencies": {
     "image-webpack-loader": "^4.3.1",
-    "regenerator-runtime": "^0.12.1",
-    "tapable": "^1.0.0"
+    "regenerator-runtime": "^0.12.1"
   },
   "main": "index.js",
   "directories": {

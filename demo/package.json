@@ -1,0 +1,34 @@
+{
+  "name": "reactpwa-demo",
+  "version": "1.0.0",
+  "description": "Demo for reactpwa",
+  "main": "index.js",
+  "scripts": {
+    "build": "npm run build:prod",
+    "build:dev": "pawjs --no-cache --env=development --verbose build",
+    "build:prod": "pawjs --no-cache --env=production build",
+    "lint": "eslint -c @pawjs/pawjs/.eslintrc --ignore-path @pawjs/pawjs/.gitignore ./src",
+    "lint:fix": "eslint -c @pawjs/pawjs/.eslintrc --ignore-path @pawjs/pawjs/.gitignore --fix ./src",
+    "start": "npm run start:dev",
+    "start:dev": "pawjs --no-cache --env=development --verbose start",
+    "start:prod": "pawjs --no-cache --env=production start",
+    "test": "pawjs test"
+  },
+  "author": "Tirth Bodawala",
+  "license": "MIT",
+  "devDependencies": {
+    "@pawjs/image-optimizer": "file:../packages/pawjs-image-optimizer/lib",
+    "@pawjs/pawjs": "file:..",
+    "@pawjs/redux": "file:../packages/pawjs-redux/lib",
+    "@pawjs/sass": "file:../packages/pawjs-sass/lib",
+    "@pawjs/srcset": "file:../packages/pawjs-srcset/lib",
+    "image-webpack-loader": "^4.3.1",
+    "node-sass": "^4.9.3",
+    "pwa-srcset-loader": "^2.0.2",
+    "sass-loader": "^7.1.0",
+    "webpack-bundle-analyzer": "^2.13.1"
+  },
+  "dependencies": {
+    "webp-loader": "^0.4.0"
+  }
+}

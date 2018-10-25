@@ -1,9 +1,10 @@
-const fs = require("fs");
-const deleteFolderRecursive = function(path) {
-  if( fs.existsSync(path) ) {
-    fs.readdirSync(path).forEach(function(file){
-      let curPath = path + "/" + file;
-      if(fs.lstatSync(curPath).isDirectory()) { // recurse
+const fs = require('fs');
+
+function deleteFolderRecursive(path) {
+  if (fs.existsSync(path)) {
+    fs.readdirSync(path).forEach((file) => {
+      const curPath = `${path}/${file}`;
+      if (fs.lstatSync(curPath).isDirectory()) { // recurse
         deleteFolderRecursive(curPath);
       } else { // delete file
         fs.unlinkSync(curPath);
@@ -11,8 +12,8 @@ const deleteFolderRecursive = function(path) {
     });
     fs.rmdirSync(path);
   }
-};
+}
 
 module.exports = {
-  deleteFolderRecursive
+  deleteFolderRecursive,
 };

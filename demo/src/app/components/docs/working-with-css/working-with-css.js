@@ -1,5 +1,5 @@
-import React, { Component } from "react";
-import Prism from "../../prism";
+import React, { Component } from 'react';
+import Prism from '../../prism';
 
 export default class WorkingWithCss extends Component {
   render() {
@@ -28,7 +28,9 @@ export default class WorkingWithCss extends Component {
             </ol>
           </p>
           <p>
-            We took care that CSS not required on the page is not included at all! <i>( Until and unless you decide to add it. )</i>
+            We took care that CSS not required on the page is not included at all!
+            {' '}
+            <i>( Until and unless you decide to add it. )</i>
           </p>
           <hr />
         </section>
@@ -62,9 +64,15 @@ export default class WorkingWithCss extends Component {
 import "bootstrap/dist/css/bootstrap-theme.css";
 import "bootstrap/dist/css/bootstrap.css";
 
-// ....`} />
+// ....`}
+            />
             <div className="alert alert-danger">
-              <strong>DO NOT IMPORT MINIMIZED CSS <strike>.min.css</strike>. We are taking care of minimization ourselves. Minimized CSS has absolute paths and are not resolved properly. </strong>
+              <strong>
+DO NOT IMPORT MINIMIZED CSS
+                <strike>.min.css</strike>
+. We are taking care of minimization ourselves. Minimized CSS has absolute paths and are not resolved properly.
+                {' '}
+              </strong>
             </div>
             <p className="mt-4">
               Once you have imported the css you can directly use in a dump component as below without importing any CSS.
@@ -77,7 +85,8 @@ export default function DumpComponent() {
         This is awesome. I can use bootstrap class (which may change in upcoming releases)
     </div>
   );
-}`} />
+}`}
+            />
           </section>
           <section className="mt-4">
             <header>
@@ -89,13 +98,21 @@ export default function DumpComponent() {
             </p>
             <Prism code={`// ...
 import "<relative path to downloaded .css>";
-// ...`} />
+// ...`}
+            />
             <div className="alert alert-danger">
-              <strong>AGAIN! DO NOT IMPORT MINIMIZED CSS <strike>.min.css</strike>.</strong>
+              <strong>
+AGAIN! DO NOT IMPORT MINIMIZED CSS
+                <strike>.min.css</strike>
+.
+              </strong>
             </div>
             <p className="mt-4">
-              Once you have imported the css you can directly use in a dump component as below without importing any CSS.<br />
-              <strong>NOTE:</strong> There is not need to import CSS in `src/client.js`
+              Once you have imported the css you can directly use in a dump component as below without importing any CSS.
+              <br />
+              <strong>NOTE:</strong>
+              {' '}
+There is not need to import CSS in `src/client.js`
             </p>
             <Prism code={`import React from "react";
 
@@ -105,7 +122,8 @@ export default function DumpComponent() {
         This is awesome. I can use bootstrap class (which may change in upcoming releases)
     </div>
   );
-}`} />
+}`}
+            />
           </section>
           <div className="alert alert-secondary mt-4">
             <p className="alert-heading"><strong>Minimize Usage of Global CSS</strong></p>
@@ -120,11 +138,12 @@ export default function DumpComponent() {
           <div className="mt-3">
             <h3>Source Code</h3>
             <p>A very simple example of adding CSS to a component would be simply importing it in component.</p>
-            
+
             <p>So for example we have a component called DumbComponent in `src/app/components/dumb/index.js` and a style file (sass, css or css-next) as `src/app/components/dumb/styles.css`</p>
-  
+
             <p className="mb-0 mt-4">File: `src/app/components/dumb/styles.css`</p>
-            <Prism code={`.text-blue {
+            <Prism
+              code={`.text-blue {
    color: blue;
  }
  .centered {
@@ -132,8 +151,10 @@ export default function DumpComponent() {
    align-items: center;
    justify-content: center;
 }
-`} language="css" />
-            
+`}
+              language="css"
+            />
+
             <p className="mb-0 mt-4">File: `src/app/components/dumb/index.js`</p>
             <Prism code={`import React from "react";
 import * as styles from "./styles.css";
@@ -141,14 +162,16 @@ import * as styles from "./styles.css";
 export default function DumpComponent() {
   return <div className={\`$\{styles["text-blue"]} $\{styles["centered"]}\`}>This is blue text!</div>;
 }
-`} />
+`}
+            />
             <hr />
             <h3>Converted Code</h3>
             <p>The above code will be converted to following: </p>
             <p className="mt-4">
               The css code above will be converted to below code:
             </p>
-            <Prism code={`.text-blue {
+            <Prism
+              code={`.text-blue {
    color: blue;
  }
 .centered {
@@ -162,16 +185,18 @@ export default function DumpComponent() {
     -ms-flex-pack: center;
     justify-content: center;
 }
-`} language="css" />
+`}
+              language="css"
+            />
             <p className="mt-4">
               The JSX snippet is converted to simple namespaced class name (in development mode) as below:
             </p>
-            <Prism code={"<div class=\"style__text-blue style__centered\">This is blue text!</div>"} />
-  
+            <Prism code={'<div class="style__text-blue style__centered">This is blue text!</div>'} />
+
             <p className="mt-4">
               The JSX snippet is converted to hashed class name (in production mode) as below:
             </p>
-            <Prism code={"<div class=\"style_text-blue_zDDtR style_centered_B3xTw\">This is blue text!</div>"} />
+            <Prism code={'<div class="style_text-blue_zDDtR style_centered_B3xTw">This is blue text!</div>'} />
           </div>
         </section>
       </article>

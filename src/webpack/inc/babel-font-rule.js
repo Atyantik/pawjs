@@ -1,18 +1,20 @@
-const directories = require("../utils/directories");
-const _ = require("lodash");
+const _ = require('lodash');
+const directories = require('../utils/directories');
 
 const defaultOptions = {
-  outputPath: "fonts/",
-  name: "[hash].[ext]",
+  outputPath: 'fonts/',
+  name: '[hash].[ext]',
   context: directories.src,
 };
 
-module.exports = module.exports.default = (options) => ({
+const rule = options => ({
   test: /\.(eot|ttf|woff|woff2)$/,
   use: [
     {
-      loader: "file-loader",
-      options: _.assignIn({}, defaultOptions, options)
+      loader: 'file-loader',
+      options: _.assignIn({}, defaultOptions, options),
     },
-  ]
+  ],
 });
+
+module.exports = rule;
