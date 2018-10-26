@@ -2,7 +2,8 @@ import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
 import Prism from '../prism';
 import AnimatedAtom from '../animated-atom';
-import * as styles from './home.scss';
+import styles from './home.scss';
+// import lessStyles from './home.less';
 
 const supportsServiceWorker = function () {
   if (typeof window === 'undefined') return false;
