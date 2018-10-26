@@ -38,9 +38,9 @@ const rule = (options = {}) => {
           plugins: babelPlugins(o),
         },
       },
-      {
-        loader: 'prefetch-loader',
-      },
+      // {
+      //   loader: 'prefetch-loader',
+      // },
     ],
   };
 };

@@ -5,11 +5,15 @@
  */
 
 import React, { Component } from 'react';
+import { Redirect } from 'react-router';
 import Prism from '../../../prism/prism';
 import HSTSImage from './images/hsts.gif';
 
 export default class HSTS extends Component {
   render() {
+    if (true) {
+      return <Redirect to="/" />;
+    }
     return (
       <article>
         <header>

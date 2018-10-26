@@ -60,6 +60,8 @@ export default class ServerHandler extends Tapable {
     const pwaSchema = routeHandler.getPwaSchema();
 
     if (!serverSideRender) {
+      res.status(200).type('text/html');
+      res.write('<!DOCTYPE html>');
       modulesInRoutes.forEach((mod) => {
         cssDependencyMap.forEach((c) => {
           if (_.indexOf(c.modules, mod) !== -1) {
@@ -103,10 +105,8 @@ export default class ServerHandler extends Tapable {
         ).join(''),
       );
 
-      res
-        .status(context.status || 200)
-        .type('html')
-        .send(`<!DOCTYPE html>${renderedHtml}`);
+      res.write(renderedHtml);
+      res.end();
       return next();
     }
 
@@ -186,6 +186,13 @@ export default class ServerHandler extends Tapable {
         </ErrorBoundary>,
       );
 
+      if (context.url) {
+        // can use the `context.status` that
+        // we added in RedirectWithStatus
+        res.redirect(context.status || 301, context.url);
+        return next();
+      }
+
       await new Promise(r => this.hooks.beforeHtmlRender.callAsync(Application, req, res, r));
 
       renderedHtml = renderToString(
@@ -205,17 +212,11 @@ export default class ServerHandler extends Tapable {
           p => `<link rel="preload" href="${p}" as="style" onload="this.rel='stylesheet'"/>`,
         ).join(''),
       );
-
-      if (context.url) {
-        // can use the `context.status` that
-        // we added in RedirectWithStatus
-        res.redirect(context.status || 301, context.url);
-      } else {
-        res
-          .status(context.status || 200)
-          .type('html')
-          .send(`<!DOCTYPE html>${renderedHtml}`);
-      }
+      
+      res
+        .status(context.status || 200)
+        .type('html')
+        .send(`<!DOCTYPE html>${renderedHtml}`);
 
       // Free some memory
       routes = null;

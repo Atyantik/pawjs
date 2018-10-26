@@ -4,13 +4,13 @@
  * Time: 1:07 PM
  */
 
-import React, { Component } from 'react';
+import React, { PureComponent } from 'react';
 
 import OfflineSrcset from './images/offline.png?sizes=400w+800w&placeholder';
 import Picture from '../../../../../../../packages/pawjs-srcset/src/picture';
-// console.log(Offline, OfflineSrcset, 1);
 
-export default class AccessOffline extends Component {
+
+export default class AccessOffline extends PureComponent {
   render() {
     return (
       <article>
@@ -27,7 +27,8 @@ export default class AccessOffline extends Component {
             offline dinosaur.
           </p>
           <p>
-            No wonder we tend to think of websites as less reliable than mobile applications - we can't use them without the network.
+            No wonder we tend to think of websites as less reliable than mobile applications -
+            we can&quot;t use them without the network.
           </p>
           <p>
             At least, not typically. We could use
@@ -42,7 +43,7 @@ and the Cache Manifest to create an offline experience. For&nbsp;
           </p>
 
           <p>
-            Luckily, there's a new web standard,
+            Luckily, there&quot;s a new web standard,
             {' '}
             <a href="https://developer.mozilla.org/en-US/docs/Web/API/Service_Worker_API" target="_blank" rel="nofollow noopener">
             Service Worker

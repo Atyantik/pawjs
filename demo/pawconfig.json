@@ -2,6 +2,7 @@
   "port": "9090",
   "host": "localhost",
   "appRootUrl": "",
+  "asyncCSS": false,
   "serviceWorker": false,
   "serverSideRender": true,
   "singlePageApplication": false
