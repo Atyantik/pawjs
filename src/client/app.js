@@ -28,6 +28,9 @@ rHandler.hooks.initRoutes.callAsync((err) => {
   }
   cHandler.run({
     routeHandler: rHandler,
+  }).catch((ex) => {
+    // eslint-disable-next-line
+    console.log(ex);
   });
 });
 

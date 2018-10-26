@@ -39,6 +39,7 @@ export default class ClientHandler extends Tapable {
     this.hooks = {
       locationChange: new AsyncParallelBailHook(['location', 'action']),
       beforeRender: new AsyncSeriesHook(['Application']),
+      renderRoutes: new AsyncSeriesHook(['AppRoutes']),
       renderComplete: new SyncHook(),
     };
     this.options = options;
@@ -157,7 +158,7 @@ export default class ClientHandler extends Tapable {
     }
   }
 
-  run({ routeHandler }) {
+  async run({ routeHandler }) {
     this.routeHandler = routeHandler;
     const { env } = this.options;
     const root = _.get(env, 'clientRootElementId', 'app');
@@ -165,6 +166,7 @@ export default class ClientHandler extends Tapable {
     if (!document.getElementById(root)) {
       // eslint-disable-next-line
       console.warn(`#${root} element not found in html. thus cannot proceed further`);
+      return false;
     }
     const domRootReference = document.getElementById(root);
     const renderer = env.serverSideRender && !env.singlePageApplication ? hydrate : render;
@@ -200,19 +202,38 @@ export default class ClientHandler extends Tapable {
       RouterParams = {};
     }
 
-    Promise.all(promises).then(() => {
-      const children = (
-        <AppRouter basename={env.appRootUrl} {...RouterParams}>
-          {renderRoutes(routes)}
-        </AppRouter>
-      );
-      const Application = {
-        children,
-        currentRoutes: currentPageRoutes.slice(0),
-        routes: routes.slice(0),
-      };
+    const AppRoutes = {
+      renderedRoutes: renderRoutes(routes),
+      setRenderedRoutes: (r) => {
+        AppRoutes.renderedRoutes = r;
+      },
+      getRenderedRoutes: () => AppRoutes.renderedRoutes,
+    };
 
-      this.hooks.beforeRender.callAsync(Application, () => {
+    await Promise.all(promises).catch();
+
+    await (new Promise(r => this.hooks.renderRoutes.callAsync({
+      setRenderedRoutes: AppRoutes.setRenderedRoutes,
+      getRenderedRoutes: AppRoutes.getRenderedRoutes,
+    }, r)));
+
+    // await this.hooks.renderRoutes.callAsync({
+    //   setRenderedRoutes: AppRoutes.setRenderedRoutes,
+    //   getRenderedRoutes: AppRoutes.getRenderedRoutes,
+    // }, () => null);
+    const children = (
+      <AppRouter basename={env.appRootUrl} {...RouterParams}>
+        {AppRoutes.renderedRoutes}
+      </AppRouter>
+    );
+    const Application = {
+      children,
+      currentRoutes: currentPageRoutes.slice(0),
+      routes: routes.slice(0),
+    };
+
+    return new Promise((resolve) => {
+      this.hooks.beforeRender.callAsync(Application, async () => {
         // Render according to routes!
         renderer(
           <ErrorBoundary ErrorComponent={routeHandler.getErrorComponent()}>
@@ -227,6 +248,7 @@ export default class ClientHandler extends Tapable {
               document.getElementById('__pawjs_preloaded').remove();
             }
             this.hooks.renderComplete.call();
+            resolve();
           },
         );
       });
