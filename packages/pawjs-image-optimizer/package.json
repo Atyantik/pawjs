@@ -6,7 +6,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "npm run build && babel src --out-dir lib --source-maps --presets=env,react --watch",
     "build": "rimraf lib && babel src --out-dir lib --presets=env,react && cpr package.json lib/package.json && cpr README.md lib/README.md ",
-    "npm-publish": "npm version patch && npm run build && cd lib && npm publish && cd .."
+    "npm-publish": "npm version patch && npm run build && cd lib && npm publish --tag=latest && cd .."
   },
   "author": "Atyantik Technologies Private Limited <tirthbodawala@atyantik.com>",
   "license": "MIT",
