@@ -8,7 +8,7 @@ const defaultOptions = {
 };
 
 const rule = options => ({
-  test: /\.(jpe?g|png|gif|svg|webp)$/i,
+  test: /\.(jpe?g|png|gif|svg|webp|ico)$/i,
   use: [
     {
       loader: 'file-loader',
