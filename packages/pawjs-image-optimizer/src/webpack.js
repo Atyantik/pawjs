@@ -14,9 +14,9 @@ const configLabels = {
     gifsicle: {
       interlaced: false,
     },
-    webp: {
-      quality: 100,
-    },
+    // webp: {
+    //   quality: 100,
+    // },
   },
   MEDIUM_QUALITY: {
     mozjpeg: {
@@ -33,9 +33,9 @@ const configLabels = {
     gifsicle: {
       interlaced: false,
     },
-    webp: {
-      quality: 80,
-    },
+    // webp: {
+    //   quality: 80,
+    // },
   },
   MIN_QUALITY: {
     mozjpeg: {
@@ -52,9 +52,9 @@ const configLabels = {
     gifsicle: {
       interlaced: false,
     },
-    webp: {
-      quality: 65,
-    },
+    // webp: {
+    //   quality: 65,
+    // },
   },
 };
 
