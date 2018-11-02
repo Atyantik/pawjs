@@ -20,12 +20,12 @@
     "babel-preset-env": "^1.7.0",
     "babel-preset-react": "^6.24.1",
     "cpr": "^3.0.1",
-    "react": "^16.4.2",
+    "react": "^16.6.0",
     "rimraf": "^2.6.2"
   },
   "dependencies": {
     "prop-types": "^15.6.2",
-    "pwa-srcset-loader": "^2.0.0",
+    "pwa-srcset-loader": "^2.0.2",
     "regenerator-runtime": "^0.12.1",
     "webp-loader": "^0.4.0"
   },

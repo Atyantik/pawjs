@@ -21,9 +21,9 @@
     "babel-preset-env": "^1.7.0",
     "babel-preset-react": "^6.24.1",
     "cpr": "^3.0.1",
-    "react": "^16.4.2",
-    "react-redux": "^5.0.7",
-    "redux": "^4.0.0",
+    "react": "^16.6.0",
+    "react-redux": "^5.1.0",
+    "redux": "^4.0.1",
     "rimraf": "^2.6.2"
   },
   "dependencies": {

@@ -20,11 +20,11 @@
     "babel-preset-env": "^1.7.0",
     "babel-preset-react": "^6.24.1",
     "cpr": "^3.0.1",
-    "react": "^16.4.2",
+    "react": "^16.6.0",
     "rimraf": "^2.6.2"
   },
   "dependencies": {
-    "node-sass": "^4.9.3",
+    "node-sass": "^4.9.4",
     "regenerator-runtime": "^0.12.1",
     "sass-loader": "^7.1.0",
     "tapable": "^1.0.0"
