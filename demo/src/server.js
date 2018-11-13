@@ -22,4 +22,13 @@ export default class Server {
   //       });
   //     });
   // }
+
+  // apply(serverHandler) {
+  //   serverHandler
+  //     .hooks
+  //     .beforeLoadData
+  //     .tap('setParams', (setParams) => {
+  //       setParams('client', { test: '123' });
+  //     });
+  // }
 }

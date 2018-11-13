@@ -13,4 +13,13 @@ export default class Client {
   //
   //   // addPlugin(reduxClient);
   // }
+
+  // apply(clientHandler) {
+  //   clientHandler
+  //     .hooks
+  //     .beforeLoadData
+  //     .tap('setParams', (setParams) => {
+  //       setParams('client', { test: '456' });
+  //     });
+  // }
 }
