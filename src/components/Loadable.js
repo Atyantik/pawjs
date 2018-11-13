@@ -127,6 +127,8 @@ function createLoadableComponent(loadFn, options) {
       route: PropTypes.any,
       // eslint-disable-next-line
       location: PropTypes.any,
+      // eslint-disable-next-line
+      loadDataParam: PropTypes.any,
     };
 
     static contextTypes = {
@@ -141,7 +143,11 @@ function createLoadableComponent(loadFn, options) {
 
     constructor(props) {
       super(props);
-      init(undefined, { match: props.match, route: props.route });
+      init(undefined, {
+        match: props.match,
+        route: props.route,
+        loadDataParam: props.loadDataParam,
+      });
 
       this.state = {
         error: res.error,
@@ -166,7 +172,11 @@ function createLoadableComponent(loadFn, options) {
 
       if (JSON.stringify(prevLocation) !== JSON.stringify(newLocation)) {
         res = null;
-        init(undefined, { route: nextProps.route, match: nextProps.match });
+        init(undefined, {
+          route: nextProps.route,
+          match: nextProps.match,
+          loadDataParam: nextProps.loadDataParam,
+        });
         this.loadModule();
       }
     }
@@ -187,8 +197,9 @@ function createLoadableComponent(loadFn, options) {
       const {
         match,
         route,
+        loadDataParam,
       } = this.props;
-      res = loadFn(opts.loader, undefined, { match, route });
+      res = loadFn(opts.loader, undefined, { match, route, loadDataParam });
       this.loadModule();
     };
 
