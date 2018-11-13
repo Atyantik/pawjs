@@ -141,7 +141,13 @@ function createLoadableComponent(loadFn, options) {
 
     constructor(props) {
       super(props);
-      init(undefined, { match: props.match, route: props.route });
+
+      const { match, route, ...otherProps } = props;
+      init(undefined, {
+        match,
+        route,
+        ...otherProps,
+      });
 
       this.state = {
         error: res.error,
@@ -166,7 +172,12 @@ function createLoadableComponent(loadFn, options) {
 
       if (JSON.stringify(prevLocation) !== JSON.stringify(newLocation)) {
         res = null;
-        init(undefined, { route: nextProps.route, match: nextProps.match });
+        const { route, match, ...otherNextProps } = nextProps;
+        init(undefined, {
+          route,
+          match,
+          ...otherNextProps,
+        });
         this.loadModule();
       }
     }
@@ -187,8 +198,9 @@ function createLoadableComponent(loadFn, options) {
       const {
         match,
         route,
+        ...otherProps
       } = this.props;
-      res = loadFn(opts.loader, undefined, { match, route });
+      res = loadFn(opts.loader, undefined, { match, route, ...otherProps });
       this.loadModule();
     };
 
