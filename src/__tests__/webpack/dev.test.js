@@ -4,7 +4,7 @@ const webpack = require('webpack');
 process.env.LIB_ROOT = path.resolve(__dirname, '../../../');
 process.env.PROJECT_ROOT = path.resolve(process.env.LIB_ROOT, 'demo');
 
-const wHandler = require('../../webpack').handler;
+const wHandler = require('../../webpack');
 
 const devWebConfig = wHandler.getConfig('development', 'web');
 const devNodeServerConfig = wHandler.getConfig('development', 'server');

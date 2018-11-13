@@ -121,6 +121,9 @@ export default class RouteHandler extends Tapable {
     let seoSchema = Object.assign({}, RouteHandler.defaultSeoSchema);
     let pwaSchema = Object.assign({}, RouteHandler.defaultPwaSchema);
     pwaSchema.start_url = options.env.appRootUrl ? options.env.appRootUrl : '/';
+    if (!pwaSchema.start_url.endsWith('/')) {
+      pwaSchema.start_url = `${pwaSchema.start_url}/`;
+    }
 
     let delay = 300;
     let timeout = 10000;
