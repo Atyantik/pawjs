@@ -18,9 +18,8 @@ export default class Client {
   //   clientHandler
   //     .hooks
   //     .beforeLoadData
-  //     .tap("setLoadDataParam", loadDataParam => {
-  //       console.log("loadDataParam", loadDataParam);
-  //       loadDataParam.client={test: "456"}
+  //     .tap('setLoadDataParams', (setLoadDataParams) => {
+  //       setLoadDataParams('client', { test: '456' });
   //     });
   // }
 }

@@ -27,8 +27,8 @@ export default class Server {
   //   serverHandler
   //     .hooks
   //     .beforeLoadData
-  //     .tap("setLoadDataParam", loadDataParam => {
-  //       loadDataParam.client={test: "123"}
+  //     .tap('setLoadDataParams', (setLoadDataParams) => {
+  //       setLoadDataParams('client', { test: '123' });
   //     });
   // }
 }

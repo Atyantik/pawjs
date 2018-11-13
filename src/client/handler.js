@@ -38,7 +38,7 @@ export default class ClientHandler extends Tapable {
 
     this.hooks = {
       locationChange: new AsyncParallelBailHook(['location', 'action']),
-      beforeLoadData: new AsyncSeriesHook(['loadDataParam']),
+      beforeLoadData: new AsyncSeriesHook(['setParams', 'getParams']),
       beforeRender: new AsyncSeriesHook(['Application']),
       renderRoutes: new AsyncSeriesHook(['AppRoutes']),
       renderComplete: new SyncHook(),
@@ -67,7 +67,7 @@ export default class ClientHandler extends Tapable {
         promises.push(r.route.component.preload(undefined, {
           route: r.route,
           match: r.match,
-          loadDataParam: r.loadDataParam,
+          loadDataParams: r.loadDataParams,
         }));
       }
     });
@@ -175,8 +175,16 @@ export default class ClientHandler extends Tapable {
 
     const routes = routeHandler.getRoutes();
 
-    const loadDataParam = {};
-    await new Promise(r => this.hooks.beforeLoadData.callAsync(loadDataParam, r));
+    const loadDataParams = {};
+    const setLoadDataParams = (paramName, paramValue) => {
+      if (paramName) {
+        loadDataParams[paramName] = paramValue;
+      }
+    };
+    const getLoadDataParams = () => {
+      return loadDataParams;
+    };
+    await new Promise(r => this.hooks.beforeLoadData.callAsync(setLoadDataParams, getLoadDataParams, r));
 
     const currentPageRoutes = RouteHandler.matchRoutes(routes, window.location.pathname.replace(this.options.env.appRootUrl, ''));
 
@@ -192,7 +200,7 @@ export default class ClientHandler extends Tapable {
           promises.push(r.route.component.preload(preloadedData[i], {
             route: r.route,
             match: r.match,
-            loadDataParam,
+            loadDataParams,
           }));
         }
       });
