@@ -15,6 +15,7 @@ import RouteHandler from '../router/handler';
 import ErrorBoundary from '../components/ErrorBoundary';
 import { generateMeta } from '../utils/seo';
 import possibleStandardNames from '../utils/reactPossibleStandardNames';
+import PreloadDataManager from '../utils/preloadDataManager';
 
 const possibleHtmlNames = _.invert(possibleStandardNames);
 const getPossibleHtmlName = key => possibleHtmlNames[key] || key;
@@ -26,10 +27,9 @@ export default class ClientHandler extends Tapable {
 
   constructor(options) {
     super();
-
-    this.loadDataParams = {};
     this.addPlugin = this.addPlugin.bind(this);
     this.manageHistoryChange = this.manageHistoryChange.bind(this);
+    this.preloadManager = new PreloadDataManager();
 
     window.PAW_HISTORY = window.PAW_HISTORY || createBrowserHistory({
       basename: options.env.appRootUrl,
@@ -51,11 +51,14 @@ export default class ClientHandler extends Tapable {
   manageHistoryChange(location, action) {
     this.hooks.locationChange.callAsync(location, action, () => null);
     if (this.routeHandler) {
-      this.updatePageMeta(location);
+      this.updatePageMeta(location).catch((e) => {
+        // eslint-disable-next-line
+        console.log(e);
+      });
     }
   }
 
-  updatePageMeta(location) {
+  async updatePageMeta(location) {
     const routes = this.routeHandler.getRoutes();
     const currentRoutes = RouteHandler.matchRoutes(routes, location.pathname.replace(this.options.env.appRootUrl, ''));
     const promises = [];
@@ -63,18 +66,18 @@ export default class ClientHandler extends Tapable {
     let seoData = {};
     const pwaSchema = this.routeHandler.getPwaSchema();
     const seoSchema = this.routeHandler.getDefaultSeoSchema();
+
     currentRoutes.forEach((r) => {
       if (r.route && r.route.component && r.route.component.preload) {
         promises.push(r.route.component.preload(undefined, {
           route: r.route,
           match: r.match,
-          loadDataParams: this.loadDataParams,
+          ...this.preloadManager.getParams(),
         }));
       }
     });
 
-
-    Promise.all(promises).then(() => {
+    await Promise.all(promises).then(() => {
       currentRoutes.forEach((r) => {
         let routeSeo = {};
         if (r.route.getRouteSeo) {
@@ -176,21 +179,19 @@ export default class ClientHandler extends Tapable {
 
     const routes = routeHandler.getRoutes();
 
-    const setLoadDataParams = (paramName, paramValue) => {
-      if (paramName) {
-        this.loadDataParams[paramName] = paramValue;
-      }
-    };
-    const getLoadDataParams = () => this.loadDataParams;
-
-    await new Promise(r => this.hooks.beforeLoadData.callAsync(setLoadDataParams, getLoadDataParams, r));
-
     const currentPageRoutes = RouteHandler.matchRoutes(routes, window.location.pathname.replace(this.options.env.appRootUrl, ''));
 
     const promises = [];
 
     if (window.PAW_PRELOADED_DATA) {
       const preloadedData = JSON.parse(atob(window.PAW_PRELOADED_DATA));
+
+      // Wait for preload data manager to get executed
+      await new Promise(r => this
+        .hooks
+        .beforeLoadData
+        .callAsync(this.preloadManager.setParams, this.preloadManager.getParams, r));
+
       currentPageRoutes.forEach((r, i) => {
         if (
           (typeof preloadedData[i] !== 'undefined')
@@ -199,7 +200,7 @@ export default class ClientHandler extends Tapable {
           promises.push(r.route.component.preload(preloadedData[i], {
             route: r.route,
             match: r.match,
-            loadDataParams: this.loadDataParams,
+            ...this.preloadManager.getParams(),
           }));
         }
       });

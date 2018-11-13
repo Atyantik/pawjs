@@ -12,6 +12,7 @@ import RouteHandler from '../router/handler';
 import Html from '../components/Html';
 import ErrorBoundary from '../components/ErrorBoundary';
 import { generateMeta } from '../utils/seo';
+import PreloadDataManager from '../utils/preloadDataManager';
 
 export default class ServerHandler extends Tapable {
   constructor(options) {
@@ -132,20 +133,25 @@ export default class ServerHandler extends Tapable {
       });
     });
 
-    const loadDataParams = {};
-    const setLoadDataParams = (paramName, paramValue) => {
-      if (paramName) {
-        loadDataParams[paramName] = paramValue;
-      }
-    };
-    const getLoadDataParams = () => {
-      return loadDataParams;
-    };
-    await new Promise(r => this.hooks.beforeLoadData.callAsync(setLoadDataParams, getLoadDataParams, r));
+    const preloadManager = new PreloadDataManager();
+
+    await new Promise(r => this
+      .hooks
+      .beforeLoadData
+      .callAsync(preloadManager.setParams, preloadManager.getParams, r));
 
     currentPageRoutes.forEach(({ route, match }) => {
       if (route.component.preload) {
-        promises.push(route.component.preload(undefined, { route, match, loadDataParams }));
+        promises.push(
+          route.component.preload(
+            undefined,
+            {
+              route,
+              match,
+              ...preloadManager.getParams(),
+            },
+          ),
+        );
       }
     });
 
