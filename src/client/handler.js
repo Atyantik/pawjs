@@ -27,6 +27,7 @@ export default class ClientHandler extends Tapable {
   constructor(options) {
     super();
 
+    this.loadDataParams = {};
     this.addPlugin = this.addPlugin.bind(this);
     this.manageHistoryChange = this.manageHistoryChange.bind(this);
 
@@ -67,7 +68,7 @@ export default class ClientHandler extends Tapable {
         promises.push(r.route.component.preload(undefined, {
           route: r.route,
           match: r.match,
-          loadDataParams: r.loadDataParams,
+          loadDataParams: this.loadDataParams,
         }));
       }
     });
@@ -175,15 +176,13 @@ export default class ClientHandler extends Tapable {
 
     const routes = routeHandler.getRoutes();
 
-    const loadDataParams = {};
     const setLoadDataParams = (paramName, paramValue) => {
       if (paramName) {
-        loadDataParams[paramName] = paramValue;
+        this.loadDataParams[paramName] = paramValue;
       }
     };
-    const getLoadDataParams = () => {
-      return loadDataParams;
-    };
+    const getLoadDataParams = () => this.loadDataParams;
+
     await new Promise(r => this.hooks.beforeLoadData.callAsync(setLoadDataParams, getLoadDataParams, r));
 
     const currentPageRoutes = RouteHandler.matchRoutes(routes, window.location.pathname.replace(this.options.env.appRootUrl, ''));
@@ -200,7 +199,7 @@ export default class ClientHandler extends Tapable {
           promises.push(r.route.component.preload(preloadedData[i], {
             route: r.route,
             match: r.match,
-            loadDataParams,
+            loadDataParams: this.loadDataParams,
           }));
         }
       });
