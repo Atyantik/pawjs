@@ -21,7 +21,7 @@ export default class ServerHandler extends Tapable {
     this.hooks = {
       beforeStart: new AsyncSeriesHook(['config', 'appOptions']),
       afterStart: new AsyncSeriesHook(['appOptions']),
-      beforeLoadData: new AsyncSeriesHook(['setParams', 'getParams']),
+      beforeLoadData: new AsyncSeriesHook(['setParams', 'getParams', 'request', 'response']),
       beforeAppRender: new AsyncSeriesHook(['application', 'request', 'response']),
       beforeHtmlRender: new AsyncSeriesHook(['application', 'request', 'response']),
       renderRoutes: new AsyncSeriesHook(['appRoutes']),
@@ -138,7 +138,7 @@ export default class ServerHandler extends Tapable {
     await new Promise(r => this
       .hooks
       .beforeLoadData
-      .callAsync(preloadManager.setParams, preloadManager.getParams, r));
+      .callAsync(preloadManager.setParams, preloadManager.getParams, req, res, r));
 
     currentPageRoutes.forEach(({ route, match }) => {
       if (route.component.preload) {
