@@ -61,6 +61,7 @@ export default class ServerHandler extends Tapable {
 
     const seoSchema = routeHandler.getDefaultSeoSchema();
     const pwaSchema = routeHandler.getPwaSchema();
+    let currentPageRoutes = RouteHandler.matchRoutes(routes, req.path.replace(appRootUrl, ''));
 
     if (!serverSideRender) {
       res.status(200).type('text/html');
@@ -92,7 +93,19 @@ export default class ServerHandler extends Tapable {
         preloadCssFiles: cssToBePreloaded.length >= 1,
         metaTags,
         pwaSchema,
+        head: [],
+        footer: [],
       };
+
+      const Application = {
+        htmlProps,
+        children: null,
+        context,
+        currentRoutes: currentPageRoutes.slice(0),
+        routes: routes.slice(0),
+      };
+
+      await new Promise(r => this.hooks.beforeHtmlRender.callAsync(Application, req, res, r));
 
       renderedHtml = renderToString(
         <Html
@@ -112,8 +125,6 @@ export default class ServerHandler extends Tapable {
       res.end();
       return next();
     }
-
-    let currentPageRoutes = RouteHandler.matchRoutes(routes, req.path.replace(appRootUrl, ''));
 
     currentPageRoutes.forEach(({ route }) => {
       if (route.modules) {
