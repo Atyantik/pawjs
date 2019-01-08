@@ -10,7 +10,7 @@ let babelPlugins = require('./babel-plugins');
 
 babelPlugins = babelPlugins.default ? babelPlugins.default : babelPlugins;
 
-const rule = options => ({
+const rule = (options = {}) => ({
   test: /\.jsx?$/,
   use: {
     loader: 'babel-loader',

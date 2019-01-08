@@ -5,7 +5,7 @@ let directories = require('../utils/directories');
 
 directories = directories.default ? directories.default : directories;
 
-const rule = options => ({
+const rule = (options = {}) => ({
   test: /\.tsx?$/,
   use: [
     {
