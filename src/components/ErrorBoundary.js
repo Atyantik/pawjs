@@ -21,6 +21,7 @@ export default class ErrorBoundary extends Component {
 
   render() {
     const { hasError, error, errorInfo } = this.state;
+    // eslint-disable-next-line
     const { ErrorComponent, children } = this.props;
     if (hasError) {
       if (!ErrorComponent) { return null; }

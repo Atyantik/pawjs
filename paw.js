@@ -10,7 +10,7 @@ for (const i in process.argv) {
 }
 const babelServer = require('./src/webpack/inc/babel-server-rule')({
   cacheDirectory: doCache,
-}).use.options;
+})[0].use.options;
 
 require('@babel/register')({
   presets: babelServer.presets.default ? babelServer.presets.default : babelServer.presets,
@@ -18,6 +18,7 @@ require('@babel/register')({
   cache: doCache,
   ignore: [
     /node_modules\/(?!(@pawjs)).*/,
+    /node_modules\/(?!(pawjs-)).*/,
   ],
 });
 

@@ -3,7 +3,7 @@ const path = require('path');
 
 const babelServer = require('./babel-server-rule')({
   cacheDirectory: false,
-}).use.options;
+})[0].use.options;
 
 require('@babel/register')({
   presets: babelServer.presets.default ? babelServer.presets.default : babelServer.presets,
@@ -11,6 +11,7 @@ require('@babel/register')({
   cache: false,
   ignore: [
     /node_modules\/(?!(@pawjs)).*/,
+    /node_modules\/(?!(pawjs-)).*/,
   ],
 });
 const CliHandler = require('../../../scripts/cli').default;
@@ -64,6 +65,7 @@ const resolver = {
       pawProjectServer: projectServerExists ? projectServerPath : emptyClass,
     },
     modules: commonResolvers,
+    extensions: ['.wasm', '.mjs', '.js', '.json', '.jsx', '.ts', '.tsx'],
   },
   resolveLoader: {
     modules: loaderResolver,

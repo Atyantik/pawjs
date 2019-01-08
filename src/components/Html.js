@@ -84,6 +84,7 @@ class Html extends Component {
    */
   render() {
     const {
+      // eslint-disable-next-line
       preloadedData,
       metaTags,
       appRootUrl,
@@ -92,6 +93,7 @@ class Html extends Component {
       head,
       dangerouslySetInnerHTML,
       clientRootElementId,
+      // eslint-disable-next-line
       children,
       footer,
       assets,

@@ -5,9 +5,10 @@
  */
 
 import React, { PureComponent } from 'react';
+import Picture from '@pawjs/srcset/picture';
 
+// @ts-ignore
 import OfflineSrcset from './images/offline.png?sizes=400w+800w&placeholder';
-import Picture from '../../../../../../../packages/pawjs-srcset/src/picture';
 
 
 export default class AccessOffline extends PureComponent {

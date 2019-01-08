@@ -2,29 +2,36 @@ const path = require('path');
 const fs = require('fs');
 const defaultsDeep = require('lodash/defaultsDeep');
 
-/**
- * Default directory list
- * @type {{root: *, src: *, dist: *, build: *}}
- */
-const defaultDirectories = {
-  root: process.env.PROJECT_ROOT,
-  src: path.resolve(process.env.PROJECT_ROOT, 'src'),
-  dist: path.join(process.env.PROJECT_ROOT, 'dist'),
-  build: path.join(process.env.PROJECT_ROOT, 'dist', 'build'),
+const projectRoot = path.resolve(path.join(__dirname, '..', '..', '..'));
+let directories = {
+  root: path.resolve(projectRoot, 'demo'),
+  src: path.resolve(projectRoot, 'demo', 'src'),
+  dist: path.join(projectRoot, 'demo', 'dist'),
+  build: path.join(projectRoot, 'demo', 'dist', 'build'),
 };
+if (typeof process.env.PROJECT_ROOT !== 'undefined') {
+  /**
+   * Default directory list
+   * @type {{root: *, src: *, dist: *, build: *}}
+   */
+  const defaultDirectories = {
+    root: process.env.PROJECT_ROOT,
+    src: path.resolve(process.env.PROJECT_ROOT, 'src'),
+    dist: path.join(process.env.PROJECT_ROOT, 'dist'),
+    build: path.join(process.env.PROJECT_ROOT, 'dist', 'build'),
+  };
 
-let directories = {};
-try {
-  const directoriesConfigPath = `${process.env.PROJECT_ROOT}/directories.js`;
-  if (fs.existsSync(directoriesConfigPath)) {
-    // eslint-disable-next-line
-    directories = require(directoriesConfigPath);
+  try {
+    const directoriesConfigPath = `${process.env.PROJECT_ROOT}/directories.js`;
+    if (fs.existsSync(directoriesConfigPath)) {
+      // eslint-disable-next-line
+      directories = require(directoriesConfigPath);
+    }
+  } catch (ex) {
+    // reset directories to blank object
+    directories = {};
   }
-} catch (ex) {
-  // reset directories to blank object
-  directories = {};
+
+  directories = defaultsDeep(directories, defaultDirectories);
 }
-
-directories = defaultsDeep(directories, defaultDirectories);
-
 module.exports = Object.assign({}, directories);

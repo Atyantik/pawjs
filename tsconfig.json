@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "noEmitOnError": true,
+    "moduleResolution": "node",
+    "target": "es5",
+    "module": "esnext",
+    "lib": ["dom", "esnext", "dom.iterable", "scripthost", "es2015.promise"],
+    "outDir": "dist",
+    "jsx": "react",
+    "experimentalDecorators": true,
+    "allowJs": true
+  }
+}

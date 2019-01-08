@@ -1,34 +1,25 @@
-// import ReduxServer from "../../packages/pawjs-redux/src/server";
-export default class Server {
-  // constructor({addPlugin}) {
-  //
-  //   // const reduxServer = new ReduxServer();
-  //   // reduxServer.setReducers({
-  //   //   counter: function(state = null) {
-  //   //     return state;
-  //   //   }
-  //   // });
-  //   //
-  //   // addPlugin(reduxServer);
-  // }
-  //
-  // apply(serverHandler) {
-  //   serverHandler
-  //     .hooks
-  //     .reduxInitialState
-  //     .tapPromise("AppInitialState", async (reduxState) => {
-  //       reduxState.setInitialState({
-  //         counter: 1
-  //       });
-  //     });
-  // }
+import ReduxServer from '@pawjs/redux/server';
 
-  // apply(serverHandler) {
-  //   serverHandler
-  //     .hooks
-  //     .beforeLoadData
-  //     .tap('setParams', (setParams) => {
-  //       setParams('client', { test: '123' });
-  //     });
-  // }
+export default class Server {
+  constructor({ addPlugin }) {
+    const reduxServer = new ReduxServer();
+    reduxServer.setReducers({
+      counter(state = null) {
+        return state;
+      },
+    });
+
+    addPlugin(reduxServer);
+  }
+  // eslint-disable-next-line
+  apply(serverHandler) {
+    serverHandler
+      .hooks
+      .reduxInitialState
+      .tapPromise('AppInitialState', async (reduxState) => {
+        reduxState.setInitialState({
+          counter: 1,
+        });
+      });
+  }
 }

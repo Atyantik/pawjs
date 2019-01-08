@@ -1,4 +1,4 @@
-import { AsyncSeriesHook, Tapable } from 'tapable';
+import { AsyncSeriesHook } from 'tapable';
 import _uniq from 'lodash/uniq';
 import _cloneDeep from 'lodash/cloneDeep';
 import { matchPath } from 'react-router';
@@ -10,7 +10,7 @@ import RouteCompiler from './compiler';
 import PwaIcon192 from '../resources/images/pwa-icon-192x192.png';
 import PwaIcon512 from '../resources/images/pwa-icon-512x512.png';
 
-export default class RouteHandler extends Tapable {
+export default class RouteHandler {
   static defaultPwaSchema = {
     name: 'PawJS',
     short_name: 'PawJS',
@@ -103,8 +103,6 @@ export default class RouteHandler extends Tapable {
   };
 
   constructor(options) {
-    super();
-
     this.routeCompiler = new RouteCompiler({
       isServer: Boolean(options.isServer),
       env: options.env,

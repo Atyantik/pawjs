@@ -1,5 +1,4 @@
 import {
-  Tapable,
   AsyncSeriesHook,
 } from 'tapable';
 
@@ -14,9 +13,8 @@ import ErrorBoundary from '../components/ErrorBoundary';
 import { generateMeta } from '../utils/seo';
 import PreloadDataManager from '../utils/preloadDataManager';
 
-export default class ServerHandler extends Tapable {
+export default class ServerHandler {
   constructor(options) {
-    super();
     this.addPlugin = this.addPlugin.bind(this);
     this.hooks = {
       beforeStart: new AsyncSeriesHook(['config', 'appOptions']),

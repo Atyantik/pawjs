@@ -1,5 +1,4 @@
 import {
-  Tapable,
   AsyncSeriesHook,
   AsyncParallelBailHook,
   SyncHook,
@@ -20,13 +19,12 @@ import PreloadDataManager from '../utils/preloadDataManager';
 const possibleHtmlNames = _.invert(possibleStandardNames);
 const getPossibleHtmlName = key => possibleHtmlNames[key] || key;
 
-export default class ClientHandler extends Tapable {
+export default class ClientHandler {
   historyUnlistener = null;
 
   routeHandler = null;
 
   constructor(options) {
-    super();
     this.addPlugin = this.addPlugin.bind(this);
     this.manageHistoryChange = this.manageHistoryChange.bind(this);
     this.preloadManager = new PreloadDataManager();
@@ -212,7 +210,7 @@ export default class ClientHandler extends Tapable {
     let RouterParams = {
       history: this.history,
     };
-    if (this.options.env.singlePageApplication) {
+    if (this.options.env.singlePageApplication && this.options.env.hashedRoutes) {
       RouterParams = {};
     }
 

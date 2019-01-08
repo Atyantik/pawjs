@@ -151,9 +151,6 @@ try {
     publicPath: pawConfig.resourcesBaseUrl,
   });
 
-  // console.log(util.inspect(webConfig, {depth: 10}));
-  // process.exit();
-
   // Create a webpack server compiler from the server config
   const serverCompiler = webpack(serverConfig);
 

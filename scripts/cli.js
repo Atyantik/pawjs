@@ -153,7 +153,8 @@ export default class CliHandler {
   test() {
     const env = Object.create(process.env);
     env.NODE_ENV = 'test';
-    spawn(this.searchCommand('jest'), [], {
+    spawn(this.searchCommand('jest'), ['--verbose'], {
+      shell: true,
       env,
       stdio: [process.stdin, process.stdout, 'pipe'],
     });

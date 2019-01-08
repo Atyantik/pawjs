@@ -1,12 +1,10 @@
 {
   "name": "@pawjs/image-optimizer",
-  "version": "2.1.6",
-  "description": "Add Wbpack Image Loader support to your PAWJS application",
+  "version": "2.2.0-beta.0",
+  "description": "Add Webpack Image Loader support to your PAWJS application",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "npm run build && babel src --out-dir lib --source-maps --presets=env,react --watch",
-    "build": "rimraf lib && babel src --out-dir lib --presets=env,react && cpr package.json lib/package.json && cpr README.md lib/README.md ",
-    "npm-publish": "npm version patch && npm run build && cd lib && npm publish --tag=latest && cd .."
+    "npm-publish": "npm version patch && npm publish --access=public --tag=latest"
   },
   "author": "Atyantik Technologies Private Limited <tirthbodawala@atyantik.com>",
   "license": "MIT",
@@ -14,22 +12,10 @@
     "react": "^16.4.1",
     "@pawjs/pawjs": "^2.0.0"
   },
-  "devDependencies": {
-    "babel-cli": "^6.26.0",
-    "babel-preset-env": "^1.7.0",
-    "babel-preset-react": "^6.24.1",
-    "cpr": "^3.0.1",
-    "react": "^16.6.0",
-    "rimraf": "^2.6.2"
-  },
   "dependencies": {
-    "image-webpack-loader": "^4.4.0",
-    "regenerator-runtime": "^0.12.1"
+    "image-webpack-loader": "^4.6.0"
   },
-  "main": "index.js",
-  "directories": {
-    "lib": "lib"
-  },
+  "main": "webpack.js",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Atyantik/pawjs.git"

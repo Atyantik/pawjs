@@ -1,12 +1,10 @@
 {
   "name": "@pawjs/less",
-  "version": "2.0.0",
+  "version": "2.1.0-beta.0",
   "description": "Add Sass support to your project",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "npm run build && babel src --out-dir lib --source-maps --presets=env,react --plugins=transform-object-rest-spread --watch",
-    "build": "rimraf lib && babel src --out-dir lib --presets=env,react --plugins=transform-object-rest-spread  && cpr package.json lib/package.json && cpr README.md lib/README.md",
-    "npm-publish": "npm version patch && npm run build && cd lib && npm publish --access=public --tag=latest && cd .."
+    "npm-publish": "npm version patch && npm publish --access=public --tag=latest"
   },
   "author": "Atyantik Technologies Private Limited <tirthbodawala@atyantik.com>",
   "license": "MIT",
@@ -14,25 +12,12 @@
     "react": "^16.4.1",
     "@pawjs/pawjs": "^2.0.0"
   },
-  "devDependencies": {
-    "babel-cli": "^6.26.0",
-    "babel-plugin-transform-object-rest-spread": "^6.26.0",
-    "babel-preset-env": "^1.7.0",
-    "babel-preset-react": "^6.24.1",
-    "cpr": "^3.0.1",
-    "react": "^16.4.2",
-    "rimraf": "^2.6.2"
-  },
   "dependencies": {
-    "less": "^3.8.1",
+    "less": "^3.9.0",
     "less-loader": "^4.1.0",
-    "regenerator-runtime": "^0.12.1",
-    "tapable": "^1.0.0"
+    "tapable": "^2.0.0-beta.3"
   },
   "main": "index.js",
-  "directories": {
-    "lib": "lib"
-  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Atyantik/pawjs.git"

@@ -232,7 +232,7 @@ wHandler.hooks.beforeConfig.tap('AddSyncedFilesPlugin', (wEnv, wType, wConfigs) 
       wConfig.module.rules.forEach((rule, index) => {
         if (isBabelRule(rule)) {
           // eslint-disable-next-line
-          wConfig.module.rules[index] = webRule({ hot: false });
+          wConfig.module.rules[index] = webRule({ hot: false })[0];
         }
 
 
@@ -288,7 +288,7 @@ wHandler.hooks.beforeConfig.tap('AddSyncedFilesPlugin', (wEnv, wType, wConfigs) 
           wConfig.module.rules[index] = serverRule({
             noChunk: true,
             hot: false,
-          });
+          })[0];
         }
 
         if (isImageRule(rule) && !hasSyncedFileLoader(rule)) {

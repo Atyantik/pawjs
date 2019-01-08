@@ -18,7 +18,7 @@ export default {
   entry: path.resolve(process.env.LIB_ROOT, './src/server/server.js'),
   module: {
     rules: [
-      serverRule({ noChunk: true, cacheDirectory: process.env.PAW_CACHE === 'true' }),
+      ...serverRule({ sourceMap: true, noChunk: true, cacheDirectory: process.env.PAW_CACHE === 'true' }),
       ...cssRule(),
       fontRule({
         emitFile: false,

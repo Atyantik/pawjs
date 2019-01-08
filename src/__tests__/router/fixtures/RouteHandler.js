@@ -1,4 +1,4 @@
-import { AsyncSeriesHook, Tapable } from 'tapable';
+import { AsyncSeriesHook } from 'tapable';
 import _ from 'lodash';
 import RouteCompiler from '../../../router/compiler';
 
@@ -7,7 +7,7 @@ const ErrorComponent = () => {};
 const AsyncRouteLoadErrorComponent = () => {};
 const AsyncRouteLoaderComponent = () => {};
 
-export default class RouteHandler extends Tapable {
+export default class RouteHandler {
   static defaultPwaSchema = {
     name: 'PawJS',
     short_name: 'PawJS',
@@ -58,8 +58,6 @@ export default class RouteHandler extends Tapable {
   };
 
   constructor(options = { env: {} }) {
-    super();
-
     this.routeCompiler = new RouteCompiler({
       isServer: Boolean(options.isServer),
       env: options.env,

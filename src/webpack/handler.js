@@ -1,16 +1,15 @@
 import _ from 'lodash';
-import { Tapable, SyncHook } from 'tapable';
+import { SyncHook } from 'tapable';
 
 // non npm imports
 import serverConfig from './server.config';
 import webConfig from './web.config';
 import babelCssRules from './inc/babel-css-rule';
 
-export default class WebpackHandler extends Tapable {
+export default class WebpackHandler {
   constructor(options) {
-    super();
     this.hooks = {
-      init: new SyncHook(),
+      init: new SyncHook([]),
       beforeConfig: new SyncHook(['env', 'type', 'config']),
     };
     this.options = options;
