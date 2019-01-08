@@ -10,8 +10,7 @@ require('@babel/register')({
   plugins: babelServer.plugins,
   cache: false,
   ignore: [
-    /node_modules\/(?!(@pawjs)).*/,
-    /node_modules\/(?!(pawjs-)).*/,
+    /node_modules\/(?!(@pawjs|pawjs-)).*/,
   ],
 });
 const CliHandler = require('../../../scripts/cli').default;

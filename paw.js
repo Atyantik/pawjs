@@ -17,8 +17,7 @@ require('@babel/register')({
   plugins: babelServer.plugins,
   cache: doCache,
   ignore: [
-    /node_modules\/(?!(@pawjs)).*/,
-    /node_modules\/(?!(pawjs-)).*/,
+    /node_modules\/(?!(@pawjs|pawjs-)).*/,
   ],
 });
 
