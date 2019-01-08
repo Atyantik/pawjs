@@ -3,18 +3,19 @@ const fs = require('fs');
 const defaultsDeep = require('lodash/defaultsDeep');
 
 const projectRoot = path.resolve(path.join(__dirname, '..', '..', '..'));
-let directories = {
+let defaultDirectories = {
   root: path.resolve(projectRoot, 'demo'),
   src: path.resolve(projectRoot, 'demo', 'src'),
   dist: path.join(projectRoot, 'demo', 'dist'),
   build: path.join(projectRoot, 'demo', 'dist', 'build'),
 };
+let directories = {};
 if (typeof process.env.PROJECT_ROOT !== 'undefined') {
   /**
    * Default directory list
    * @type {{root: *, src: *, dist: *, build: *}}
    */
-  const defaultDirectories = {
+  defaultDirectories = {
     root: process.env.PROJECT_ROOT,
     src: path.resolve(process.env.PROJECT_ROOT, 'src'),
     dist: path.join(process.env.PROJECT_ROOT, 'dist'),

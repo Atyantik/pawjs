@@ -1,8 +1,8 @@
 const babelJest = require('babel-jest');
-const babelServerRule = require('./src/webpack/inc/babel-server-rule')({
+const babelServerRule = require('./src/webpack/inc/babel-server-rule-js')({
   cacheDirectory: false,
   noChunk: true,
-})[0].use.options;
+}).use.options;
 
 const customJest = babelJest.createTransformer({
   presets: babelServerRule.presets,

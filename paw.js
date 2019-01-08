@@ -8,9 +8,10 @@ for (const i in process.argv) {
     doCache = false;
   }
 }
-const babelServer = require('./src/webpack/inc/babel-server-rule')({
+const babelServer = require('./src/webpack/inc/babel-server-rule-js')({
   cacheDirectory: doCache,
-})[0].use.options;
+  onlyBabel: true,
+}).use.options;
 
 require('@babel/register')({
   presets: babelServer.presets.default ? babelServer.presets.default : babelServer.presets,
