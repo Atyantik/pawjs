@@ -157,7 +157,7 @@ export default class CliHandler {
     let eslintPath = path.join(this.libRoot, '.eslintrc');
     let eslintRoot = this.libRoot;
     if (fs.existsSync(path.join(this.projectRoot, '.eslintrc'))) {
-      eslintPath = path.join(this.libRoot, '.eslintrc');
+      eslintPath = path.join(this.projectRoot, '.eslintrc');
       eslintRoot = this.projectRoot;
     }
 
@@ -179,7 +179,7 @@ export default class CliHandler {
         let tslintPath = path.join(this.libRoot, 'tslint.json');
         let tslintRoot = this.libRoot;
         if (fs.existsSync(path.join(this.projectRoot, 'tslint.json'))) {
-          tslintPath = path.join(this.libRoot, 'tslint.json');
+          tslintPath = path.join(this.projectRoot, 'tslint.json');
           tslintRoot = this.projectRoot;
         }
         const tsSrcDir = fs.existsSync(path.join(tslintRoot, 'src')) ? path.join(tslintRoot, 'src') : tslintRoot;
