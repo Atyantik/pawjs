@@ -1,5 +1,5 @@
 const babelJest = require('babel-jest');
-const babelServerRule = require('./src/webpack/inc/babel-server-rule-js')({
+const babelServerRule = require('./src/webpack/inc/babel-server-rule')({
   cacheDirectory: false,
   noChunk: true,
 }).use.options;
@@ -14,9 +14,13 @@ module.exports = {
   name: 'pawjs',
   verbose: true,
   testEnvironment: 'node',
-  collectCoverage: true,
   coverageDirectory: './coverage',
-  collectCoverageFrom: ['src/**/*.js'],
+  collectCoverage: true,
+  collectCoverageFrom: [
+    'src/**/*.{js,jsx,ts,tsx}',
+    '!**/node_modules/**',
+    '!**/dist/**',
+  ],
   testRegex: '(/__tests__/.*|(\\.|/)(test|spec))\\.(ts|tsx|js|jsx|mjs)?$',
   testPathIgnorePatterns: [
     '/node_modules/',
@@ -32,7 +36,6 @@ module.exports = {
     'node',
   ],
   transform: {
-    '^.+\\.jsx?$': '<rootDir>/jest-transformer.js',
-    '^.+\\.tsx?$': 'ts-jest',
+    '^.+\\.(j|t)sx?$': '<rootDir>/jest-transformer.js',
   },
 };

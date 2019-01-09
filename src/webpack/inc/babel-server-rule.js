@@ -1,14 +1,38 @@
-let babelServerJSRule = require('./babel-server-rule-js');
+let presetEnv = require('@babel/preset-env');
 
-babelServerJSRule = babelServerJSRule.default ? babelServerJSRule.default : babelServerJSRule;
+presetEnv = presetEnv.default ? presetEnv.default : presetEnv;
 
-let babelServerTSRule = require('./babel-server-rule-ts');
+let presetReact = require('@babel/preset-react');
 
-babelServerTSRule = babelServerTSRule.default ? babelServerTSRule.default : babelServerTSRule;
+presetReact = presetReact.default ? presetReact.default : presetReact;
 
-const rule = options => [
-  babelServerJSRule(options),
-  babelServerTSRule(options),
-];
+let presetTypescript = require('@babel/preset-typescript');
+
+presetTypescript = presetTypescript.default ? presetTypescript.default : presetTypescript;
+
+let babelPlugins = require('./babel-plugins');
+
+babelPlugins = babelPlugins.default ? babelPlugins.default : babelPlugins;
+
+const rule = options => ({
+  test: /\.(mj|j|t)sx?$/,
+  use: {
+    loader: 'babel-loader',
+    options: {
+      presets: [
+        [
+          presetEnv,
+          {
+            targets: { node: '8.11.2' },
+          },
+        ],
+        presetReact,
+        presetTypescript,
+      ],
+      cacheDirectory: typeof options.cacheDirectory !== 'undefined' ? options.cacheDirectory : process.env.PAW_CACHE === 'true',
+      plugins: babelPlugins(options),
+    },
+  },
+});
 
 module.exports = rule;

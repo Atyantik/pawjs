@@ -1,15 +1,15 @@
-const path = require("path");
-const fs = require("fs");
-const _ = require("lodash");
+const path = require('path');
+const fs = require('fs');
+const _ = require('lodash');
 
 // Find command from all the paths possible
 function findCommandPath(com, pathList) {
-  let execPath = "";
-  const possibleExtension = ["", ".exe", ".cmd"];
-  _.each(pathList, executablePath => {
+  let execPath = '';
+  const possibleExtension = ['', '.exe', '.cmd'];
+  _.each(pathList, (executablePath) => {
     if (execPath.length) return;
 
-    _.each(possibleExtension, ext => {
+    _.each(possibleExtension, (ext) => {
       if (execPath.length) return;
 
       const extendedPath = path.join(executablePath, `${com}${ext}`);
@@ -23,8 +23,6 @@ function findCommandPath(com, pathList) {
 }
 
 module.exports = findCommandPath;
-module.exports.factory = function(pathList) {
-  return cmd => {
-    return findCommandPath(cmd, pathList);
-  };
+module.exports.factory = function (pathList) {
+  return cmd => findCommandPath(cmd, pathList);
 };

@@ -11,8 +11,8 @@ import directories from '../webpack/utils/directories';
 
 
 import wHandler from '../webpack';
-import webJSRule from '../webpack/inc/babel-web-rule-js';
-import serverJSRule from '../webpack/inc/babel-server-rule-js';
+import webRule from '../webpack/inc/babel-web-rule';
+import serverRule from '../webpack/inc/babel-server-rule';
 import SyncedFilesPlugin from '../webpack/plugins/synced-files-plugin';
 import ExtractEmittedAssets from '../webpack/plugins/extract-emitted-assets';
 
@@ -232,7 +232,7 @@ wHandler.hooks.beforeConfig.tap('AddSyncedFilesPlugin', (wEnv, wType, wConfigs) 
       wConfig.module.rules.forEach((rule, index) => {
         if (isBabelRule(rule)) {
           // eslint-disable-next-line
-          wConfig.module.rules[index] = webJSRule({ hot: false, onlyBabel: true, });
+          wConfig.module.rules[index] = webRule({ hot: false });
         }
 
 
@@ -285,7 +285,7 @@ wHandler.hooks.beforeConfig.tap('AddSyncedFilesPlugin', (wEnv, wType, wConfigs) 
       wConfig.module.rules.forEach((rule, index) => {
         if (isBabelRule(rule)) {
           // eslint-disable-next-line
-          wConfig.module.rules[index] = serverJSRule({
+          wConfig.module.rules[index] = serverRule({
             noChunk: true,
             hot: false,
           });

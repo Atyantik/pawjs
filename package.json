@@ -43,8 +43,12 @@
     "@babel/polyfill": "^7.2.5",
     "@babel/preset-env": "^7.2.3",
     "@babel/preset-react": "^7.0.0",
+    "@babel/preset-typescript": "^7.1.0",
     "@babel/register": "^7.0.0",
     "@babel/types": "^7.2.2",
+    "@types/express": "^4.16.0",
+    "@types/lodash": "^4.14.119",
+    "@types/react": "^16.7.18",
     "babel-core": "^7.0.0-bridge.0",
     "babel-eslint": "^10.0.1",
     "babel-jest": "^23.6.0",
@@ -86,13 +90,12 @@
     "style-loader": "^0.23.0",
     "supertest": "^3.3.0",
     "tapable": "^2.0.0-beta.3",
-    "ts-jest": "^23.10.5",
-    "ts-loader": "^5.3.3",
+    "tslint": "^5.12.0",
+    "tslint-config-airbnb": "^5.11.1",
+    "tslint-react": "^3.6.0",
     "typescript": "^3.2.2",
     "webpack": "^4.28.3",
-    "webpack-cli": "^3.2.1",
     "webpack-dev-middleware": "^3.5.0",
-    "webpack-dev-server": "^3.1.14",
     "webpack-hot-middleware": "^2.24.2",
     "webpack-log": "^2.0.0",
     "workbox-webpack-plugin": "^3.6.3"
@@ -104,6 +107,5 @@
   "bugs": {
     "url": "https://github.com/Atyantik/pawjs/issues"
   },
-  "homepage": "https://github.com/Atyantik/pawjs#readme",
-  "devDependencies": {}
+  "homepage": "https://github.com/Atyantik/pawjs#readme"
 }

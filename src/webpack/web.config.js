@@ -52,7 +52,7 @@ export default {
   stats: true,
   module: {
     rules: [
-      ...webRule(),
+      webRule(),
       ...cssRule({ hot: isHot }),
       fontRule({
         outputPath: 'fonts/',

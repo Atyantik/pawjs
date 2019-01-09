@@ -1,0 +1,19 @@
+{
+  "defaultSeverity": "error",
+  "extends": [
+    "tslint:latest",
+    "tslint-react",
+    "tslint-config-airbnb"
+  ],
+  "jsRules": {},
+  "rules": {
+    "no-implicit-dependencies": false,
+    "import-name": false,
+    "no-submodule-imports": [true, "@pawjs"]
+  },
+  "indent": [true, "spaces", 2],
+  "rulesDirectory": [],
+  "linterOptions": {
+    "exclude": ["**/node_modules/**"]
+  }
+}

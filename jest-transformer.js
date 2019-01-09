@@ -1,5 +1,5 @@
 const babelJest = require('babel-jest');
-const babelServerRule = require('./src/webpack/inc/babel-server-rule-js')({
+const babelServerRule = require('./src/webpack/inc/babel-server-rule')({
   cacheDirectory: false,
   noChunk: true,
 }).use.options;

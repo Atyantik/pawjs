@@ -1,14 +1,52 @@
-let babelWebJSRule = require('./babel-web-rule-js');
+const _ = require('lodash');
+let babelPresetEnv = require('@babel/preset-env');
 
-babelWebJSRule = babelWebJSRule.default ? babelWebJSRule.default : babelWebJSRule;
+babelPresetEnv = babelPresetEnv.default ? babelPresetEnv.default : babelPresetEnv;
 
-let babelWebTSRule = require('./babel-server-rule-ts');
+let babelPresetReact = require('@babel/preset-react');
 
-babelWebTSRule = babelWebTSRule.default ? babelWebTSRule.default : babelWebTSRule;
+babelPresetReact = babelPresetReact.default ? babelPresetReact.default : babelPresetReact;
 
-const rule = options => [
-  babelWebJSRule(options),
-  babelWebTSRule(options),
-];
+let presetTypescript = require('@babel/preset-typescript');
 
+presetTypescript = presetTypescript.default ? presetTypescript.default : presetTypescript;
+
+let babelPlugins = require('./babel-plugins');
+
+babelPlugins = babelPlugins.default ? babelPlugins.default : babelPlugins;
+
+const defaultOptions = {
+  cacheDirectory: process.env.PAW_CACHE === 'true',
+};
+
+const rule = (options = {}) => {
+  const o = _.assignIn({}, defaultOptions, options);
+  return {
+    test: /\.(mj|j|t)sx?$/,
+    use: [
+      {
+        loader: 'babel-loader',
+        options: {
+          presets: [
+            [
+              babelPresetEnv,
+              {
+                targets: {
+                  browsers: ['last 2 versions', 'safari >= 7', 'ie >= 9'],
+                },
+              },
+            ],
+            babelPresetReact,
+            presetTypescript,
+          ],
+          cacheDirectory: o.cacheDirectory,
+          plugins: babelPlugins(o),
+        },
+      },
+      {
+        loader: 'prefetch-loader',
+      },
+    ],
+  };
+};
 module.exports = rule;

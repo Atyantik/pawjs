@@ -17,4 +17,5 @@ fs.readdirSync(lib)
 
     // Install folder
     cp.spawnSync(npmCmd, ['i'], { env: process.env, cwd: modPath, stdio: 'inherit' });
+    cp.spawnSync(npmCmd, ['run', 'build'], { env: process.env, cwd: modPath, stdio: 'inherit' });
   });

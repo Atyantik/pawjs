@@ -150,13 +150,76 @@ export default class CliHandler {
     require(path.resolve(this.libRoot, 'src/server/webpack-build.js'));
   };
 
-  test() {
+  lint() {
     const env = Object.create(process.env);
     env.NODE_ENV = 'test';
-    spawn(this.searchCommand('jest'), ['--verbose'], {
+
+    let eslintPath = path.join(this.libRoot, '.eslintrc');
+    let eslintRoot = this.libRoot;
+    if (fs.existsSync(path.join(this.projectRoot, '.eslintrc'))) {
+      eslintPath = path.join(this.libRoot, '.eslintrc');
+      eslintRoot = this.projectRoot;
+    }
+
+    const srcDir = fs.existsSync(path.join(eslintRoot, 'src')) ? path.join(eslintRoot, 'src') : eslintRoot;
+    // eslint-disable-next-line
+    console.log(`Linting with eslint...\nConfig path: ${eslintPath}`);
+    const eslint = spawn(this.searchCommand('eslint'), [
+      '-c',
+      eslintPath,
+      srcDir,
+    ], {
       shell: true,
       env,
       stdio: [process.stdin, process.stdout, 'pipe'],
+    });
+
+    eslint.on('close', (errorCode) => {
+      if (!errorCode) {
+        let tslintPath = path.join(this.libRoot, 'tslint.json');
+        let tslintRoot = this.libRoot;
+        if (fs.existsSync(path.join(this.projectRoot, 'tslint.json'))) {
+          tslintPath = path.join(this.libRoot, 'tslint.json');
+          tslintRoot = this.projectRoot;
+        }
+        const tsSrcDir = fs.existsSync(path.join(tslintRoot, 'src')) ? path.join(tslintRoot, 'src') : tslintRoot;
+        // eslint-disable-next-line
+        console.log(`Linting with tslint...\nConfig path: ${tslintPath}`);
+        spawn(this.searchCommand('tslint'), [
+          '-c',
+          tslintPath,
+          `${tsSrcDir}/**/*.ts{,x}`,
+        ], {
+          shell: true,
+          env,
+          stdio: [process.stdin, process.stdout, 'pipe'],
+        });
+      }
+    });
+  }
+
+  test() {
+    const env = Object.create(process.env);
+    env.NODE_ENV = 'test';
+
+    let tscRoot = this.libRoot;
+    if (fs.existsSync(path.join(this.projectRoot, 'tsconfig.json'))) {
+      tscRoot = this.projectRoot;
+    }
+    const tsc = spawn(this.searchCommand('tsc'), ['-p', tscRoot], {
+      shell: true,
+      env,
+      stdio: [process.stdin, process.stdout, 'pipe'],
+    });
+
+    tsc.on('close', (errorCode) => {
+      if (!errorCode) {
+        spawn(this.searchCommand('jest'), ['--verbose'], {
+          shell: true,
+          env,
+          stdio: [process.stdin, process.stdout, 'pipe'],
+        });
+      }
     });
   }
 
@@ -185,6 +248,10 @@ export default class CliHandler {
       .description('Run the test cases for the project.')
       .action(this.test.bind(this));
 
+    this.program
+      .command('lint')
+      .description('Run eslint & tslint for the project.')
+      .action(this.lint.bind(this));
 
     // Set PAW_VERBOSE to true
     this.program.on('option:verbose', () => {

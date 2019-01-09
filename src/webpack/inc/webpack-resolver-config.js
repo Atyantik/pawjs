@@ -1,9 +1,8 @@
 const fs = require('fs');
 const path = require('path');
 
-const babelServer = require('./babel-server-rule-js')({
+const babelServer = require('./babel-server-rule')({
   cacheDirectory: false,
-  onlyBabel: true,
 }).use.options;
 
 require('@babel/register')({
