@@ -19,6 +19,7 @@ class Html extends Component {
     metaTags: PropTypes.arrayOf(PropTypes.shape({})),
     pwaSchema: PropTypes.shape({}),
     cssFiles: PropTypes.arrayOf(PropTypes.shape({})),
+    env: PropTypes.arrayOf(PropTypes.shape({})),
     preloadCssFiles: PropTypes.bool,
     assets: PropTypes.arrayOf(PropTypes.string),
     head: PropTypes.arrayOf(PropTypes.any),
@@ -33,6 +34,7 @@ class Html extends Component {
   static defaultProps = {
     metaTags: [],
     pwaSchema: {},
+    env: {},
     cssFiles: [],
     preloadCssFiles: false,
     assets: [],
@@ -86,6 +88,7 @@ class Html extends Component {
     const {
       // eslint-disable-next-line
       preloadedData,
+      env,
       metaTags,
       appRootUrl,
       preloadCssFiles,
@@ -103,6 +106,10 @@ class Html extends Component {
       <html lang={this.getPwaValue('lang')} dir={this.getPwaValue('dir')}>
         <head>
           <title>{this.getMetaValue('title').content}</title>
+          {env.polyfill && env.polyfill === 'cdn' && ([
+            <link rel="dns-prefetch" href="//cdn.polyfill.io" />,
+            <script key="cdn-polyfill-io" src="https://cdn.polyfill.io/v2/polyfill.min.js" />,
+          ])}
           <link rel="manifest" href={`${appRootUrl}/manifest.json`} />
           {
             metaTags.map(m => <meta key={JSON.stringify(m)} {...m} />)

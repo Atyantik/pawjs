@@ -38,7 +38,7 @@ export default {
   context: directories.root,
   entry: {
     client: [
-      '@babel/polyfill',
+      ...(pawConfig.polyfill === 'cdn' ? [] : ['@babel/polyfill']),
       // Initial entry point for dev
       path.resolve(process.env.LIB_ROOT, './src/client/app.js'),
     ],

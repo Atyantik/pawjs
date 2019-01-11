@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import assignIn from 'lodash/assignIn';
 import ProjectClient from 'pawProjectClient';
 import ClientHandler from './handler';
 import RouteHandler from '../router/handler';
@@ -9,13 +9,13 @@ let ProjectRoutes = require(`${process.env.PROJECT_ROOT}/src/routes`);
 if (ProjectRoutes.default) ProjectRoutes = ProjectRoutes.default;
 
 const rHandler = new RouteHandler({
-  env: _.assignIn({}, env),
+  env: assignIn({}, env),
 });
 
 rHandler.addPlugin(new ProjectRoutes({ addPlugin: rHandler.addPlugin }));
 
 const cHandler = new ClientHandler({
-  env: _.assignIn({}, env),
+  env: assignIn({}, env),
 });
 cHandler.addPlugin(new ProjectClient({ addPlugin: cHandler.addPlugin }));
 

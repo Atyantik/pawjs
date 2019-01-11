@@ -93,6 +93,7 @@ export default class ServerHandler {
         pwaSchema,
         head: [],
         footer: [],
+        env: _.assignIn({}, this.options.env),
       };
 
       const Application = {
@@ -192,6 +193,7 @@ export default class ServerHandler {
         pwaSchema,
         head: [],
         footer: [],
+        env: _.assignIn({}, this.options.env),
       };
 
       const AppRoutes = {

@@ -40,4 +40,12 @@ if (typeof config.hashedRoutes === 'undefined' && config.singlePageApplication) 
   config.hashedRoutes = true;
 }
 
+// Managing polyfill
+if (config.polyfill && typeof config.polyfill === 'string') {
+  config.polyfill = config.polyfill.toLowerCase();
+}
+
+if (config.polyfill !== 'cdn' || config.polyfill !== 'internal') {
+  config.polyfill = 'internal';
+}
 export default Object.assign({}, config);
