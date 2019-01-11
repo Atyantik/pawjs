@@ -4,6 +4,8 @@
   "appRootUrl": "",
   "asyncCSS": false,
   "serviceWorker": false,
+  "polyfill": "cdn",
+  "react": "cdn",
   "serverSideRender": true,
   "singlePageApplication": false
 }

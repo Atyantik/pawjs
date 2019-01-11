@@ -21,11 +21,11 @@ const isHot = typeof process.env.PAW_HOT !== 'undefined' ? process.env.PAW_HOT =
 
 const devPlugins = [];
 // try {
-//   if (require.resolve("webpack-bundle-analyzer")) {
-//     const WebpackBundleAnalyzer = require("webpack-bundle-analyzer").BundleAnalyzerPlugin;
-//     devPlugins.push(new WebpackBundleAnalyzer);
+//   if (require.resolve('webpack-bundle-analyzer')) {
+//     const WebpackBundleAnalyzer = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
+//     devPlugins.push(new WebpackBundleAnalyzer());
 //   }
-// } catch(e) {
+// } catch (e) {
 //   // eslint-disable-next-line
 //   console.warn("Webpack bundle analyzer not found!");
 // }
@@ -72,7 +72,22 @@ export default {
       chunks: 'all',
     },
   },
+  externals: {
+    ...(pawConfig.react === 'cdn' ? { react: 'React', 'react-dom': 'ReactDOM' } : {}),
+  },
   plugins: [
+    ...(pawConfig.react === 'cdn' ? [
+      new webpack.ProvidePlugin({
+        React: 'React',
+        react: 'React',
+        'window.react': 'React',
+        'window.React': 'React',
+        ReactDom: 'ReactDOM',
+        ReactDOM: 'ReactDOM',
+        'window.ReactDOM': 'ReactDOM',
+        'window.ReactDom': 'ReactDOM',
+      }),
+    ] : []),
     new webpack.EnvironmentPlugin(Object.assign({}, process.env)),
     ...(isHot ? [] : [new MiniCssExtractPlugin({
       // Options similar to the same options in webpackOptions.output

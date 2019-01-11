@@ -45,7 +45,17 @@ if (config.polyfill && typeof config.polyfill === 'string') {
   config.polyfill = config.polyfill.toLowerCase();
 }
 
-if (config.polyfill !== 'cdn' || config.polyfill !== 'internal') {
+if (config.polyfill !== 'cdn' && config.polyfill !== 'internal') {
   config.polyfill = 'internal';
 }
+
+if (config.react && typeof config.react === 'string') {
+  config.react = config.react.toLowerCase();
+}
+
+if (config.react !== 'cdn' && config.react !== 'internal') {
+  config.react = 'internal';
+}
+
+// Managing React
 export default Object.assign({}, config);

@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import BabelPolyfill from '@babel/polyfill/package.json';
 import { metaKeys } from '../utils/seo';
+
 
 let toBase64;
 // Base64 polyfill
@@ -107,8 +109,13 @@ class Html extends Component {
         <head>
           <title>{this.getMetaValue('title').content}</title>
           {env.polyfill && env.polyfill === 'cdn' && ([
-            <link rel="dns-prefetch" href="//cdn.polyfill.io" />,
-            <script key="cdn-polyfill-io" src="https://cdn.polyfill.io/v2/polyfill.min.js" />,
+            <link rel="dns-prefetch" key="dns-cdnjs-cloudflare-com" href="//cdnjs.cloudflare.com/" />,
+            <script key="dns-cdnjs-cloudflare-com-babel-polyfill" src={`https://cdnjs.cloudflare.com/ajax/libs/babel-polyfill/${BabelPolyfill.version}/polyfill.min.js`} />,
+          ])}
+          {env.react && env.react === 'cdn' && ([
+            <link rel="dns-prefetch" key="dns-unpkg-com" href="//unpkg.com" />,
+            <script key="cdn-react-unpkg-com" crossOrigin src={`https://unpkg.com/react@${React.version}/umd/react.production.min.js`} />,
+            <script key="cdn-react-dom-unpkg-com" crossOrigin src={`https://unpkg.com/react-dom@${React.version}/umd/react-dom.production.min.js`} />,
           ])}
           <link rel="manifest" href={`${appRootUrl}/manifest.json`} />
           {
