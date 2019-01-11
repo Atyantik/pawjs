@@ -126,7 +126,10 @@ const stats = {
   // Filter warnings to be shown (since webpack 2.4.0),
   // can be a String, Regexp, a function getting the warning and returning a boolean
   // or an Array of a combination of the above. First match wins.
-  warningsFilter: warning => warning.indexOf('node_modules/express') !== -1,
+  warningsFilter: warning => (
+    warning.indexOf('node_modules/express') !== -1
+    || warning.indexOf('node_modules/encoding') !== -1
+  ),
 };
 
 // Notify the user that compilation has started and should be done soon.
