@@ -15,13 +15,12 @@ if (typeof atob === 'undefined' && typeof Buffer !== 'undefined') {
   toBase64 = atob;
 }
 
-
 class Html extends Component {
   static propTypes = {
     metaTags: PropTypes.arrayOf(PropTypes.shape({})),
     pwaSchema: PropTypes.shape({}),
     cssFiles: PropTypes.arrayOf(PropTypes.shape({})),
-    env: PropTypes.arrayOf(PropTypes.shape({})),
+    env: PropTypes.shape({}),
     preloadCssFiles: PropTypes.bool,
     assets: PropTypes.arrayOf(PropTypes.string),
     head: PropTypes.arrayOf(PropTypes.any),

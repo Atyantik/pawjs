@@ -116,7 +116,7 @@ export default class ServerHandler {
       renderedHtml = renderedHtml.replace(
         '<preload-css></preload-css>',
         cssToBePreloaded.map(
-          p => `<link rel="preload" href="${p}" as="style" onload="this.rel='stylesheet'"/>`,
+          p => `<link rel="preload" href="${p}" as="style" onerror="this.rel='stylesheet'" onload="this.rel='stylesheet'"/>`,
         ).join(''),
       );
 
