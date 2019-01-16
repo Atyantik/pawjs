@@ -74,5 +74,3 @@ dist
 lib
 
 # Ignore npm output
-/*.js
-/*.map

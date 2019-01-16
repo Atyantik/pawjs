@@ -72,7 +72,3 @@ dist
 
 # Ignore the npm library generated
 lib
-
-# Ignore npm output
-/*.js
-/*.map
