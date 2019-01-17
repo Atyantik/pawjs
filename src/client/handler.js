@@ -19,6 +19,13 @@ import PreloadDataManager from '../utils/preloadDataManager';
 const possibleHtmlNames = _.invert(possibleStandardNames);
 const getPossibleHtmlName = key => possibleHtmlNames[key] || key;
 
+const b64DecodeUnicode = str => decodeURIComponent(
+  atob(str)
+    .split('')
+    .map(c => `%${(`00${c.charCodeAt(0).toString(16)}`).slice(-2)}`)
+    .join(''),
+);
+
 export default class ClientHandler {
   historyUnlistener = null;
 
@@ -182,7 +189,7 @@ export default class ClientHandler {
     const promises = [];
 
     if (window.PAW_PRELOADED_DATA) {
-      const preloadedData = JSON.parse(atob(window.PAW_PRELOADED_DATA));
+      const preloadedData = JSON.parse(b64DecodeUnicode(window.PAW_PRELOADED_DATA));
 
       // Wait for preload data manager to get executed
       await new Promise(r => this

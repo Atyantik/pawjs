@@ -9,11 +9,22 @@ let toBase64;
 if (typeof atob === 'undefined' && typeof Buffer !== 'undefined') {
   toBase64 = (str) => {
     if (!str) return str;
-    return Buffer.from(str).toString('base64');
+    return Buffer.from(str, 'latin1').toString('base64');
   };
 } else if (typeof atob !== 'undefined') {
   toBase64 = atob;
 }
+
+// first we use encodeURIComponent to get percent-encoded UTF-8,
+// then we convert the percent encodings into raw bytes which
+// can be fed into btoa.
+const b64EncodeUnicode = str => toBase64(
+  encodeURIComponent(str)
+    .replace(
+      /%([0-9A-F]{2})/g,
+      (match, p1) => String.fromCharCode(`0x${p1}`),
+    ),
+);
 
 class Html extends Component {
   static propTypes = {
@@ -125,7 +136,7 @@ class Html extends Component {
             id="__pawjs_preloaded"
             // eslint-disable-next-line
             dangerouslySetInnerHTML={{
-              __html: `window.PAW_PRELOADED_DATA = ${JSON.stringify(toBase64(JSON.stringify(preloadedData)))};`,
+              __html: `window.PAW_PRELOADED_DATA = ${JSON.stringify(b64EncodeUnicode(JSON.stringify(preloadedData)))};`,
             }}
           />
           {preloadCssFiles && (<preload-css />)}
