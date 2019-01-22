@@ -8,7 +8,7 @@ import env from '../config';
 import { assetsToArray } from '../utils/utils';
 
 /**
- * Initialize Route handler
+ * Initialize Route handler for PWA details
  * @type {RouteHandler}
  */
 const rHandler = new RouteHandler({
@@ -91,6 +91,14 @@ app.get('*', (req, res, next) => {
   ) {
     return next();
   }
+  const clientRouteHandler = new RouteHandler({
+    env: _.assignIn({}, env),
+    isServer: true,
+  });
+
+  // Add route plugin
+  clientRouteHandler.addPlugin(new ProjectRoutes({ addPlugin: clientRouteHandler.addPlugin }));
+
   // Get the resources
   const assets = assetsToArray(res.locals.assets);
 
@@ -102,13 +110,13 @@ app.get('*', (req, res, next) => {
       res,
       next,
       assets,
-      routeHandler: rHandler,
+      routeHandler: clientRouteHandler,
       cssDependencyMap: res.locals.cssDependencyMap,
     });
   }
   // If server side render is enabled then, then let the routes load
   // Wait for all routes to load everything!
-  return rHandler.hooks.initRoutes.callAsync((err) => {
+  return clientRouteHandler.hooks.initRoutes.callAsync((err) => {
     if (err) {
       // eslint-disable-next-line
       console.log(err);
@@ -119,7 +127,7 @@ app.get('*', (req, res, next) => {
     // Once we have all the routes, pass the handler to the
     // server run at this point we should have cssDependencyMap as well.
     return sHandler.run({
-      routeHandler: rHandler,
+      routeHandler: clientRouteHandler,
       req,
       res,
       next,
