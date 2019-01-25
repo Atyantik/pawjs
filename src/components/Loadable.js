@@ -178,6 +178,13 @@ function createLoadableComponent(loadFn, options) {
           match,
           ...otherNextProps,
         });
+        this.setState({
+          error: res.error,
+          pastDelay: false,
+          timedOut: false,
+          loading: res.loading,
+          loaded: res.loaded,
+        });
         this.loadModule();
       }
     }
