@@ -36,7 +36,6 @@ export default class RouteCompiler {
       delay: delay || routerService.getDefaultAllowedLoadDelay(),
     };
 
-
     let routeSeo = {};
 
     const updateSeo = (userSeoData = {}) => {
@@ -44,6 +43,8 @@ export default class RouteCompiler {
     };
 
     const loadableComponent = Loadable.Map({
+      timeout: Params.timeout,
+      delay: Params.delay,
       loader: {
         // Router Component
         RouteComponent: async () => component,

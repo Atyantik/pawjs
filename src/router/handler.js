@@ -123,7 +123,7 @@ export default class RouteHandler {
       pwaSchema.start_url = `${pwaSchema.start_url}/`;
     }
 
-    let delay = 300;
+    let delay = 200;
     let timeout = 10000;
 
     this.setDefaultSeoSchema = (schema = {}) => {
