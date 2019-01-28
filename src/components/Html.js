@@ -131,14 +131,18 @@ class Html extends Component {
           {
             metaTags.map(m => <meta key={JSON.stringify(m)} {...m} />)
           }
-          <script
-            type="text/javascript"
-            id="__pawjs_preloaded"
-            // eslint-disable-next-line
-            dangerouslySetInnerHTML={{
-              __html: `window.PAW_PRELOADED_DATA = ${JSON.stringify(b64EncodeUnicode(JSON.stringify(preloadedData)))};`,
-            }}
-          />
+          {
+            Boolean(preloadedData) && (
+              <script
+                type="text/javascript"
+                id="__pawjs_preloaded"
+                // eslint-disable-next-line
+                dangerouslySetInnerHTML={{
+                  __html: `window.PAW_PRELOADED_DATA = ${JSON.stringify(b64EncodeUnicode(JSON.stringify(preloadedData)))};`,
+                }}
+              />
+            )
+          }
           {preloadCssFiles && (<preload-css />)}
           {
             cssFiles
