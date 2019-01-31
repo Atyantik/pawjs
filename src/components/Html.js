@@ -118,36 +118,34 @@ class Html extends Component {
       <html lang={this.getPwaValue('lang')} dir={this.getPwaValue('dir')}>
         <head>
           <title>{this.getMetaValue('title').content}</title>
-          {env.polyfill && env.polyfill === 'cdn' && ([
-            <link rel="dns-prefetch" key="dns-cdnjs-cloudflare-com" href="//cdnjs.cloudflare.com/" />,
-            <script key="dns-cdnjs-cloudflare-com-babel-polyfill" src={`https://cdnjs.cloudflare.com/ajax/libs/babel-polyfill/${BabelPolyfill.version}/polyfill.min.js`} />,
-          ])}
-          {env.react && env.react === 'cdn' && ([
-            <link rel="dns-prefetch" key="dns-unpkg-com" href="//unpkg.com" />,
-            <script key="cdn-react-unpkg-com" crossOrigin src={`https://unpkg.com/react@${React.version}/umd/react.production.min.js`} />,
-            <script key="cdn-react-dom-unpkg-com" crossOrigin src={`https://unpkg.com/react-dom@${React.version}/umd/react-dom.production.min.js`} />,
-          ])}
-          <link rel="manifest" href={`${appRootUrl}/manifest.json`} />
-          {
-            metaTags.map(m => <meta key={JSON.stringify(m)} {...m} />)
-          }
-          {
-            Boolean(preloadedData) && (
-              <script
-                type="text/javascript"
-                id="__pawjs_preloaded"
-                // eslint-disable-next-line
-                dangerouslySetInnerHTML={{
-                  __html: `window.PAW_PRELOADED_DATA = ${JSON.stringify(b64EncodeUnicode(JSON.stringify(preloadedData)))};`,
-                }}
-              />
-            )
-          }
           {preloadCssFiles && (<preload-css />)}
           {
             cssFiles
               .map(path => <link rel="stylesheet" type="text/css" key={path} href={path} />)
           }
+          {env.polyfill && env.polyfill === 'cdn' && ([
+            <link rel="dns-prefetch" key="dns-cdnjs-cloudflare-com" href="//cdnjs.cloudflare.com/" />,
+            <script key="dns-cdnjs-cloudflare-com-babel-polyfill" defer src={`https://cdnjs.cloudflare.com/ajax/libs/babel-polyfill/${BabelPolyfill.version}/polyfill.min.js`} />,
+          ])}
+          {env.react && env.react === 'cdn' && ([
+            <link rel="dns-prefetch" key="dns-unpkg-com" href="//unpkg.com" />,
+            <script key="cdn-react-unpkg-com" defer crossOrigin src={`https://unpkg.com/react@${React.version}/umd/react.production.min.js`} />,
+            <script key="cdn-react-dom-unpkg-com" defer crossOrigin src={`https://unpkg.com/react-dom@${React.version}/umd/react-dom.production.min.js`} />,
+          ])}
+          <link rel="manifest" href={`${appRootUrl}/manifest.json`} />
+          {
+            metaTags.map(m => <meta key={JSON.stringify(m)} {...m} />)
+          }
+          { preloadedData && (
+            <script
+              type="text/javascript"
+              id="__pawjs_preloaded"
+              // eslint-disable-next-line
+              dangerouslySetInnerHTML={{
+                __html: `window.PAW_PRELOADED_DATA = ${JSON.stringify(b64EncodeUnicode(JSON.stringify(preloadedData)))};`,
+              }}
+            />
+          ) }
           {head}
         </head>
         <body>
@@ -168,7 +166,7 @@ class Html extends Component {
           {
             assets
               .filter(path => path.endsWith('.js'))
-              .map(path => <script key={path} src={path} async />)
+              .map(path => <script defer key={path} src={path} async />)
           }
         </body>
       </html>
