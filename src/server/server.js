@@ -16,12 +16,15 @@ const rHandler = new RouteHandler({
   isServer: true,
 });
 
-// eslint-disable-next-line
-let ProjectRoutes = require(`${process.env.PROJECT_ROOT}/src/routes`);
-if (ProjectRoutes.default) ProjectRoutes = ProjectRoutes.default;
+let ProjectRoutes = false;
+if (env.serverSideRender) {
+  // eslint-disable-next-line
+  ProjectRoutes = require(`${process.env.PROJECT_ROOT}/src/routes`);
+  if (ProjectRoutes.default) ProjectRoutes = ProjectRoutes.default;
 
-// Add route plugin
-rHandler.addPlugin(new ProjectRoutes({ addPlugin: rHandler.addPlugin }));
+  // Add route plugin
+  rHandler.addPlugin(new ProjectRoutes({ addPlugin: rHandler.addPlugin }));
+}
 
 /**
  * Initialize server handler
@@ -97,7 +100,9 @@ app.get('*', (req, res, next) => {
   });
 
   // Add route plugin
-  clientRouteHandler.addPlugin(new ProjectRoutes({ addPlugin: clientRouteHandler.addPlugin }));
+  if (env.serverSideRender && ProjectRoutes) {
+    clientRouteHandler.addPlugin(new ProjectRoutes({ addPlugin: clientRouteHandler.addPlugin }));
+  }
 
   // Get the resources
   const assets = assetsToArray(res.locals.assets);

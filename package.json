@@ -111,6 +111,8 @@
   },
   "homepage": "https://github.com/Atyantik/pawjs#readme",
   "devDependencies": {
+    "esdoc": "^1.1.0",
+    "esdoc-standard-plugin": "^1.0.0",
     "pre-commit": "^1.2.2"
   },
   "pre-commit": [
