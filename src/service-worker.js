@@ -1,8 +1,12 @@
 // eslint-disable-next-line
 const serviceWorker = self;
 
-serviceWorker.workbox.skipWaiting();
-serviceWorker.workbox.clientsClaim();
+serviceWorker.addEventListener('install', () => {
+  serviceWorker.skipWaiting();
+});
+serviceWorker.addEventListener('activate', () => {
+  serviceWorker.clients.claim();
+});
 
 serviceWorker.workbox.setConfig({
   debug: serviceWorker.paw__env.PAW_ENV !== 'production',

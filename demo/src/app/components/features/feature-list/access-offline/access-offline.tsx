@@ -2,7 +2,9 @@ import Picture from '@pawjs/srcset/picture';
 import * as React from 'react';
 import OfflineSrcset from './images/offline.png?sizes=400w+800w&placeholder';
 
+console.log('in offline');
 export default () => {
+  console.log('rendering offline');
   const [counter, setCounter] = React.useState(11);
   return (
     <article>

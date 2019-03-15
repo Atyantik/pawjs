@@ -1,9 +1,9 @@
 import React from 'react';
-import { hot } from 'react-hot-loader';
+import { hot } from 'react-hot-loader/root';
 import clientHandler from './app';
 
 const App = props => props.children;
-const HotApp = hot(module)(App);
+const HotApp = hot(App);
 
 clientHandler.hooks.beforeRender.tap('AddHotModuleLoader', (app) => {
   // eslint-disable-next-line

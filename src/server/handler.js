@@ -208,6 +208,7 @@ export default class ServerHandler {
         getRenderedRoutes: AppRoutes.getRenderedRoutes,
       }, r));
 
+      const util = require('util');
       const Application = {
         htmlProps,
         children: (
@@ -227,6 +228,11 @@ export default class ServerHandler {
           {Application.children}
         </ErrorBoundary>,
       );
+      console.log(util.inspect(renderToString(
+        <ErrorBoundary ErrorComponent={routeHandler.getErrorComponent()}>
+          {Application.children}
+        </ErrorBoundary>,
+      ), { depth: 10 }));
 
       if (context.url) {
         // can use the `context.status` that

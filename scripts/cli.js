@@ -2,10 +2,10 @@ import Program from 'commander';
 import path from 'path';
 import fs from 'fs';
 import ChildProcess from 'child_process';
+import dotenv from 'dotenv';
 import executablePaths from './executable-paths';
 import FindCommand from './find-command';
 import packageDetails from '../package.json';
-import dotenv from 'dotenv';
 
 const { spawn } = ChildProcess;
 

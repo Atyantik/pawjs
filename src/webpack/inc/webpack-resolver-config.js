@@ -59,6 +59,7 @@ loaderResolver.push(path.join(process.env.LIB_ROOT, 'src', 'webpack', 'loaders')
 const resolver = {
   resolve: {
     alias: {
+      'react-dom': '@hot-loader/react-dom',
       pawjs: path.resolve(path.join(process.env.LIB_ROOT)),
       pawProjectClient: projectClientExists ? projectClientPath : emptyClass,
       pawProjectServer: projectServerExists ? projectServerPath : emptyClass,

@@ -215,10 +215,10 @@ wHandler.hooks.beforeConfig.tap('AddSyncedFilesPlugin', (wEnv, wType, wConfigs) 
         const hasCleanWebpackPlugin = wConfig.plugins.some(p => p instanceof CleanWebpackPlugin);
 
         if (!hasCleanWebpackPlugin) {
-          wConfig.plugins.push(new CleanWebpackPlugin([
-            directories.dist.split(path.sep).pop(),
-          ], {
-            root: path.dirname(directories.dist),
+          wConfig.plugins.push(new CleanWebpackPlugin({
+            cleanOnceBeforeBuildPatterns: [
+              directories.dist,
+            ],
           }));
           cleanDistFolder = true;
         }
@@ -371,34 +371,36 @@ try {
           console.log(`Successfully created: ${path.join(directories.build, "index.html")}`);
           // eslint-disable-next-line
           console.log(`Successfully created: ${path.join(directories.build, "manifest.json")}`);
-        }).then(() => {
+        }).then(async () => {
           // eslint-disable-next-line
           console.log("\n\nRe-organizing files...\n");
           try {
             const tempPawJSBuildPath = path.join(directories.root, 'pawjs-temp-build');
             // Move to tempFolder
-            del([tempPawJSBuildPath]).then(() => {
-              mv(directories.build, tempPawJSBuildPath, { mkdir: true, clobber: true }, (err) => {
+            await del([tempPawJSBuildPath]);
+            mv(
+              directories.build,
+              tempPawJSBuildPath,
+              { mkdir: true, clobber: true },
+              async (err) => {
                 if (err) {
                   // eslint-disable-next-line
                   console.error(err);
                   return;
                 }
-                del([directories.dist])
-                  .then(() => {
-                    mv(tempPawJSBuildPath, directories.dist, { clobber: true }, (err1) => {
-                      if (err1) {
-                        // eslint-disable-next-line
-                        console.error(err1);
-                        return;
-                      }
-                      // eslint-disable-next-line
-                      console.log("Static site generated successfully.");
-                      process.exit(0);
-                    });
-                  });
-              });
-            });
+                await del([directories.dist]);
+                mv(tempPawJSBuildPath, directories.dist, { clobber: true }, (err1) => {
+                  if (err1) {
+                    // eslint-disable-next-line
+                    console.error(err1);
+                    return;
+                  }
+                  // eslint-disable-next-line
+                  console.log("Static site generated successfully.");
+                  process.exit(0);
+                });
+              },
+            );
           } catch (ex) {
             // eslint-disable-next-line
             console.log(ex);

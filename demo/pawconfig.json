@@ -3,9 +3,7 @@
   "host": "localhost",
   "appRootUrl": "",
   "asyncCSS": false,
-  "serviceWorker": false,
-  "polyfill": "cdn",
-  "react": "cdn",
+  "serviceWorker": true,
   "serverSideRender": true,
   "singlePageApplication": false
 }
