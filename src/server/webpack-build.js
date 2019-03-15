@@ -208,6 +208,12 @@ const hasSyncedFileLoader = (rule) => {
 let cleanDistFolder = false;
 let copyPublicFolder = !fs.existsSync(path.join(directories.src, 'public'));
 wHandler.hooks.beforeConfig.tap('AddSyncedFilesPlugin', (wEnv, wType, wConfigs) => {
+  // Before fresh build remove images sync file from previous build
+  const syncedOutputFilename = 'synced-files.json';
+  const syncedOutputPath = directories.dist;
+  if (fs.existsSync(path.join(syncedOutputPath, syncedOutputFilename))) {
+    fs.unlinkSync(path.join(syncedOutputPath, syncedOutputFilename));
+  }
   // Web specific configurations
   if (wType === 'web') {
     wConfigs.forEach((wConfig) => {
@@ -254,7 +260,8 @@ wHandler.hooks.beforeConfig.tap('AddSyncedFilesPlugin', (wEnv, wType, wConfigs) 
       const hasSyncedFilePlugin = wConfig.plugins.some(p => p instanceof SyncedFilesPlugin);
       if (!hasSyncedFilePlugin) {
         wConfig.plugins.push(new SyncedFilesPlugin({
-          outputPath: directories.dist,
+          outputPath: syncedOutputPath,
+          outputFileName: syncedOutputFilename,
         }));
       }
 
@@ -310,7 +317,8 @@ wHandler.hooks.beforeConfig.tap('AddSyncedFilesPlugin', (wEnv, wType, wConfigs) 
       const hasSyncedFilePlugin = wConfig.plugins.some(p => p instanceof SyncedFilesPlugin);
       if (!hasSyncedFilePlugin) {
         wConfig.plugins.push(new SyncedFilesPlugin({
-          outputPath: directories.dist,
+          outputPath: syncedOutputPath,
+          outputFileName: syncedOutputFilename,
         }));
       }
     });

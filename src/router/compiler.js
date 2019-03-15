@@ -29,13 +29,12 @@ export default class RouteCompiler {
     } = route;
 
     let routeComponent = component;
+    let routeLayout = layout;
     if (component && typeof component.then === 'function') {
       routeComponent = () => component;
     } else if (component && typeof component !== 'function') {
       routeComponent = async () => component;
     }
-
-    let routeLayout = layout;
     if (layout && typeof layout.then === 'function') {
       routeLayout = () => layout;
     } else if (layout && typeof layout !== 'function') {
