@@ -27,8 +27,12 @@ wHandler.hooks.beforeConfig.tap('AddHotReplacementPlugin', (wEnv, wType, wConfig
   // Add eval devtool to all the configs
   wConfigs.forEach((wConfig) => {
     if (!wConfig.devtool) {
-      // eslint-disable-next-line
+      /* eslint-disable */
       wConfig.devtool = 'eval';
+      if (!wConfig.resolve) wConfig.resolve = {};
+      if (!wConfig.resolve.alias) wConfig.resolve.alias = {};
+      if (!wConfig.resolve.alias['react-dom']) wConfig.resolve.alias['react-dom'] = '@hot-loader/react-dom';
+      /* eslint-enable */
     }
   });
 

@@ -16,12 +16,15 @@ const rHandler = new RouteHandler({
   isServer: true,
 });
 
-// eslint-disable-next-line
-let ProjectRoutes = require(`${process.env.PROJECT_ROOT}/src/routes`);
-if (ProjectRoutes.default) ProjectRoutes = ProjectRoutes.default;
+let ProjectRoutes = false;
+if (env.serverSideRender) {
+  // eslint-disable-next-line
+  ProjectRoutes = require(`${process.env.PROJECT_ROOT}/src/routes`);
+  if (ProjectRoutes.default) ProjectRoutes = ProjectRoutes.default;
 
-// Add route plugin
-rHandler.addPlugin(new ProjectRoutes({ addPlugin: rHandler.addPlugin }));
+  // Add route plugin
+  rHandler.addPlugin(new ProjectRoutes({ addPlugin: rHandler.addPlugin }));
+}
 
 /**
  * Initialize server handler
@@ -70,12 +73,14 @@ const hstsSettings = {
 if (hstsSettings.enabled) {
   // If HSTS is enabled and user is running on https protocol then add the hsts
   // middleware
-  app.use(hsts(_.assignIn(hstsSettings, {
-    // Enable hsts for https sites
-    setIf(req) {
-      return req.secure || (req.headers['x-forwarded-proto'] === 'https');
-    },
-  })));
+  app.use((req, res, next) => {
+    if (req.secure) {
+      const hstsMiddleware = hsts(hstsSettings);
+      hstsMiddleware(req, res, next);
+    } else {
+      next();
+    }
+  });
 }
 
 app.get(`${env.appRootUrl}/manifest.json`, (req, res) => {
@@ -97,7 +102,9 @@ app.get('*', (req, res, next) => {
   });
 
   // Add route plugin
-  clientRouteHandler.addPlugin(new ProjectRoutes({ addPlugin: clientRouteHandler.addPlugin }));
+  if (env.serverSideRender && ProjectRoutes) {
+    clientRouteHandler.addPlugin(new ProjectRoutes({ addPlugin: clientRouteHandler.addPlugin }));
+  }
 
   // Get the resources
   const assets = assetsToArray(res.locals.assets);

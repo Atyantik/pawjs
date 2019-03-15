@@ -207,7 +207,6 @@ export default class ServerHandler {
         setRenderedRoutes: AppRoutes.setRenderedRoutes,
         getRenderedRoutes: AppRoutes.getRenderedRoutes,
       }, r));
-
       const Application = {
         htmlProps,
         children: (
@@ -227,7 +226,6 @@ export default class ServerHandler {
           {Application.children}
         </ErrorBoundary>,
       );
-
       if (context.url) {
         // can use the `context.status` that
         // we added in RedirectWithStatus

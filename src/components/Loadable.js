@@ -6,7 +6,11 @@ const ALL_INITIALIZERS = [];
 const READY_INITIALIZERS = [];
 
 function load(loader, props) {
-  const promise = loader(props);
+  const p = loader(props);
+  let promise = p;
+  if (typeof p.then === 'undefined') {
+    promise = new Promise(res => res(p));
+  }
 
   const state = {
     loading: true,

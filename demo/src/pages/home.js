@@ -4,8 +4,8 @@ import HomeSkeleton from '../app/components/skeleton/home';
 export default [
   {
     path: '/',
-    component: import('../app/components/home'),
-    layout: import('../app/components/layout'),
+    component: () => import('../app/components/home'),
+    layout: () => import('../app/components/layout'),
     skeleton: HomeSkeleton,
     exact: true,
   },

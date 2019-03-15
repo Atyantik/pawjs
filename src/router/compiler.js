@@ -28,6 +28,19 @@ export default class RouteCompiler {
       ...others
     } = route;
 
+    let routeComponent = component;
+    let routeLayout = layout;
+    if (component && typeof component.then === 'function') {
+      routeComponent = () => component;
+    } else if (component && typeof component !== 'function') {
+      routeComponent = async () => component;
+    }
+    if (layout && typeof layout.then === 'function') {
+      routeLayout = () => layout;
+    } else if (layout && typeof layout !== 'function') {
+      routeLayout = async () => layout;
+    }
+
     // JSXifiable component object
     const Params = {
       errorComponent: error || routerService.getDefaultLoadErrorComponent(),
@@ -47,14 +60,13 @@ export default class RouteCompiler {
       delay: Params.delay,
       loader: {
         // Router Component
-        RouteComponent: async () => component,
+        RouteComponent: routeComponent,
 
         // Load Data with ability to update SEO
         LoadData: (typeof loadData !== 'undefined'
           ? async (props = {}) => loadData({ updateSeo, ...props }) : async () => ({})),
-
         // Load layout as well
-        Layout: async () => layout,
+        ...(routeLayout ? { Layout: routeLayout } : {}),
       },
       loading: (props) => {
         const { err, pastDelay } = props;

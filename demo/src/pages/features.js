@@ -2,8 +2,8 @@ import DummyLogoWhite from '../resources/images/reactpwa-logo-white.png';
 
 const routes = [
   {
-    component: import('../app/components/features/layout'),
-    layout: import('../app/components/layout'),
+    component: () => import('../app/components/features/layout'),
+    layout: () => import('../app/components/layout'),
     path: '/features',
     seo: {
       title: 'Features | React PWA',
@@ -16,7 +16,7 @@ const routes = [
       {
         path: '/features',
         exact: true,
-        component: import('../app/components/features/index'),
+        component: () => import('../app/components/features/index'),
         props: {
           title: 'Features',
         },
@@ -30,7 +30,7 @@ const routes = [
       {
         path: '/features/pwa-progressive-web-application',
         exact: true,
-        component: import('../app/components/features/feature-list/pwa/pwa'),
+        component: () => import('../app/components/features/feature-list/pwa/pwa'),
         props: {
           title: 'Progressive Web Application - PWA',
         },
@@ -44,7 +44,7 @@ const routes = [
       {
         path: '/features/access-offline',
         exact: true,
-        component: import('../app/components/features/feature-list/access-offline/access-offline'),
+        component: () => import('../app/components/features/feature-list/access-offline/access-offline'),
         props: {
           title: 'Offline Accessibility',
         },
@@ -58,7 +58,7 @@ const routes = [
       {
         path: '/features/code-splitting',
         exact: true,
-        component: import('../app/components/features/feature-list/code-splitting/code-splitting'),
+        component: () => import('../app/components/features/feature-list/code-splitting/code-splitting'),
         props: {
           title: 'Code Splitting',
         },
@@ -72,7 +72,7 @@ const routes = [
       {
         path: '/features/hot-reloading',
         exact: true,
-        component: import('../app/components/features/feature-list/hot-reloading/hot-reloading'),
+        component: () => import('../app/components/features/feature-list/hot-reloading/hot-reloading'),
         props: {
           title: 'Hot Reloading',
         },
@@ -86,7 +86,7 @@ const routes = [
       {
         path: '/features/next-gen-js-es6-es7',
         exact: true,
-        component: import('../app/components/features/feature-list/nextgen-js/nextgen-js'),
+        component: () => import('../app/components/features/feature-list/nextgen-js/nextgen-js'),
         props: {
           title: 'Next Generation JavaScript',
         },
@@ -100,7 +100,7 @@ const routes = [
       {
         path: '/features/isomorphic-universal-routing',
         exact: true,
-        component: import('../app/components/features/feature-list/iso-uni-routing/iso-uni-routing'),
+        component: () => import('../app/components/features/feature-list/iso-uni-routing/iso-uni-routing'),
         props: {
           title: 'Isomorphic/Universal Routing',
         },
@@ -114,7 +114,7 @@ const routes = [
       {
         path: '/features/seo-search-engine-optimization',
         exact: true,
-        component: import('../app/components/features/feature-list/seo/seo'),
+        component: () => import('../app/components/features/feature-list/seo/seo'),
         props: {
           title: 'Search Engine Optimization - SEO',
         },
@@ -128,7 +128,7 @@ const routes = [
       {
         path: '/features/seo-search-engine-optimization/social-sharing',
         exact: true,
-        component: import('../app/components/features/feature-list/social-sharing/social-sharing'),
+        component: () => import('../app/components/features/feature-list/social-sharing/social-sharing'),
         props: {
           title: 'Social Sharing',
         },
@@ -142,7 +142,7 @@ const routes = [
       {
         path: '/features/seo-search-engine-optimization/ssr-server-side-rendering',
         exact: true,
-        component: import('../app/components/features/feature-list/ssr/ssr'),
+        component: () => import('../app/components/features/feature-list/ssr/ssr'),
         props: {
           title: 'Server Side Rendering - SSR',
         },
@@ -156,7 +156,7 @@ const routes = [
       {
         path: '/features/seo-search-engine-optimization/content-folding',
         exact: true,
-        component: import('../app/components/features/feature-list/content-folding/content-folding'),
+        component: () => import('../app/components/features/feature-list/content-folding/content-folding'),
         props: {
           title: 'Content Folding',
         },
@@ -170,7 +170,7 @@ const routes = [
       {
         path: '/features/caching',
         exact: true,
-        component: import('../app/components/features/feature-list/caching/caching'),
+        component: () => import('../app/components/features/feature-list/caching/caching'),
         props: {
           title: 'Caching',
         },
@@ -184,7 +184,7 @@ const routes = [
       {
         path: '/features/bundling',
         exact: true,
-        component: import('../app/components/features/feature-list/bundling/bundling'),
+        component: () => import('../app/components/features/feature-list/bundling/bundling'),
         props: {
           title: 'Bundling',
         },
@@ -198,7 +198,7 @@ const routes = [
       {
         path: '/features/image-optimization',
         exact: true,
-        component: import('../app/components/features/feature-list/image-optimization/image-optimization'),
+        component: () => import('../app/components/features/feature-list/image-optimization/image-optimization'),
         props: {
           title: 'Image Optimization',
         },
@@ -212,7 +212,7 @@ const routes = [
       {
         path: '/features/hsts',
         exact: true,
-        component: import('../app/components/features/feature-list/hsts/hsts'),
+        component: () => import('../app/components/features/feature-list/hsts/hsts'),
         props: {
           title: 'HTTP Strict Transport Security - HSTS',
         },
