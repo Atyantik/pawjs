@@ -16,6 +16,5 @@ if (fs.existsSync(path.join(projectRoot, 'src', 'webpack.js'))) {
   }
   handlerInstance.addPlugin(new ProjectWebpackPlugin({ addPlugin: handlerInstance.addPlugin }));
 }
-
-module.exports = handlerInstance;
-module.exports.handler = WebpackHandler;
+export const handler = WebpackHandler;
+export default handlerInstance;

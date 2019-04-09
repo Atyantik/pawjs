@@ -13,8 +13,11 @@ import requireFromString from '../webpack/utils/requireFromString';
 // Assets normalizer appending publicPath
 import normalizeAssets from '../webpack/utils/normalizeAssets';
 
+interface IPawjsWebpackConfig extends webpack.Configuration {
+  entry: any;
+  externals: any;
+}
 // Notify the user that compilation has started and should be done soon.
-
 // eslint-disable-next-line
 console.log(`
 ===================================================
@@ -25,29 +28,42 @@ console.log(`
 `);
 wHandler.hooks.beforeConfig.tap('AddHotReplacementPlugin', (wEnv, wType, wConfigs) => {
   // Add eval devtool to all the configs
-  wConfigs.forEach((wConfig) => {
-    if (!wConfig.devtool) {
-      /* eslint-disable */
-      wConfig.devtool = 'eval';
-      if (!wConfig.resolve) wConfig.resolve = {};
-      if (!wConfig.resolve.alias) wConfig.resolve.alias = {};
-      if (!wConfig.resolve.alias['react-dom']) wConfig.resolve.alias['react-dom'] = '@hot-loader/react-dom';
-      /* eslint-enable */
+  wConfigs.forEach((wConfig: IPawjsWebpackConfig) => {
+    const config = wConfig;
+    if (!config.devtool) {
+      config.devtool = 'eval';
+      if (!config.resolve) config.resolve = {};
+      if (!config.resolve.alias) config.resolve.alias = {};
+      if (!config.resolve.alias['react-dom']) {
+        config.resolve.alias['react-dom'] = '@hot-loader/react-dom';
+      }
     }
   });
 
-
   // Web specific configurations
   if (wType === 'web') {
-    wConfigs.forEach((wConfig) => {
+    wConfigs.forEach((webpackConfig: IPawjsWebpackConfig) => {
+      const wConfig = webpackConfig;
       if (
-        wConfig.entry.client
+        typeof wConfig.entry !== 'undefined'
+        && typeof wConfig.entry.client !== 'undefined'
         && Array.isArray(wConfig.entry.client)
       ) {
-        let clientIndex = wConfig.entry.client.indexOf(path.resolve(process.env.LIB_ROOT, 'src', 'client', 'app.js'));
+        const libRoot = process.env.LIB_ROOT;
+        if (typeof libRoot === 'undefined') {
+          return;
+        }
+        let clientIndex = wConfig
+          .entry
+          .client
+          .indexOf(
+            path.resolve(libRoot, 'src', 'client', 'app.js'),
+          );
 
         // Add webpack-hot-middleware as entry point
-        const hotMiddlewareString = 'webpack-hot-middleware/client?name=web&path=/__hmr_update&timeout=2000&overlay=true&quiet=false';
+        const hotMiddlewareString = 'webpack-hot-middleware/client?name=web&'
+          + 'path=/__hmr_update&timeout=2000&overlay=true&quiet=false';
+
         if (!wConfig.entry.client.includes(hotMiddlewareString)) {
           if (clientIndex === -1) {
             wConfig.entry.client.unshift(hotMiddlewareString);
@@ -58,12 +74,13 @@ wHandler.hooks.beforeConfig.tap('AddHotReplacementPlugin', (wEnv, wType, wConfig
         }
 
         // Replace app with hot-app
-        if (wConfig.entry.client.includes(path.resolve(process.env.LIB_ROOT, 'src', 'client', 'app.js'))) {
+        if (wConfig.entry.client.includes(path.resolve(libRoot, 'src', 'client', 'app.js'))) {
           // eslint-disable-next-line
-          wConfig.entry.client[clientIndex] = path.resolve(process.env.LIB_ROOT, 'src', 'client', 'hot-app.js');
+          wConfig.entry.client[clientIndex] = path.resolve(libRoot, 'src', 'client', 'hot-app.js');
         }
 
         // check for Hot Module replacement plugin and add it if necessary
+        if (!wConfig.plugins) wConfig.plugins = [];
         const hasHotPlugin = wConfig
           .plugins
           .some(p => p instanceof webpack.HotModuleReplacementPlugin);
@@ -76,35 +93,34 @@ wHandler.hooks.beforeConfig.tap('AddHotReplacementPlugin', (wEnv, wType, wConfig
       }
     });
   }
-
-
   if (wType === 'server') {
-    wConfigs.forEach((wConfig) => {
+    wConfigs.forEach((webpackConfig: IPawjsWebpackConfig) => {
+      const wConfig = webpackConfig;
       // Add express as externals
       if (!wConfig.externals) {
-        // eslint-disable-next-line
         wConfig.externals = {};
       }
-      // eslint-disable-next-line
+
       wConfig.externals.express = 'express';
 
-
+      if (!wConfig.module) wConfig.module = { rules: [] };
       // do not emit image files for server!
-      wConfig.module.rules.forEach((rule) => {
-        // eslint-disable-next-line
-        rule.use && Array.isArray(rule.use) && rule.use.forEach((u) => {
-          if (u.loader && u.loader === 'file-loader') {
-            // eslint-disable-next-line
-            if (!u.options) u.options = {};
-            // eslint-disable-next-line
-            u.options.emitFile = typeof u.options.emitFile !== 'undefined' ? u.options.emitFile : false;
-          }
-        });
+      wConfig.module.rules.forEach((r: any) => {
+        const rule = r;
+        if (rule.use && Array.isArray(rule.use)) {
+          rule.use.forEach((use: any) => {
+            const u = use;
+            if (u.loader && u.loader === 'file-loader') {
+              if (!u.options) u.options = {};
+              u.options.emitFile = typeof u.options.emitFile !== 'undefined'
+                ? u.options.emitFile : false;
+            }
+          });
+        }
       });
     });
   }
 });
-
 
 try {
   // Server configurations
@@ -118,7 +134,7 @@ try {
     host: pawConfig.host,
     serverSideRender: pawConfig.serverSideRender,
     publicPath: pawConfig.resourcesBaseUrl,
-    contentBase: path.join(directories.src, 'public'),
+    contentBase: path.join((directories.src || ''), 'public'),
   };
 
   // Create new logging entity, pawjs
@@ -148,7 +164,7 @@ try {
     hot: true,
   };
 
-  const serverOptions = Object.assign({}, commonOptions, devServerConfig);
+  const serverOptions: any = Object.assign({}, commonOptions, devServerConfig);
   const webOptions = Object.assign({}, commonOptions, {
     inline: true,
     serverSideRender: true,
@@ -170,9 +186,11 @@ try {
   app.set('x-powered-by', 'PawJS');
 
   // Add server middleware
-  const serverMiddleware = webpackMiddleware(serverCompiler, serverOptions);
-  app.use(serverMiddleware);
+  const serverMiddleware
+    : webpackMiddleware.WebpackDevMiddleware = webpackMiddleware(serverCompiler, serverOptions);
 
+  // @ts-ignore
+  app.use(serverMiddleware);
 
   const getCommonServer = () => {
     const mfs = serverMiddleware.fileSystem;
@@ -225,7 +243,6 @@ try {
       return next();
     }
 
-
     let CommonServerMiddleware;
     try {
       // Get content of the server that is compiled!
@@ -250,7 +267,6 @@ try {
   const startServer = () => {
     if (serverStarted) return;
 
-
     let beforeStart; let afterStart = null;
     try {
       const CommonServer = getCommonServer();
@@ -262,7 +278,6 @@ try {
       // eslint-disable-next-line
       console.log(ex);
     }
-
 
     const nodeServerConfig = {
       port: devServerConfig.port,

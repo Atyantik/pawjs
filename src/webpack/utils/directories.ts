@@ -1,6 +1,14 @@
-const path = require('path');
-const fs = require('fs');
-const defaultsDeep = require('lodash/defaultsDeep');
+import path from 'path';
+import defaultsDeep from 'lodash/defaultsDeep';
+
+/* global getDefault */
+
+interface IDirectories {
+  root?: string;
+  src?: string;
+  dist?: string;
+  build?: string;
+}
 
 const projectRoot = path.resolve(path.join(__dirname, '..', '..', '..'));
 let defaultDirectories = {
@@ -9,7 +17,7 @@ let defaultDirectories = {
   dist: path.join(projectRoot, 'demo', 'dist'),
   build: path.join(projectRoot, 'demo', 'dist', 'build'),
 };
-let directories = {};
+let directories: IDirectories = {};
 if (typeof process.env.PROJECT_ROOT !== 'undefined') {
   /**
    * Default directory list
@@ -23,10 +31,10 @@ if (typeof process.env.PROJECT_ROOT !== 'undefined') {
   };
 
   try {
-    const directoriesConfigPath = `${process.env.PROJECT_ROOT}/directories.js`;
-    if (fs.existsSync(directoriesConfigPath)) {
-      // eslint-disable-next-line
-      directories = require(directoriesConfigPath);
+    const directoriesConfigPath = `${process.env.PROJECT_ROOT}/directories`;
+    if (path.resolve(directoriesConfigPath)) {
+      // @ts-ignore
+      directories = getDefault(require(directoriesConfigPath)); // eslint-disable-line
     }
   } catch (ex) {
     // reset directories to blank object
@@ -35,4 +43,5 @@ if (typeof process.env.PROJECT_ROOT !== 'undefined') {
 
   directories = defaultsDeep(directories, defaultDirectories);
 }
-module.exports = Object.assign({}, directories);
+
+export default Object.assign({}, directories);

@@ -6,7 +6,7 @@
  * @returns {*}
  */
 /* global getDefault */
-global.getDefault = m => (m.default ? m.default : m);
+global.getDefault = global.getDefault || (m => (m.default ? m.default : m));
 /**
  * @desc Set cache to enabled by default,
  * at this moment we need this cache to determine if we would like to use babel cache
@@ -45,7 +45,7 @@ require('@babel/register')({
   plugins: babelServer.plugins,
   cache: cacheEnabled,
   ignore: [
-    // Allow @pawjs core & pawjs- plguins to be of es6 or TS format
+    // Allow @pawjs core & pawjs- plugins to be of es6 or TS format
     /node_modules\/(?!(@pawjs|pawjs-)).*/,
   ],
   extensions: ['.wasm', '.mjs', '.js', '.json', '.jsx', '.ts', '.tsx'],
