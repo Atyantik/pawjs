@@ -1,21 +1,57 @@
 const fs = require('fs');
 const path = require('path');
 
-const babelServer = require('./babel-server-rule')({
-  cacheDirectory: false,
+let cacheEnabled = true;
+
+/**
+ * As this is a mixture of ES6 and ES5 we require almost module that might
+ * be exported as default or using the old module.exports
+ * @param m array | object | any
+ * @returns {*}
+ */
+/* global getDefault */
+global.getDefault = global.getDefault || (m => (m.default ? m.default : m));
+/**
+ * Traverse through all the arguments and check if the user has
+ * indicated if he does not want to use cache!
+ */
+Array.from(process.argv).forEach((arg) => {
+  // Convert argument to lowercase
+  const lArg = arg.toLowerCase();
+  if (
+    lArg.indexOf('-nc') !== false
+    || lArg.indexOf('--no-cache') !== false
+  ) {
+    cacheEnabled = false;
+  }
+});
+
+// Get babel configuration for nodejs
+const babelServer = getDefault(require('../../babel/node.js'))({
+  cacheDirectory: cacheEnabled,
 }).use.options;
 
+/**
+ * Use babel register so that we can use latest EcmaScript & TypeScript version
+ * in included files. Also we need to make sure that any plugins for pawjs or pawjs core
+ * modules needs to be access with new code directly and there should be no need for
+ * compiled code even if it lies in node_modules
+ */
 require('@babel/register')({
-  presets: babelServer.presets.default ? babelServer.presets.default : babelServer.presets,
+  presets: getDefault(babelServer.presets),
   plugins: babelServer.plugins,
-  cache: false,
+  cache: cacheEnabled,
   ignore: [
+    // Allow @pawjs core & pawjs- plguins to be of es6 or TS format
     /node_modules\/(?!(@pawjs|pawjs-)).*/,
   ],
+  extensions: ['.wasm', '.mjs', '.js', '.json', '.jsx', '.ts', '.tsx'],
 });
-const CliHandler = require('../../scripts/cli').default;
+
 
 if (!process.env.PROJECT_ROOT) {
+  // eslint-disable-next-line
+  const CliHandler = getDefault(require('../../scripts/cli'));
   // eslint-disable-next-line
   const cli = new CliHandler();
 }
