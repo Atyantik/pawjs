@@ -3,15 +3,15 @@
     "browser": true,
     "commonjs": true,
     "es6": true,
-
     "node": true,
     "mocha": true,
     "jest/globals": true
   },
-  "parser": "babel-eslint",
+  "parser": "typescript-eslint-parser",
   "extends": [
     "airbnb",
-    "plugin:jest/recommended"
+    "plugin:jest/recommended",
+    "plugin:import/typescript"
   ],
   "parserOptions": {
     "ecmaVersion": 7,
@@ -28,7 +28,7 @@
     "react-hooks"
   ],
   "rules": {
-    "react/jsx-filename-extension": [1, { "extensions": [".js", ".jsx"] }],
+    "react/jsx-filename-extension": [1, { "extensions": [".js", ".jsx", ".ts", ".tsx"] }],
     "react-hooks/rules-of-hooks": "error",
     // Jest Rules
     "jest/no-disabled-tests": "warn",
@@ -40,6 +40,9 @@
   },
   "settings": {
     "import/resolver": {
+      "typescript": {
+        "directory": "./"
+      },
       "webpack": {
         "config": "./src/webpack/inc/webpack-resolver-config.js"
       }

@@ -23,7 +23,7 @@ const rule = options => ({
         [
           presetEnv,
           {
-            targets: { node: '8.11.2' },
+            targets: { node: '10.15.3' },
           },
         ],
         presetReact,

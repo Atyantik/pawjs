@@ -13,7 +13,7 @@ require('@babel/register')({
     /node_modules\/(?!(@pawjs|pawjs-)).*/,
   ],
 });
-const CliHandler = require('../../../scripts/cli').default;
+const CliHandler = require('../../scripts/cli').default;
 
 if (!process.env.PROJECT_ROOT) {
   // eslint-disable-next-line

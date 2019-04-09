@@ -1,32 +1,60 @@
-import Program from 'commander';
-import path from 'path';
-import fs from 'fs';
 import ChildProcess from 'child_process';
+import Program from 'commander';
 import dotenv from 'dotenv';
+import fs from 'fs';
+import path from 'path';
 import executablePaths from './executable-paths';
-import FindCommand from './find-command';
-import packageDetails from '../package.json';
+import packageDetails from '../../package.json';
+import { factory as findCommandFactory } from './find-command';
 
 const { spawn } = ChildProcess;
 
+/**
+ * Current process directory
+ */
 const processDir = process.cwd();
 
+/**
+ * We need the program to exit clean even if the
+ * user triggered ctrl+c or via any other interrupt.
+ */
 const cleanExit = function cleanExit() { process.exit(); };
 process.on('SIGINT', cleanExit); // catch ctrl-c
 process.on('SIGTERM', cleanExit); // catch kill
 
-
 export default class CliHandler {
+  /**
+   * Set program as instance of commander
+   */
   program = Program;
 
-  projectRoot = null;
+  /**
+   * Project root is the path of directory where the
+   * project source code resides
+   */
+  projectRoot = '';
 
-  libRoot = null;
+  /**
+   * Library root is the path of directory where PawJS is installed
+   */
+  libRoot = '';
 
-  searchCommand = null;
+  /**
+   * As there is a very good possibility that many versions of same packages
+   * are installed via npm, searchCommand helps search for the path of executable
+   */
+  searchCommand: any;
 
+  /**
+   * A flag to check if the pawConfig was set manually
+   * via the CLI or ENV
+   */
   pawConfigManualPath = false;
 
+  /**
+   * A flag to check if the projectRoot was set manually
+   * via the CLI or ENV
+   */
   projectRootManualPath = false;
 
   constructor() {
@@ -37,67 +65,89 @@ export default class CliHandler {
     this.startServer = this.startServer.bind(this);
   }
 
+  /**
+   * Initialize default environment variables
+   */
   initProcessEnv() {
     // try to get ENV_CONFIG_PATH from environment
+    /**
+     * If the evn variable ENV_CONFIG_PATH is set then resolve the path
+     * and load the env config.
+     * The below process is of importance when parameters passed via env
+     * like `ENV_CONFIG_PATH=./local.env` pawjs start
+     */
     process.env.ENV_CONFIG_PATH = process.env.ENV_CONFIG_PATH || path.resolve(processDir, '.env');
-    if (!path.isAbsolute(process.env.ENV_CONFIG_PATH)) {
-      process.env.ENV_CONFIG_PATH = path.resolve(processDir, process.env.ENV_CONFIG_PATH);
-    }
-    if (!fs.existsSync(process.env.ENV_CONFIG_PATH)) {
-      process.env.ENV_CONFIG_PATH = null;
+    if (!this.setEnvConfigPath(process.env.ENV_CONFIG_PATH)) {
       delete process.env.ENV_CONFIG_PATH;
-    }
-    if (process.env.ENV_CONFIG_PATH) {
-      this.processEnvConfigPath();
     }
 
     // PawJS library root, i.e. the folder where the script file is located
-    process.env.LIB_ROOT = path.resolve(path.join(__dirname, '..'));
+    process.env.LIB_ROOT = path.resolve(path.join(__dirname, '..', '..'));
     this.libRoot = process.env.LIB_ROOT;
 
-    // Set paw cache to true by default
+    // Set PawJS cache to true by default
     process.env.PAW_CACHE = 'true';
 
+    /**
+     * Setting verbose mode to false by default,
+     * enabling verbose mode gives extra details of compilation to user on terminal
+     * which might not be necessary always.
+     */
     process.env.PAW_VERBOSE = 'false';
 
     // Set default env as development
     process.env.PAW_ENV = 'development';
 
+    /**
+     * We try to find the project root at the start of the program,
+     * the project root we define here serves as the default project root,
+     * it might be updated via cli options
+     */
     // Project root - Assuming the command is executed from project root
     process.env.PROJECT_ROOT = (
-      // If already stored then reuse the PROJECT_ROOT
+      /**
+       * If already stored then reuse the PROJECT_ROOT from env variable, at this moment
+       * the PROJECT_ROOT can also be defined in file located at ENV_CONFIG_PATH
+       * or via direct env declaration like `PROJECT_ROOT=./demo pawjs start`
+       */
       process.env.PROJECT_ROOT
-
-      // if not try to get the project root from env variable PROJECT_ROOT
-      || process.env.PROJECT_ROOT
 
       // If not provided then consider the current directory of the process as project root
       || (processDir + path.sep)
     );
-    this.updateProjectRoot(process.env.PROJECT_ROOT, false);
-
+    /**
+     * Update the project root, not this is a separate function as
+     * updating project root updates lots of ENV PATH this we have a different function
+     * for updating Project Root
+     */
+    this.updateProjectRoot(process.env.PROJECT_ROOT);
+    /**
+     * We expect the pawconfig.json to be in the project root folder only
+     */
     process.env.PAW_CONFIG_PATH = path.join(this.projectRoot, 'pawconfig.json');
   }
 
-  onSetProjectRoot() {
+  /**
+   * Create list of executable paths for our user based on
+   * project root and library root
+   */
+  updateExecutablePaths() {
     const newNodePath = executablePaths(this.projectRoot, this.libRoot).join(path.delimiter);
     if (!process.env.NODE_PATH) {
       process.env.NODE_PATH = newNodePath;
     } else {
-      process.env.NODE_PATH = [process.env.NODE_ENV, newNodePath].join(path.delimiter);
+      process.env.NODE_PATH = [process.env.NODE_PATH, newNodePath].join(path.delimiter);
     }
     process.env.PATH = process.env.NODE_PATH;
 
     if (!this.pawConfigManualPath) {
       process.env.PAW_CONFIG_PATH = path.join(this.projectRoot, 'pawconfig.json');
     }
-
-    this.updateCommandSearch();
   }
 
   updateCommandSearch() {
     // get the search command with the executable path list
-    this.searchCommand = FindCommand.factory(executablePaths(this.projectRoot, this.libRoot));
+    this.searchCommand = findCommandFactory(executablePaths(this.projectRoot, this.libRoot));
   }
 
   /**
@@ -105,7 +155,7 @@ export default class CliHandler {
    * @param configPath
    * @param manual
    */
-  updateConfigPath(configPath, manual = true) {
+  updateConfigPath(configPath: string, manual = true) {
     // store the absolute value of project root
     let pawConfig = configPath;
     if (!path.isAbsolute(configPath)) {
@@ -114,7 +164,10 @@ export default class CliHandler {
     const pathStats = fs.lstatSync(pawConfig);
     if (!pathStats.isFile()) {
       // eslint-disable-next-line
-      console.warn(`WARNING:: Invalid config file path specified ${configPath}, using ${process.env.PAW_CONFIG_PATH} instead`);
+      console.warn(
+        `WARNING:: Invalid config file path specified ${configPath},
+        using ${process.env.PAW_CONFIG_PATH} instead`,
+      );
       return;
     }
     if (manual) {
@@ -125,14 +178,47 @@ export default class CliHandler {
   }
 
   /**
-   * Process env from .env file specified
+   * Set the environment config path, i.e. the path pointing to
+   * .env specified by user
+   * @param envConfigPath
    */
-  processEnvConfigPath() {
-    const envConfig = dotenv.parse(fs.readFileSync(process.env.ENV_CONFIG_PATH));
+  setEnvConfigPath(envConfigPath: string): boolean {
+    let ecp = envConfigPath;
+    if (!path.isAbsolute(ecp)) {
+      ecp = path.resolve(processDir, ecp);
+    }
+    if (fs.existsSync(ecp) && ecp !== path.resolve(processDir, '.env')) {
+      process.env.ENV_CONFIG_PATH = ecp;
+      this.processEnvConfigPath();
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * Process env from .env file specified
+   * in the process.env variable
+   */
+  processEnvConfigPath(): void {
+    const envConfigPath: any = process.env.ENV_CONFIG_PATH;
+    if (typeof envConfigPath !== 'string') {
+      return;
+    }
+    /**
+     * Parse the env file with plugin with dotenv and add all the variables in
+     * .env file to process.env
+     */
+    const envConfig = dotenv.parse(fs.readFileSync(envConfigPath));
     Object.keys(envConfig).forEach((e) => {
       process.env[e] = envConfig[e];
+
+      /**
+       * While adding variables from .env file, if we find a variable for
+       * PROJECT_ROOT, then update the project root immediately
+       * also let the process know that the project root is manually set.
+       */
       if (e === 'PROJECT_ROOT') {
-        this.updateProjectRoot(envConfig[e], true);
+        this.updateProjectRoot(envConfig[e]);
       }
     });
   }
@@ -140,9 +226,8 @@ export default class CliHandler {
   /**
    * Specify the project root directory
    * @param projectRootDir
-   * @param manual
    */
-  updateProjectRoot(projectRootDir, manual = true) {
+  updateProjectRoot(projectRootDir: string) {
     // store the absolute value of project root
     let pRoot = projectRootDir;
     if (!path.isAbsolute(projectRootDir)) {
@@ -151,15 +236,14 @@ export default class CliHandler {
     const pathStats = fs.lstatSync(pRoot);
     if (!pathStats.isDirectory()) {
       // eslint-disable-next-line
-      console.warn(`WARNING:: Invalid root directory specified ${projectRootDir}, using ${this.projectRoot} instead`);
+      console.warn(`WARNING:: Invalid root directory specified ${projectRootDir},
+      using ${this.projectRoot} instead`);
       return;
-    }
-    if (manual) {
-      this.projectRootManualPath = true;
     }
     process.env.PROJECT_ROOT = pRoot;
     this.projectRoot = process.env.PROJECT_ROOT;
-    this.onSetProjectRoot();
+    this.updateExecutablePaths();
+    this.updateCommandSearch();
   }
 
   /**
@@ -171,11 +255,13 @@ export default class CliHandler {
     require(path.resolve(this.libRoot, 'src/server/webpack-start.js'));
   }
 
-  buildProd = () => {
-    process.env.PAW_HOT = typeof process.env.PAW_HOT !== 'undefined' ? process.env.PAW_HOT : 'false';
+  buildProd() {
+    process.env.PAW_HOT = typeof process.env.PAW_HOT !== 'undefined'
+      ? process.env.PAW_HOT
+      : 'false';
     // eslint-disable-next-line
     require(path.resolve(this.libRoot, 'src/server/webpack-build.js'));
-  };
+  }
 
   lint() {
     const env = Object.create(process.env);
@@ -188,18 +274,24 @@ export default class CliHandler {
       eslintRoot = this.projectRoot;
     }
 
-    const srcDir = fs.existsSync(path.join(eslintRoot, 'src')) ? path.join(eslintRoot, 'src') : eslintRoot;
+    const srcDir = fs.existsSync(path.join(eslintRoot, 'src'))
+      ? path.join(eslintRoot, 'src')
+      : eslintRoot;
     // eslint-disable-next-line
     console.log(`Linting with eslint...\nConfig path: ${eslintPath}`);
-    const eslint = spawn(this.searchCommand('eslint'), [
-      '-c',
-      eslintPath,
-      srcDir,
-    ], {
-      shell: true,
-      env,
-      stdio: [process.stdin, process.stdout, 'pipe'],
-    });
+    const eslint = spawn(
+      this.searchCommand('eslint'),
+      [
+        '-c',
+        eslintPath,
+        srcDir,
+      ],
+      {
+        env,
+        shell: true,
+        stdio: [process.stdin, process.stdout, 'pipe'],
+      },
+    );
 
     eslint.on('close', (errorCode) => {
       if (!errorCode) {
@@ -209,18 +301,25 @@ export default class CliHandler {
           tslintPath = path.join(this.projectRoot, 'tslint.json');
           tslintRoot = this.projectRoot;
         }
-        const tsSrcDir = fs.existsSync(path.join(tslintRoot, 'src')) ? path.join(tslintRoot, 'src') : tslintRoot;
+        const tsSrcDir = fs.existsSync(path.join(tslintRoot, 'src'))
+          ? path.join(tslintRoot, 'src')
+          : tslintRoot;
+
         // eslint-disable-next-line
         console.log(`Linting with tslint...\nConfig path: ${tslintPath}`);
-        spawn(this.searchCommand('tslint'), [
-          '-c',
-          tslintPath,
-          `${tsSrcDir}/**/*.ts{,x}`,
-        ], {
-          shell: true,
-          env,
-          stdio: [process.stdin, process.stdout, 'pipe'],
-        });
+        spawn(
+          this.searchCommand('tslint'),
+          [
+            '-c',
+            tslintPath,
+            `${tsSrcDir}/**/*.ts{,x}`,
+          ],
+          {
+            env,
+            shell: true,
+            stdio: [process.stdin, process.stdout, 'pipe'],
+          },
+        );
       }
     });
   }
@@ -234,16 +333,16 @@ export default class CliHandler {
       tscRoot = this.projectRoot;
     }
     const tsc = spawn(this.searchCommand('tsc'), ['-p', tscRoot], {
-      shell: true,
       env,
+      shell: true,
       stdio: [process.stdin, process.stdout, 'pipe'],
     });
 
     tsc.on('close', (errorCode) => {
       if (!errorCode) {
         spawn(this.searchCommand('jest'), ['--verbose'], {
-          shell: true,
           env,
+          shell: true,
           stdio: [process.stdin, process.stdout, 'pipe'],
         });
       }
@@ -253,11 +352,28 @@ export default class CliHandler {
   run() {
     this.program
       .version(packageDetails.version, '-V, --version');
-    this.program.option('--env-config-path <envConfigPath>', 'Set path to environment file handled via DotEnv');
+
+    /**
+     * The next highest priority is the dotenv file
+     * for env variables update
+     */
+    this.program.option(
+      '--env-config-path <envConfigPath>',
+      'Set path to environment file handled via DotEnv',
+    );
+
+    /**
+     * Second highest priority is updating the project root via CLI
+     */
+    this.program.option('-r, --root <projectRootDir>', 'Set the project root');
+
     this.program.option('-v, --verbose', 'Start with detailed comments and explanation');
     this.program.option('-e, --env <env>', 'Set the application environment default is dev env');
-    this.program.option('-nc, --no-cache', 'Disable cache. Ideal for PawJS core/plugin development');
-    this.program.option('-r, --root <projectRootDir>', 'Set the project root');
+    this.program.option(
+      '-nc, --no-cache',
+      'Disable cache. Ideal for PawJS core/plugin development',
+    );
+
     this.program.option('-c, --config <configPath>', 'Set path to pawconfig.json');
 
     this.program
@@ -280,17 +396,11 @@ export default class CliHandler {
       .description('Run eslint & tslint for the project.')
       .action(this.lint.bind(this));
 
-    // Set PAW_VERBOSE to true
-    this.program.on('option:env-config-path', (envConfigPath) => {
-      let ecp = envConfigPath;
-      if (!path.isAbsolute(ecp)) {
-        ecp = path.resolve(processDir, ecp);
-      }
-      if (fs.existsSync(ecp) && ecp !== path.resolve(processDir, '.env')) {
-        process.env.ENV_CONFIG_PATH = ecp;
-        this.processEnvConfigPath();
-      }
-    });
+    /**
+     * When an option is specified for env-config-path, then read the
+     * .env file from the specified path
+     */
+    this.program.on('option:env-config-path', this.setEnvConfigPath.bind(this));
 
     // Set PAW_VERBOSE to true
     this.program.on('option:verbose', () => {
@@ -304,13 +414,13 @@ export default class CliHandler {
       env = env.toLowerCase();
       if (env === 'dev') {
         // eslint-disable-next-line
-        console.info("NOTE:: Setting env to development. Please use --env=development instead");
+        console.info('NOTE:: Setting env to development. Please use --env=development instead');
         env = 'development';
       }
 
       if (env === 'prod') {
         // eslint-disable-next-line
-        console.info("NOTE:: Setting env to production. Please use --env=production instead");
+        console.info('NOTE:: Setting env to production. Please use --env=production instead');
         env = 'production';
       }
       process.env.PAW_ENV = env;
@@ -328,7 +438,7 @@ export default class CliHandler {
         process.env.PAW_CACHE = 'false';
 
         // Disable babel cache if no-cache is specified
-        process.env.BABEL_DISABLE_CACHE = true;
+        process.env.BABEL_DISABLE_CACHE = 'true';
       }
     });
 
@@ -340,7 +450,10 @@ export default class CliHandler {
 
     this.program.on('command:*', () => {
       // eslint-disable-next-line
-      console.error("Invalid command: %s\nSee --help for a list of available commands.", Program.args.join(" "));
+      console.error(
+        'Invalid command: %s\nSee --help for a list of available commands.',
+        Program.args.join(' '),
+      );
       process.exit(1);
     });
 
