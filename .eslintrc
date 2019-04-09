@@ -7,13 +7,14 @@
     "mocha": true,
     "jest/globals": true
   },
-  "parser": "typescript-eslint-parser",
+  "parser": "babel-eslint",
   "extends": [
     "airbnb",
     "plugin:jest/recommended",
     "plugin:import/typescript"
   ],
   "parserOptions": {
+    "typescript": true,
     "ecmaVersion": 7,
     "ecmaFeatures": {
       "classes": true,

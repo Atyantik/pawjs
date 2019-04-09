@@ -59,7 +59,7 @@ export function rmFilesInDir(dirPath) {
     return;
   }
   if (files.length > 0) {
-    for (let i = 0; i < files.length; i++) {
+    for (let i = 0; i < files.length; i += 1) {
       const filePath = `${dirPath}/${files[i]}`;
       if (Fs.statSync(filePath).isFile()) Fs.unlinkSync(filePath);
     }
