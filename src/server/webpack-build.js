@@ -1,3 +1,4 @@
+/* global pawExistsSync */
 import path from 'path';
 import fs from 'fs';
 import del from 'del';
@@ -183,7 +184,7 @@ const hasSyncedFileLoader = (rule) => {
     rule.use.forEach((u) => {
       if (hasSyncFile) return;
 
-      if (u.loader === path.resolve(__dirname, '../webpack/plugins/synced-files-plugin/loader.js')) {
+      if (u.loader === pawExistsSync(path.join(__dirname, '../webpack/plugins/synced-files-plugin/loader.js'))) {
         hasSyncFile = true;
       }
     });
@@ -196,7 +197,7 @@ const hasSyncedFileLoader = (rule) => {
       oneOf.use.forEach((u) => {
         if (hasSyncFile) return;
 
-        if (u.loader === path.resolve(__dirname, '../webpack/plugins/synced-files-plugin/loader.js')) {
+        if (u.loader === pawExistsSync(path.join(__dirname, '../webpack/plugins/synced-files-plugin/loader.js'))) {
           hasSyncFile = true;
         }
       });
@@ -277,9 +278,9 @@ wHandler.hooks.beforeConfig.tap('AddSyncedFilesPlugin', (wEnv, wType, wConfigs) 
 
   if (wType === 'server') {
     wConfigs.forEach((wConfig) => {
-      if (wConfig.entry === path.resolve(process.env.LIB_ROOT, './src/server/server.js')) {
+      if (wConfig.entry === pawExistsSync(path.join(process.env.LIB_ROOT, './src/server/server.js'))) {
         // eslint-disable-next-line
-        wConfig.entry = path.resolve(process.env.LIB_ROOT, './src/server/build.js');
+        wConfig.entry = pawExistsSync(path.join(process.env.LIB_ROOT, './src/server/build'));
       }
       if (!wConfig.externals) {
         // eslint-disable-next-line
@@ -362,7 +363,7 @@ try {
 
         const outputConfig = serverConfig[0].output;
         // eslint-disable-next-line
-        let server = require(path.resolve(outputConfig.path, outputConfig.filename));
+        let server = require(pawExistsSync(path.join(outputConfig.path, outputConfig.filename)));
         server = server.default ? server.default : server;
 
         // eslint-disable-next-line

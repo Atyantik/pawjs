@@ -3,7 +3,7 @@
   "host": "localhost",
   "appRootUrl": "",
   "asyncCSS": false,
-  "serviceWorker": true,
+  "serviceWorker": false,
   "serverSideRender": true,
   "singlePageApplication": false
 }

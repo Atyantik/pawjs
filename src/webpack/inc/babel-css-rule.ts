@@ -1,7 +1,7 @@
-const path = require('path');
-const MiniCssExtractPlugin = require('mini-css-extract-plugin');
-const _ = require('lodash');
-const directories = require('../utils/directories');
+import path from 'path';
+import MiniCssExtractPlugin from 'mini-css-extract-plugin';
+import assignIn from 'lodash/assignIn';
+import directories from '../utils/directories';
 
 const isProduction = process.env.PAW_ENV === 'production';
 
@@ -12,8 +12,8 @@ const defaultOptions = {
   hot: false,
 };
 
-const rule = (options) => {
-  const o = _.assignIn({}, defaultOptions, options);
+const rule = (options: any) => {
+  const o = assignIn({}, defaultOptions, options);
   return [
     {
       test: /\.css$/,

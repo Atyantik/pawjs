@@ -1,3 +1,4 @@
+/* global pawExistsSync */
 import path from 'path';
 import WorkboxPlugin from 'workbox-webpack-plugin';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
@@ -29,8 +30,6 @@ const devPlugins = [];
 //   // eslint-disable-next-line
 //   console.warn("Webpack bundle analyzer not found!");
 // }
-
-
 export default {
   name: 'web',
   target: 'web',
@@ -40,7 +39,7 @@ export default {
     client: [
       ...(pawConfig.polyfill === 'cdn' ? [] : ['@babel/polyfill']),
       // Initial entry point for dev
-      path.resolve(process.env.LIB_ROOT, './src/client/app.js'),
+      pawExistsSync(path.join(process.env.LIB_ROOT, './src/client/app')),
     ],
   },
   output: {
@@ -97,7 +96,7 @@ export default {
     })]),
     ...(pawConfig.serviceWorker ? [
       new WorkboxPlugin.InjectManifest({
-        swSrc: path.resolve(process.env.LIB_ROOT, 'src', 'service-worker.js'),
+        swSrc: pawExistsSync(path.join(process.env.LIB_ROOT, 'src', 'service-worker')),
         swDest: 'sw.js',
       }),
       new SwVariables({

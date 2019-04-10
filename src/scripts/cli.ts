@@ -252,7 +252,7 @@ export default class CliHandler {
   startServer() {
     process.env.PAW_HOT = typeof process.env.PAW_HOT !== 'undefined' ? process.env.PAW_HOT : 'true';
     // eslint-disable-next-line
-    require(path.resolve(this.libRoot, 'src/server/webpack-start'));
+    require(pawExistsSync(path.join(this.libRoot, 'src/server/webpack-start')));
   }
 
   buildProd() {
@@ -260,7 +260,7 @@ export default class CliHandler {
       ? process.env.PAW_HOT
       : 'false';
     // eslint-disable-next-line
-    require(path.resolve(this.libRoot, 'src/server/webpack-build.js'));
+    require(pawExistsSync(path.join(this.libRoot, 'src/server/webpack-build')));
   }
 
   lint() {

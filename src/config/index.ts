@@ -43,7 +43,7 @@ if (config.appRootUrl && config.appRootUrl.endsWith('/')) {
 
 // Calculate resource base url via options provided by config itself!
 let resourcesBaseUrl = config.cdnUrl ? config.cdnUrl : config.appRootUrl;
-if (resourcesBaseUrl && !resourcesBaseUrl.endsWith('/')) {
+if (typeof resourcesBaseUrl === 'string' && !resourcesBaseUrl.endsWith('/')) {
   resourcesBaseUrl = `${resourcesBaseUrl}/`;
 }
 config.resourcesBaseUrl = resourcesBaseUrl;

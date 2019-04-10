@@ -1,3 +1,4 @@
+/* global pawExistsSync */
 import path from 'path';
 import express from 'express';
 import webpack from 'webpack';
@@ -57,7 +58,7 @@ wHandler.hooks.beforeConfig.tap('AddHotReplacementPlugin', (wEnv, wType, wConfig
           .entry
           .client
           .indexOf(
-            path.resolve(libRoot, 'src', 'client', 'app.js'),
+            pawExistsSync(path.join(libRoot, 'src', 'client', 'app.js')),
           );
 
         // Add webpack-hot-middleware as entry point
@@ -74,9 +75,17 @@ wHandler.hooks.beforeConfig.tap('AddHotReplacementPlugin', (wEnv, wType, wConfig
         }
 
         // Replace app with hot-app
-        if (wConfig.entry.client.includes(path.resolve(libRoot, 'src', 'client', 'app.js'))) {
+        if (
+          wConfig.entry.client.includes(
+            pawExistsSync(
+              path.join(libRoot, 'src', 'client', 'app'),
+            ),
+          )
+        ) {
           // eslint-disable-next-line
-          wConfig.entry.client[clientIndex] = path.resolve(libRoot, 'src', 'client', 'hot-app.js');
+          wConfig.entry.client[clientIndex] = pawExistsSync(
+            path.join(libRoot, 'src', 'client', 'hot-app'),
+          );
         }
 
         // check for Hot Module replacement plugin and add it if necessary
@@ -195,13 +204,22 @@ try {
   const getCommonServer = () => {
     const mfs = serverMiddleware.fileSystem;
     // Get content of the server that is compiled!
-    const serverContent = mfs.readFileSync(serverMiddleware.getFilenameFromUrl(`${serverOptions.publicPath}/server.js`), 'utf-8');
+    const serverFile = serverMiddleware.getFilenameFromUrl(
+      `${serverOptions.publicPath}/server.js`,
+    );
+    if (!serverFile) {
+      throw new Error(`Cannot find server.js at ${serverOptions.publicPath}/server.js`);
+    }
 
+    const serverContent = mfs.readFileSync(serverFile, 'utf-8');
+
+    const nodePath = process.env.NODE_PATH || '';
     return requireFromString(serverContent, {
-      appendPaths: process.env.NODE_PATH.split(path.delimiter),
+      appendPaths: nodePath.split(path.delimiter),
     });
   };
   // Add web middleware
+  // @ts-ignore
   const webMiddleware = webpackMiddleware(webCompiler, webOptions);
 
   // On adding this middleware the SSR data to serverMiddleware will be lost in
@@ -215,7 +233,7 @@ try {
     heartbeat: 2000,
   }));
 
-  app.use(pawConfig.appRootUrl, express.static(serverOptions.contentBase));
+  app.use(pawConfig.appRootUrl || '', express.static(serverOptions.contentBase));
 
   /**
    * Below is where the magic happens!
@@ -226,7 +244,7 @@ try {
   app.use((req, res, next) => {
     const mfs = serverMiddleware.fileSystem;
     const fileNameFromUrl = serverMiddleware
-      .getFilenameFromUrl(serverOptions.publicPath + req.path);
+      .getFilenameFromUrl(serverOptions.publicPath + req.path) || '';
 
     // If the request is for static file, do not compute or send data to
     // server just execute the express default next functionality
@@ -243,17 +261,18 @@ try {
       return next();
     }
 
-    let CommonServerMiddleware;
+    let commonServerMiddleware;
     try {
       // Get content of the server that is compiled!
-      const CommonServer = getCommonServer();
-      CommonServerMiddleware = CommonServer.default;
+      const commonServer = getCommonServer();
+      commonServerMiddleware = commonServer.default;
 
+      // @ts-ignore
       const { cssDependencyMap, ...assets } = normalizeAssets(res.locals.webpackStats);
       res.locals.assets = assets;
       res.locals.cssDependencyMap = cssDependencyMap;
 
-      return CommonServerMiddleware(req, res, next, PAW_GLOBAL);
+      return commonServerMiddleware(req, res, next, PAW_GLOBAL);
     } catch (ex) {
       // eslint-disable-next-line
       console.log(ex);
@@ -267,13 +286,14 @@ try {
   const startServer = () => {
     if (serverStarted) return;
 
-    let beforeStart; let afterStart = null;
+    let beforeStart: any;
+    let afterStart: any;
     try {
-      const CommonServer = getCommonServer();
+      const commonServer = getCommonServer();
       // eslint-disable-next-line
-      beforeStart = CommonServer.beforeStart;
+      beforeStart = commonServer.beforeStart;
       // eslint-disable-next-line
-      afterStart = CommonServer.afterStart;
+      afterStart = commonServer.afterStart;
     } catch (ex) {
       // eslint-disable-next-line
       console.log(ex);
@@ -284,25 +304,28 @@ try {
       host: devServerConfig.host,
     };
 
-    beforeStart(nodeServerConfig, PAW_GLOBAL, (err) => {
+    beforeStart(nodeServerConfig, PAW_GLOBAL, (err: Error) => {
       if (err) {
         // eslint-disable-next-line
         console.error(err);
         return;
       }
 
-      app.listen(nodeServerConfig.port, nodeServerConfig.host, () => {
-        serverStarted = true;
-        // eslint-disable-next-line
-        console.log(`
+      app.listen(
+        parseInt(nodeServerConfig.port || '9090', 10),
+        nodeServerConfig.host || '0.0.0.0',
+        () => {
+          serverStarted = true;
+          // eslint-disable-next-line
+          console.log(`
 
 ===================================================
   Listening to http://${nodeServerConfig.host}:${nodeServerConfig.port}
   Open the above url in your browser.
-===================================================
-      `);
-        afterStart(PAW_GLOBAL);
-      });
+===================================================`);
+          afterStart(PAW_GLOBAL);
+        },
+      );
     });
   };
 

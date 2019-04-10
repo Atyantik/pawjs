@@ -1,29 +1,28 @@
-import path from 'path';
-import defaultsDeep from 'lodash/defaultsDeep';
-
 /* global getDefault */
+/* global pawExistsSync */
+import path from 'path';
+import assignIn from 'lodash/assignIn';
 
 interface IDirectories {
-  root?: string;
-  src?: string;
-  dist?: string;
-  build?: string;
+  root: string;
+  src: string;
+  dist: string;
+  build: string;
 }
 
-const projectRoot = path.resolve(path.join(__dirname, '..', '..', '..'));
-let defaultDirectories = {
+const projectRoot = path.normalize(path.join(__dirname, '..', '..', '..'));
+let directories: IDirectories = assignIn({}, {
   root: path.resolve(projectRoot, 'demo'),
   src: path.resolve(projectRoot, 'demo', 'src'),
   dist: path.join(projectRoot, 'demo', 'dist'),
   build: path.join(projectRoot, 'demo', 'dist', 'build'),
-};
-let directories: IDirectories = {};
+});
 if (typeof process.env.PROJECT_ROOT !== 'undefined') {
   /**
    * Default directory list
-   * @type {{root: *, src: *, dist: *, build: *}}
+   * @type {{root: string, src: string, dist: string, build: string}}
    */
-  defaultDirectories = {
+  directories = {
     root: process.env.PROJECT_ROOT,
     src: path.resolve(process.env.PROJECT_ROOT, 'src'),
     dist: path.join(process.env.PROJECT_ROOT, 'dist'),
@@ -31,17 +30,17 @@ if (typeof process.env.PROJECT_ROOT !== 'undefined') {
   };
 
   try {
-    const directoriesConfigPath = `${process.env.PROJECT_ROOT}/directories`;
-    if (path.resolve(directoriesConfigPath)) {
-      // @ts-ignore
-      directories = getDefault(require(directoriesConfigPath)); // eslint-disable-line
+    const directoriesConfigPath = pawExistsSync(`${process.env.PROJECT_ROOT}/directories`);
+    if (directoriesConfigPath) {
+      directories = assignIn(
+        directories,
+        // eslint-disable-next-line
+        getDefault(require(directoriesConfigPath)),
+      );
     }
   } catch (ex) {
-    // reset directories to blank object
-    directories = {};
+    // do nothing
   }
-
-  directories = defaultsDeep(directories, defaultDirectories);
 }
 
-export default Object.assign({}, directories);
+export default assignIn({}, directories);

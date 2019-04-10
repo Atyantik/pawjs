@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const supportedExtensions = require('../../extensions.js');
 
 let cacheEnabled = true;
 
@@ -11,6 +12,27 @@ let cacheEnabled = true;
  */
 /* global getDefault */
 global.getDefault = global.getDefault || (m => (m.default ? m.default : m));
+
+/* global pawExistsSync */
+/**
+ * We need to resolve the files as per the extensions at many places
+ * for example we do not want to restrict people to just .js or .jsx extension
+ * we need ability like fileExistsSync to compare for all extensions we have defined
+ * @type {*|Function}
+ */
+global.pawExistsSync = global.pawExistsSync || ((filePath, fileSystem = fs) => {
+  if (fileSystem.existsSync(filePath)) return filePath;
+  let resolvedFilePath = '';
+  supportedExtensions.javascript.forEach((jsExt) => {
+    if (resolvedFilePath) {
+      return;
+    }
+    if (fileSystem.existsSync(filePath + jsExt)) {
+      resolvedFilePath = filePath + jsExt;
+    }
+  });
+  return resolvedFilePath;
+});
 /**
  * Traverse through all the arguments and check if the user has
  * indicated if he does not want to use cache!
@@ -45,7 +67,7 @@ require('@babel/register')({
     // Allow @pawjs core & pawjs- plguins to be of es6 or TS format
     /node_modules\/(?!(@pawjs|pawjs-)).*/,
   ],
-  extensions: ['.wasm', '.mjs', '.js', '.json', '.jsx', '.ts', '.tsx'],
+  extensions: supportedExtensions.resolveExtensions,
 });
 
 
@@ -53,16 +75,13 @@ if (!process.env.PROJECT_ROOT) {
   // eslint-disable-next-line
   const CliHandler = getDefault(require('../../scripts/cli'));
   // eslint-disable-next-line
-  const cli = new CliHandler();
+  (new CliHandler());
 }
-const directories = require('../utils/directories');
+const directories = getDefault(require('../utils/directories'));
 
-const emptyClass = path.resolve(process.env.LIB_ROOT, 'src', 'webpack', 'utils', 'emptyClass.js');
-const projectClientPath = `${process.env.PROJECT_ROOT}/src/client.js`;
-const projectClientExists = fs.existsSync(projectClientPath);
-
-const projectServerPath = `${process.env.PROJECT_ROOT}/src/server.js`;
-const projectServerExists = fs.existsSync(projectServerPath);
+const emptyClass = pawExistsSync(path.join(process.env.LIB_ROOT, 'src', 'webpack', 'utils', 'emptyClass'));
+const projectClientPath = pawExistsSync(`${process.env.PROJECT_ROOT}/src/client`);
+const projectServerPath = pawExistsSync(`${process.env.PROJECT_ROOT}/src/server`);
 
 const commonResolvers = [
   'node_modules',
@@ -96,11 +115,11 @@ const resolver = {
   resolve: {
     alias: {
       pawjs: path.resolve(path.join(process.env.LIB_ROOT)),
-      pawProjectClient: projectClientExists ? projectClientPath : emptyClass,
-      pawProjectServer: projectServerExists ? projectServerPath : emptyClass,
+      pawProjectClient: projectClientPath || emptyClass,
+      pawProjectServer: projectServerPath || emptyClass,
     },
     modules: commonResolvers,
-    extensions: ['.wasm', '.mjs', '.js', '.json', '.jsx', '.ts', '.tsx'],
+    extensions: supportedExtensions.resolveExtensions,
   },
   resolveLoader: {
     modules: loaderResolver,

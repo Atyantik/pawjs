@@ -1,4 +1,5 @@
 import assignIn from 'lodash/assignIn';
+// eslint-disable-next-line
 import ProjectClient from 'pawProjectClient';
 import ClientHandler from './handler';
 import RouteHandler from '../router/handler';

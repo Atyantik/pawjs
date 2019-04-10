@@ -1,3 +1,4 @@
+/* global pawExistsSync */
 import path from 'path';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 import webpack from 'webpack';
@@ -15,7 +16,7 @@ export default {
   name: 'server',
   mode: isProduction ? 'production' : 'development',
   target: 'node',
-  entry: path.resolve(process.env.LIB_ROOT, './src/server/server.js'),
+  entry: pawExistsSync(path.join(process.env.LIB_ROOT, './src/server/server')),
   module: {
     rules: [
       serverRule({ noChunk: true, cacheDirectory: process.env.PAW_CACHE === 'true' }),

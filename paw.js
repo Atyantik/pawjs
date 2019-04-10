@@ -1,4 +1,6 @@
 #!/usr/bin/env node
+const fs = require('fs');
+const supportedExtensions = require('./src/extensions');
 /**
  * As this is a mixture of ES6 and ES5 we require almost module that might
  * be exported as default or using the old module.exports
@@ -7,6 +9,27 @@
  */
 /* global getDefault */
 global.getDefault = global.getDefault || (m => (m.default ? m.default : m));
+
+/**
+ * We need to resolve the files as per the extensions at many places
+ * for example we do not want to restrict people to just .js or .jsx extension
+ * we need ability like fileExistsSync to compare for all extensions we have defined
+ * @type {*|Function}
+ */
+global.pawExistsSync = global.pawExistsSync || ((filePath, fileSystem = fs) => {
+  if (fileSystem.existsSync(filePath)) return filePath;
+  let resolvedFilePath = '';
+  supportedExtensions.javascript.forEach((jsExt) => {
+    if (resolvedFilePath) {
+      return;
+    }
+    if (fileSystem.existsSync(filePath + jsExt)) {
+      resolvedFilePath = filePath + jsExt;
+    }
+  });
+  return resolvedFilePath;
+});
+
 /**
  * @desc Set cache to enabled by default,
  * at this moment we need this cache to determine if we would like to use babel cache
@@ -48,7 +71,7 @@ require('@babel/register')({
     // Allow @pawjs core & pawjs- plugins to be of es6 or TS format
     /node_modules\/(?!(@pawjs|pawjs-)).*/,
   ],
-  extensions: ['.wasm', '.mjs', '.js', '.json', '.jsx', '.ts', '.tsx'],
+  extensions: supportedExtensions.resolveExtensions,
 });
 
 /**
