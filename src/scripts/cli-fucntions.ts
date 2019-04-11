@@ -1,14 +1,14 @@
 import Http from 'http';
-import Fs from 'fs';
+import Fs, { PathLike } from 'fs';
 
-export function getDataFromUrl(url) {
+export function getDataFromUrl(url: string) {
   return new Promise((resolve, reject) => {
     Http.get(url, (res) => {
       const { statusCode } = res;
       let error;
       if (statusCode !== 200) {
-        error = new Error('Request Failed.\n'
-          + `Status Code: ${statusCode}`);
+        error = new Error(`Request Failed.\n
+          Status Code: ${statusCode}`);
       }
       if (error) {
         // eslint-disable-next-line
@@ -40,7 +40,7 @@ export function getDataFromUrl(url) {
   });
 }
 
-export function saveDataToFile(rawData, fileUrl) {
+export function saveDataToFile(rawData: any, fileUrl: PathLike) {
   return new Promise((resolve, reject) => {
     try {
       Fs.writeFileSync(fileUrl, rawData, 'utf-8');
@@ -51,7 +51,7 @@ export function saveDataToFile(rawData, fileUrl) {
   });
 }
 
-export function rmFilesInDir(dirPath) {
+export function rmFilesInDir(dirPath: string) {
   let files = [];
   try {
     files = Fs.readdirSync(dirPath);
