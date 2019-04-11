@@ -55,7 +55,9 @@ export default {
   },
   ...resolverConfig,
   plugins: [
-    new webpack.EnvironmentPlugin(Object.assign({}, process.env)),
+    new webpack.EnvironmentPlugin(Object.assign({
+      pawConfig: JSON.stringify(pawConfig),
+    }, process.env)),
     new MiniCssExtractPlugin({ filename: 'server.css' }),
   ],
 };

@@ -1,4 +1,4 @@
-import defaultsDeep from 'lodash/defaultsDeep';
+import assignIn from 'lodash/assignIn';
 import defaultConfig from './defaults.json';
 
 interface IConfig {
@@ -22,15 +22,20 @@ interface IConfig {
 }
 let config: IConfig = {};
 try {
-  const pawConfigPath = process.env.PAW_CONFIG_PATH;
-  if (typeof pawConfigPath !== 'undefined') {
-    // eslint-disable-next-line
-    config = require(pawConfigPath);
+  if (typeof process.env.pawConfig !== 'undefined') {
+    config = JSON.parse(process.env.pawConfig);
+  } else {
+    const pawConfigPath = process.env.PAW_CONFIG_PATH;
+    if (typeof pawConfigPath !== 'undefined') {
+      // eslint-disable-next-line
+      config = require(pawConfigPath);
+    }
   }
 } catch (ex) {
+  console.log(ex);
   config = {};
 }
-config = defaultsDeep(config, defaultConfig);
+config = assignIn({}, defaultConfig, config);
 
 if (config.appRootUrl && config.appRootUrl.startsWith('http')) {
   throw new Error(
@@ -80,4 +85,4 @@ if (config.react !== 'cdn' && config.react !== 'internal') {
   config.react = 'internal';
 }
 
-export default Object.assign({}, config);
+export default assignIn({}, config);

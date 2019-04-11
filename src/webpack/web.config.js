@@ -87,7 +87,9 @@ export default {
         'window.ReactDom': 'ReactDOM',
       }),
     ] : []),
-    new webpack.EnvironmentPlugin(Object.assign({}, process.env)),
+    new webpack.EnvironmentPlugin(Object.assign({
+      pawConfig: JSON.stringify(pawConfig),
+    }, process.env)),
     ...(isHot ? [] : [new MiniCssExtractPlugin({
       // Options similar to the same options in webpackOptions.output
       // both options are optional

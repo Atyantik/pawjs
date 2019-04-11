@@ -4,13 +4,11 @@ import fs from 'fs';
 import del from 'del';
 import mv from 'mv';
 import request from 'supertest';
-import webpack from 'webpack';
+import webpack, { RuleSetRule } from 'webpack';
 import CleanWebpackPlugin from 'clean-webpack-plugin';
 import CopyWebpackPlugin from 'copy-webpack-plugin';
 import pawConfig from '../config';
 import directories from '../webpack/utils/directories';
-
-
 import wHandler from '../webpack';
 import webRule from '../webpack/inc/babel-web-rule';
 import serverRule from '../webpack/inc/babel-server-rule';
@@ -19,7 +17,7 @@ import ExtractEmittedAssets from '../webpack/plugins/extract-emitted-assets';
 
 const isVerbose = process.env.PAW_VERBOSE === 'true';
 
-const stats = {
+const stats: webpack.Stats.ToStringOptionsObject = {
   // fallback value for stats options when
   // an option is not defined (has precedence over local webpack defaults)
   all: undefined,
@@ -45,9 +43,6 @@ const stats = {
 
   // Add chunk information (setting this to `false` allows for a less verbose output)
   chunks: isVerbose,
-
-  // Add namedChunkGroups information
-  chunkGroups: isVerbose,
 
   // Add built modules information to chunk information
   chunkModules: isVerbose,
@@ -122,14 +117,14 @@ const stats = {
 
   // Add warnings
   warnings: true,
-  profile: true,
 
   // Filter warnings to be shown (since webpack 2.4.0),
   // can be a String, Regexp, a function getting the warning and returning a boolean
   // or an Array of a combination of the above. First match wins.
-  warningsFilter: warning => (
+  warningsFilter: (warning: string) => (
     warning.indexOf('node_modules/express') !== -1
     || warning.indexOf('node_modules/encoding') !== -1
+    || warning.indexOf('config/index') !== -1
   ),
 };
 
@@ -143,7 +138,7 @@ console.log(`
   Thank you for your patience.
 ===================================================
 `);
-const imageExtensions = [
+const imageExtensions: string [] = [
   'jpg',
   'jpeg',
   'png',
@@ -151,56 +146,61 @@ const imageExtensions = [
   'svg',
   'webp',
 ];
-const isImageRule = (rule) => {
+const isImageRule = (rule: RuleSetRule) => {
   let isValid = true;
   imageExtensions.forEach((ext) => {
     if (!isValid) return;
-    isValid = rule.test.test(`.${ext}`);
+    if (rule.test instanceof RegExp) {
+      // rule.test: RegExp
+      isValid = rule.test.test(`.${ext}`);
+    } else {
+      isValid = false;
+    }
   });
   return isValid;
 };
 
-
-const isBabelRule = (rule) => {
-  if (
-    rule
-    && rule.use
-    && Array.isArray(rule.use)
-    && rule.use.some(u => u.loader === 'babel-loader')
-  ) {
-    return true;
+const isBabelRule = (rule: RuleSetRule) => {
+  if (typeof rule === 'undefined') return false;
+  if (Array.isArray(rule.use)) {
+    return rule.use.some((u: any) => u.loader && u.loader === 'babel-loader');
   }
 
   return (
-    rule
-    && rule.use
-    && typeof rule.use === 'object'
+    typeof rule.use === 'object'
     && rule.use.loader === 'babel-loader'
   );
 };
-const hasSyncedFileLoader = (rule) => {
+const hasSyncedFileLoader = (rule: RuleSetRule) => {
   let hasSyncFile = false;
-  if (rule.use && rule.use.length) {
-    rule.use.forEach((u) => {
+  if (Array.isArray(rule.use) && rule.use.length) {
+    rule.use.forEach((u: any) => {
       if (hasSyncFile) return;
-
-      if (u.loader === pawExistsSync(path.join(__dirname, '../webpack/plugins/synced-files-plugin/loader.js'))) {
+      if (
+        u.loader === pawExistsSync(
+          path.join(__dirname, '../webpack/plugins/synced-files-plugin/loader.js'),
+        )
+      ) {
         hasSyncFile = true;
       }
     });
   }
 
   if (rule.oneOf && rule.oneOf.length) {
-    rule.oneOf.forEach((oneOf) => {
+    rule.oneOf.forEach((oneOf: RuleSetRule) => {
       if (hasSyncFile) return;
-
-      oneOf.use.forEach((u) => {
-        if (hasSyncFile) return;
-
-        if (u.loader === pawExistsSync(path.join(__dirname, '../webpack/plugins/synced-files-plugin/loader.js'))) {
-          hasSyncFile = true;
-        }
-      });
+      if (oneOf.use && Array.isArray(oneOf.use)) {
+        oneOf.use.forEach((u: any) => {
+          if (hasSyncFile) return;
+          if (
+            u.loader === pawExistsSync(
+              path.join(__dirname, '../webpack/plugins/synced-files-plugin/loader.js'),
+            )
+          ) {
+            hasSyncFile = true;
+          }
+        });
+      }
     });
   }
   return hasSyncFile;
@@ -217,11 +217,20 @@ wHandler.hooks.beforeConfig.tap('AddSyncedFilesPlugin', (wEnv, wType, wConfigs) 
   }
   // Web specific configurations
   if (wType === 'web') {
-    wConfigs.forEach((wConfig) => {
+    wConfigs.forEach((c: webpack.Configuration) => {
+      const wConfig = c;
       if (!cleanDistFolder) {
+        if (!wConfig.plugins) wConfig.plugins = [];
+        /**
+         * Check if plugins array exists and if it does
+         * check if CleanWebpackPlugin exists inside the plugin array
+         */
         const hasCleanWebpackPlugin = wConfig.plugins.some(p => p instanceof CleanWebpackPlugin);
-
         if (!hasCleanWebpackPlugin) {
+          /**
+           * Push CleanWebpackPlugin to plugin list and ask it to clean
+           * the dist folder
+           */
           wConfig.plugins.push(new CleanWebpackPlugin({
             cleanOnceBeforeBuildPatterns: [
               directories.dist,
@@ -232,6 +241,11 @@ wHandler.hooks.beforeConfig.tap('AddSyncedFilesPlugin', (wEnv, wType, wConfigs) 
       }
 
       if (!copyPublicFolder) {
+        if (!wConfig.plugins) wConfig.plugins = [];
+        /**
+         * We need to make sure that everything inside the public folder
+         * is copied as it is to the build/public folder
+         */
         wConfig.plugins.push(new CopyWebpackPlugin([{
           from: path.join(directories.src, 'public'),
           to: directories.build,
@@ -239,63 +253,75 @@ wHandler.hooks.beforeConfig.tap('AddSyncedFilesPlugin', (wEnv, wType, wConfigs) 
         copyPublicFolder = true;
       }
 
-      wConfig.module.rules.forEach((rule, index) => {
+      // Initialize wConfig.module if not already exists
+      if (!wConfig.module) wConfig.module = { rules: [] };
+      wConfig.module.rules.forEach((r: webpack.RuleSetRule, index: number) => {
+        const rule = r;
+        /**
+         * Check for babel rule and replace it with babel rule that
+         * with babel web rule with param hot as false
+         */
         if (isBabelRule(rule)) {
-          // eslint-disable-next-line
+          // We already know that wConfig.module is not undefined
+          // @ts-ignore
           wConfig.module.rules[index] = webRule({ hot: false });
         }
 
-
         if (isImageRule(rule) && !hasSyncedFileLoader(rule)) {
           if (rule.use) {
-            // eslint-disable-next-line
-            rule.use = SyncedFilesPlugin.loader(rule.use)
+            rule.use = SyncedFilesPlugin.loader(rule.use);
           }
           if (rule.oneOf) {
-            // eslint-disable-next-line
-            rule.oneOf = SyncedFilesPlugin.loaderOneOf(rule.oneOf)
+            rule.oneOf = SyncedFilesPlugin.loaderOneOf(rule.oneOf);
           }
         }
       });
 
-      const hasSyncedFilePlugin = wConfig.plugins.some(p => p instanceof SyncedFilesPlugin);
+      const hasSyncedFilePlugin = wConfig.plugins
+        && wConfig.plugins.some(p => p instanceof SyncedFilesPlugin);
+
       if (!hasSyncedFilePlugin) {
+        if (typeof wConfig.plugins === 'undefined') wConfig.plugins = [];
         wConfig.plugins.push(new SyncedFilesPlugin({
           outputPath: syncedOutputPath,
           outputFileName: syncedOutputFilename,
         }));
       }
 
-      const hasExtractEmittedAssets = wConfig.plugins.some(p => p instanceof ExtractEmittedAssets);
+      const hasExtractEmittedAssets = wConfig.plugins
+        && wConfig.plugins.some(p => p instanceof ExtractEmittedAssets);
       if (!hasExtractEmittedAssets) {
+        if (typeof wConfig.plugins === 'undefined') wConfig.plugins = [];
         wConfig.plugins.push(new ExtractEmittedAssets({
           outputPath: directories.dist,
         }));
       }
     });
   }
-
-
   if (wType === 'server') {
-    wConfigs.forEach((wConfig) => {
-      if (wConfig.entry === pawExistsSync(path.join(process.env.LIB_ROOT, './src/server/server.js'))) {
+    wConfigs.forEach((c: webpack.Configuration) => {
+      const wConfig = c;
+      if (
+        wConfig.entry === pawExistsSync(
+          path.join(process.env.LIB_ROOT || '', './src/server/server'),
+        )
+      ) {
         // eslint-disable-next-line
-        wConfig.entry = pawExistsSync(path.join(process.env.LIB_ROOT, './src/server/build'));
+        wConfig.entry = pawExistsSync(path.join(process.env.LIB_ROOT || '', './src/server/build'));
       }
-      if (!wConfig.externals) {
-        // eslint-disable-next-line
-        wConfig.externals = {};
-      }
+      if (!wConfig.externals) wConfig.externals = {};
 
       // Add paw-assets as externals
-      if (!wConfig.externals['pwa-assets']) {
-        // eslint-disable-next-line
+      // @ts-ignore
+      if (typeof wConfig.externals['pwa-assets'] === 'undefined') {
+        // @ts-ignore
         wConfig.externals['pwa-assets'] = './assets.json';
       }
 
-      wConfig.module.rules.forEach((rule, index) => {
+      if (!wConfig.module) wConfig.module = { rules: [] };
+      wConfig.module.rules.forEach((rule: RuleSetRule, index: number) => {
         if (isBabelRule(rule)) {
-          // eslint-disable-next-line
+          // @ts-ignore
           wConfig.module.rules[index] = serverRule({
             noChunk: true,
             hot: false,
@@ -310,13 +336,15 @@ wHandler.hooks.beforeConfig.tap('AddSyncedFilesPlugin', (wEnv, wType, wConfigs) 
 
           if (rule.oneOf) {
             // eslint-disable-next-line
-            rule.oneOf = SyncedFilesPlugin.loaderOneOf(rule.oneOf)
+            rule.oneOf = SyncedFilesPlugin.loaderOneOf(rule.oneOf);
           }
         }
       });
 
-      const hasSyncedFilePlugin = wConfig.plugins.some(p => p instanceof SyncedFilesPlugin);
+      const hasSyncedFilePlugin = wConfig.plugins
+        && wConfig.plugins.some(p => p instanceof SyncedFilesPlugin);
       if (!hasSyncedFilePlugin) {
+        wConfig.plugins = wConfig.plugins || [];
         wConfig.plugins.push(new SyncedFilesPlugin({
           outputPath: syncedOutputPath,
           outputFileName: syncedOutputFilename,
@@ -326,7 +354,6 @@ wHandler.hooks.beforeConfig.tap('AddSyncedFilesPlugin', (wEnv, wType, wConfigs) 
   }
 });
 
-
 try {
   // Server configurations
   const serverConfig = wHandler.getConfig(process.env.PAW_ENV, 'server');
@@ -335,13 +362,13 @@ try {
   const webConfig = wHandler.getConfig(process.env.PAW_ENV, 'web');
 
   // Create a webpack web compiler from the web configurations
-  webpack(webConfig, (webErr, webStats) => {
+  webpack(webConfig, (webErr: Error, webStats: webpack.Stats) => {
     if (webErr || webStats.hasErrors()) {
       // Handle errors here
       // eslint-disable-next-line
       console.log(webStats.toJson());
       // eslint-disable-next-line
-      console.log("Web compiler error occurred. Please handle error here");
+      console.log('Web compiler error occurred. Please handle error here');
       return;
     }
     // eslint-disable-next-line
@@ -350,7 +377,7 @@ try {
       if (serverErr || serverStats.hasErrors()) {
         // Handle errors here
         // eslint-disable-next-line
-        console.log("Server Compiler error occurred. Please handle error here");
+        console.log('Server Compiler error occurred. Please handle error here');
         return;
       }
 
@@ -359,30 +386,33 @@ try {
 
       if (pawConfig.singlePageApplication) {
         // eslint-disable-next-line
-        console.log("Creating static files...");
-
+        console.log('Creating static files...');
         const outputConfig = serverConfig[0].output;
         // eslint-disable-next-line
         let server = require(pawExistsSync(path.join(outputConfig.path, outputConfig.filename)));
         server = server.default ? server.default : server;
 
         // eslint-disable-next-line
-        console.log("Generating index.html & manifest.json");
+        console.log('Generating index.html & manifest.json');
 
         Promise.all([
           request(server).get('/'),
           request(server).get('/manifest.json'),
         ]).then(([indexResponse, manifestResponse]) => {
           fs.writeFileSync(path.join(directories.build, 'index.html'), indexResponse.text, 'utf-8');
-          fs.writeFileSync(path.join(directories.build, 'manifest.json'), manifestResponse.text, 'utf-8');
+          fs.writeFileSync(
+            path.join(directories.build, 'manifest.json'),
+            manifestResponse.text,
+            'utf-8',
+          );
 
           // eslint-disable-next-line
-          console.log(`Successfully created: ${path.join(directories.build, "index.html")}`);
+          console.log(`Successfully created: ${path.join(directories.build, 'index.html')}`);
           // eslint-disable-next-line
-          console.log(`Successfully created: ${path.join(directories.build, "manifest.json")}`);
+          console.log(`Successfully created: ${path.join(directories.build, 'manifest.json')}`);
         }).then(async () => {
           // eslint-disable-next-line
-          console.log("\n\nRe-organizing files...\n");
+          console.log('\n\nRe-organizing files...\n');
           try {
             const tempPawJSBuildPath = path.join(directories.root, 'pawjs-temp-build');
             // Move to tempFolder
@@ -390,7 +420,10 @@ try {
             mv(
               directories.build,
               tempPawJSBuildPath,
-              { mkdir: true, clobber: true },
+              {
+                mkdirp: true,
+                clobber: true,
+              },
               async (err) => {
                 if (err) {
                   // eslint-disable-next-line
@@ -405,7 +438,7 @@ try {
                     return;
                   }
                   // eslint-disable-next-line
-                  console.log("Static site generated successfully.");
+                  console.log('Static site generated successfully.');
                   process.exit(0);
                 });
               },

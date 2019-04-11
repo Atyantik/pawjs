@@ -58,7 +58,7 @@ wHandler.hooks.beforeConfig.tap('AddHotReplacementPlugin', (wEnv, wType, wConfig
           .entry
           .client
           .indexOf(
-            pawExistsSync(path.join(libRoot, 'src', 'client', 'app.js')),
+            pawExistsSync(path.join(libRoot, 'src', 'client', 'app')),
           );
 
         // Add webpack-hot-middleware as entry point
@@ -166,6 +166,11 @@ try {
       errors: true,
       cachedAssets: isVerbose,
       version: isVerbose,
+      warningsFilter: (warning: string) => (
+        warning.indexOf('node_modules/express') !== -1
+        || warning.indexOf('node_modules/encoding') !== -1
+        || warning.indexOf('config/index') !== -1
+      ),
     },
     logger: log,
     logLevel: 'debug',

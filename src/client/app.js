@@ -3,7 +3,9 @@ import assignIn from 'lodash/assignIn';
 import ProjectClient from 'pawProjectClient';
 import ClientHandler from './handler';
 import RouteHandler from '../router/handler';
-import env from '../config/index';
+
+// parse pawConfig
+const env = JSON.parse(process.env.pawConfig);
 
 // eslint-disable-next-line
 let ProjectRoutes = require(`${process.env.PROJECT_ROOT}/src/routes`);
