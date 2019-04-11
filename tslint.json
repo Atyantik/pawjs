@@ -12,6 +12,10 @@
   "indent": [true, "spaces", 2],
   "rulesDirectory": [],
   "linterOptions": {
-    "exclude": ["**/node_modules/**"]
+    "exclude": [
+      "**/node_modules/**",
+      "node_modules/**",
+      "demo/**"
+    ]
   }
 }
