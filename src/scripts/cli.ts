@@ -12,13 +12,13 @@ const { spawn } = ChildProcess;
 /**
  * Current process directory
  */
-const processDir = process.cwd();
+const processDir: string = process.cwd();
 
 /**
  * We need the program to exit clean even if the
  * user triggered ctrl+c or via any other interrupt.
  */
-const cleanExit = function cleanExit() { process.exit(); };
+const cleanExit = function cleanExit(): void { process.exit(); };
 process.on('SIGINT', cleanExit); // catch ctrl-c
 process.on('SIGTERM', cleanExit); // catch kill
 
@@ -26,18 +26,18 @@ export default class CliHandler {
   /**
    * Set program as instance of commander
    */
-  program = Program;
+  program: Program.CommanderStatic = Program;
 
   /**
    * Project root is the path of directory where the
    * project source code resides
    */
-  projectRoot = '';
+  projectRoot: string = '';
 
   /**
    * Library root is the path of directory where PawJS is installed
    */
-  libRoot = '';
+  libRoot: string = '';
 
   /**
    * As there is a very good possibility that many versions of same packages
@@ -49,20 +49,19 @@ export default class CliHandler {
    * A flag to check if the pawConfig was set manually
    * via the CLI or ENV
    */
-  pawConfigManualPath = false;
-
-  /**
-   * A flag to check if the projectRoot was set manually
-   * via the CLI or ENV
-   */
-  projectRootManualPath = false;
+  pawConfigManualPath: boolean = false;
 
   constructor() {
-    // Initialize the env with defaults
-    this.initProcessEnv();
+    // Bind to local class
     this.updateConfigPath = this.updateConfigPath.bind(this);
     this.updateProjectRoot = this.updateProjectRoot.bind(this);
     this.startServer = this.startServer.bind(this);
+    this.buildProd = this.buildProd.bind(this);
+    this.test = this.test.bind(this);
+    this.lint = this.lint.bind(this);
+
+    // Initialize the env with defaults
+    this.initProcessEnv();
   }
 
   /**
@@ -379,22 +378,22 @@ export default class CliHandler {
     this.program
       .command('start')
       .description('Start the application')
-      .action(this.startServer.bind(this));
+      .action(this.startServer);
 
     this.program
       .command('build')
       .description('Compile the project for production.')
-      .action(this.buildProd.bind(this));
+      .action(this.buildProd);
 
     this.program
       .command('test')
       .description('Run the test cases for the project.')
-      .action(this.test.bind(this));
+      .action(this.test);
 
     this.program
       .command('lint')
       .description('Run eslint & tslint for the project.')
-      .action(this.lint.bind(this));
+      .action(this.lint);
 
     /**
      * When an option is specified for env-config-path, then read the

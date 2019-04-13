@@ -1,7 +1,10 @@
-const Module = require('module');
-const path = require('path');
+import path from 'path';
 
-module.exports = function requireFromString(code, fname, options) {
+/* tslint:disable: variable-name */
+const Module = require('module');
+/* tslint:enable */
+
+export default (code: string, fname: any, options?: any) => {
   let opts = options;
   let filename = fname;
   if (typeof filename === 'object') {
@@ -18,11 +21,10 @@ module.exports = function requireFromString(code, fname, options) {
   if (typeof code !== 'string') {
     throw new Error(`code must be a string, not ${typeof code}`);
   }
+  // @ts-ignore
+  const paths = Module._nodeModulePaths(path.dirname(filename)); // eslint-disable-line
 
-  // eslint-disable-next-line
-  const paths = Module._nodeModulePaths(path.dirname(filename));
-
-  const { parent } = module;
+  const { parent } = Module;
   const m = new Module(filename, parent);
   m.filename = filename;
   m.paths = [].concat(opts.prependPaths).concat(paths).concat(opts.appendPaths);

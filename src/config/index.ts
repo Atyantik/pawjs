@@ -13,7 +13,7 @@ interface IConfig {
   polyfill?: string;
   clientRootElementId?: string;
   hstsEnabled?: boolean;
-  hstsmaxAge?: number;
+  hstsMaxAge?: number;
   hstsIncludeSubDomains?: boolean;
   hstsPreload?: boolean;
   resourcesBaseUrl?: string;

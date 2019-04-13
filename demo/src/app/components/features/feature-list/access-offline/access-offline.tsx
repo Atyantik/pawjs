@@ -3,12 +3,12 @@ import * as React from 'react';
 import OfflineSrcset from './images/offline.png?sizes=400w+800w&placeholder';
 
 export default () => {
-  const [counter, setCounter] = React.useState(11);
+  const [counter, setCounter] = React.useState(1);
   return (
     <article>
       <header>
         <h1 className="mt-4" onClick={() => setCounter(counter + 1)}>
-          Offline Access -&nbsp;
+          Offline Accesssss -&nbsp;
           {counter}
         </h1>
         <hr />

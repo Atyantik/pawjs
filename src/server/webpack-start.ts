@@ -5,6 +5,7 @@ import webpack from 'webpack';
 import webpackMiddleware from 'webpack-dev-middleware';
 import webpackHotMiddleware from 'webpack-hot-middleware';
 import webLog from 'webpack-log';
+import { NextHandleFunction } from 'connect';
 import pawConfig from '../config';
 import directories from '../webpack/utils/directories';
 import wHandler from '../webpack';
@@ -200,10 +201,10 @@ try {
   app.set('x-powered-by', 'PawJS');
 
   // Add server middleware
-  const serverMiddleware
-    : webpackMiddleware.WebpackDevMiddleware = webpackMiddleware(serverCompiler, serverOptions);
+  const serverMiddleware:
+    webpackMiddleware.WebpackDevMiddleware
+    & NextHandleFunction = webpackMiddleware(serverCompiler, serverOptions);
 
-  // @ts-ignore
   app.use(serverMiddleware);
 
   const getCommonServer = () => {
@@ -272,7 +273,6 @@ try {
       const commonServer = getCommonServer();
       commonServerMiddleware = commonServer.default;
 
-      // @ts-ignore
       const { cssDependencyMap, ...assets } = normalizeAssets(res.locals.webpackStats);
       res.locals.assets = assets;
       res.locals.cssDependencyMap = cssDependencyMap;

@@ -1,6 +1,7 @@
+/* global getDefault */
 const path = require('path');
 const fs = require('fs');
-const normalizeAssets = require('../utils/normalizeAssets');
+const normalizeAssets = getDefault(require('../utils/normalizeAssets'));
 
 class ExtractEmittedAssets {
   constructor(options) {

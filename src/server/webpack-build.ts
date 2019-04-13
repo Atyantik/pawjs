@@ -364,9 +364,11 @@ try {
   // Create a webpack web compiler from the web configurations
   webpack(webConfig, (webErr: Error, webStats: webpack.Stats) => {
     if (webErr || webStats.hasErrors()) {
+      // eslint-disable-next-line
+      console.log(webErr);
       // Handle errors here
       // eslint-disable-next-line
-      console.log(webStats.toJson());
+      webStats.toJson && console.log(webStats.toJson());
       // eslint-disable-next-line
       console.log('Web compiler error occurred. Please handle error here');
       return;

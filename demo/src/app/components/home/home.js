@@ -50,7 +50,7 @@ export default class Home extends Component {
                 It's fast and developer friendly, already loaded with Docker support and deployable with no need to install with npm dependencies!
                 <br />
                 <strong>
-And more importantly its
+And more importantly its&nbsp;
                   <i>UPGRADABLE!</i>
                 </strong>
                 <br />

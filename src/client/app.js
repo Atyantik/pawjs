@@ -1,15 +1,13 @@
 import assignIn from 'lodash/assignIn';
 // eslint-disable-next-line
 import ProjectClient from 'pawProjectClient';
+// eslint-disable-next-line
+import ProjectRoutes from 'pawProjectRoutes';
 import ClientHandler from './handler';
 import RouteHandler from '../router/handler';
 
 // parse pawConfig
 const env = JSON.parse(process.env.pawConfig);
-
-// eslint-disable-next-line
-let ProjectRoutes = require(`${process.env.PROJECT_ROOT}/src/routes`);
-if (ProjectRoutes.default) ProjectRoutes = ProjectRoutes.default;
 
 const rHandler = new RouteHandler({
   env: assignIn({}, env),

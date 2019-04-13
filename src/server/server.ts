@@ -3,6 +3,7 @@ import _ from 'lodash';
 import hsts from 'hsts';
 // eslint-disable-next-line
 import ProjectServer from 'pawProjectServer';
+import { NextHandleFunction } from 'connect';
 import RouteHandler from '../router/handler';
 import ServerHandler from './handler';
 import env from '../config';
@@ -16,11 +17,12 @@ const rHandler = new RouteHandler({
   env: _.assignIn({}, env),
   isServer: true,
 });
-
-let ProjectRoutes = false;
+/* tslint:disable: variable-name */
+let ProjectRoutes: any = false;
+/* tslint:enable */
 if (env.serverSideRender) {
   // eslint-disable-next-line
-  ProjectRoutes = require(`${process.env.PROJECT_ROOT}/src/routes`);
+  ProjectRoutes = require('pawProjectRoutes');
   if (ProjectRoutes.default) ProjectRoutes = ProjectRoutes.default;
 
   // Add route plugin
@@ -35,11 +37,10 @@ const sHandler = new ServerHandler({
   env: _.assignIn({}, env),
 });
 
-const serverMiddlewares = [];
+const serverMiddlewares: express.Application[] = [];
 sHandler.addPlugin(new ProjectServer({
-
   addPlugin: sHandler.addPlugin,
-  addMiddleware: (middleware) => {
+  addMiddleware: (middleware: express.Application) => {
     serverMiddlewares.push(middleware);
   },
 }));
@@ -56,7 +57,7 @@ app.use((req, res, next) => {
   next();
 });
 
-serverMiddlewares.forEach((middleware) => {
+serverMiddlewares.forEach((middleware: NextHandleFunction) => {
   app.use(middleware);
 });
 
@@ -104,6 +105,7 @@ app.get('*', (req, res, next) => {
 
   // Add route plugin
   if (env.serverSideRender && ProjectRoutes) {
+    // @ts-ignore
     clientRouteHandler.addPlugin(new ProjectRoutes({ addPlugin: clientRouteHandler.addPlugin }));
   }
 
@@ -124,7 +126,7 @@ app.get('*', (req, res, next) => {
   }
   // If server side render is enabled then, then let the routes load
   // Wait for all routes to load everything!
-  return clientRouteHandler.hooks.initRoutes.callAsync((err) => {
+  return clientRouteHandler.hooks.initRoutes.callAsync((err: Error) => {
     if (err) {
       // eslint-disable-next-line
       console.log(err);
@@ -135,11 +137,11 @@ app.get('*', (req, res, next) => {
     // Once we have all the routes, pass the handler to the
     // server run at this point we should have cssDependencyMap as well.
     return sHandler.run({
-      routeHandler: clientRouteHandler,
       req,
       res,
       next,
       assets,
+      routeHandler: clientRouteHandler,
       cssDependencyMap: res.locals.cssDependencyMap,
     });
   });
@@ -153,12 +155,17 @@ app.get('*', (req, res, next) => {
  * @param PAW_GLOBAL
  * @returns {*}
  */
-export default (req, res, next, PAW_GLOBAL) => {
+export default (
+  req: express.Request,
+  res: express.Response,
+  next: express.NextFunction,
+  PAW_GLOBAL: any,
+) => {
   // Add global vars to middlewares and application
   Object.keys(PAW_GLOBAL).forEach((key) => {
     const val = PAW_GLOBAL[key];
     app.locals[key] = val;
-    serverMiddlewares.forEach((sm) => {
+    serverMiddlewares.forEach((sm: express.Application) => {
       if (sm && sm.locals) {
         // eslint-disable-next-line
         sm.locals[key] = val;
@@ -166,39 +173,47 @@ export default (req, res, next, PAW_GLOBAL) => {
     });
   });
 
+  // @ts-ignore
   return app.handle(req, res, next);
 };
 
-export const beforeStart = (serverConfig, PAW_GLOBAL, cb = function callback() {}) => {
-  const setAppLocal = (key, value) => {
+export const beforeStart = (serverConfig: any, PAW_GLOBAL: any, cb = function callback() {}) => {
+  const setAppLocal = (key: string, value: any) => {
     if (!key) return;
 
     // eslint-disable-next-line
     PAW_GLOBAL[key] = value;
   };
-  const getAppLocal = (key, defaultValue = false) => {
+  const getAppLocal = (key: string, defaultValue: any = false) => {
     if (!PAW_GLOBAL[key]) return defaultValue;
     return PAW_GLOBAL[key];
   };
 
-  sHandler.hooks.beforeStart.callAsync(serverConfig, {
-    setAppLocal,
-    getAppLocal,
-  }, cb);
+  sHandler.hooks.beforeStart.callAsync(
+    serverConfig,
+    {
+      setAppLocal,
+      getAppLocal,
+    },
+    cb,
+  );
 };
 
-export const afterStart = (PAW_GLOBAL, cb = function callback() {}) => {
-  const setAppLocal = (key, value) => {
+export const afterStart = (PAW_GLOBAL: any, cb = function callback() {}) => {
+  const setAppLocal = (key: string, value: any) => {
     if (!key) return;
     // eslint-disable-next-line
     PAW_GLOBAL[key] = value;
   };
-  const getAppLocal = (key, defaultValue = false) => {
+  const getAppLocal = (key: string, defaultValue: any = false) => {
     if (!PAW_GLOBAL[key]) return defaultValue;
     return PAW_GLOBAL[key];
   };
-  sHandler.hooks.afterStart.callAsync({
-    setAppLocal,
-    getAppLocal,
-  }, cb);
+  sHandler.hooks.afterStart.callAsync(
+    {
+      setAppLocal,
+      getAppLocal,
+    },
+    cb,
+  );
 };
