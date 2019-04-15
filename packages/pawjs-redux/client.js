@@ -33,8 +33,12 @@ export default class ReduxClient extends ReduxTapable {
         },
       };
       await new Promise(r => this.hooks.reduxInitialState.callAsync(state, app, r));
+      let composeEnhancers = compose;
       // eslint-disable-next-line
-      const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
+      if (process.env.PAW_ENV !== 'production' && window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__) {
+        // eslint-disable-next-line
+        composeEnhancers = __REDUX_DEVTOOLS_EXTENSION_COMPOSE__;
+      }
 
       try {
         window.paw__reduxStore = window.paw__reduxStore || createStore(

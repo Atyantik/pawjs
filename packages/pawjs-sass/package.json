@@ -15,7 +15,7 @@
   "dependencies": {
     "node-sass": "^4.11.0",
     "sass-loader": "^7.1.0",
-    "tapable": "^2.0.0-beta.3"
+    "tapable": "^2.0.0-beta.4"
   },
   "main": "webpack.js",
   "repository": {
