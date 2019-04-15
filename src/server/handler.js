@@ -22,7 +22,7 @@ export default class ServerHandler {
       beforeLoadData: new AsyncSeriesHook(['setParams', 'getParams', 'request', 'response']),
       beforeAppRender: new AsyncSeriesHook(['application', 'request', 'response']),
       beforeHtmlRender: new AsyncSeriesHook(['application', 'request', 'response']),
-      renderRoutes: new AsyncSeriesHook(['appRoutes']),
+      renderRoutes: new AsyncSeriesHook(['appRoutes', 'request', 'response']),
     };
     this.options = options;
   }
@@ -206,7 +206,7 @@ export default class ServerHandler {
       await new Promise(r => this.hooks.renderRoutes.callAsync({
         setRenderedRoutes: AppRoutes.setRenderedRoutes,
         getRenderedRoutes: AppRoutes.getRenderedRoutes,
-      }, r));
+      }, req, res, r));
       const Application = {
         htmlProps,
         children: (
