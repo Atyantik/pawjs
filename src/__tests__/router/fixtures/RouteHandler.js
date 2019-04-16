@@ -1,5 +1,7 @@
 import { AsyncSeriesHook } from 'tapable';
-import _ from 'lodash';
+import uniq from 'lodash/uniq';
+import each from 'lodash/each';
+import cloneDeep from 'lodash/cloneDeep';
 import RouteCompiler from '../../../router/compiler';
 
 const NotFoundComponent = () => {};
@@ -63,7 +65,7 @@ export default class RouteHandler {
       env: options.env,
     });
     this.hooks = {
-      initRoutes: new AsyncSeriesHook(),
+      initRoutes: new AsyncSeriesHook(['URL']),
     };
 
     // Private methods
@@ -136,19 +138,19 @@ export default class RouteHandler {
   addRoute(route) {
     const compiledRoute = this.routeCompiler.compileRoute(route, this);
     this.routes.push(compiledRoute);
-    this.routes = _.uniq(this.routes);
+    this.routes = uniq(this.routes);
   }
 
   addRoutes(routes) {
     const compiledRoutes = this.routeCompiler.compileRoutes(routes, this);
     this.routes = this.routes.concat(compiledRoutes);
-    this.routes = _.uniq(this.routes);
+    this.routes = uniq(this.routes);
   }
 
   addPlugin(plugin) {
     try {
       if (plugin.hooks && Object.keys(plugin.hooks).length) {
-        _.each(plugin.hooks, (hookValue, hookName) => {
+        each(plugin.hooks, (hookValue, hookName) => {
           this.hooks[hookName] = hookValue;
         });
       }
@@ -162,7 +164,7 @@ export default class RouteHandler {
   }
 
   getRoutes() {
-    const routes = _.cloneDeep(this.routes);
+    const routes = cloneDeep(this.routes);
     routes.push({
       component: this.get404Component(),
     });

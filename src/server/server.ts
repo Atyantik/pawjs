@@ -1,6 +1,7 @@
 import express from 'express';
 import _ from 'lodash';
 import hsts from 'hsts';
+import { URL } from 'universal-url';
 // eslint-disable-next-line
 import ProjectServer from 'pawProjectServer';
 import { NextHandleFunction } from 'connect';
@@ -56,6 +57,13 @@ app.use((req, res, next) => {
   res.setHeader('X-Powered-By', 'PawJS');
   next();
 });
+/**
+ * Enable trust proxy, i.e. allow data from
+ * X-Protocol
+ * X-Host
+ * X-Forwarded-For
+ */
+app.enable('trust proxy');
 
 serverMiddlewares.forEach((middleware: NextHandleFunction) => {
   app.use(middleware);
@@ -98,6 +106,8 @@ app.get('*', (req, res, next) => {
   ) {
     return next();
   }
+  const fullUrl = `${req.protocol}://${req.get('host')}${req.originalUrl}`;
+
   const clientRouteHandler = new RouteHandler({
     env: _.assignIn({}, env),
     isServer: true,
@@ -126,7 +136,7 @@ app.get('*', (req, res, next) => {
   }
   // If server side render is enabled then, then let the routes load
   // Wait for all routes to load everything!
-  return clientRouteHandler.hooks.initRoutes.callAsync((err: Error) => {
+  return clientRouteHandler.hooks.initRoutes.callAsync(new URL(fullUrl), (err: Error) => {
     if (err) {
       // eslint-disable-next-line
       console.log(err);

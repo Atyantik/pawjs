@@ -108,6 +108,7 @@
     "tslint-react": "^4.0.0",
     "typescript": "^3.4.3",
     "typescript-eslint-parser": "^22.0.0",
+    "universal-url": "^2.0.0",
     "webpack": "^4.29.6",
     "webpack-dev-middleware": "^3.6.1",
     "webpack-hot-middleware": "^2.24.2",

@@ -108,7 +108,7 @@ export default class RouteHandler {
       env: options.env,
     });
     this.hooks = {
-      initRoutes: new AsyncSeriesHook(),
+      initRoutes: new AsyncSeriesHook(['URL']),
     };
 
     // Private methods
