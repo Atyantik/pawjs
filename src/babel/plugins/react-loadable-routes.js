@@ -5,38 +5,78 @@ module.exports = ({ types: t }) => ({
 
   visitor: {
     Import(path) {
-      const { parent } = path.parentPath;
-      if (parent.type !== 'ObjectProperty') return;
-      if (parent.key.name !== 'component') return;
-
       const source = path.parentPath.node.arguments[0].value;
+      const { parent } = path.parentPath;
 
-      try {
-        const obj = path.parentPath.parentPath;
+      if (parent.type === 'ObjectProperty') {
+        if (parent.key.name !== 'component') return;
 
-        const propertiesMap = {};
-        const newContainer = [];
+        try {
+          const obj = path.parentPath.parentPath;
 
-        obj.container.forEach((property) => {
-          propertiesMap[property.key.name] = property.value.value;
-          newContainer.push(property);
-        });
+          const propertiesMap = {};
+          const newContainer = [];
 
-        if (propertiesMap.modules) {
-          return;
+          obj.container.forEach((property) => {
+            propertiesMap[property.key.name] = property.value.value;
+            newContainer.push(property);
+          });
+
+          if (propertiesMap.modules) {
+            return;
+          }
+
+          const moduleObj = t.objectProperty(
+            t.identifier('modules'),
+            t.arrayExpression([
+              t.StringLiteral(source),
+            ]),
+          );
+          obj.parentPath.pushContainer('properties', moduleObj);
+        } catch (ex) {
+          // eslint-disable-next-line
+          console.log(ex);
         }
+      }
 
-        const moduleObj = t.objectProperty(
-          t.identifier('modules'),
-          t.arrayExpression([
-            t.StringLiteral(source),
-          ]),
-        );
+      if (parent.type === 'ReturnStatement') {
+        if (
+          path.parentPath
+          && path.parentPath.parentPath
+          && path.parentPath.parentPath.parentPath
+          && path.parentPath.parentPath.parentPath.parent
+        ) {
+          const { parent: p } = path.parentPath.parentPath.parentPath;
 
-        obj.parentPath.pushContainer('properties', moduleObj);
-      } catch (ex) {
-        // eslint-disable-next-line
-        console.log(ex);
+          if (p.id.name !== 'component') return;
+
+          try {
+            const obj = path.parentPath.parentPath.parentPath.parentPath.parentPath;
+
+            const propertiesMap = {};
+            const newContainer = [];
+
+            obj.container.forEach((property) => {
+              propertiesMap[property.key.name] = property;
+              newContainer.push(property);
+            });
+
+            if (propertiesMap.modules) {
+              return;
+            }
+
+            const moduleObj = t.objectProperty(
+              t.identifier('modules'),
+              t.arrayExpression([
+                t.StringLiteral(source),
+              ]),
+            );
+            obj.parentPath.pushContainer('properties', moduleObj);
+          } catch (ex) {
+            // eslint-disable-next-line
+            console.log(ex);
+          }
+        }
       }
     },
   },

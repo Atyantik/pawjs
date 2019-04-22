@@ -10,7 +10,7 @@ let presetTypescript = require('@babel/preset-typescript');
 
 presetTypescript = presetTypescript.default ? presetTypescript.default : presetTypescript;
 
-let babelPlugins = require('./babel-plugins');
+let babelPlugins = require('../../babel/plugin');
 
 babelPlugins = babelPlugins.default ? babelPlugins.default : babelPlugins;
 

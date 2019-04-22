@@ -1,6 +1,7 @@
 import Picture from '@pawjs/srcset/picture';
 import * as React from 'react';
 import OfflineSrcset from './images/offline.png?sizes=400w+800w&placeholder';
+import './style.scss';
 
 export default () => {
   const [counter, setCounter] = React.useState(1);
