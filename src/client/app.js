@@ -1,4 +1,4 @@
-import { URL } from 'universal-url';
+import { URL } from 'universal-url-lite';
 import assignIn from 'lodash/assignIn';
 // eslint-disable-next-line
 import ProjectClient from 'pawProjectClient';

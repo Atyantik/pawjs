@@ -118,7 +118,7 @@ export default class ClientHandler {
         const alreadyExists = document.querySelector(metaSearchStr);
         if (!alreadyExists) {
           const previousExists = document.querySelector(firstMetaSearchStr);
-          if (previousExists) {
+          if (previousExists && previousExists.remove) {
             previousExists.remove();
           }
 
@@ -264,7 +264,7 @@ export default class ClientHandler {
             window.PAW_PRELOADED_DATA = null;
             delete window.PAW_PRELOADED_DATA;
             if (document.getElementById('__pawjs_preloaded')) {
-              document.getElementById('__pawjs_preloaded').remove();
+              document.getElementById('__pawjs_preloaded').remove && document.getElementById('__pawjs_preloaded').remove();
             }
             this.hooks.renderComplete.call();
             resolve();
