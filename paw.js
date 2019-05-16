@@ -55,6 +55,7 @@ Array.from(process.argv).forEach((arg) => {
 // Get babel configuration for nodejs
 const babelServer = getDefault(require('./src/babel/node.js'))({
   cacheDirectory: cacheEnabled,
+  hot: false,
 }).use.options;
 
 /**
