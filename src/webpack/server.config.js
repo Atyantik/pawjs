@@ -19,7 +19,7 @@ export default {
   entry: pawExistsSync(path.join(process.env.LIB_ROOT, './src/server/server')),
   module: {
     rules: [
-      serverRule({ noChunk: true, cacheDirectory: process.env.PAW_CACHE === 'true' }),
+      serverRule({ hot: false, noChunk: true, cacheDirectory: process.env.PAW_CACHE === 'true' }),
       ...cssRule(),
       fontRule({
         emitFile: false,
