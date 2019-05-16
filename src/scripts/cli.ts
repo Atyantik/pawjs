@@ -186,7 +186,7 @@ export default class CliHandler {
     if (!path.isAbsolute(ecp)) {
       ecp = path.resolve(processDir, ecp);
     }
-    if (fs.existsSync(ecp) && ecp !== path.resolve(processDir, '.env')) {
+    if (fs.existsSync(ecp)) {
       process.env.ENV_CONFIG_PATH = ecp;
       this.processEnvConfigPath();
       return true;
@@ -399,7 +399,15 @@ export default class CliHandler {
      * When an option is specified for env-config-path, then read the
      * .env file from the specified path
      */
-    this.program.on('option:env-config-path', this.setEnvConfigPath.bind(this));
+    this.program.on('option:env-config-path', (e) => {
+      let ecp = e;
+      if (!path.isAbsolute(ecp)) {
+        ecp = path.resolve(processDir, ecp);
+      }
+      if (ecp !== path.resolve(processDir, '.env')) {
+        this.setEnvConfigPath(e);
+      }
+    });
 
     // Set PAW_VERBOSE to true
     this.program.on('option:verbose', () => {
