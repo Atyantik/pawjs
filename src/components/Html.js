@@ -41,6 +41,7 @@ class Html extends Component {
     dangerouslySetInnerHTML: PropTypes.shape({
       __html: PropTypes.string,
     }),
+    noJS: PropTypes.bool,
   };
 
   static defaultProps = {
@@ -57,6 +58,7 @@ class Html extends Component {
     dangerouslySetInnerHTML: {
       __html: '',
     },
+    noJS: false,
   };
 
   getPwaValue(key, defaultValue = '') {
@@ -112,6 +114,7 @@ class Html extends Component {
       children,
       footer,
       assets,
+      noJS,
     } = this.props;
 
     return (
@@ -164,7 +167,7 @@ class Html extends Component {
           }
           {footer}
           {
-            assets
+            !noJS && assets
               .filter(path => path.endsWith('.js'))
               .map(path => <script defer key={path} src={path} />)
           }

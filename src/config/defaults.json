@@ -12,5 +12,6 @@
   "hstsEnabled": true,
   "hstsmaxAge": 31536000,
   "hstsIncludeSubDomains": true,
-  "hstsPreload": false
+  "hstsPreload": false,
+  "noJS": false
 }

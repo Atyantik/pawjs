@@ -19,6 +19,7 @@ interface IConfig {
   resourcesBaseUrl?: string;
   hashedRoutes?: boolean;
   react?: string;
+  noJS?: boolean;
 }
 let config: IConfig = {};
 try {

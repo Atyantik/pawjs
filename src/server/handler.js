@@ -46,7 +46,12 @@ export default class ServerHandler {
   async run({
     routeHandler, req, res, next, assets, cssDependencyMap,
   }) {
-    const { asyncCSS, serverSideRender, appRootUrl } = this.options.env;
+    const {
+      asyncCSS,
+      serverSideRender,
+      appRootUrl,
+      noJS,
+    } = this.options.env;
 
     let routes = routeHandler.getRoutes();
     let renderedHtml = '';
@@ -87,6 +92,7 @@ export default class ServerHandler {
 
       const htmlProps = {
         assets,
+        noJS,
         cssFiles: cssToBeIncluded,
         preloadCssFiles: cssToBePreloaded.length >= 1,
         metaTags,
@@ -185,6 +191,7 @@ export default class ServerHandler {
         pwaSchema,
       });
       const htmlProps = {
+        noJS,
         assets,
         cssFiles: cssToBeIncluded,
         preloadCssFiles: cssToBePreloaded.length >= 1,
@@ -267,6 +274,7 @@ export default class ServerHandler {
       const ErrorComponent = routeHandler.getErrorComponent();
       renderedHtml = renderToString(
         <Html
+          noJS={noJS}
           clientRootElementId={this.options.env.clientRootElementId}
           assets={assets}
           cssFiles={cssToBeIncluded}
