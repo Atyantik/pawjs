@@ -139,7 +139,7 @@ class Html extends Component {
           {
             metaTags.map(m => <meta key={JSON.stringify(m)} {...m} />)
           }
-          { preloadedData && (
+          { !noJS && preloadedData && (
             <script
               type="text/javascript"
               id="__pawjs_preloaded"
