@@ -5,7 +5,7 @@ import del from 'del';
 import mv from 'mv';
 import request from 'supertest';
 import webpack, { RuleSetRule } from 'webpack';
-import CleanWebpackPlugin from 'clean-webpack-plugin';
+import { CleanWebpackPlugin } from 'clean-webpack-plugin';
 import CopyWebpackPlugin from 'copy-webpack-plugin';
 import pawConfig from '../config';
 import directories from '../webpack/utils/directories';
