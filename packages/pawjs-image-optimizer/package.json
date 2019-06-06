@@ -1,6 +1,6 @@
 {
   "name": "@pawjs/image-optimizer",
-  "version": "2.2.0",
+  "version": "2.2.2",
   "description": "Add Webpack Image Loader support to your PAWJS application",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
