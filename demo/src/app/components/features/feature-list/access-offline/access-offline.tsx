@@ -1,7 +1,6 @@
 import Picture from '@pawjs/srcset/picture';
 import * as React from 'react';
 import OfflineSrcset from './images/offline.png?sizes=400w+800w&placeholder';
-import './style.scss';
 
 export default () => {
   const [counter, setCounter] = React.useState(1);
@@ -32,7 +31,7 @@ export default () => {
           <a
             href="http://diveintohtml5.info/offline.html"
             target="_blank"
-            rel="nofollow noopener"
+            rel="noreferrer nofollow noopener"
           >
             App Cache
           </a>
@@ -41,7 +40,7 @@ export default () => {
           <a
             href="http://alistapart.com/article/application-cache-is-a-douchebag"
             target="_blank"
-            rel="nofollow noopener"
+            rel="noreferrer nofollow noopener"
           >
             a number of reasons
           </a>
@@ -54,7 +53,7 @@ export default () => {
           <a
             href="https://developer.mozilla.org/en-US/docs/Web/API/Service_Worker_API"
             target="_blank"
-            rel="nofollow noopener"
+            rel="noreferrer nofollow noopener"
           >
             Service Worker
           </a>
