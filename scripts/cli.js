@@ -186,6 +186,9 @@ export default class CliHandler {
     if (fs.existsSync(path.join(this.projectRoot, '.eslintrc'))) {
       eslintPath = path.join(this.projectRoot, '.eslintrc');
       eslintRoot = this.projectRoot;
+    } else if (fs.existsSync(path.join(this.projectRoot, '.eslintrc.js'))) {
+      eslintPath = path.join(this.projectRoot, '.eslintrc.js');
+      eslintRoot = this.projectRoot;
     }
 
     const srcDir = fs.existsSync(path.join(eslintRoot, 'src')) ? path.join(eslintRoot, 'src') : eslintRoot;
