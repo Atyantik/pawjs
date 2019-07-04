@@ -15,7 +15,9 @@
     "start:dev": "node ./paw.js --no-cache --root=./demo --env=development --verbose start",
     "start:prod": "node ./paw.js --no-cache --root=./demo --env=production start",
     "test:demo": "cross-env PROJECT_ROOT=./demo node ./paw.js --no-cache --verbose test",
-    "test": "cross-env node ./paw.js test"
+    "test": "cross-env node ./paw.js test",
+    "snyk-protect": "snyk protect",
+    "prepare": "npm run snyk-protect"
   },
   "bin": {
     "paw": "./paw.js",
@@ -102,7 +104,8 @@
     "webpack-dev-middleware": "^3.6.1",
     "webpack-hot-middleware": "^2.24.2",
     "webpack-log": "^2.0.0",
-    "workbox-webpack-plugin": "^4.1.0"
+    "workbox-webpack-plugin": "^4.1.0",
+    "snyk": "^1.189.0"
   },
   "repository": {
     "type": "git",
@@ -120,5 +123,6 @@
   "pre-commit": [
     "lint",
     "test"
-  ]
+  ],
+  "snyk": true
 }
