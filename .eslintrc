@@ -37,7 +37,7 @@
     "jest/no-identical-title": "error",
     "jest/prefer-to-have-length": "warn",
     "jest/valid-expect": "error",
-    "import/no-extraneous-dependencies": false
+    "import/no-extraneous-dependencies": 0
   },
   "settings": {
     "import/resolver": {

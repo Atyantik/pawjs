@@ -28,8 +28,9 @@ const rule = (options: any) => {
         {
           loader: 'css-loader',
           options: {
-            modules: true,
-            localIdentName: o.localIdentName,
+            modules: {
+              localIdentName: o.localIdentName,
+            },
             sourceMap: o.sourceMap,
             importLoaders: 1,
           },
@@ -49,8 +50,9 @@ const rule = (options: any) => {
         {
           loader: 'css-loader',
           options: {
-            modules: true,
-            localIdentName: '[local]',
+            modules: {
+              localIdentName: '[local]',
+            },
             sourceMap: o.sourceMap,
             importLoaders: 2,
           },

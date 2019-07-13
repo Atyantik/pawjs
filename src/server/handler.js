@@ -17,7 +17,7 @@ export default class ServerHandler {
     this.addPlugin = this.addPlugin.bind(this);
     this.hooks = {
       beforeStart: new AsyncSeriesHook(['config', 'appOptions']),
-      afterStart: new AsyncSeriesHook(['appOptions', 'server']),
+      afterStart: new AsyncSeriesHook(['appOptions']),
       beforeLoadData: new AsyncSeriesHook(['setParams', 'getParams', 'request', 'response']),
       beforeAppRender: new AsyncSeriesHook(['application', 'request', 'response']),
       beforeHtmlRender: new AsyncSeriesHook(['application', 'request', 'response']),
