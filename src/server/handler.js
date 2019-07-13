@@ -11,14 +11,13 @@ import RouteHandler from '../router/handler';
 import Html from '../components/Html';
 import ErrorBoundary from '../components/ErrorBoundary';
 import { generateMeta } from '../utils/seo';
-import PreloadDataManager from '../utils/preloadDataManager';
 
 export default class ServerHandler {
   constructor(options) {
     this.addPlugin = this.addPlugin.bind(this);
     this.hooks = {
       beforeStart: new AsyncSeriesHook(['config', 'appOptions']),
-      afterStart: new AsyncSeriesHook(['appOptions']),
+      afterStart: new AsyncSeriesHook(['appOptions', 'server']),
       beforeLoadData: new AsyncSeriesHook(['setParams', 'getParams', 'request', 'response']),
       beforeAppRender: new AsyncSeriesHook(['application', 'request', 'response']),
       beforeHtmlRender: new AsyncSeriesHook(['application', 'request', 'response']),
@@ -149,12 +148,16 @@ export default class ServerHandler {
       });
     });
 
-    const preloadManager = new PreloadDataManager();
-
     await new Promise(r => this
       .hooks
       .beforeLoadData
-      .callAsync(preloadManager.setParams, preloadManager.getParams, req, res, r));
+      .callAsync(
+        routeHandler.routeCompiler.preloadManager.setParams,
+        routeHandler.routeCompiler.preloadManager.getParams,
+        req,
+        res,
+        r,
+      ));
 
     currentPageRoutes.forEach(({ route, match }) => {
       if (route.component.preload) {
@@ -164,7 +167,6 @@ export default class ServerHandler {
             {
               route,
               match,
-              ...preloadManager.getParams(),
             },
           ),
         );

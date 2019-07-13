@@ -14,7 +14,6 @@ import RouteHandler from '../router/handler';
 import ErrorBoundary from '../components/ErrorBoundary';
 import { generateMeta } from '../utils/seo';
 import possibleStandardNames from '../utils/reactPossibleStandardNames';
-import PreloadDataManager from '../utils/preloadDataManager';
 
 const possibleHtmlNames = _.invert(possibleStandardNames);
 const getPossibleHtmlName = key => possibleHtmlNames[key] || key;
@@ -34,7 +33,7 @@ export default class ClientHandler {
   constructor(options) {
     this.addPlugin = this.addPlugin.bind(this);
     this.manageHistoryChange = this.manageHistoryChange.bind(this);
-    this.preloadManager = new PreloadDataManager();
+
 
     window.PAW_HISTORY = window.PAW_HISTORY || createBrowserHistory({
       basename: options.env.appRootUrl,
@@ -72,12 +71,21 @@ export default class ClientHandler {
     const pwaSchema = this.routeHandler.getPwaSchema();
     const seoSchema = this.routeHandler.getDefaultSeoSchema();
 
+    // Wait for preload data manager to get executed
+    await new Promise(r => this
+      .hooks
+      .beforeLoadData
+      .callAsync(
+        this.routeHandler.routeCompiler.preloadManager.setParams,
+        this.routeHandler.routeCompiler.preloadManager.getParams,
+        r,
+      ));
+
     currentRoutes.forEach((r) => {
       if (r.route && r.route.component && r.route.component.preload) {
         promises.push(r.route.component.preload(undefined, {
           route: r.route,
           match: r.match,
-          ...this.preloadManager.getParams(),
         }));
       }
     });
@@ -188,14 +196,18 @@ export default class ClientHandler {
 
     const promises = [];
 
+    // Wait for preload data manager to get executed
+    await new Promise(r => this
+      .hooks
+      .beforeLoadData
+      .callAsync(
+        this.routeHandler.routeCompiler.preloadManager.setParams,
+        this.routeHandler.routeCompiler.preloadManager.getParams,
+        r,
+      ));
+
     if (window.PAW_PRELOADED_DATA) {
       const preloadedData = JSON.parse(b64DecodeUnicode(window.PAW_PRELOADED_DATA));
-
-      // Wait for preload data manager to get executed
-      await new Promise(r => this
-        .hooks
-        .beforeLoadData
-        .callAsync(this.preloadManager.setParams, this.preloadManager.getParams, r));
 
       currentPageRoutes.forEach((r, i) => {
         if (
@@ -205,7 +217,6 @@ export default class ClientHandler {
           promises.push(r.route.component.preload(preloadedData[i], {
             route: r.route,
             match: r.match,
-            ...this.preloadManager.getParams(),
           }));
         }
       });
@@ -263,8 +274,8 @@ export default class ClientHandler {
           () => {
             window.PAW_PRELOADED_DATA = null;
             delete window.PAW_PRELOADED_DATA;
-            if (document.getElementById('__pawjs_preloaded')) {
-              document.getElementById('__pawjs_preloaded').remove && document.getElementById('__pawjs_preloaded').remove();
+            if (document.getElementById('__pawjs_preloaded') && document.getElementById('__pawjs_preloaded').remove) {
+              document.getElementById('__pawjs_preloaded').remove();
             }
             this.hooks.renderComplete.call();
             resolve();

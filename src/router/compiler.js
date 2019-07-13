@@ -1,14 +1,15 @@
 import React from 'react';
-import _ from 'lodash';
+import PreloadDataManager from '../utils/preloadDataManager';
 import Loadable from '../components/Loadable';
 
 export default class RouteCompiler {
   constructor(options) {
     this.options = options;
+    this.preloadManager = new PreloadDataManager();
   }
 
   compileRoutes(routes, routerService) {
-    return _.map(routes, (r) => {
+    return routes.map((r) => {
       if (r.component.compiled) return r;
       return this.compileRoute(r, routerService);
     });
@@ -55,6 +56,14 @@ export default class RouteCompiler {
       routeSeo = Object.assign({}, seo, userSeoData);
     };
 
+    const preLoadData = async (props) => {
+      if (typeof loadData !== 'undefined') {
+        const extraParams = await this.preloadManager.getParams();
+        return loadData({ updateSeo, ...props, ...extraParams });
+      }
+      return {};
+    };
+
     const loadableComponent = Loadable.Map({
       timeout: Params.timeout,
       delay: Params.delay,
@@ -63,8 +72,7 @@ export default class RouteCompiler {
         RouteComponent: routeComponent,
 
         // Load Data with ability to update SEO
-        LoadData: (typeof loadData !== 'undefined'
-          ? async (props = {}) => loadData({ updateSeo, ...props }) : async () => ({})),
+        LoadData: preLoadData,
         // Load layout as well
         ...(routeLayout ? { Layout: routeLayout } : {}),
       },
