@@ -15,7 +15,7 @@
   "dependencies": {
     "less": "^3.9.0",
     "less-loader": "^5.0.0",
-    "tapable": "^2.0.0-beta.3"
+    "tapable": "^2.0.0-beta.8"
   },
   "main": "index.js",
   "repository": {

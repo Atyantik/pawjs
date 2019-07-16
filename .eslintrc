@@ -48,5 +48,16 @@
         "config": "./src/webpack/inc/webpack-resolver-config.js"
       }
     }
-  }
+  },
+  "overrides": [
+    {
+      "files": ["*.ts", "*.tsx"],
+      "parser": "@typescript-eslint/parser",
+      "rules": {
+        "no-undef": "off",
+        "no-unused-vars": "off",
+        "react/prop-types": "off"
+      }
+    }
+  ]
 }
