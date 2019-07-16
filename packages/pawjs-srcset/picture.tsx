@@ -16,10 +16,11 @@ type Image = {
 };
 
 type Picture = {
-  alt: string;
+  alt?: string;
   image: Image [] | string;
-  pictureClassName: string;
-  imgClassName: string;
+  pictureClassName?: string;
+  imgClassName?: string;
+  top?: number;
 };
 
 declare global {
@@ -88,11 +89,13 @@ export default (
     imgClassName,
     pictureClassName,
     image,
+    top,
   }: Picture = {
     alt: '',
     image: [],
     pictureClassName: '',
     imgClassName: '',
+    top: 0,
   },
 ) => {
   const [componentImages] = useState(rearrange(image));
@@ -115,7 +118,7 @@ export default (
   const showImage = () => {
     if ('IntersectionObserver' in window) {
       const options = {
-        rootMargin: '0px',
+        rootMargin: `${top || 0}px`,
         threshold: 0.1,
       };
 
