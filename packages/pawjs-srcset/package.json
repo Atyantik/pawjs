@@ -1,6 +1,6 @@
 {
   "name": "@pawjs/srcset",
-  "version": "2.1.1",
+  "version": "2.1.2",
   "description": "Add pwa-srcset-loader for image resize and proper srcset loading",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",

@@ -12,6 +12,7 @@ interface IConfig {
   asyncCSS?: boolean;
   polyfill?: string;
   clientRootElementId?: string;
+  assetsMaxAge?: number;
   hstsEnabled?: boolean;
   hstsMaxAge?: number;
   hstsIncludeSubDomains?: boolean;

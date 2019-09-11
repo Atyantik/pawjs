@@ -38,7 +38,7 @@ app.use(`${pawConfig.appRootUrl}/sw.js`, express.static(path.join(currentDir, 'b
   },
 }));
 
-const cacheTime = 86400000 * 30; // 30 days;
+const cacheTime = pawConfig.assetsMaxAge || 86400000 * 30; // 30 days;
 app.use(pawConfig.appRootUrl, express.static(path.join(currentDir, 'build'), {
   maxAge: cacheTime,
 }));

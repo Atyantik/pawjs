@@ -1,14 +1,15 @@
 import Picture from '@pawjs/srcset/picture';
 import * as React from 'react';
 import OfflineSrcset from './images/offline.png?sizes=400w+800w&placeholder';
+import * as s from './style.scss';
 
 export default () => {
   const [counter, setCounter] = React.useState(1);
   return (
     <article>
-      <header>
+      <header className={s.none}>
         <h1 className="mt-4" onClick={() => setCounter(counter + 1)}>
-          Offline Accesssss -&nbsp;
+          Offline Access -&nbsp;
           {counter}
         </h1>
         <hr />
