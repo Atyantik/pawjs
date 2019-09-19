@@ -12,7 +12,7 @@ const defaultOptions = {
   hot: false,
 };
 
-const rule = (options: any) => {
+export default (options: any) => {
   const o = assignIn({}, defaultOptions, options);
   return [
     {
@@ -61,5 +61,3 @@ const rule = (options: any) => {
     },
   ];
 };
-
-module.exports = rule;

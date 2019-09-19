@@ -1,18 +1,39 @@
-import _ from 'lodash';
-import { SyncHook } from 'tapable';
+import each from 'lodash/each';
+import { Hook, SyncHook } from 'tapable';
 
 // non npm imports
 import serverConfig from './server.config';
 import webConfig from './web.config';
 import babelCssRules from './inc/babel-css-rule';
 
+interface IPlugin {
+  hooks: {
+    [s: string]: Hook<string | string[], any> | SyncHook<string | string[], any>;
+  } | void;
+  apply: (w: WebpackHandler) => void;
+  [s: string]: any;
+}
+
 export default class WebpackHandler {
-  constructor(options) {
+  hooks: {
+    init: SyncHook<any, any>;
+    beforeConfig: SyncHook<any, any>;
+    [s: string]: Hook<any, any> | SyncHook<any, any>;
+  };
+
+  private readonly envConfigs: {
+    [s: string]: {
+      server: any[];
+      web: any[];
+      [s: string]: any[];
+    };
+  };
+
+  constructor() {
     this.hooks = {
-      init: new SyncHook([]),
+      init: new SyncHook(),
       beforeConfig: new SyncHook(['env', 'type', 'config']),
     };
-    this.options = options;
     this.addPlugin = this.addPlugin.bind(this);
     this.envConfigs = {
       development: {
@@ -31,10 +52,10 @@ export default class WebpackHandler {
     return babelCssRules;
   }
 
-  addPlugin(plugin) {
+  addPlugin(plugin: IPlugin) {
     try {
       if (plugin.hooks && Object.keys(plugin.hooks).length) {
-        _.each(plugin.hooks, (hookValue, hookName) => {
+        each(plugin.hooks, (hookValue, hookName) => {
           this.hooks[hookName] = hookValue;
         });
       }
@@ -49,12 +70,7 @@ export default class WebpackHandler {
 
   getConfig(env = 'development', type = 'web') {
     if (this.envConfigs[env] && this.envConfigs[env][type]) {
-      this.hooks.beforeConfig.call(env, type, this.envConfigs[env][type], (err) => {
-        if (err) {
-          // eslint-disable-next-line
-          console.log(err);
-        }
-      });
+      this.hooks.beforeConfig.call(env, type, this.envConfigs[env][type]);
       return this.envConfigs[env][type];
     }
     if (env === 'test') return {};

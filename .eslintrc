@@ -29,6 +29,11 @@
     "react-hooks"
   ],
   "rules": {
+    "arrow-parens": [
+      1,
+      "as-needed",
+      { "requireForBlockBody": true }
+    ],
     "react/jsx-filename-extension": [1, { "extensions": [".js", ".jsx", ".ts", ".tsx"] }],
     "react-hooks/rules-of-hooks": "error",
     // Jest Rules

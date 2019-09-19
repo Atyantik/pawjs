@@ -18,7 +18,7 @@ const processDir: string = process.cwd();
  * We need the program to exit clean even if the
  * user triggered ctrl+c or via any other interrupt.
  */
-const cleanExit = function cleanExit(): void { process.exit(); };
+const cleanExit = (): void => process.exit();
 process.on('SIGINT', cleanExit); // catch ctrl-c
 process.on('SIGTERM', cleanExit); // catch kill
 
@@ -43,7 +43,7 @@ export default class CliHandler {
    * As there is a very good possibility that many versions of same packages
    * are installed via npm, searchCommand helps search for the path of executable
    */
-  searchCommand: any;
+  searchCommand: ((cmd: string) => string) | undefined;
 
   /**
    * A flag to check if the pawConfig was set manually
@@ -70,17 +70,26 @@ export default class CliHandler {
   initProcessEnv() {
     // try to get ENV_CONFIG_PATH from environment
     /**
-     * If the evn variable ENV_CONFIG_PATH is set then resolve the path
+     * If the env variable ENV_CONFIG_PATH is set then resolve the path
      * and load the env config.
      * The below process is of importance when parameters passed via env
      * like `ENV_CONFIG_PATH=./local.env` pawjs start
      */
-    process.env.ENV_CONFIG_PATH = process.env.ENV_CONFIG_PATH || path.resolve(processDir, '.env');
-    if (!this.setEnvConfigPath(process.env.ENV_CONFIG_PATH)) {
+    if (process.env.ENV_CONFIG_PATH && !this.setEnvConfigPath(process.env.ENV_CONFIG_PATH)) {
+      // Here we know that ENV_CONFIG_PATH as set but was not a valid one,
+      // so we delete it from variable list instead
       delete process.env.ENV_CONFIG_PATH;
     }
 
+    // if ENV_CONFIG_PATH is not set, then we simply need to assign it the value of '.env'
+    if (!process.env.ENV_CONFIG_PATH) {
+      // if .env file does not exists, the the value won't be set anyway
+      this.setEnvConfigPath(path.resolve(processDir, '.env'));
+    }
+
     // PawJS library root, i.e. the folder where the script file is located
+    // Point to note here is we do not care if user specified LIB_ROOT in .env
+    // We calculate it on basis of this file being executed!
     process.env.LIB_ROOT = path.resolve(path.join(__dirname, '..', '..'));
     this.libRoot = process.env.LIB_ROOT;
 
@@ -115,8 +124,8 @@ export default class CliHandler {
       || (processDir + path.sep)
     );
     /**
-     * Update the project root, not this is a separate function as
-     * updating project root updates lots of ENV PATH this we have a different function
+     * Update the project root, now this is a separate function as
+     * updating project root updates lots of ENV PATH, thus we have a different function
      * for updating Project Root
      */
     this.updateProjectRoot(process.env.PROJECT_ROOT);
@@ -188,6 +197,11 @@ export default class CliHandler {
     }
     if (fs.existsSync(ecp)) {
       process.env.ENV_CONFIG_PATH = ecp;
+
+      /**
+       * On setting ENV_CONFIG_PATH, execute the command,
+       * to process ENV config Path
+       */
       this.processEnvConfigPath();
       return true;
     }
@@ -250,7 +264,7 @@ export default class CliHandler {
    */
   startServer() {
     process.env.PAW_HOT = typeof process.env.PAW_HOT !== 'undefined' ? process.env.PAW_HOT : 'true';
-    // eslint-disable-next-line
+    // eslint-disable-next-line global-require,import/no-dynamic-require
     require(pawExistsSync(path.join(this.libRoot, 'src/server/webpack-start')));
   }
 
@@ -258,11 +272,16 @@ export default class CliHandler {
     process.env.PAW_HOT = typeof process.env.PAW_HOT !== 'undefined'
       ? process.env.PAW_HOT
       : 'false';
-    // eslint-disable-next-line
+    // eslint-disable-next-line global-require,import/no-dynamic-require
     require(pawExistsSync(path.join(this.libRoot, 'src/server/webpack-build')));
   }
 
   lint() {
+    if (!this.searchCommand) {
+      // eslint-disable-next-line no-console
+      console.log('Application not configured properly, cannot search for commands');
+      return;
+    }
     const env = Object.create(process.env);
     env.NODE_ENV = 'test';
 
@@ -293,6 +312,11 @@ export default class CliHandler {
     );
 
     eslint.on('close', (errorCode) => {
+      if (!this.searchCommand) {
+        // eslint-disable-next-line no-console
+        console.log('Application not configured properly, cannot search for commands');
+        return;
+      }
       if (!errorCode) {
         let tslintPath = path.join(this.libRoot, 'tslint.json');
         let tslintRoot = this.libRoot;
@@ -324,6 +348,11 @@ export default class CliHandler {
   }
 
   test() {
+    if (!this.searchCommand) {
+      // eslint-disable-next-line no-console
+      console.log('Application not configured properly, cannot search for commands');
+      return;
+    }
     const env = Object.create(process.env);
     env.NODE_ENV = 'test';
 
@@ -338,6 +367,11 @@ export default class CliHandler {
     });
 
     tsc.on('close', (errorCode) => {
+      if (!this.searchCommand) {
+        // eslint-disable-next-line no-console
+        console.log('Application not configured properly, cannot search for commands');
+        return;
+      }
       if (!errorCode) {
         spawn(this.searchCommand('jest'), ['--verbose'], {
           env,
@@ -370,7 +404,7 @@ export default class CliHandler {
     this.program.option('-e, --env <env>', 'Set the application environment default is dev env');
     this.program.option(
       '-nc, --no-cache',
-      'Disable cache. Ideal for PawJS core/plugin development',
+      'Disable cache. Ideally used for PawJS core/plugin development',
     );
 
     this.program.option('-c, --config <configPath>', 'Set path to pawconfig.json');
@@ -405,7 +439,7 @@ export default class CliHandler {
         ecp = path.resolve(processDir, ecp);
       }
       if (ecp !== path.resolve(processDir, '.env')) {
-        this.setEnvConfigPath(e);
+        this.setEnvConfigPath(ecp);
       }
     });
 
@@ -434,8 +468,8 @@ export default class CliHandler {
 
       // Force set NODE_ENV & ENV to production
       if (process.env.PAW_ENV === 'production' && typeof process.env.NODE_ENV === 'undefined') {
-        process.env.NODE_ENV = 'production';
-        process.env.ENV = 'production';
+        process.env.NODE_ENV = env;
+        process.env.ENV = env;
       }
     });
 

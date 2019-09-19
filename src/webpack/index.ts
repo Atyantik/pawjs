@@ -14,5 +14,7 @@ if (hasProjectWebpackPlugin) {
   );
   handlerInstance.addPlugin(new PROJECT_WEBPACK_PLUGIN({ addPlugin: handlerInstance.addPlugin }));
 }
-export const handler = WebpackHandler;
+export {
+  WebpackHandler as handler,
+};
 export default handlerInstance;

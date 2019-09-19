@@ -1,19 +1,21 @@
 #!/usr/bin/env node
 const fs = require('fs');
+const util = require('util');
 const supportedExtensions = require('./src/extensions');
 /**
- * As this is a mixture of ES6 and ES5 we require almost module that might
+ * As this is a mixture of ES6 and ES5 we require module that might
  * be exported as default or using the old module.exports
  * @param m array | object | any
  * @returns {*}
  */
 /* global getDefault */
-global.getDefault = global.getDefault || (m => (m.default ? m.default : m));
+global.getDefault = global.getDefault || ((m) => (m.default ? m.default : m));
 
 /**
  * We need to resolve the files as per the extensions at many places
  * for example we do not want to restrict people to just .js or .jsx extension
  * we need ability like fileExistsSync to compare for all extensions we have defined
+ * in `src/extensions`
  * @type {*|Function}
  */
 global.pawExistsSync = global.pawExistsSync || ((filePath, fileSystem = fs) => {
@@ -28,6 +30,12 @@ global.pawExistsSync = global.pawExistsSync || ((filePath, fileSystem = fs) => {
     }
   });
   return resolvedFilePath;
+});
+
+global.pawDebug = global.pawDebug || ((data, options = {}) => {
+  // eslint-disable-next-line
+  console.log(util.inspect(data, { depth: 10, ...options }));
+  process.exit(0);
 });
 
 /**
@@ -52,8 +60,8 @@ Array.from(process.argv).forEach((arg) => {
   }
 });
 
-// Get babel configuration for nodejs
-const babelServer = getDefault(require('./src/babel/node.js'))({
+// Get babel configuration for nodejs server
+const babelServerOptions = getDefault(require('./src/babel/node.js'))({
   cacheDirectory: cacheEnabled,
   hot: false,
 }).use.options;
@@ -65,8 +73,8 @@ const babelServer = getDefault(require('./src/babel/node.js'))({
  * compiled code even if it lies in node_modules
  */
 require('@babel/register')({
-  presets: getDefault(babelServer.presets),
-  plugins: babelServer.plugins,
+  presets: getDefault(babelServerOptions.presets),
+  plugins: babelServerOptions.plugins,
   cache: cacheEnabled,
   ignore: [
     // Allow @pawjs core & pawjs- plugins to be of es6 or TS format
@@ -76,7 +84,7 @@ require('@babel/register')({
 });
 
 /**
- * After registering babel we can include ts files as well
+ * After registering babel we can include typescript (TS) files as well
  */
 const CliHandler = getDefault(require('./src/scripts/cli.ts'));
 

@@ -2,9 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import uniq from 'lodash/uniq';
 
-const pRoot = (process.env.PROJECT_ROOT)
-  || (process.env.PROJECT_ROOT)
-  || (process.cwd() + path.sep);
+const pRoot = process.env.PROJECT_ROOT || (process.cwd() + path.sep);
 const lRoot = process.env.LIB_ROOT || path.resolve(__dirname, '../');
 
 const addToArrayIfExists = (arr: string [], paths: string []): void => {
@@ -14,11 +12,11 @@ const addToArrayIfExists = (arr: string [], paths: string []): void => {
   }
 };
 
-export default (projectRoot: string = pRoot, libRoot: string = lRoot) => {
+export default (projectRoot: string = pRoot, libRoot: string = lRoot): string [] => {
   let executablePaths = process.env.PATH ? process.env.PATH.split(path.delimiter) : [];
 
-  // Add library root to executable path
-  executablePaths.unshift(libRoot);
+  // Add library root to executable path without the trailing slash
+  executablePaths.unshift(libRoot.replace(/\/$/, ''));
 
   // Include library's bin and it's node_modules's bin
   addToArrayIfExists(executablePaths, [libRoot, '.bin']);
@@ -37,7 +35,7 @@ export default (projectRoot: string = pRoot, libRoot: string = lRoot) => {
   addToArrayIfExists(executablePaths, [libRoot, '..', 'node_modules', '.bin']);
 
   // Add project root to executable path
-  executablePaths.unshift(projectRoot);
+  executablePaths.unshift(projectRoot.replace(/\/$/, ''));
 
   // Include current folder bin and node_modules's bin
   addToArrayIfExists(executablePaths, [projectRoot, '.bin']);

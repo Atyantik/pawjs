@@ -22,11 +22,11 @@ interface IPawjsWebpackConfig extends webpack.Configuration {
 // Notify the user that compilation has started and should be done soon.
 // eslint-disable-next-line
 console.log(`
-===================================================
+=========================================================
   Compiling files.
   This may take time depending on the application size.
   Thank you for your patience.
-===================================================
+=========================================================
 `);
 wHandler
   .hooks
@@ -189,12 +189,16 @@ try {
     hot: true,
   };
 
-  const serverOptions: any = Object.assign({}, commonOptions, devServerConfig);
-  const webOptions = Object.assign({}, commonOptions, {
+  const serverOptions: any = {
+    ...commonOptions,
+    ...devServerConfig,
+  };
+  const webOptions = {
+    ...commonOptions,
     inline: true,
     serverSideRender: true,
     publicPath: pawConfig.resourcesBaseUrl,
-  });
+  };
 
   // Create a webpack server compiler from the server config
   const serverCompiler = webpack(serverConfig);

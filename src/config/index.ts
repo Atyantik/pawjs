@@ -1,4 +1,3 @@
-import assignIn from 'lodash/assignIn';
 import defaultConfig from './defaults.json';
 
 interface IConfig {
@@ -29,15 +28,16 @@ try {
   } else {
     const pawConfigPath = process.env.PAW_CONFIG_PATH;
     if (typeof pawConfigPath !== 'undefined') {
-      // eslint-disable-next-line
+      // eslint-disable-next-line global-require,import/no-dynamic-require
       config = require(pawConfigPath);
     }
   }
 } catch (ex) {
+  // eslint-disable-next-line no-console
   console.log(ex);
   config = {};
 }
-config = assignIn({}, defaultConfig, config);
+config = { ...defaultConfig, ...config };
 
 if (config.appRootUrl && config.appRootUrl.startsWith('http')) {
   throw new Error(
@@ -87,4 +87,4 @@ if (config.react !== 'cdn' && config.react !== 'internal') {
   config.react = 'internal';
 }
 
-export default assignIn({}, config);
+export default { ...config };
