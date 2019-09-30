@@ -15,7 +15,7 @@ const pluginDefaults = {
 };
 
 module.exports = (options) => {
-  const o = Object.assign({}, pluginDefaults, options);
+  const o = { ...pluginDefaults, ...options };
   return [
     reactLoadableRoutes,
     o.noChunk ? dynamicImportWebpack : syntaxDynamicImport,

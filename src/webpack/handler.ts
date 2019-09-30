@@ -5,14 +5,7 @@ import { Hook, SyncHook } from 'tapable';
 import serverConfig from './server.config';
 import webConfig from './web.config';
 import babelCssRules from './inc/babel-css-rule';
-
-interface IPlugin {
-  hooks: {
-    [s: string]: Hook<string | string[], any> | SyncHook<string | string[], any>;
-  } | void;
-  apply: (w: WebpackHandler) => void;
-  [s: string]: any;
-}
+import {IPlugin} from "../@types/pawjs";
 
 export default class WebpackHandler {
   hooks: {

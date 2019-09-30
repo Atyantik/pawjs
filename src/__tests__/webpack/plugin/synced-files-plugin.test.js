@@ -3,8 +3,8 @@ const webpack = require('webpack');
 const SyncedFilesPlugins = require('../../../webpack/plugins/synced-files-plugin');
 
 describe('Synced Files Plugin Tests:', () => {
-  test('Should throw error on invalid output path', () => {
-    expect(new Promise((resolve, reject) => {
+  test('Should throw error on invalid output path', async () => {
+    (await expect(new Promise((resolve, reject) => {
       try {
         const syncedFilesPlugin = new SyncedFilesPlugins({
           outputPath: '/path/that/does/not/exists',
@@ -26,6 +26,6 @@ describe('Synced Files Plugin Tests:', () => {
         // eslint-disable-next-line
         return reject(1);
       }
-    })).rejects.toEqual(1);
+    }))).rejects.toEqual(1);
   });
 });

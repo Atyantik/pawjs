@@ -3,7 +3,7 @@ import {
   AsyncParallelBailHook,
   SyncHook,
 } from 'tapable';
-import _ from 'lodash';
+import invert from 'lodash/invert';
 import React from 'react';
 import { renderRoutes } from 'react-router-config';
 import { Router } from 'react-router';
@@ -15,10 +15,18 @@ import ErrorBoundary from '../components/ErrorBoundary';
 import { generateMeta } from '../utils/seo';
 import possibleStandardNames from '../utils/reactPossibleStandardNames';
 
-const possibleHtmlNames = _.invert(possibleStandardNames);
-const getPossibleHtmlName = key => possibleHtmlNames[key] || key;
+const possibleHtmlNames = invert(possibleStandardNames);
+const getPossibleHtmlName = (key: string) => possibleHtmlNames[key] || key;
 
-const b64DecodeUnicode = str => decodeURIComponent(
+type HistoryLocation = {
+  pathname: string;
+  search?: string;
+  hash?: string;
+  key?: string;
+  state?: any;
+};
+
+const b64DecodeUnicode = (str: string) => decodeURIComponent(
   atob(str)
     .split('')
     .map(c => `%${(`00${c.charCodeAt(0).toString(16)}`).slice(-2)}`)
@@ -28,12 +36,25 @@ const b64DecodeUnicode = str => decodeURIComponent(
 export default class ClientHandler {
   historyUnlistener = null;
 
-  routeHandler = null;
+  routeHandler: RouteHandler | null = null;
 
-  constructor(options) {
+  history: any;
+
+  hooks: {
+    beforeRender: AsyncSeriesHook<any>;
+    locationChange: AsyncParallelBailHook<any, any>;
+    beforeLoadData: AsyncSeriesHook<any>;
+    renderRoutes: AsyncSeriesHook<any>;
+    renderComplete: SyncHook<any, any>;
+  };
+
+  options: {
+    env: any;
+  };
+
+  constructor(options: { env: any; }) {
     this.addPlugin = this.addPlugin.bind(this);
     this.manageHistoryChange = this.manageHistoryChange.bind(this);
-
 
     window.PAW_HISTORY = window.PAW_HISTORY || createBrowserHistory({
       basename: options.env.appRootUrl,
@@ -52,7 +73,7 @@ export default class ClientHandler {
     this.manageServiceWorker();
   }
 
-  manageHistoryChange(location, action) {
+  manageHistoryChange(location: HistoryLocation, action: string) {
     this.hooks.locationChange.callAsync(location, action, () => null);
     if (this.routeHandler) {
       this.updatePageMeta(location).catch((e) => {
@@ -62,10 +83,14 @@ export default class ClientHandler {
     }
   }
 
-  async updatePageMeta(location) {
+  async updatePageMeta(location: HistoryLocation) {
+    if (!this.routeHandler) return null;
     const routes = this.routeHandler.getRoutes();
-    const currentRoutes = RouteHandler.matchRoutes(routes, location.pathname.replace(this.options.env.appRootUrl, ''));
-    const promises = [];
+    const currentRoutes = RouteHandler.matchRoutes(
+      routes,
+      location.pathname.replace(this.options.env.appRootUrl, ''),
+    );
+    const promises: Promise<any> [] = [];
 
     let seoData = {};
     const pwaSchema = this.routeHandler.getPwaSchema();
@@ -96,7 +121,7 @@ export default class ClientHandler {
         if (r.route.getRouteSeo) {
           routeSeo = r.route.getRouteSeo();
         }
-        seoData = _.assignIn(seoData, r.route.seo, routeSeo);
+        seoData = { ...seoData, ...r.route.seo, ...routeSeo };
       });
 
       const metaTags = generateMeta(seoData, {
@@ -252,6 +277,7 @@ export default class ClientHandler {
     //   getRenderedRoutes: AppRoutes.getRenderedRoutes,
     // }, () => null);
     const children = (
+      // eslint-disable-next-line react/jsx-props-no-spreading
       <AppRouter basename={env.appRootUrl} {...RouterParams}>
         {AppRoutes.renderedRoutes}
       </AppRouter>

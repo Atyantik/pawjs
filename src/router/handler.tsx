@@ -9,6 +9,8 @@ import ErrorComponent from '../components/Error';
 import RouteCompiler from './compiler';
 import PwaIcon192 from '../resources/images/pwa-icon-192x192.png';
 import PwaIcon512 from '../resources/images/pwa-icon-512x512.png';
+import { ReactComponent, Route } from '../@types/route';
+import { IPlugin } from '../@types/pawjs';
 
 export default class RouteHandler {
   static defaultPwaSchema = {
@@ -63,18 +65,19 @@ export default class RouteHandler {
     },
   };
 
-  static computeRootMatch = pathname => ({
+  static computeRootMatch = (pathname: string) => ({
     path: '/', url: '/', params: {}, isExact: pathname === '/',
   });
 
-  static matchRoutes = (...args) => {
+  static matchRoutes = (...args: any[] | [any, any]) => {
     const [routes, pathname] = args;
     const branch = args.length > 2 && args[2] !== undefined ? args[2] : [];
 
-    routes.some((route) => {
+    routes.some((route: Route) => {
       let match;
 
       if (route.path) {
+        // @ts-ignore
         match = matchPath(pathname, route);
       } else {
         match = branch.length ? branch[branch.length - 1].match // use parent match
@@ -95,14 +98,48 @@ export default class RouteHandler {
     return branch;
   };
 
-  routes = [];
+  routes: Route [] = [];
 
   components = {
     NotFoundComponent,
     ErrorComponent,
   };
 
-  constructor(options) {
+  hooks: { initRoutes: AsyncSeriesHook<any> };
+
+  routeCompiler: RouteCompiler;
+
+  setDefaultSeoSchema: (schema?: {}) => void;
+
+  setPwaSchema: (schema?: {}) => void;
+
+  getPwaSchema: () => any;
+
+  setDefaultLoadErrorComponent: (component: ReactComponent) => this;
+
+  getDefaultLoadErrorComponent: () => ReactComponent;
+
+  setDefaultLoaderComponent: (component: ReactComponent) => this;
+
+  setDefaultLoadTimeout: (loadTimeout: number) => this;
+
+  getDefaultLoadTimeout: () => number;
+
+  set404Component: (component: ReactComponent) => void;
+
+  get404Component: () => ReactComponent;
+
+  getDefaultLoaderComponent: () => ReactComponent;
+
+  setDefaultAllowedLoadDelay: (allowedDelay: number) => this;
+
+  getDefaultAllowedLoadDelay: () => number;
+
+  setErrorComponent: (component: ReactComponent) => void;
+
+  getErrorComponent: () => ReactComponent;
+
+  constructor(options: { env: any; isServer?: any; }) {
     this.routeCompiler = new RouteCompiler({
       isServer: Boolean(options.isServer),
       env: options.env,
@@ -112,12 +149,12 @@ export default class RouteHandler {
     };
 
     // Private methods
-    let loadErrorComponent = AsyncRouteLoadErrorComponent;
-    let loaderComponent = AsyncRouteLoaderComponent;
-    let notFoundComponent = NotFoundComponent;
-    let errorComponent = ErrorComponent;
-    let seoSchema = Object.assign({}, RouteHandler.defaultSeoSchema);
-    let pwaSchema = Object.assign({}, RouteHandler.defaultPwaSchema);
+    let loadErrorComponent: ReactComponent = AsyncRouteLoadErrorComponent;
+    let loaderComponent: ReactComponent = AsyncRouteLoaderComponent;
+    let notFoundComponent: ReactComponent = NotFoundComponent;
+    let errorComponent: ReactComponent = ErrorComponent;
+    let seoSchema = { ...RouteHandler.defaultSeoSchema };
+    let pwaSchema = { ...RouteHandler.defaultPwaSchema };
     pwaSchema.start_url = options.env.appRootUrl ? options.env.appRootUrl : '/';
     if (!pwaSchema.start_url.endsWith('/')) {
       pwaSchema.start_url = `${pwaSchema.start_url}/`;
@@ -130,13 +167,13 @@ export default class RouteHandler {
       seoSchema = Object.assign(seoSchema, schema);
     };
 
-    this.getDefaultSeoSchema = () => Object.assign({}, seoSchema);
+    this.setDefaultSeoSchema = () => ({ ...seoSchema });
 
     this.setPwaSchema = (schema = {}) => {
       pwaSchema = Object.assign(pwaSchema, schema);
     };
 
-    this.getPwaSchema = () => Object.assign({}, pwaSchema);
+    this.getPwaSchema = () => ({ ...pwaSchema });
 
     this.setDefaultLoadErrorComponent = (component) => {
       loadErrorComponent = component;
@@ -168,6 +205,7 @@ export default class RouteHandler {
 
     this.set404Component = (component = () => null) => {
       notFoundComponent = component;
+      return this;
     };
     this.get404Component = () => notFoundComponent;
 
@@ -178,23 +216,24 @@ export default class RouteHandler {
     this.getErrorComponent = () => errorComponent;
   }
 
-  addRoute(route) {
+  addRoute(route: Route) {
     const compiledRoute = this.routeCompiler.compileRoute(route, this);
     this.routes.push(compiledRoute);
     this.routes = _uniq(this.routes);
   }
 
-  addRoutes(routes) {
+  addRoutes(routes: Route []) {
     const compiledRoutes = this.routeCompiler.compileRoutes(routes, this);
     this.routes = this.routes.concat(compiledRoutes);
     this.routes = _uniq(this.routes);
   }
 
-  addPlugin(plugin) {
+  addPlugin(plugin: IPlugin) {
     try {
       if (plugin.hooks && Object.keys(plugin.hooks).length) {
-        plugin.hooks.forEach((hookValue, hookName) => {
-          this.hooks[hookName] = hookValue;
+        Object.keys(plugin.hooks).forEach((hookName: string) => {
+          // @ts-ignore
+          this.hooks[hookName] = plugin.hooks[hookName];
         });
       }
     } catch (ex) {
@@ -209,7 +248,7 @@ export default class RouteHandler {
   getRoutes() {
     const routes = _cloneDeep(this.routes);
     routes.push({
-      component: this.get404Component(),
+      component: () => this.get404Component(),
     });
     return routes;
   }

@@ -73,8 +73,8 @@ export default class RouteHandler {
     let loaderComponent = AsyncRouteLoaderComponent;
     let notFoundComponent = NotFoundComponent;
     let errorComponent = ErrorComponent;
-    let seoSchema = Object.assign({}, RouteHandler.defaultSeoSchema);
-    let pwaSchema = Object.assign({}, RouteHandler.defaultPwaSchema);
+    let seoSchema = { ...RouteHandler.defaultSeoSchema };
+    let pwaSchema = { ...RouteHandler.defaultPwaSchema };
     pwaSchema.start_url = options.env.appRootUrl || '/';
     if (!pwaSchema.start_url.endsWith('/')) {
       pwaSchema.start_url = `${pwaSchema.start_url}/`;
@@ -87,13 +87,13 @@ export default class RouteHandler {
       seoSchema = Object.assign(seoSchema, schema);
     };
 
-    this.getDefaultSeoSchema = () => Object.assign({}, seoSchema);
+    this.getDefaultSeoSchema = () => ({ ...seoSchema });
 
     this.setPwaSchema = (schema = {}) => {
       pwaSchema = Object.assign(pwaSchema, schema);
     };
 
-    this.getPwaSchema = () => Object.assign({}, pwaSchema);
+    this.getPwaSchema = () => ({ ...pwaSchema });
 
     this.setDefaultLoadErrorComponent = (component) => {
       loadErrorComponent = component;
