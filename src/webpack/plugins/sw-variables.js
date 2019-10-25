@@ -53,7 +53,10 @@ class SwVariables {
       if (compilation.assets[fileName]) {
         let src = compilation.assets[fileName].source();
 
-        const pawEnv = Object.keys(process.env).filter(x => x.indexOf('PAW_') !== -1);
+        const pawEnv = Object.keys(process.env).filter((x) => (
+          x.indexOf('PAW_') !== -1
+            && x !== 'PAW_CONFIG_PATH'
+        ));
         const env = {};
         pawEnv.forEach((k) => {
           env[k] = process.env[k];
