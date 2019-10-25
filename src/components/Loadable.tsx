@@ -1,23 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { withRouter } from 'react-router';
-
-const ALL_INITIALIZERS = [];
-const READY_INITIALIZERS = [];
-
-const isWebpackReady = (getModuleIds: () => any []) => {
-  // @ts-ignore
-  // eslint-disable-next-line camelcase
-  if (typeof __webpack_modules__ !== 'object') {
-    return false;
-  }
-
-  return getModuleIds().every(moduleId => (
-    typeof moduleId !== 'undefined'
-    // @ts-ignore
-    // eslint-disable-next-line camelcase
-    && typeof __webpack_modules__[moduleId] !== 'undefined'
-  ));
-};
 
 type LoadableState = {
   loading: boolean;
@@ -141,100 +123,182 @@ const createLoadableComponent = (
   };
 
   let res: LoadableState | null = null;
-  const init = (loadedData: any, props: any): Promise<any> => {
+  const init = (loadedData: any, props: any): LoadableState => {
     if (!res) {
       res = loadFn(opts.loader, loadedData, props);
     }
     if (!res.promise) {
       throw new Error('Invalid state received from loadFn');
     }
-    return res.promise;
+    return res;
   };
 
-  const loadableComponent = (
-    {
+  const loadableComponent = (props: any) => {
+    const {
       match,
       route,
       location,
       ...otherProps
-    },
-  ) => {
+    } = props;
     /* eslint-disable react-hooks/rules-of-hooks */
-    const [error, setError] = useState(res && res.error ? res.error : undefined);
-    const [pastDelay, setPastDelay] = useState(opts.delay <= 0);
-    const [loading, setLoading] = useState(res ? res.loading : true);
-    const [loaded, setLoaded] = useState(res ? res.loaded : null);
-    // Managing state of past delay
-    useEffect(
-      () => {
-        let timeout: any = 0;
-        if (opts.delay) {
-          timeout = setTimeout(
-            () => {
-              setPastDelay(true);
-            },
-            opts.delay,
-          );
-        }
-        return () => {
-          if (timeout) {
-            clearTimeout(timeout);
-          }
-        };
-      },
-      [],
-    );
-
-    const [timedOut, setTimeoutOut] = useState(false);
-    // Managing state of past delay
-    useEffect(
-      () => {
-        let timeout: any = 0;
-        if (opts.timeout) {
-          timeout = setTimeout(
-            () => {
-              setTimeoutOut(true);
-            },
-            opts.timeout,
-          );
-        }
-        return () => {
-          if (timeout) {
-            clearTimeout(timeout);
-          }
-        };
-      },
-      [],
-    );
-
-    init(undefined, {
+    const resReference = useRef(init(undefined, {
       match,
       route,
       ...otherProps,
-    });
+    }));
+    const updateRes = (loadedData = undefined, extraProps: any) => {
+      resReference.current = init(loadedData, extraProps);
+      return resReference;
+    };
 
-    if (loading || error) {
-      return React.createElement(opts.loading, {
+    const [error, setError] = useState(
+      resReference
+        && resReference.current
+        && resReference.current.error
+        ? resReference.current.error
+        : undefined,
+    );
+    const [loading, setLoading] = useState(
+      resReference
+      && resReference.current
+        ? resReference.current.loading
+        : true,
+    );
+    const [loaded, setLoaded] = useState(
+      resReference
+        && resReference.current
+        ? resReference.current.loaded
+        : null,
+    );
+    if (resReference && resReference.current && resReference.current.promise) {
+      resReference.current.promise.then(() => {
+        setError(resReference.current.error
+          ? resReference.current.error
+          : undefined);
+        setLoading(resReference.current.loading);
+        setLoaded(resReference.current.loaded);
+      });
+    }
+    const [pastDelay, setPastDelay] = useState(opts.delay <= 0);
+    const pastDelayTimeoutRef: any = useRef();
+    const [timedOut, setTimedOut] = useState(false);
+    const timedOutTimeoutRef: any = useRef();
+    const clearTimeouts = () => {
+      if (pastDelayTimeoutRef.current) {
+        clearTimeout(pastDelayTimeoutRef.current);
+      }
+      if (timedOutTimeoutRef.current) {
+        clearTimeout(timedOutTimeoutRef.current);
+      }
+    };
+    const componentState = useRef({ mounted: false });
+    useEffect(
+      () => {
+        componentState.current = { mounted: true };
+        return () => {
+          componentState.current = { mounted: false };
+        };
+      },
+      [],
+    );
+
+    const loadModule = () => {
+      if (
+        // Do not load if current res reference is not present
+        !resReference.current
+        // Also, Do not load if current res reference is already loading
+        || !resReference.current.loading
+        // Also, Do not load if current component is not mounted anymore
+        || !componentState.current.mounted
+      ) {
+        return false;
+      }
+      // Clear previous timeouts
+      clearTimeouts();
+
+      if (opts.delay === 0) {
+        // If no delay amount specified mark the module as past delay
+        setPastDelay(true);
+      } else {
+        pastDelayTimeoutRef.current = setTimeout(
+          () => {
+            setPastDelay(true);
+          },
+          opts.delay,
+        );
+      }
+      if (opts.timeout) {
+        timedOutTimeoutRef.current = setTimeout(
+          () => {
+            setTimedOut(true);
+          },
+          opts.timeout,
+        );
+      }
+
+      const update = () => {
+        if (!componentState.current.mounted) {
+          return;
+        }
+        if (resReference
+          && resReference.current
+        ) {
+          if (resReference.current.error) {
+            setError(resReference.current.error);
+          }
+          setLoaded(resReference.current.loaded);
+          setLoading(resReference.current.loading);
+        }
+        clearTimeouts();
+      };
+
+      if (resReference.current.promise) {
+        resReference.current.promise
+          .then(() => {
+            update();
+          })
+          .catch(() => {
+            update();
+          });
+      }
+      return true;
+    };
+    useEffect(
+      () => {
+        loadModule();
+      },
+      [],
+    );
+
+    const retry = () => {
+      setError(undefined);
+      setLoading(true);
+      setTimedOut(false);
+      loadModule();
+    };
+    if (loading) {
+      return React.createElement(opts.loading || null, {
+        retry,
         pastDelay,
         timedOut,
         error,
         isLoading: loading,
-        retry: this.retry,
       });
     } if (loaded) {
-      return opts.render(loaded, this.props);
+      return opts.render(loaded, props);
     }
     return null;
   };
   loadableComponent.preload = init;
+  // @ts-ignore
   return withRouter(loadableComponent);
 };
 
 export default (opts: { render?: any; loading?: any; }) => createLoadableComponent(load, opts);
 
-const loadableMap = (opts: { render: any; }) => {
+const loadableMap = (opts: any) => {
   if (typeof opts.render !== 'function') {
-    throw new Error('LoadableMap requires a `render(loaded, props)` function');
+    throw new Error('Loadable\'s Map requires a `render(loaded, props)` function');
   }
 
   return createLoadableComponent(loadMap, opts);

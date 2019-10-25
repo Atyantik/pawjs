@@ -3,6 +3,9 @@ import { ComponentType } from 'react';
 
 interface IComponent {
   loadedData?: any;
+  match?: any;
+  location?: any;
+  route?: any;
 }
 export type ReactComponent = ComponentType<RouteComponentProps<any>>
   | ComponentType<any>
@@ -10,6 +13,8 @@ export type ReactComponent = ComponentType<RouteComponentProps<any>>
 export type RouteComponent = Promise<ReactComponent>;
 
 export interface Route extends RouteProps {
+  path?: string;
+  getRouteSeo?: any;
   compiled: boolean;
   delay?: number;
   error?: RouteComponent;
@@ -20,4 +25,6 @@ export interface Route extends RouteProps {
   skeleton?: RouteComponent;
   component?: RouteComponent;
   timeout?: number;
+  modules?: string [];
+  webpack?: string [];
 }

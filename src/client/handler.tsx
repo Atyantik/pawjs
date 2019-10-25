@@ -10,10 +10,12 @@ import { Router } from 'react-router';
 import { HashRouter } from 'react-router-dom';
 import { createBrowserHistory } from 'history';
 import { render, hydrate } from 'react-dom';
+import get from 'lodash/get';
 import RouteHandler from '../router/handler';
 import ErrorBoundary from '../components/ErrorBoundary';
 import { generateMeta } from '../utils/seo';
 import possibleStandardNames from '../utils/reactPossibleStandardNames';
+import AbstractPlugin from '../abstract-plugin';
 
 const possibleHtmlNames = invert(possibleStandardNames);
 const getPossibleHtmlName = (key: string) => possibleHtmlNames[key] || key;
@@ -33,7 +35,7 @@ const b64DecodeUnicode = (str: string) => decodeURIComponent(
     .join(''),
 );
 
-export default class ClientHandler {
+export default class ClientHandler extends AbstractPlugin {
   historyUnlistener = null;
 
   routeHandler: RouteHandler | null = null;
@@ -53,6 +55,7 @@ export default class ClientHandler {
   };
 
   constructor(options: { env: any; }) {
+    super();
     this.addPlugin = this.addPlugin.bind(this);
     this.manageHistoryChange = this.manageHistoryChange.bind(this);
 
@@ -165,12 +168,14 @@ export default class ClientHandler {
     });
   }
 
-  manageServiceWorker() {
+  manageServiceWorker()   {
     if (this.options.env.serviceWorker) {
       this.hooks.renderComplete.tap('AddServiceWorker', (err) => {
         if (err) return;
         if ('serviceWorker' in navigator) {
-          navigator.serviceWorker.register(`${this.options.env.appRootUrl}/sw.js`).catch(() => null);
+          navigator.serviceWorker.register(
+            `${this.options.env.appRootUrl}/sw.js`,
+          ).catch(() => null);
         }
       });
     } else {
@@ -186,26 +191,10 @@ export default class ClientHandler {
     }
   }
 
-  addPlugin(plugin) {
-    try {
-      if (plugin.hooks && Object.keys(plugin.hooks).length) {
-        _.each(plugin.hooks, (hookValue, hookName) => {
-          this.hooks[hookName] = hookValue;
-        });
-      }
-    } catch (ex) {
-      // eslint-disable-next-line
-      console.log(ex);
-    }
-    if (plugin.apply) {
-      plugin.apply(this);
-    }
-  }
-
-  async run({ routeHandler }) {
+  async run({ routeHandler }: { routeHandler: RouteHandler }) {
     this.routeHandler = routeHandler;
     const { env } = this.options;
-    const root = _.get(env, 'clientRootElementId', 'app');
+    const root = get(env, 'clientRootElementId', 'app');
 
     if (!document.getElementById(root)) {
       // eslint-disable-next-line
@@ -216,10 +205,15 @@ export default class ClientHandler {
     const renderer = env.serverSideRender && !env.singlePageApplication ? hydrate : render;
 
     const routes = routeHandler.getRoutes();
+    const currentPageRoutes = RouteHandler.matchRoutes(
+      routes,
+      window.location.pathname.replace(
+        this.options.env.appRootUrl,
+        '',
+      ),
+    );
 
-    const currentPageRoutes = RouteHandler.matchRoutes(routes, window.location.pathname.replace(this.options.env.appRootUrl, ''));
-
-    const promises = [];
+    const promises: Promise<any> [] = [];
 
     // Wait for preload data manager to get executed
     await new Promise(r => this
@@ -231,21 +225,24 @@ export default class ClientHandler {
         r,
       ));
 
+
+    console.log('after this');
     if (window.PAW_PRELOADED_DATA) {
       const preloadedData = JSON.parse(b64DecodeUnicode(window.PAW_PRELOADED_DATA));
-
       currentPageRoutes.forEach((r, i) => {
         if (
           (typeof preloadedData[i] !== 'undefined')
           && r.route && r.route.component && r.route.component.preload
         ) {
-          promises.push(r.route.component.preload(preloadedData[i], {
+          const preloadInit = r.route.component.preload(preloadedData[i], {
             route: r.route,
             match: r.match,
-          }));
+          });
+          promises.push(preloadInit.promise);
         }
       });
     }
+    await Promise.all(promises);
 
     const AppRouter = (this.options.env.singlePageApplication && this.options.env.hashedRoutes)
       ? HashRouter : Router;
@@ -264,8 +261,6 @@ export default class ClientHandler {
       },
       getRenderedRoutes: () => AppRoutes.renderedRoutes,
     };
-
-    await Promise.all(promises).catch();
 
     await (new Promise(r => this.hooks.renderRoutes.callAsync({
       setRenderedRoutes: AppRoutes.setRenderedRoutes,
@@ -290,6 +285,7 @@ export default class ClientHandler {
 
     return new Promise((resolve) => {
       this.hooks.beforeRender.callAsync(Application, async () => {
+        console.log('pre-render');
         // Render according to routes!
         renderer(
           <ErrorBoundary ErrorComponent={routeHandler.getErrorComponent()}>

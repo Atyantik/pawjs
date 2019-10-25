@@ -5,6 +5,12 @@ const presetTypescript = getDefault(require('@babel/preset-typescript'));
 const babelPlugins = getDefault(require('./plugin.js'));
 const supportedExtensions = getDefault(require('../extensions.js'));
 
+const getCacheOption = cacheDirectory => (
+  typeof cacheDirectory !== 'undefined'
+    ? cacheDirectory
+    : process.env.PAW_CACHE === 'true'
+);
+
 const rule = options => ({
   test: supportedExtensions.javascriptRegExp,
   use: {
@@ -20,8 +26,9 @@ const rule = options => ({
         presetReact,
         presetTypescript,
       ],
-      cacheDirectory: typeof options.cacheDirectory !== 'undefined' ? options.cacheDirectory : process.env.PAW_CACHE === 'true',
+      cacheDirectory: getCacheOption(options.cacheDirectory),
       plugins: babelPlugins(options),
+      cache: getCacheOption(options.cacheDirectory),
     },
   },
 });

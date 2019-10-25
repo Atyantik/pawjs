@@ -11,8 +11,9 @@ import PwaIcon192 from '../resources/images/pwa-icon-192x192.png';
 import PwaIcon512 from '../resources/images/pwa-icon-512x512.png';
 import { ReactComponent, Route } from '../@types/route';
 import { IPlugin } from '../@types/pawjs';
+import AbstractPlugin from '../abstract-plugin';
 
-export default class RouteHandler {
+export default class RouteHandler extends AbstractPlugin {
   static defaultPwaSchema = {
     name: 'PawJS',
     short_name: 'PawJS',
@@ -111,6 +112,8 @@ export default class RouteHandler {
 
   setDefaultSeoSchema: (schema?: {}) => void;
 
+  getDefaultSeoSchema: () => any;
+
   setPwaSchema: (schema?: {}) => void;
 
   getPwaSchema: () => any;
@@ -140,10 +143,8 @@ export default class RouteHandler {
   getErrorComponent: () => ReactComponent;
 
   constructor(options: { env: any; isServer?: any; }) {
-    this.routeCompiler = new RouteCompiler({
-      isServer: Boolean(options.isServer),
-      env: options.env,
-    });
+    super();
+    this.routeCompiler = new RouteCompiler();
     this.hooks = {
       initRoutes: new AsyncSeriesHook(['URL']),
     };
@@ -167,7 +168,7 @@ export default class RouteHandler {
       seoSchema = Object.assign(seoSchema, schema);
     };
 
-    this.setDefaultSeoSchema = () => ({ ...seoSchema });
+    this.getDefaultSeoSchema = () => ({ ...seoSchema });
 
     this.setPwaSchema = (schema = {}) => {
       pwaSchema = Object.assign(pwaSchema, schema);
@@ -228,26 +229,10 @@ export default class RouteHandler {
     this.routes = _uniq(this.routes);
   }
 
-  addPlugin(plugin: IPlugin) {
-    try {
-      if (plugin.hooks && Object.keys(plugin.hooks).length) {
-        Object.keys(plugin.hooks).forEach((hookName: string) => {
-          // @ts-ignore
-          this.hooks[hookName] = plugin.hooks[hookName];
-        });
-      }
-    } catch (ex) {
-      // eslint-disable-next-line
-      console.log(ex);
-    }
-    if (plugin.apply) {
-      plugin.apply(this);
-    }
-  }
-
   getRoutes() {
     const routes = _cloneDeep(this.routes);
     routes.push({
+      // @ts-ignore
       component: () => this.get404Component(),
     });
     return routes;

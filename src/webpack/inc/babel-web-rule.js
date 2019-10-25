@@ -32,7 +32,7 @@ const rule = (options = {}) => {
               babelPresetEnv,
               {
                 targets: {
-                  browsers: ['last 2 versions', 'safari >= 7', 'ie >= 9'],
+                  browsers: ['last 2 versions', 'safari >= 7', 'ie >= 11'],
                 },
               },
             ],

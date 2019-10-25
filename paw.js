@@ -64,6 +64,8 @@ Array.from(process.argv).forEach((arg) => {
 const babelServerOptions = getDefault(require('./src/babel/node.js'))({
   cacheDirectory: cacheEnabled,
   hot: false,
+  noChunk: true,
+  cache: cacheEnabled,
 }).use.options;
 
 /**

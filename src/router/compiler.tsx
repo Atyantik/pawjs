@@ -1,6 +1,6 @@
 import React from 'react';
 import PreloadDataManager from '../utils/preloadDataManager';
-import Loadable from '../components/Loadable';
+import { Map } from '../components/Loadable';
 import { ReactComponent, Route } from '../@types/route';
 
 export default class RouteCompiler {
@@ -52,8 +52,7 @@ export default class RouteCompiler {
       }
       return {};
     };
-
-    const loadableComponent = Loadable.Map({
+    const loadableComponent = Map({
       timeout: PARAMS.timeout,
       delay: PARAMS.delay,
       loader: {
@@ -99,28 +98,37 @@ export default class RouteCompiler {
         },
         props: any,
       ) {
-        const { Layout, RouteComponent, LoadData: loadedData } = loaded;
+        let { Layout, RouteComponent, LoadData: loadedData } = loaded;
+        if (Layout && Layout.default) {
+          Layout = Layout.default;
+        }
+        if (RouteComponent.default) {
+          RouteComponent = RouteComponent.default;
+        }
         const {
+          route: currentRoute,
           history,
           location,
           match,
           props: componentProps,
         } = props;
+
         if (Layout) {
           return (
             <Layout
+              route={currentRoute}
               history={history}
               location={location}
               match={match}
               loadedData={loadedData}
             >
-              // @ts-ignore
               <RouteComponent
                 // eslint-disable-next-line react/jsx-props-no-spreading
                 {...componentProps}
                 history={history}
                 location={location}
                 match={match}
+                route={currentRoute}
                 loadedData={loadedData}
               />
             </Layout>
@@ -140,10 +148,12 @@ export default class RouteCompiler {
       },
       ...(route.modules ? { modules: route.modules } : {}),
     });
+    // @ts-ignore
     loadableComponent.compiled = true;
     return {
-      getRouteSeo: () => ({ ...routeSeo }),
       path,
+      getRouteSeo: () => ({ ...routeSeo }),
+      // @ts-ignore
       component: loadableComponent,
       seo: { ...seo },
       ...others,

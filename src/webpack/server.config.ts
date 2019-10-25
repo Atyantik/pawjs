@@ -55,9 +55,10 @@ export default {
   },
   ...resolverConfig,
   plugins: [
-    new webpack.EnvironmentPlugin(Object.assign({
-      pawConfig: JSON.stringify(pawConfig),
-    }, process.env)),
+    new webpack.EnvironmentPlugin({ pawConfig: JSON.stringify(pawConfig), ...process.env }),
     new MiniCssExtractPlugin({ filename: 'server.css' }),
+    new webpack.optimize.LimitChunkCountPlugin({
+      maxChunks: 1,
+    }),
   ],
 };

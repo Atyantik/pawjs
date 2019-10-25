@@ -23,33 +23,32 @@ module.exports = ({ types: t }) => ({
         ) {
           const { parent } = path.parentPath.parentPath;
           if (parent.type === 'ObjectProperty') {
-            if (parent.key.name !== 'component') return;
+            if (parent.key.name === 'component' || parent.key.name === 'layout') {
+              try {
+                const obj = path.parentPath.parentPath.parentPath;
 
-            try {
-              const obj = path.parentPath.parentPath.parentPath;
+                const propertiesMap = {};
+                obj.container.forEach((property) => {
+                  propertiesMap[property.key.name] = property.value.value;
+                });
 
-              const propertiesMap = {};
-              const newContainer = [];
+                let previousModules = [];
+                if (propertiesMap.modules) {
+                  previousModules = propertiesMap.modules.value.elements;
+                }
 
-              obj.container.forEach((property) => {
-                propertiesMap[property.key.name] = property.value.value;
-                newContainer.push(property);
-              });
-
-              if (propertiesMap.modules) {
-                return;
+                const moduleObj = t.objectProperty(
+                  t.identifier('modules'),
+                  t.arrayExpression([
+                    t.StringLiteral(source),
+                    ...previousModules,
+                  ]),
+                );
+                obj.parentPath.pushContainer('properties', moduleObj);
+              } catch (ex) {
+                // eslint-disable-next-line
+                console.log(ex);
               }
-
-              const moduleObj = t.objectProperty(
-                t.identifier('modules'),
-                t.arrayExpression([
-                  t.StringLiteral(source),
-                ]),
-              );
-              obj.parentPath.pushContainer('properties', moduleObj);
-            } catch (ex) {
-              // eslint-disable-next-line
-              console.log(ex);
             }
           }
         }
