@@ -4,7 +4,7 @@ import {
 
 import React from 'react';
 import _ from 'lodash';
-import { renderToString } from 'react-dom/server';
+import { renderToNodeStream } from 'react-dom/server';
 import { renderRoutes } from 'react-router-config';
 import { StaticRouter } from 'react-router';
 import RouteHandler from '../router/handler';
@@ -61,6 +61,22 @@ export default class ServerHandler {
     const pwaSchema = routeHandler.getPwaSchema();
     let currentPageRoutes = RouteHandler.matchRoutes(routes, req.path.replace(appRootUrl, ''));
 
+    const render = (reactComponent) => {
+      return new Promise((resolve, reject) => {
+        const body = [];
+        const bodyStream = renderToNodeStream(reactComponent);
+        bodyStream.on('data', (chunk) => {
+          body.push(chunk.toString());
+        });
+        bodyStream.on('error', (err) => {
+          reject(err);
+        });
+        bodyStream.on('end', () => {
+          resolve(body.join(''));
+        });
+      });
+    };
+
     if (!serverSideRender) {
       res.status(200).type('text/html');
       res.write('<!DOCTYPE html>');
@@ -106,7 +122,7 @@ export default class ServerHandler {
 
       await new Promise(r => this.hooks.beforeHtmlRender.callAsync(Application, req, res, r));
 
-      renderedHtml = renderToString(
+      renderedHtml = await render(
         <Html
           {...htmlProps}
           appRootUrl={appRootUrl}
@@ -221,7 +237,7 @@ export default class ServerHandler {
 
       await new Promise(r => this.hooks.beforeAppRender.callAsync(Application, req, res, r));
 
-      const htmlContent = this.options.env.singlePageApplication ? '' : renderToString(
+      const htmlContent = this.options.env.singlePageApplication ? '' : await render(
         <ErrorBoundary ErrorComponent={routeHandler.getErrorComponent()}>
           {Application.children}
         </ErrorBoundary>,
@@ -234,7 +250,7 @@ export default class ServerHandler {
       }
 
       await new Promise(r => this.hooks.beforeHtmlRender.callAsync(Application, req, res, r));
-      renderedHtml = renderToString(
+      renderedHtml = await render(
         <Html
           {...Application.htmlProps}
           appRootUrl={appRootUrl}
@@ -265,7 +281,7 @@ export default class ServerHandler {
       return next();
     } catch (ex) {
       const ErrorComponent = routeHandler.getErrorComponent();
-      renderedHtml = renderToString(
+      renderedHtml = await render(
         <Html
           clientRootElementId={this.options.env.clientRootElementId}
           assets={assets}
