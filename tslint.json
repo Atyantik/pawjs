@@ -18,7 +18,8 @@
       "node_modules/**",
       "demo/**",
       "src/__tests__",
-      "src/babel"
+      "src/babel",
+      "src/webpack"
     ]
   }
 }

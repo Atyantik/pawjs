@@ -1,16 +1,19 @@
-class SwVariables {
-  options: {};
+import webpack = require('webpack');
 
-  constructor(options = {}) {
+class SwVariables {
+  options: any;
+
+  constructor(options: any = {}) {
     this.options = options;
   }
 
-  apply(compiler) {
+  apply(compiler: webpack.Compiler) {
     const { fileName, variables, text } = this.options;
 
     compiler.hooks.emit.tap('AddVariableToSw', (compilation) => {
       const { chunks } = compilation;
 
+      // @ts-ignore
       const { publicPath } = compilation.options.output;
       const offlineAssetsMapping = [];
 
@@ -56,7 +59,7 @@ class SwVariables {
         let src = compilation.assets[fileName].source();
 
         const pawEnv = Object.keys(process.env).filter(x => x.indexOf('PAW_') !== -1);
-        const env = {};
+        const env: any = {};
         pawEnv.forEach((k) => {
           env[k] = process.env[k];
         });

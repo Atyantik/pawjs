@@ -21,6 +21,9 @@
     "src/extensions.js",
     "demo",
     "node_modules",
-    "**/dist/**/*"
+    "**/dist/**/*",
+    "src/__tests__",
+    "src/babel",
+    "src/webpack"
   ]
 }
