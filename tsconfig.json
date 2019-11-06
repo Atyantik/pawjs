@@ -22,8 +22,8 @@
     "demo",
     "node_modules",
     "**/dist/**/*",
-    "src/__tests__",
-    "src/babel",
-    "src/webpack"
+    "src/__tests__/**",
+    "src/babel/**",
+    "src/webpack/**"
   ]
 }
