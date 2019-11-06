@@ -1,6 +1,7 @@
 import express from 'express';
 import _ from 'lodash';
 import hsts from 'hsts';
+// @ts-ignore
 import { URL } from 'universal-url';
 // eslint-disable-next-line
 import ProjectServer from 'pawProjectServer';
@@ -187,7 +188,11 @@ export default (
   return app.handle(req, res, next);
 };
 
-export const beforeStart = (serverConfig: any, PAW_GLOBAL: any, cb = function callback() {}) => {
+export const beforeStart = (
+  serverConfig: any,
+  PAW_GLOBAL: any,
+  cb: any = function callback() {},
+) => {
   const setAppLocal = (key: string, value: any) => {
     if (!key) return;
 

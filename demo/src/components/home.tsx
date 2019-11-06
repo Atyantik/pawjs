@@ -1,8 +1,9 @@
 import React, { useEffect } from 'react';
 
 export default () => {
+  console.log('here');
   useEffect(() => {
-    alert('am mounted');
+    console.log('am mounted');
   });
   return (
     <div>

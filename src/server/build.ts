@@ -3,6 +3,7 @@ import _find from 'lodash/find';
 import path from 'path';
 import compression from 'compression';
 // the below assets will be added by webpack. Don't worry about it
+// @ts-ignore
 // eslint-disable-next-line
 import pawAssets from 'pwa-assets';
 import server, { beforeStart, afterStart } from './server';
@@ -39,7 +40,7 @@ app.use(`${pawConfig.appRootUrl}/sw.js`, express.static(path.join(currentDir, 'b
 }));
 
 const cacheTime = pawConfig.assetsMaxAge || 86400000 * 30; // 30 days;
-app.use(pawConfig.appRootUrl, express.static(path.join(currentDir, 'build'), {
+app.use(pawConfig.appRootUrl || '/', express.static(path.join(currentDir, 'build'), {
   maxAge: cacheTime,
 }));
 
@@ -52,13 +53,12 @@ app.use((req, res, next) => server(req, res, next, PAW_GLOBAL));
 
 export default app;
 
-
 const serverConfig = {
   port: pawConfig.port,
   host: pawConfig.host,
 };
 
-beforeStart(serverConfig, PAW_GLOBAL, (err) => {
+beforeStart(serverConfig, PAW_GLOBAL, (err: Error) => {
   if (err) {
     // eslint-disable-next-line
     console.error(err);
@@ -66,10 +66,14 @@ beforeStart(serverConfig, PAW_GLOBAL, (err) => {
   }
 
   if (!pawConfig.singlePageApplication) {
-    app.listen(serverConfig.port, serverConfig.host, () => {
-      // eslint-disable-next-line
-      console.log(`Listening to http://${serverConfig.host}:${serverConfig.port}`);
-      afterStart(PAW_GLOBAL);
-    });
+    app.listen(
+      parseInt(serverConfig.port || '9090', 10),
+      serverConfig.host || 'localhost',
+      () => {
+        // eslint-disable-next-line
+        console.log(`Listening to http://${serverConfig.host}:${serverConfig.port}`);
+        afterStart(PAW_GLOBAL);
+      },
+    );
   }
 });

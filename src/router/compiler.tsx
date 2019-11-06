@@ -4,7 +4,7 @@ import { Map } from '../components/Loadable';
 import { ReactComponent, Route } from '../@types/route';
 
 export default class RouteCompiler {
-  private preloadManager: PreloadDataManager;
+  public preloadManager: PreloadDataManager;
 
   constructor() {
     this.preloadManager = new PreloadDataManager();
@@ -98,53 +98,56 @@ export default class RouteCompiler {
         },
         props: any,
       ) {
-        let { Layout, RouteComponent, LoadData: loadedData } = loaded;
+        const { Layout, RouteComponent, LoadData: loadedData } = loaded;
+        const components: any = {
+          layout: Layout,
+          routeComponent: RouteComponent,
+        };
+        // @ts-ignore
         if (Layout && Layout.default) {
-          Layout = Layout.default;
+          // @ts-ignore
+          components.layout = Layout.default;
         }
+        // @ts-ignore
         if (RouteComponent.default) {
-          RouteComponent = RouteComponent.default;
+          // @ts-ignore
+          components.routeComponent = RouteComponent.default;
         }
         const {
-          route: currentRoute,
           history,
           location,
           match,
+          route: currentRoute,
           props: componentProps,
         } = props;
 
-        if (Layout) {
+        components.routeComponent = (
+          // @ts-ignore
+          <components.routeComponent
+            // eslint-disable-next-line react/jsx-props-no-spreading
+            {...componentProps}
+            history={history}
+            location={location}
+            match={match}
+            route={currentRoute}
+            loadedData={loadedData}
+          />
+        );
+
+        if (components.layout) {
           return (
-            <Layout
+            <components.layout
               route={currentRoute}
               history={history}
               location={location}
               match={match}
               loadedData={loadedData}
             >
-              <RouteComponent
-                // eslint-disable-next-line react/jsx-props-no-spreading
-                {...componentProps}
-                history={history}
-                location={location}
-                match={match}
-                route={currentRoute}
-                loadedData={loadedData}
-              />
-            </Layout>
+              {components.routeComponent}
+            </components.layout>
           );
         }
-        return (
-          // @ts-ignore
-          <RouteComponent
-            // eslint-disable-next-line react/jsx-props-no-spreading
-            {...componentProps}
-            history={history}
-            location={location}
-            match={match}
-            loadedData={loadedData}
-          />
-        );
+        return components.routeComponent;
       },
       ...(route.modules ? { modules: route.modules } : {}),
     });

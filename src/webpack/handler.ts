@@ -5,9 +5,10 @@ import { Hook, SyncHook } from 'tapable';
 import serverConfig from './server.config';
 import webConfig from './web.config';
 import babelCssRules from './inc/babel-css-rule';
-import {IPlugin} from "../@types/pawjs";
+import { IPlugin } from '../@types/pawjs';
+import AbstractPlugin from '../abstract-plugin';
 
-export default class WebpackHandler {
+export default class WebpackHandler extends AbstractPlugin {
   hooks: {
     init: SyncHook<any, any>;
     beforeConfig: SyncHook<any, any>;
@@ -23,6 +24,7 @@ export default class WebpackHandler {
   };
 
   constructor() {
+    super();
     this.hooks = {
       init: new SyncHook(),
       beforeConfig: new SyncHook(['env', 'type', 'config']),
@@ -43,22 +45,6 @@ export default class WebpackHandler {
   // eslint-disable-next-line
   getBabelCssRule() {
     return babelCssRules;
-  }
-
-  addPlugin(plugin: IPlugin) {
-    try {
-      if (plugin.hooks && Object.keys(plugin.hooks).length) {
-        each(plugin.hooks, (hookValue, hookName) => {
-          this.hooks[hookName] = hookValue;
-        });
-      }
-    } catch (ex) {
-      // eslint-disable-next-line
-      console.log(ex);
-    }
-    if (plugin.apply) {
-      plugin.apply(this);
-    }
   }
 
   getConfig(env = 'development', type = 'web') {

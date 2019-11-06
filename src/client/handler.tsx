@@ -16,9 +16,10 @@ import ErrorBoundary from '../components/ErrorBoundary';
 import { generateMeta } from '../utils/seo';
 import possibleStandardNames from '../utils/reactPossibleStandardNames';
 import AbstractPlugin from '../abstract-plugin';
+import { Route } from '../@types/route';
 
 const possibleHtmlNames = invert(possibleStandardNames);
-const getPossibleHtmlName = (key: string) => possibleHtmlNames[key] || key;
+const getPossibleHtmlName = (key: string): string => possibleHtmlNames[key] || key;
 
 type HistoryLocation = {
   pathname: string;
@@ -86,8 +87,8 @@ export default class ClientHandler extends AbstractPlugin {
     }
   }
 
-  async updatePageMeta(location: HistoryLocation) {
-    if (!this.routeHandler) return null;
+  async updatePageMeta(location: HistoryLocation, preload = true) {
+    if (this.routeHandler === null) return false;
     const routes = this.routeHandler.getRoutes();
     const currentRoutes = RouteHandler.matchRoutes(
       routes,
@@ -100,75 +101,76 @@ export default class ClientHandler extends AbstractPlugin {
     const seoSchema = this.routeHandler.getDefaultSeoSchema();
 
     // Wait for preload data manager to get executed
-    await new Promise(r => this
-      .hooks
-      .beforeLoadData
-      .callAsync(
-        this.routeHandler.routeCompiler.preloadManager.setParams,
-        this.routeHandler.routeCompiler.preloadManager.getParams,
-        r,
-      ));
+    const { preloadManager: { setParams, getParams } } = this.routeHandler.routeCompiler;
+    if (preload) {
+      await new Promise(r => this
+        .hooks
+        .beforeLoadData
+        .callAsync(
+          setParams,
+          getParams,
+          r,
+        ));
+      currentRoutes.forEach((r: { route: Route, match: any }) => {
+        if (r.route && r.route.component && r.route.component.preload) {
+          promises.push(r.route.component.preload(undefined, {
+            route: r.route,
+            match: r.match,
+          }));
+        }
+      });
+      await Promise.all(promises);
+    }
+    currentRoutes.forEach((r: { route: Route, match: any }) => {
+      let routeSeo = {};
+      if (r.route.getRouteSeo) {
+        routeSeo = r.route.getRouteSeo();
+      }
+      seoData = { ...seoData, ...r.route.seo, ...routeSeo };
+    });
 
-    currentRoutes.forEach((r) => {
-      if (r.route && r.route.component && r.route.component.preload) {
-        promises.push(r.route.component.preload(undefined, {
-          route: r.route,
-          match: r.match,
-        }));
+    const metaTags = generateMeta(seoData, {
+      seoSchema,
+      pwaSchema,
+      baseUrl: window.location.origin,
+      url: window.location.href,
+    });
+
+    metaTags.forEach((meta) => {
+      let metaSearchStr = 'meta';
+      let firstMetaSearchStr = '';
+      const htmlMeta: any = {};
+
+      if (meta.name === 'title') {
+        document.title = `${meta.content}${process.env.APP_NAME ? ` | ${process.env.APP_NAME}` : ''}`;
+      }
+
+      Object.keys(meta).forEach((key) => {
+        htmlMeta[getPossibleHtmlName(key)] = meta[key];
+        if (!firstMetaSearchStr) {
+          firstMetaSearchStr = `meta[${getPossibleHtmlName(key)}=${JSON.stringify(meta[key])}]`;
+        }
+        metaSearchStr += `[${getPossibleHtmlName(key)}=${JSON.stringify(meta[key])}]`;
+      });
+
+      const alreadyExists = document.querySelector(metaSearchStr);
+      if (!alreadyExists) {
+        const previousExists = document.querySelector(firstMetaSearchStr);
+        if (previousExists && previousExists.remove) {
+          previousExists.remove();
+        }
+
+        const metaElement = document.createElement('meta');
+        Object.keys(htmlMeta).forEach((htmlMetaKey) => {
+          metaElement.setAttribute(htmlMetaKey, htmlMeta[htmlMetaKey]);
+        });
+        document.getElementsByTagName('head')[0].appendChild(metaElement);
       }
     });
-
-    await Promise.all(promises).then(() => {
-      currentRoutes.forEach((r) => {
-        let routeSeo = {};
-        if (r.route.getRouteSeo) {
-          routeSeo = r.route.getRouteSeo();
-        }
-        seoData = { ...seoData, ...r.route.seo, ...routeSeo };
-      });
-
-      const metaTags = generateMeta(seoData, {
-        baseUrl: window.location.origin,
-        url: window.location.href,
-        seoSchema,
-        pwaSchema,
-      });
-
-      metaTags.forEach((meta) => {
-        let metaSearchStr = 'meta';
-        let firstMetaSearchStr = '';
-        const htmlMeta = {};
-
-        if (meta.name === 'title') {
-          document.title = meta.content;
-        }
-
-        Object.keys(meta).forEach((key) => {
-          htmlMeta[getPossibleHtmlName(key)] = meta[key];
-          if (!firstMetaSearchStr) {
-            firstMetaSearchStr = `meta[${getPossibleHtmlName(key)}=${JSON.stringify(meta[key])}]`;
-          }
-          metaSearchStr += `[${getPossibleHtmlName(key)}=${JSON.stringify(meta[key])}]`;
-        });
-
-        const alreadyExists = document.querySelector(metaSearchStr);
-        if (!alreadyExists) {
-          const previousExists = document.querySelector(firstMetaSearchStr);
-          if (previousExists && previousExists.remove) {
-            previousExists.remove();
-          }
-
-          const metaElement = document.createElement('meta');
-          Object.keys(htmlMeta).forEach((htmlMetaKey) => {
-            metaElement.setAttribute(htmlMetaKey, htmlMeta[htmlMetaKey]);
-          });
-          document.getElementsByTagName('head')[0].appendChild(metaElement);
-        }
-      });
-    });
+    return true;
   }
 
-  manageServiceWorker()   {
+  manageServiceWorker() {
     if (this.options.env.serviceWorker) {
       this.hooks.renderComplete.tap('AddServiceWorker', (err) => {
         if (err) return;
@@ -215,21 +217,9 @@ export default class ClientHandler extends AbstractPlugin {
 
     const promises: Promise<any> [] = [];
 
-    // Wait for preload data manager to get executed
-    await new Promise(r => this
-      .hooks
-      .beforeLoadData
-      .callAsync(
-        this.routeHandler.routeCompiler.preloadManager.setParams,
-        this.routeHandler.routeCompiler.preloadManager.getParams,
-        r,
-      ));
-
-
-    console.log('after this');
     if (window.PAW_PRELOADED_DATA) {
       const preloadedData = JSON.parse(b64DecodeUnicode(window.PAW_PRELOADED_DATA));
-      currentPageRoutes.forEach((r, i) => {
+      currentPageRoutes.forEach((r: { route: Route, match: any }, i: number) => {
         if (
           (typeof preloadedData[i] !== 'undefined')
           && r.route && r.route.component && r.route.component.preload
@@ -244,60 +234,64 @@ export default class ClientHandler extends AbstractPlugin {
     }
     await Promise.all(promises);
 
-    const AppRouter = (this.options.env.singlePageApplication && this.options.env.hashedRoutes)
+    this.updatePageMeta(this.history.location, false);
+
+    const components: any = {};
+
+    components.appRouter = (this.options.env.singlePageApplication && this.options.env.hashedRoutes)
       ? HashRouter : Router;
 
-    let RouterParams = {
+    let routerParams: any = {
       history: this.history,
     };
     if (this.options.env.singlePageApplication && this.options.env.hashedRoutes) {
-      RouterParams = {};
+      routerParams = {};
     }
 
-    const AppRoutes = {
+    const appRoutes = {
       renderedRoutes: renderRoutes(routes),
-      setRenderedRoutes: (r) => {
-        AppRoutes.renderedRoutes = r;
+      setRenderedRoutes: (r: JSX.Element) => {
+        appRoutes.renderedRoutes = r;
       },
-      getRenderedRoutes: () => AppRoutes.renderedRoutes,
+      getRenderedRoutes: () => appRoutes.renderedRoutes,
     };
 
-    await (new Promise(r => this.hooks.renderRoutes.callAsync({
-      setRenderedRoutes: AppRoutes.setRenderedRoutes,
-      getRenderedRoutes: AppRoutes.getRenderedRoutes,
-    }, r)));
+    await (
+      new Promise(r => this.hooks.renderRoutes.callAsync(
+        {
+          setRenderedRoutes: appRoutes.setRenderedRoutes,
+          getRenderedRoutes: appRoutes.getRenderedRoutes,
+        },
+        r,
+      )));
 
-    // await this.hooks.renderRoutes.callAsync({
-    //   setRenderedRoutes: AppRoutes.setRenderedRoutes,
-    //   getRenderedRoutes: AppRoutes.getRenderedRoutes,
-    // }, () => null);
     const children = (
       // eslint-disable-next-line react/jsx-props-no-spreading
-      <AppRouter basename={env.appRootUrl} {...RouterParams}>
-        {AppRoutes.renderedRoutes}
-      </AppRouter>
+      <components.appRouter basename={env.appRootUrl} {...routerParams}>
+        {appRoutes.renderedRoutes}
+      </components.appRouter>
     );
-    const Application = {
+    const application = {
       children,
       currentRoutes: currentPageRoutes.slice(0),
       routes: routes.slice(0),
     };
 
     return new Promise((resolve) => {
-      this.hooks.beforeRender.callAsync(Application, async () => {
-        console.log('pre-render');
+      this.hooks.beforeRender.callAsync(application, async () => {
         // Render according to routes!
         renderer(
+          // tslint:disable-next-line:jsx-wrap-multiline
           <ErrorBoundary ErrorComponent={routeHandler.getErrorComponent()}>
-            {Application.children}
+            {application.children}
           </ErrorBoundary>,
           domRootReference,
-          // div,
           () => {
             window.PAW_PRELOADED_DATA = null;
             delete window.PAW_PRELOADED_DATA;
-            if (document.getElementById('__pawjs_preloaded') && document.getElementById('__pawjs_preloaded').remove) {
-              document.getElementById('__pawjs_preloaded').remove();
+            const preloadedElement = document.getElementById('__pawjs_preloaded');
+            if (preloadedElement && preloadedElement.remove) {
+              preloadedElement.remove();
             }
             this.hooks.renderComplete.call();
             resolve();

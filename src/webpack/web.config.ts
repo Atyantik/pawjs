@@ -87,9 +87,7 @@ export default {
         'window.ReactDom': 'ReactDOM',
       }),
     ] : []),
-    new webpack.EnvironmentPlugin(Object.assign({
-      pawConfig: JSON.stringify(pawConfig),
-    }, process.env)),
+    new webpack.EnvironmentPlugin({ pawConfig: JSON.stringify(pawConfig), ...process.env }),
     ...(isHot ? [] : [new MiniCssExtractPlugin({
       // Options similar to the same options in webpackOptions.output
       // both options are optional
@@ -103,7 +101,7 @@ export default {
       }),
       new SwVariables({
         fileName: 'sw.js',
-        variables: Object.assign({ workboxDebug: true }, pawConfig),
+        variables: { workboxDebug: true, ...pawConfig },
         text: projectSW,
       }),
     ] : []),

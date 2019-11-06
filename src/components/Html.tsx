@@ -26,18 +26,18 @@ const b64EncodeUnicode = (str: string) => toBase64(
 );
 
 interface IHtmlProps {
-  preloadedData: any;
-  metaTags: any [];
+  preloadedData?: any;
+  metaTags?: any [];
   pwaSchema: any;
   cssFiles: any [];
-  env: any;
+  env?: any;
   preloadCssFiles: boolean;
   assets: string [];
-  head: any [];
-  footer: any [];
+  head?: any [];
+  footer?: any [];
   appRootUrl: string;
   clientRootElementId: string;
-  dangerouslySetInnerHTML: {
+  dangerouslySetInnerHTML?: {
     __html: string,
   };
   noJS: boolean;
@@ -70,7 +70,6 @@ const html = (props: React.PropsWithChildren<IHtmlProps> = {
     head,
     dangerouslySetInnerHTML,
     clientRootElementId,
-    // eslint-disable-next-line
     children,
     footer,
     assets,
@@ -92,6 +91,7 @@ const html = (props: React.PropsWithChildren<IHtmlProps> = {
    */
   const getMetaValue = (key: string, defaultValue: any = '') => {
     let metaTag = {};
+    if (!metaTags) return defaultValue;
     metaTags.forEach((m) => {
       if (Object.keys(metaTag).length) return;
       metaKeys.forEach((mKey) => {
@@ -118,14 +118,18 @@ const html = (props: React.PropsWithChildren<IHtmlProps> = {
       );
     }
     if (env.polyfill && env.polyfill === 'cdn') {
-      jsAssets.unshift(`https://cdnjs.cloudflare.com/ajax/libs/babel-polyfill/${BabelPolyfill.version}/polyfill.min.js`);
+      jsAssets.unshift(
+        `https://cdnjs.cloudflare.com/ajax/libs/babel-polyfill/${BabelPolyfill.version}/polyfill.min.js`,
+      );
     }
     jsAssets
       .forEach((path: string) => {
-        loadingScript = loadingScript.replace('<>', `fnLoadPJS(${JSON.stringify(path)}, <>)`);
+        loadingScript = loadingScript.replace(
+          '<>',
+          `fnLoadPJS(${JSON.stringify(path)}, <>)`,
+        );
       });
   }
-  console.log(jsAssets);
   loadingScript = loadingScript.replace('<>', 'function(){}');
 
   /**
@@ -137,8 +141,8 @@ const html = (props: React.PropsWithChildren<IHtmlProps> = {
   return (
     <html lang={getPwaValue('lang')} dir={getPwaValue('dir')}>
       <head>
-        <title>{getMetaValue('title').content}</title>
-        {preloadCssFiles && (<preload-css />)}
+        <title>{`${getMetaValue('title').content}${process.env.APP_NAME ? ` | ${process.env.APP_NAME}` : ''}`}</title>
+        {preloadCssFiles && <preload-css />}
         {cssFiles.map(path => (
           <link rel="stylesheet" type="text/css" key={path} href={path} />
         ))}
@@ -162,13 +166,12 @@ const html = (props: React.PropsWithChildren<IHtmlProps> = {
           />
         )}
         <link rel="manifest" href={`${appRootUrl}/manifest.json`} />
-        {metaTags.map(m => <meta key={JSON.stringify(m)} {...m} />)}
+        {metaTags && metaTags.map(m => <meta key={JSON.stringify(m)} {...m} />)}
         {
           !noJS && preloadedData && (
             <script
               type="text/javascript"
               id="__pawjs_preloaded"
-              // eslint-disable-next-line
               dangerouslySetInnerHTML={{
                 __html: `window.PAW_PRELOADED_DATA = ${JSON.stringify(b64EncodeUnicode(JSON.stringify(preloadedData)))};`,
               }}
@@ -178,10 +181,10 @@ const html = (props: React.PropsWithChildren<IHtmlProps> = {
         {head}
       </head>
       <body>
-        {Boolean(dangerouslySetInnerHTML.__html.length) && (
+        {Boolean(dangerouslySetInnerHTML && dangerouslySetInnerHTML.__html.length) && (
           <div id={clientRootElementId} dangerouslySetInnerHTML={dangerouslySetInnerHTML} />
         )}
-        {!dangerouslySetInnerHTML.__html.length && (
+        {!(dangerouslySetInnerHTML && dangerouslySetInnerHTML.__html.length) && (
           <div id={clientRootElementId}>{children || null}</div>
         )}
         {footer}

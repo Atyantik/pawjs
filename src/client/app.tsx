@@ -1,6 +1,5 @@
 // @ts-ignore
 import { URL } from 'universal-url-lite';
-import assignIn from 'lodash/assignIn';
 // @ts-ignore
 // eslint-disable-next-line import/no-unresolved
 import ProjectClient from 'pawProjectClient';
@@ -12,14 +11,17 @@ import RouteHandler from '../router/handler';
 // parse pawConfig
 const env = JSON.parse(process.env.pawConfig || '');
 
+// Initialize routing handler
 const rHandler = new RouteHandler({
-  env: assignIn({}, env),
+  env: { ...env },
 });
 
+// Add project routes, i.e. Project + `src/routes`
+// as a plugin to the PawJS system
 rHandler.addPlugin(new ProjectRoutes({ addPlugin: rHandler.addPlugin }));
 
 const cHandler = new ClientHandler({
-  env: assignIn({}, env),
+  env: { ...env },
 });
 cHandler.addPlugin(new ProjectClient({ addPlugin: cHandler.addPlugin }));
 

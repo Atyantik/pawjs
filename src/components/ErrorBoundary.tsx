@@ -1,7 +1,16 @@
 import React, { Component } from 'react';
 
-export default class ErrorBoundary extends Component {
-  constructor(props) {
+interface IErrorProps {
+  ErrorComponent: React.ComponentType<any>;
+}
+interface IErrorState {
+  hasError: boolean;
+  error: null | Error;
+  errorInfo: any;
+}
+
+class ErrorBoundary extends Component<React.PropsWithChildren<IErrorProps>, IErrorState> {
+  constructor(props: Readonly<React.PropsWithChildren<IErrorProps>>) {
     super(props);
     this.state = {
       hasError: false,
@@ -10,24 +19,25 @@ export default class ErrorBoundary extends Component {
     };
   }
 
-  componentDidCatch(error, info) {
+  componentDidCatch(error: Error, info: any) {
     // Display fallback UI
     this.setState({
-      hasError: true,
       error,
+      hasError: true,
       errorInfo: info,
     });
   }
 
   render() {
     const { hasError, error, errorInfo } = this.state;
-    // eslint-disable-next-line
     const { ErrorComponent, children } = this.props;
     if (hasError) {
       if (!ErrorComponent) { return null; }
       // You can render any custom fallback UI
-      return <ErrorComponent {...this.props} error={error} info={errorInfo} />;
+      return <ErrorComponent error={error} info={errorInfo} />;
     }
     return children;
   }
 }
+
+export default ErrorBoundary;

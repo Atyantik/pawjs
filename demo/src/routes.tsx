@@ -6,17 +6,17 @@ export default class Routes {
     router.hooks.initRoutes.tap('AddAppRoutes', () => {
       router.addRoutes([
         {
-          path: '/',
+          path: '/test',
           component: () => import('./components/home'),
-          skeleton: () => 'Loading',
-          error: () => 'Error',
-          timeout: 1,
-          delay: 0,
+          // skeleton: () => 'Loading',
+          // error: () => 'Error',
+          // timeout: 1,
+          // delay: 0,
           loadData: () => {},
           seo: {
             title: 'Minimal App',
           },
-          layout: () => import('./components/home'),
+          layout: () => import('./components/home-layout'),
         },
       ]);
     });

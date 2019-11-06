@@ -233,7 +233,10 @@ export default class RouteHandler extends AbstractPlugin {
     const routes = _cloneDeep(this.routes);
     routes.push({
       // @ts-ignore
-      component: () => this.get404Component(),
+      component: this.get404Component(),
+      seo: {
+        title: 'Page not found',
+      },
     });
     return routes;
   }

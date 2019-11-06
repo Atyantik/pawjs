@@ -1,7 +1,16 @@
-import _ from 'lodash';
+import get from 'lodash/get';
+import set from 'lodash/set';
+import isEmpty from 'lodash/isEmpty';
+import each from 'lodash/each';
+import find from 'lodash/find';
+import defaultsDeep from 'lodash/defaultsDeep';
+import cloneDeep from 'lodash/cloneDeep';
+import first from 'lodash/first';
+import isEqual from 'lodash/isEqual';
+import uniqWith from 'lodash/uniqWith';
 import { isBrowser } from './utils';
 
-const defaultMeta = pwaSchema => [
+const defaultMeta = (pwaSchema: any) => [
   {
     charSet: 'utf-8',
   },
@@ -23,7 +32,7 @@ const defaultMeta = pwaSchema => [
   },
   {
     name: 'application-name',
-    content: _.get(pwaSchema, 'name', ''),
+    content: get(pwaSchema, 'name', ''),
   },
   {
     name: 'generator',
@@ -43,23 +52,23 @@ const defaultMeta = pwaSchema => [
   },
   {
     name: 'apple-mobile-web-app-status-bar-style',
-    content: _.get(pwaSchema, 'theme_color', '#fff'),
+    content: get(pwaSchema, 'theme_color', '#fff'),
   },
   {
     name: 'apple-mobile-web-app-title',
-    content: _.get(pwaSchema, 'name', ''),
+    content: get(pwaSchema, 'name', ''),
   },
   {
     name: 'msapplication-tooltip',
-    content: _.get(pwaSchema, 'description', ''),
+    content: get(pwaSchema, 'description', ''),
   },
   {
     name: 'msapplication-starturl',
-    content: _.get(pwaSchema, 'start_url', ''),
+    content: get(pwaSchema, 'start_url', ''),
   },
   {
     name: 'msapplication-TileColor',
-    content: _.get(pwaSchema, 'background_color', '#fff'),
+    content: get(pwaSchema, 'background_color', '#fff'),
   },
   {
     name: 'renderer',
@@ -89,10 +98,10 @@ export const metaKeys = [
  * @param baseUrl
  * @returns {*}
  */
-const getFullUrl = (url, baseUrl = '') => {
+const getFullUrl = (url: string, baseUrl = '') => {
   let fullImageUrl = url;
-  if (!_.startsWith(fullImageUrl, 'http')) {
-    fullImageUrl = `${baseUrl}${!_.startsWith(fullImageUrl, '/') ? '/' : ''}${fullImageUrl}`;
+  if (!fullImageUrl.startsWith('http')) {
+    fullImageUrl = `${baseUrl}${!fullImageUrl.startsWith('/') ? '/' : ''}${fullImageUrl}`;
   }
   return fullImageUrl;
 };
@@ -103,10 +112,10 @@ const getFullUrl = (url, baseUrl = '') => {
  * @param meta
  * @returns {boolean|string}
  */
-const getMetaKey = (meta) => {
-  let selectedMetaKey = false;
-  _.each(metaKeys, (key) => {
-    if (!selectedMetaKey && _.get(meta, key, false)) {
+const getMetaKey = (meta: any): string => {
+  let selectedMetaKey: string = '';
+  each(metaKeys, (key) => {
+    if (!selectedMetaKey && get(meta, key, false)) {
       selectedMetaKey = key;
     }
   });
@@ -119,18 +128,18 @@ const getMetaKey = (meta) => {
  * @param source {Array}
  * @param customMetas {Array}
  */
-const addUpdateMeta = (source = [], customMetas = []) => {
-  _.each(customMetas, (meta) => {
+const addUpdateMeta = (source: any [] = [], customMetas: any [] = []) => {
+  each(customMetas, (meta) => {
     const metaKey = getMetaKey(meta);
     let metaUpdated = false;
     if (metaKey) {
       // Suppose we got a meta key in our generatedSchema
       // then we need to update the generated schema
-      const generatedSchemaObj = _.find(source, { [metaKey]: meta[metaKey] });
+      const generatedSchemaObj: any = find(source, { [metaKey]: meta[metaKey] });
 
       if (generatedSchemaObj) {
-        _.each(meta, (value, key) => {
-          _.set(generatedSchemaObj, key, value);
+        each(meta, (value, key) => {
+          set(generatedSchemaObj, key, value);
         });
         metaUpdated = true;
       }
@@ -163,10 +172,10 @@ export const generateMeta = (data = {}, options = {
   baseUrl: '', url: '', pwaSchema: {}, seoSchema: {},
 }) => {
   // deep defaults the seoSchema we have in config file and the data provided to us.
-  const seoData = _.defaultsDeep(data, options.seoSchema);
+  const seoData = defaultsDeep(data, options.seoSchema);
 
   // Let store the generated Schema in following variable
-  let generatedSchema = [];
+  let generatedSchema: any [] = [];
 
   const descriptionText = getTextFromHtml(seoData.description);
   // Get 155 words out of description
@@ -182,7 +191,7 @@ export const generateMeta = (data = {}, options = {
   const baseUrl = options.baseUrl.replace(/\/$/, '');
 
   // Add meta required for at top of head
-  addUpdateMeta(generatedSchema, _.cloneDeep(defaultMeta(options.pwaSchema)));
+  addUpdateMeta(generatedSchema, cloneDeep(defaultMeta(options.pwaSchema)));
 
   /**
    * Manage name/title
@@ -205,13 +214,13 @@ export const generateMeta = (data = {}, options = {
   /**
    * Manage keywords (allow string and array as well)
    */
-  if (_.isString(seoData.keywords) && seoData.keywords.trim().length) {
+  if (typeof seoData.keywords === 'string' && seoData.keywords.trim().length) {
     generatedSchema.push({
       name: 'keywords',
       content: seoData.keywords,
     });
   }
-  if (_.isArray(seoData.keywords) && seoData.keywords.length) {
+  if (Array.isArray(seoData.keywords) && seoData.keywords.length) {
     generatedSchema.push({
       name: 'keywords',
       content: seoData.keywords.join(','),
@@ -221,7 +230,7 @@ export const generateMeta = (data = {}, options = {
   /**
    * Manage twitter site & author
    */
-  const twitterSite = _.get(seoData, 'twitter.site', '');
+  const twitterSite = get(seoData, 'twitter.site', '');
   if (twitterSite.length) {
     generatedSchema.push({
       name: 'twitter:site',
@@ -229,7 +238,7 @@ export const generateMeta = (data = {}, options = {
     });
   }
 
-  const twitterCreator = _.get(seoData, 'twitter.creator', '');
+  const twitterCreator = get(seoData, 'twitter.creator', '');
   if (twitterCreator.length) {
     generatedSchema.push({
       name: 'twitter:creator',
@@ -240,7 +249,7 @@ export const generateMeta = (data = {}, options = {
   /**
    * Manage facebook admins
    */
-  const fbAdmins = _.get(seoData, 'facebook.admins', []);
+  const fbAdmins = get(seoData, 'facebook.admins', []);
   if (fbAdmins && fbAdmins.length) {
     generatedSchema.push({
       property: 'fb:admins',
@@ -282,11 +291,11 @@ export const generateMeta = (data = {}, options = {
 
   if (hasImage) {
     let images = hasImage ? seoData.image : [];
-    if (!_.isArray(images)) {
+    if (!Array.isArray(images)) {
       images = [images];
     }
 
-    const image = _.first(images);
+    const image: string = first(images) || '';
     const fullImageUrl = getFullUrl(image, baseUrl);
     generatedSchema.push({
       itemProp: 'image',
@@ -297,7 +306,7 @@ export const generateMeta = (data = {}, options = {
       content: fullImageUrl,
     });
     if (image.length > 1) {
-      _.each(images, (img) => {
+      each(images, (img) => {
         generatedSchema.push({
           property: 'og:image',
           content: getFullUrl(img, baseUrl),
@@ -331,10 +340,10 @@ export const generateMeta = (data = {}, options = {
   });
 
   let twitterDataCounter = 1;
-  _.each(seoData.type_details, (value, key) => {
-    if (_.isObject(value)) {
-      _.each(value, (subValue, subKey) => {
-        if (!_.isEmpty(subValue)) {
+  each(seoData.type_details, (value, key) => {
+    if (typeof value === 'object' && value !== null) {
+      each(value, (subValue, subKey) => {
+        if (!isEmpty(subValue)) {
           generatedSchema.push({
             property: `${seoData.type}:${key}:${subKey}`,
             content: subValue,
@@ -350,7 +359,7 @@ export const generateMeta = (data = {}, options = {
           twitterDataCounter += 1;
         }
       });
-    } else if (!_.isEmpty(value)) {
+    } else if (!isEmpty(value)) {
       generatedSchema.push({
         property: `${seoData.type}:${key}`,
         content: value,
@@ -367,9 +376,9 @@ export const generateMeta = (data = {}, options = {
     }
   });
 
-  let url = _.get(seoData, 'url', _.get(options, 'url', ''));
+  let url = get(seoData, 'url', get(options, 'url', ''));
   if (!url.length && isBrowser()) {
-    url = _.get(window, 'location.href', '');
+    url = get(window, 'location.href', '');
   }
   if (url.trim().length) {
     generatedSchema.push({
@@ -378,10 +387,10 @@ export const generateMeta = (data = {}, options = {
     });
   }
 
-  const userMeta = _.get(seoData, 'meta', []);
+  const userMeta = get(seoData, 'meta', []);
   addUpdateMeta(generatedSchema, userMeta);
 
-  generatedSchema = _.uniqWith(generatedSchema, _.isEqual);
+  generatedSchema = uniqWith(generatedSchema, isEqual);
 
   return generatedSchema;
 };
@@ -395,10 +404,10 @@ export const generateMeta = (data = {}, options = {
  * @param length
  * @returns String
  */
-export const trimTillLastSentence = (str, length = 0) => {
+export const trimTillLastSentence = (str: string, length = 0) => {
   // Get pure text from string provided, necessary
   // to remove html tags
-  let strr = getTextFromHtml(str);
+  let strr: string = getTextFromHtml(str);
 
   // If no min length specified or no string
   // length then return string

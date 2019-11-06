@@ -16,7 +16,9 @@
     "exclude": [
       "**/node_modules/**",
       "node_modules/**",
-      "demo/**"
+      "demo/**",
+      "src/__tests__",
+      "src/babel"
     ]
   }
 }

@@ -1,5 +1,6 @@
 import { RouteComponentProps, RouteProps } from 'react-router';
 import { ComponentType } from 'react';
+import { RouteConfig } from 'react-router-config';
 
 interface IComponent {
   loadedData?: any;
@@ -12,7 +13,7 @@ export type ReactComponent = ComponentType<RouteComponentProps<any>>
   | ComponentType<IComponent>;
 export type RouteComponent = Promise<ReactComponent>;
 
-export interface Route extends RouteProps {
+export interface IRoute extends RouteProps {
   path?: string;
   getRouteSeo?: any;
   compiled: boolean;
@@ -21,10 +22,12 @@ export interface Route extends RouteProps {
   layout?: RouteComponent;
   loadData?: any;
   seo?: any;
-  routes?: Route [];
+  routes?: (Route) [];
   skeleton?: RouteComponent;
-  component?: RouteComponent;
+  component?: RouteComponent & { preload: any };
   timeout?: number;
   modules?: string [];
   webpack?: string [];
 }
+
+export type Route = IRoute & RouteConfig;

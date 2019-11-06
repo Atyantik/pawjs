@@ -1,5 +1,6 @@
 import {
-  AsyncSeriesHook,
+  AsyncParallelBailHook,
+  AsyncSeriesHook, SyncHook,
 } from 'tapable';
 
 import React from 'react';
@@ -13,8 +14,23 @@ import ErrorBoundary from '../components/ErrorBoundary';
 import { generateMeta } from '../utils/seo';
 import AbstractPlugin from '../abstract-plugin';
 
+type Options = {
+  env: any;
+};
+
 export default class ServerHandler extends AbstractPlugin {
-  constructor(options) {
+  options: Options;
+
+  hooks: {
+    beforeStart: AsyncSeriesHook<any>,
+    afterStart: AsyncSeriesHook<any>,
+    beforeLoadData: AsyncSeriesHook<any>,
+    beforeAppRender: AsyncSeriesHook<any>,
+    beforeHtmlRender: AsyncSeriesHook<any>,
+    renderRoutes: AsyncSeriesHook<any>,
+  };
+
+  constructor(options: Options) {
     super();
     this.addPlugin = this.addPlugin.bind(this);
     this.hooks = {
@@ -30,7 +46,7 @@ export default class ServerHandler extends AbstractPlugin {
 
   async run({
     routeHandler, req, res, next, assets, cssDependencyMap,
-  }) {
+  }: any) {
     const {
       asyncCSS,
       serverSideRender,
@@ -40,12 +56,12 @@ export default class ServerHandler extends AbstractPlugin {
 
     let routes = routeHandler.getRoutes();
     let renderedHtml = '';
-    let context = {};
-    let promises = [];
-    const preloadedData = [];
-    const cssToBeIncluded = [];
-    const cssToBePreloaded = [];
-    const modulesInRoutes = ['pawProjectClient'];
+    let context:any = {};
+    let promises: Promise<any> [] = [];
+    const preloadedData: any[] = [];
+    const cssToBeIncluded: string[] = [];
+    const cssToBePreloaded: string[] = [];
+    const modulesInRoutes: string[] = ['pawProjectClient'];
 
     const seoSchema = routeHandler.getDefaultSeoSchema();
     const pwaSchema = routeHandler.getPwaSchema();
@@ -55,7 +71,7 @@ export default class ServerHandler extends AbstractPlugin {
       res.status(200).type('text/html');
       res.write('<!DOCTYPE html>');
       modulesInRoutes.forEach((mod) => {
-        cssDependencyMap.forEach((c) => {
+        cssDependencyMap.forEach((c: { modules: string[], path: string }) => {
           if (_.indexOf(c.modules, mod) !== -1) {
             if (!asyncCSS) {
               cssToBeIncluded.push(c.path);
@@ -70,36 +86,45 @@ export default class ServerHandler extends AbstractPlugin {
 
       const metaTags = generateMeta({}, {
         baseUrl,
-        url: fullUrl,
         seoSchema,
         pwaSchema,
+        url: fullUrl,
       });
 
       const htmlProps = {
         assets,
         noJS,
-        cssFiles: cssToBeIncluded,
-        preloadCssFiles: cssToBePreloaded.length >= 1,
         metaTags,
         pwaSchema,
+        cssFiles: cssToBeIncluded,
+        preloadCssFiles: cssToBePreloaded.length >= 1,
         head: [],
         footer: [],
         env: _.assignIn({}, this.options.env),
       };
 
-      const Application = {
+      const application = {
+        context,
         htmlProps,
         children: null,
-        context,
         currentRoutes: currentPageRoutes.slice(0),
         routes: routes.slice(0),
       };
 
-      await new Promise(r => this.hooks.beforeHtmlRender.callAsync(Application, req, res, r));
+      await new Promise(r => this.hooks.beforeHtmlRender.callAsync(application, req, res, r));
 
       renderedHtml = renderToString(
+        // tslint:disable-next-line:jsx-wrap-multiline
         <Html
-          {...htmlProps}
+          assets={htmlProps.assets}
+          noJS={htmlProps.noJS}
+          metaTags={htmlProps.metaTags}
+          pwaSchema={htmlProps.pwaSchema}
+          cssFiles={htmlProps.cssFiles}
+          preloadCssFiles={htmlProps.preloadCssFiles}
+          head={htmlProps.head}
+          footer={htmlProps.footer}
+          env={htmlProps.env}
           appRootUrl={appRootUrl}
           clientRootElementId={this.options.env.clientRootElementId}
         />,
@@ -116,16 +141,14 @@ export default class ServerHandler extends AbstractPlugin {
       return next();
     }
 
-    console.log(currentPageRoutes[0].route.modules);
-
-    currentPageRoutes.forEach(({ route }) => {
+    currentPageRoutes.forEach(({ route }: { route: { modules: string[] } }) => {
       if (route.modules) {
         modulesInRoutes.push(...route.modules);
       }
     });
 
     modulesInRoutes.forEach((mod) => {
-      cssDependencyMap.forEach((c) => {
+      cssDependencyMap.forEach((c: { modules: string[], path: string }) => {
         if (_.indexOf(c.modules, mod) !== -1) {
           if (!asyncCSS) {
             cssToBeIncluded.push(c.path);
@@ -147,7 +170,7 @@ export default class ServerHandler extends AbstractPlugin {
         r,
       ));
 
-    currentPageRoutes.forEach(({ route, match }) => {
+    currentPageRoutes.forEach(({ route, match }: any) => {
       if (route.component.preload) {
         promises.push(
           route.component.preload(
@@ -164,7 +187,7 @@ export default class ServerHandler extends AbstractPlugin {
     try {
       const promisesData = await Promise.all(promises);
       let seoData = {};
-      currentPageRoutes.forEach((r, i) => {
+      currentPageRoutes.forEach((r: { route: any, match: any}, i: number) => {
         if (r.route.getRouteSeo) {
           seoData = _.assignIn(seoData, r.route.seo, r.route.getRouteSeo());
         }
@@ -176,52 +199,61 @@ export default class ServerHandler extends AbstractPlugin {
       const fullUrl = `${baseUrl}${req.originalUrl}`;
       const metaTags = generateMeta(seoData, {
         baseUrl,
-        url: fullUrl,
         seoSchema,
         pwaSchema,
+        url: fullUrl,
       });
       const htmlProps = {
         noJS,
         assets,
-        cssFiles: cssToBeIncluded,
-        preloadCssFiles: cssToBePreloaded.length >= 1,
         preloadedData,
         metaTags,
         pwaSchema,
+        cssFiles: cssToBeIncluded,
+        preloadCssFiles: cssToBePreloaded.length >= 1,
         head: [],
         footer: [],
         env: _.assignIn({}, this.options.env),
       };
 
-      const AppRoutes = {
+      const appRoutes = {
         renderedRoutes: renderRoutes(routes),
-        setRenderedRoutes: (r) => {
-          AppRoutes.renderedRoutes = r;
+        setRenderedRoutes: (r: JSX.Element) => {
+          appRoutes.renderedRoutes = r;
         },
-        getRenderedRoutes: () => AppRoutes.renderedRoutes,
+        getRenderedRoutes: () => appRoutes.renderedRoutes,
       };
-      await new Promise(r => this.hooks.renderRoutes.callAsync({
-        setRenderedRoutes: AppRoutes.setRenderedRoutes,
-        getRenderedRoutes: AppRoutes.getRenderedRoutes,
-      }, req, res, r));
-      const Application = {
+      await new Promise(
+        r => this.hooks.renderRoutes.callAsync(
+          {
+            setRenderedRoutes: appRoutes.setRenderedRoutes,
+            getRenderedRoutes: appRoutes.getRenderedRoutes,
+          },
+          req,
+          res,
+          r,
+        ),
+      );
+      const application = {
+        context,
         htmlProps,
         children: (
           <StaticRouter location={req.url} context={context} basename={appRootUrl}>
-            {AppRoutes.renderedRoutes}
+            {appRoutes.renderedRoutes}
           </StaticRouter>
         ),
-        context,
         currentRoutes: currentPageRoutes.slice(0),
         routes: routes.slice(0),
       };
 
-      await new Promise(r => this.hooks.beforeAppRender.callAsync(Application, req, res, r));
+      await new Promise(r => this.hooks.beforeAppRender.callAsync(application, req, res, r));
 
       const htmlContent = this.options.env.singlePageApplication ? '' : renderToString(
-        <ErrorBoundary ErrorComponent={routeHandler.getErrorComponent()}>
-          {Application.children}
-        </ErrorBoundary>,
+        (
+          <ErrorBoundary ErrorComponent={routeHandler.getErrorComponent()}>
+            {application.children}
+          </ErrorBoundary>
+        ),
       );
       if (context.url) {
         // can use the `context.status` that
@@ -230,16 +262,24 @@ export default class ServerHandler extends AbstractPlugin {
         return next();
       }
 
-      await new Promise(r => this.hooks.beforeHtmlRender.callAsync(Application, req, res, r));
+      await new Promise(r => this.hooks.beforeHtmlRender.callAsync(application, req, res, r));
       renderedHtml = renderToString(
-        <Html
-          {...Application.htmlProps}
-          appRootUrl={appRootUrl}
-          clientRootElementId={this.options.env.clientRootElementId}
-          dangerouslySetInnerHTML={{
-            __html: htmlContent,
-          }}
-        />,
+        (
+          <Html
+            assets={htmlProps.assets}
+            noJS={htmlProps.noJS}
+            metaTags={htmlProps.metaTags}
+            pwaSchema={htmlProps.pwaSchema}
+            cssFiles={htmlProps.cssFiles}
+            preloadCssFiles={htmlProps.preloadCssFiles}
+            head={htmlProps.head}
+            footer={htmlProps.footer}
+            env={htmlProps.env}
+            appRootUrl={appRootUrl}
+            clientRootElementId={this.options.env.clientRootElementId}
+            dangerouslySetInnerHTML={{ __html: htmlContent }}
+          />
+        ),
       );
 
       renderedHtml = renderedHtml.replace(
@@ -257,22 +297,27 @@ export default class ServerHandler extends AbstractPlugin {
       // Free some memory
       routes = null;
       currentPageRoutes = null;
-      context = null;
-      promises = null;
+      context = {};
+      promises = [];
       return next();
     } catch (ex) {
-      const ErrorComponent = routeHandler.getErrorComponent();
+      const components = {
+        errorComponent: routeHandler.getErrorComponent(),
+      };
       renderedHtml = renderToString(
-        <Html
-          noJS={noJS}
-          clientRootElementId={this.options.env.clientRootElementId}
-          assets={assets}
-          cssFiles={cssToBeIncluded}
-          preloadCssFiles={cssToBePreloaded.length >= 1}
-          pwaSchema={pwaSchema}
-        >
-          <ErrorComponent error={ex} />
-        </Html>,
+        (
+          <Html
+            noJS={noJS}
+            clientRootElementId={this.options.env.clientRootElementId}
+            assets={assets}
+            cssFiles={cssToBeIncluded}
+            preloadCssFiles={cssToBePreloaded.length >= 1}
+            pwaSchema={pwaSchema}
+            appRootUrl={appRootUrl}
+          >
+            <components.errorComponent error={ex} />
+          </Html>
+        ),
       );
 
       renderedHtml = renderedHtml.replace(

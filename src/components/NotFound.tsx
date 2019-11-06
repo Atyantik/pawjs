@@ -1,8 +1,7 @@
 import React from 'react';
 import Status from './RouteStatus';
 
-export default (props) => {
-  // eslint-disable-next-line
+export default (props: { location: any }) => {
   const { location } = props;
   return (
     <Status code={404}>
