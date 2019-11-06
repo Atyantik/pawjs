@@ -1,6 +1,6 @@
 {
   "name": "@pawjs/sass",
-  "version": "2.2.1",
+  "version": "2.2.2",
   "description": "Add Sass support to your project",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -13,9 +13,9 @@
     "@pawjs/pawjs": "^2.0.0"
   },
   "dependencies": {
-    "node-sass": "^4.12.0",
-    "sass-loader": "^7.1.0",
-    "tapable": "^2.0.0-beta.3"
+    "node-sass": "^4.13.0",
+    "sass-loader": "^8.0.0",
+    "tapable": "^2.0.0-beta.8"
   },
   "main": "webpack.js",
   "repository": {

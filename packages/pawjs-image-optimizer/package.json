@@ -1,6 +1,6 @@
 {
   "name": "@pawjs/image-optimizer",
-  "version": "2.2.2",
+  "version": "2.2.3",
   "description": "Add Webpack Image Loader support to your PAWJS application",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -13,7 +13,7 @@
     "@pawjs/pawjs": "^2.0.0"
   },
   "dependencies": {
-    "image-webpack-loader": "^5.0.0"
+    "image-webpack-loader": "^6.0.0"
   },
   "main": "webpack.js",
   "repository": {

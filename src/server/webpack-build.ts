@@ -10,9 +10,13 @@ import CopyWebpackPlugin from 'copy-webpack-plugin';
 import pawConfig from '../config';
 import directories from '../webpack/utils/directories';
 import wHandler from '../webpack';
+// @ts-ignore
 import webRule from '../webpack/inc/babel-web-rule';
+// @ts-ignore
 import serverRule from '../webpack/inc/babel-server-rule';
+// @ts-ignore
 import SyncedFilesPlugin from '../webpack/plugins/synced-files-plugin';
+// @ts-ignore
 import ExtractEmittedAssets from '../webpack/plugins/extract-emitted-assets';
 
 const isVerbose = process.env.PAW_VERBOSE === 'true';
@@ -389,6 +393,7 @@ try {
       if (pawConfig.singlePageApplication) {
         // eslint-disable-next-line
         console.log('Creating static files...');
+        // @ts-ignore
         const outputConfig = serverConfig[0].output;
         // eslint-disable-next-line
         let server = require(pawExistsSync(path.join(outputConfig.path, outputConfig.filename)));
