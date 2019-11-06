@@ -26,14 +26,17 @@ export default (wStats: Stats): INormalizeAssets => {
     && webpackStats.children
     && webpackStats.children.length === 1
   ) {
+    // @ts-ignore
     webpackStats = webpackStats.children;
   }
 
   if (!isArray(webpackStats)) {
+    // @ts-ignore
     webpackStats = [webpackStats];
   }
 
   each(webpackStats, (stat) => {
+    // @ts-ignore
     const { assetsByChunkName: a, publicPath } = stat;
 
     each(a, (chunkValue, chunkName) => {
@@ -58,6 +61,7 @@ export default (wStats: Stats): INormalizeAssets => {
       }
     });
 
+    // @ts-ignore
     each(stat.chunks, (chunk) => {
       let hasCSS = false;
       let cssFileName = '';

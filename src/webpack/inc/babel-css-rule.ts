@@ -12,7 +12,7 @@ const defaultOptions = {
   hot: false,
 };
 
-export default (options: any) => {
+export default (options: any = {}) => {
   const o = assignIn({}, defaultOptions, options);
   return [
     {

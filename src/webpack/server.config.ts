@@ -6,8 +6,11 @@ import cssRule from './inc/babel-css-rule';
 import imageRule from './inc/babel-image-rule';
 import directories from './utils/directories';
 import pawConfig from '../config';
+// @ts-ignore
 import resolverConfig from './inc/webpack-resolver-config';
+// @ts-ignore
 import serverRule from './inc/babel-server-rule';
+// @ts-ignore
 import fontRule from './inc/babel-font-rule';
 
 const isProduction = process.env.PAW_ENV === 'production';
@@ -16,7 +19,7 @@ export default {
   name: 'server',
   mode: isProduction ? 'production' : 'development',
   target: 'node',
-  entry: pawExistsSync(path.join(process.env.LIB_ROOT, './src/server/server')),
+  entry: pawExistsSync(path.join(process.env.LIB_ROOT || '', './src/server/server')),
   module: {
     rules: [
       serverRule({ hot: false, noChunk: true, cacheDirectory: process.env.PAW_CACHE === 'true' }),
