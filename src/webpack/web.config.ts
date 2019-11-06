@@ -4,13 +4,17 @@ import WorkboxPlugin from 'workbox-webpack-plugin';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 import webpack from 'webpack';
 import fs from 'fs';
+import { BundleAnalyzerPlugin } from 'webpack-bundle-analyzer';
 import cssRule from './inc/babel-css-rule';
 import imageRule from './inc/babel-image-rule';
 import SwVariables from './plugins/sw-variables';
 import directories from './utils/directories';
+// @ts-ignore
 import webRule from './inc/babel-web-rule';
+// @ts-ignore
 import resolverConfig from './inc/webpack-resolver-config';
 import pawConfig from '../config';
+// @ts-ignore
 import fontRule from './inc/babel-font-rule';
 
 let projectSW = '';
@@ -20,16 +24,10 @@ if (fs.existsSync(path.join(directories.src, 'sw.js'))) {
 
 const isHot = typeof process.env.PAW_HOT !== 'undefined' ? process.env.PAW_HOT === 'true' : false;
 
-const devPlugins = [];
-// try {
-//   if (require.resolve('webpack-bundle-analyzer')) {
-//     const WebpackBundleAnalyzer = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
-//     devPlugins.push(new WebpackBundleAnalyzer());
-//   }
-// } catch (e) {
-//   // eslint-disable-next-line
-//   console.warn("Webpack bundle analyzer not found!");
-// }
+const devPlugins: webpack.Plugin [] = [];
+if (process.env.PAW_DEBUG === 'true') {
+  devPlugins.push(new BundleAnalyzerPlugin());
+}
 export default {
   name: 'web',
   target: 'web',
@@ -39,7 +37,7 @@ export default {
     client: [
       ...(pawConfig.polyfill === 'cdn' ? [] : ['@babel/polyfill']),
       // Initial entry point for dev
-      pawExistsSync(path.join(process.env.LIB_ROOT, './src/client/app')),
+      pawExistsSync(path.join(process.env.LIB_ROOT || '', './src/client/app')),
     ],
   },
   output: {
@@ -96,7 +94,7 @@ export default {
     })]),
     ...(pawConfig.serviceWorker ? [
       new WorkboxPlugin.InjectManifest({
-        swSrc: pawExistsSync(path.join(process.env.LIB_ROOT, 'src', 'service-worker')),
+        swSrc: pawExistsSync(path.join(process.env.LIB_ROOT || '', 'src', 'service-worker')),
         swDest: 'sw.js',
       }),
       new SwVariables({
