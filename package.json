@@ -1,9 +1,11 @@
 {
   "name": "@pawjs/pawjs",
-  "version": "3.0.0-alpha.21",
+  "version": "3.0.0-alpha.22",
   "description": "A minimal pluggable reactjs framework to develop a progressive web application",
   "main": "pawj.js",
-  "engines" : { "node" : ">=10.0.0" },
+  "engines": {
+    "node": ">=10.0.0"
+  },
   "scripts": {
     "prepare-demo": "node ./prepare-packages.js && cd demo && npm install && cd ..",
     "build": "npm run build:prod",
