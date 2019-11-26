@@ -73,6 +73,12 @@ const createLoadableComponent = (
   }
 
   const loadableComponent = withRouter((props: any) => {
+    const {
+      history: propsHistory,
+      location: propsLocation,
+      match: propsMatch,
+      route: propsRoute,
+    } = props;
     const resReference = useRef(
       (res && res.completed)
         ? res : init(undefined, props),
@@ -196,7 +202,7 @@ const createLoadableComponent = (
       ],
     );
 
-    const [location, setLocation] = useState(props.history.location);
+    const [location, setLocation] = useState(propsLocation);
     const historyCallback = useCallback(
       (newLocation) => {
         // @ts-ignore
@@ -256,6 +262,10 @@ const createLoadableComponent = (
           pastDelay={loadableState.pastDelay}
           timedOut={loadableState.timedOut}
           error={loadableState.error}
+          history={propsHistory}
+          location={propsLocation}
+          match={propsMatch}
+          route={propsRoute}
         />
       );
     }

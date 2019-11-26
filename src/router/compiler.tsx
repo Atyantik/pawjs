@@ -80,12 +80,32 @@ export default class RouteCompiler {
           pastDelay,
           timedOut,
           retry,
+          history: propsHistory,
+          location: propsLocation,
+          match: propsMatch,
+          route: propsRoute,
         } = props;
         if (err instanceof NotFoundError) {
-          return <PARAMS.notFoundComponent error={err} />;
+          return (
+            <PARAMS.notFoundComponent
+              error={err}
+              history={propsHistory}
+              location={propsLocation}
+              match={propsMatch}
+              route={propsRoute}
+            />
+          );
         }
         if (err) {
-          return <PARAMS.errorComponent error={err} />;
+          return (
+            <PARAMS.errorComponent
+              error={err}
+              history={propsHistory}
+              location={propsLocation}
+              match={propsMatch}
+              route={propsRoute}
+            />
+          );
         } if (pastDelay) {
           return (
             <PARAMS.skeletonComponent
@@ -93,6 +113,10 @@ export default class RouteCompiler {
               pastDelay={pastDelay}
               timedOut={timedOut}
               retry={retry}
+              history={propsHistory}
+              location={propsLocation}
+              match={propsMatch}
+              route={propsRoute}
             />
           );
         }
@@ -122,24 +146,35 @@ export default class RouteCompiler {
           components.routeComponent = RouteComponent.default;
         }
         const {
-          route: currentRoute,
           props: componentProps,
+          history: propsHistory,
+          location: propsLocation,
+          match: propsMatch,
+          route: propsRoute,
         } = props;
 
         components.routeComponent = (
           <components.routeComponent
             // eslint-disable-next-line react/jsx-props-no-spreading
             {...componentProps}
-            route={currentRoute}
+            history={propsHistory}
+            location={propsLocation}
+            match={propsMatch}
+            route={propsRoute}
             loadedData={loadedData}
           />
         );
 
         if (components.layout) {
           return (
-            <ErrorBoundary ErrorComponent={PARAMS.errorComponent}>
+            <ErrorBoundary
+              ErrorComponent={PARAMS.errorComponent}
+            >
               <components.layout
-                route={currentRoute}
+                history={propsHistory}
+                location={propsLocation}
+                match={propsMatch}
+                route={propsRoute}
                 loadedData={loadedData}
               >
                 {components.routeComponent}
