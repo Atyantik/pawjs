@@ -41,7 +41,6 @@ export default class PawImageOptimizerWebpack {
               options: {
                 outputStyle: doCompress ? 'compressed' : 'expanded',
                 sourceMap,
-                sourceMapContents: sourceMap,
               },
             });
 
