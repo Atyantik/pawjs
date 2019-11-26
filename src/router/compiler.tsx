@@ -4,7 +4,7 @@ import { Map } from '../components/Loadable';
 import { CompiledRoute, ReactComponent, Route } from '../@types/route';
 import NotFoundError from '../errors/not-found';
 import ServerError from '../errors/server';
-import ErrorBoundary from "../components/ErrorBoundary";
+import ErrorBoundary from '../components/ErrorBoundary';
 
 export default class RouteCompiler {
   public preloadManager: PreloadDataManager;
