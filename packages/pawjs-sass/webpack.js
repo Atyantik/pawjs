@@ -39,7 +39,6 @@ export default class PawImageOptimizerWebpack {
             newUse.push({
               loader: 'sass-loader',
               options: {
-                outputStyle: doCompress ? 'compressed' : 'expanded',
                 sourceMap,
               },
             });
