@@ -50,7 +50,6 @@ export default class PawImageOptimizerWebpack {
               use: newUse,
             });
           });
-
           c.module.rules = [...c.module.rules, ...sassRules];
         });
       } catch (ex) {
