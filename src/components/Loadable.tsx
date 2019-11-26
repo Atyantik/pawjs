@@ -115,11 +115,9 @@ const createLoadableComponent = (
 
     useEffect(
       () => {
-        console.log('mounting...');
         isMounted.current = true;
         return () => {
           isMounted.current = false;
-          console.log('un-mounting...');
           clearTimeouts();
         };
       },
