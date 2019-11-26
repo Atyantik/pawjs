@@ -1,97 +1,8 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { withRouter } from 'react-router';
-
-type LoadableState = {
-  loading: boolean;
-  loaded: any;
-  error?: Error | null;
-  promise?: Promise<any>;
-};
-
-const load = (
-  loader: (arg0: any) => Promise<any>,
-  props?: any,
-): LoadableState => {
-  const p = loader(props);
-  let promise = p;
-  if (typeof p.then === 'undefined') {
-    promise = new Promise(res => res(p));
-  }
-  const state: LoadableState = {
-    loading: true,
-    loaded: null,
-  };
-
-  state.promise = promise.then((loaded) => {
-    state.loading = false;
-    state.loaded = loaded;
-    return loaded;
-  }).catch((err: Error) => {
-    state.loading = false;
-    state.error = err;
-    throw err;
-  });
-  return state;
-};
-
-const loadMap = (
-  obj: any,
-  loadedData: any,
-  props: any,
-): LoadableState => {
-  const state: LoadableState = {
-    loading: false,
-    loaded: {},
-  };
-
-  const promises: Promise<any> [] = [];
-  try {
-    Object.keys(obj).forEach((key) => {
-      let result = null;
-      if (key === 'LoadData' && loadedData) {
-        result = {
-          loading: false,
-          loaded: loadedData,
-          promise: (async () => loadedData)(),
-        };
-      } else {
-        if (key === 'LoadData') {
-          result = load(obj[key], props);
-        } else {
-          result = load(obj[key]);
-        }
-
-        if (!result.loading) {
-          state.loaded[key] = result.loaded;
-          state.error = result.error;
-        } else {
-          state.loading = true;
-        }
-      }
-
-      if (result.promise) {
-        promises.push(result.promise);
-        result.promise.then((res) => {
-          state.loaded[key] = res;
-        }).catch((err) => {
-          state.error = err;
-        });
-      }
-    });
-  } catch (err) {
-    state.error = err;
-  }
-
-  state.promise = Promise.all(promises).then((res) => {
-    state.loading = false;
-    return res;
-  }).catch((err) => {
-    state.loading = false;
-    throw err;
-  });
-
-  return state;
-};
+import React, {
+  useCallback,
+  useEffect, useReducer, useRef, useState,
+} from 'react';
+import loadMap, { load, LoadableState } from '../utils/loadable';
 
 // eslint-disable-next-line no-underscore-dangle
 const resolve = (obj: any) => (obj && obj.__esModule ? obj.default : obj);
@@ -106,7 +17,7 @@ const createLoadableComponent = (
   },
 ) => {
   if (!options.loading) {
-    throw new Error('react-loadable requires a `loading` component');
+    throw new Error('loadable requires a `loading` component');
   }
 
   const opts = {
@@ -116,13 +27,16 @@ const createLoadableComponent = (
     delay: 200,
     timeout: 0,
     webpack: [],
-    modules: null,
+    modules: [],
     loadedData: null,
-    loadDataCache: false,
     ...options,
   };
 
-  let res: LoadableState | null = null;
+  /**
+   * Cached res object so the promise or loading
+   * is not executed multiple times
+   */
+  let res: LoadableState;
   const init = (loadedData: any, props: any): LoadableState => {
     if (!res) {
       res = loadFn(opts.loader, loadedData, props);
@@ -133,56 +47,63 @@ const createLoadableComponent = (
     return res;
   };
 
-  const loadableComponent = (props: any) => {
-    const {
-      match,
-      route,
-      location,
-      ...otherProps
-    } = props;
-    /* eslint-disable react-hooks/rules-of-hooks */
-    const resReference = useRef(init(undefined, {
-      match,
-      route,
-      ...otherProps,
-    }));
-    const updateRes = (loadedData = undefined, extraProps: any) => {
-      resReference.current = init(loadedData, extraProps);
-      return resReference;
-    };
+  const initialState = {
+    loading: false,
+    error: null,
+    pastDelay: false,
+    timedOut: false,
+  };
 
-    const [error, setError] = useState(
-      resReference
-        && resReference.current
-        && resReference.current.error
-        ? resReference.current.error
-        : undefined,
-    );
-    const [loading, setLoading] = useState(
-      resReference
-      && resReference.current
-        ? resReference.current.loading
-        : true,
-    );
-    const [loaded, setLoaded] = useState(
-      resReference
-        && resReference.current
-        ? resReference.current.loaded
-        : null,
-    );
-    if (resReference && resReference.current && resReference.current.promise) {
-      resReference.current.promise.then(() => {
-        setError(resReference.current.error
-          ? resReference.current.error
-          : undefined);
-        setLoading(resReference.current.loading);
-        setLoaded(resReference.current.loaded);
-      });
+  function reducer(state: any = initialState, action: any) {
+    switch (action.type) {
+      case 'SET_ERROR':
+        return { ...state, ...{ error: action.error } };
+      case 'SET_LOADING':
+        return { ...state, ...{ loading: action.loading } };
+      case 'SET_PAST_DELAY':
+        return { ...state, ...{ pastDelay: action.pastDelay } };
+      case 'SET_TIMED_OUT':
+        return { ...state, ...{ timedOut: action.timedOut } };
+      case 'UPDATE':
+        return { ...state, ...action.payload };
+      default:
+        return state;
     }
-    const [pastDelay, setPastDelay] = useState(opts.delay <= 0);
+  }
+
+  const useLoadableComponent = (props: any) => {
+    const resReference = useRef(
+      (res && res.completed)
+        ? res : init(undefined, props),
+    );
+    const [previousCompleted, setPreviousCompleted] = useState(resReference.current.completed);
+    useEffect(
+      () => {
+        setPreviousCompleted(resReference.current.completed);
+      },
+      [
+        resReference.current.completed,
+      ],
+    );
+    const [
+      loadableState,
+      updateLoadableState,
+    ] = useReducer(
+      reducer,
+      {
+        ...initialState,
+        ...{
+          loading: resReference.current.loading,
+          error: resReference.current.error,
+          pastDelay: opts.delay <= 0,
+        },
+      },
+    );
     const pastDelayTimeoutRef: any = useRef();
-    const [timedOut, setTimedOut] = useState(false);
     const timedOutTimeoutRef: any = useRef();
+    const isMounted = useRef(false);
+    const isModuleLoading = useRef(false);
+
     const clearTimeouts = () => {
       if (pastDelayTimeoutRef.current) {
         clearTimeout(pastDelayTimeoutRef.current);
@@ -191,107 +112,130 @@ const createLoadableComponent = (
         clearTimeout(timedOutTimeoutRef.current);
       }
     };
-    const componentState = useRef({ mounted: false });
+
     useEffect(
       () => {
-        componentState.current = { mounted: true };
+        console.log('mounting...');
+        isMounted.current = true;
         return () => {
-          componentState.current = { mounted: false };
+          isMounted.current = false;
+          console.log('un-mounting...');
+          clearTimeouts();
+        };
+      },
+      [],
+    );
+    const loadModule = useCallback(
+      () => {
+        if (
+          // Do not load if current res reference is not present
+          !resReference
+          || (resReference.current.completed && previousCompleted)
+          // If module is already loaded, then we do not need to load it twice
+          || isModuleLoading.current
+          // Also, Do not load if current component is not mounted anymore
+          || !isMounted.current
+        ) {
+          return false;
+        }
+        isModuleLoading.current = true;
+        // Clear previous timeouts
+        clearTimeouts();
+
+        if (opts.delay > 0) {
+          pastDelayTimeoutRef.current = setTimeout(
+            () => {
+              if (isMounted.current) {
+                isModuleLoading.current = false;
+                updateLoadableState({ type: 'SET_PAST_DELAY', pastDelay: true });
+              }
+            },
+            opts.delay,
+          );
+        }
+        if (opts.timeout) {
+          timedOutTimeoutRef.current = setTimeout(
+            () => {
+              if (isMounted.current) {
+                isModuleLoading.current = false;
+                updateLoadableState({ type: 'SET_TIMED_OUT', timedOut: true });
+              }
+            },
+            opts.timeout,
+          );
+        }
+
+        if (resReference.current.promise) {
+          resReference.current.promise
+            .finally(() => {
+              if (isMounted.current) {
+                clearTimeouts();
+                updateLoadableState({
+                  type: 'UPDATE',
+                  payload: {
+                    loading: resReference.current.loading,
+                    error: resReference.current.error,
+                  },
+                });
+              }
+              isModuleLoading.current = false;
+            });
+        }
+        return true;
+      },
+      [
+        previousCompleted,
+      ],
+    );
+    useEffect(
+      () => {
+        loadModule();
+        return () => {
+          // @ts-ignore
+          res = null;
+          resReference.current = {
+            completed: false,
+            resource: null,
+            loading: false,
+            error: null,
+          };
         };
       },
       [],
     );
 
-    const loadModule = () => {
-      if (
-        // Do not load if current res reference is not present
-        !resReference.current
-        // Also, Do not load if current res reference is already loading
-        || !resReference.current.loading
-        // Also, Do not load if current component is not mounted anymore
-        || !componentState.current.mounted
-      ) {
-        return false;
-      }
-      // Clear previous timeouts
-      clearTimeouts();
-
-      if (opts.delay === 0) {
-        // If no delay amount specified mark the module as past delay
-        setPastDelay(true);
-      } else {
-        pastDelayTimeoutRef.current = setTimeout(
-          () => {
-            setPastDelay(true);
-          },
-          opts.delay,
-        );
-      }
-      if (opts.timeout) {
-        timedOutTimeoutRef.current = setTimeout(
-          () => {
-            setTimedOut(true);
-          },
-          opts.timeout,
-        );
-      }
-
-      const update = () => {
-        if (!componentState.current.mounted) {
-          return;
-        }
-        if (resReference
-          && resReference.current
-        ) {
-          if (resReference.current.error) {
-            setError(resReference.current.error);
-          }
-          setLoaded(resReference.current.loaded);
-          setLoading(resReference.current.loading);
-        }
-        clearTimeouts();
-      };
-
-      if (resReference.current.promise) {
-        resReference.current.promise
-          .then(() => {
-            update();
-          })
-          .catch(() => {
-            update();
-          });
-      }
-      return true;
-    };
-    useEffect(
-      () => {
-        loadModule();
-      },
-      [],
-    );
-
     const retry = () => {
-      setError(undefined);
-      setLoading(true);
-      setTimedOut(false);
+      // @ts-ignore
+      res = null;
+      resReference.current = init(undefined, props);
+      updateLoadableState({
+        ...{
+          error: resReference.current.error,
+          loading: resReference.current.loading,
+          timedOut: false,
+          pastDelay: opts.delay <= 0,
+        },
+      });
       loadModule();
     };
-    if (loading) {
-      return React.createElement(opts.loading || null, {
-        retry,
-        pastDelay,
-        timedOut,
-        error,
-        isLoading: loading,
-      });
-    } if (loaded) {
-      return opts.render(loaded, props);
+    if (loadableState.loading || loadableState.error) {
+      if (!opts.loading) return null;
+      return (
+        <opts.loading
+          retry={retry}
+          pastDelay={loadableState.pastDelay}
+          timedOut={loadableState.timedOut}
+          error={loadableState.error}
+        />
+      );
+    }
+    if (resReference.current.completed) {
+      return opts.render(resReference.current.resource, props);
     }
     return null;
   };
-  loadableComponent.preload = init;
-  // @ts-ignore
-  return withRouter(loadableComponent);
+  useLoadableComponent.preload = init;
+  return useLoadableComponent;
 };
 
 export default (opts: { render?: any; loading?: any; }) => createLoadableComponent(load, opts);

@@ -9,7 +9,7 @@ const supportedExtensions = require('./src/extensions');
  * @returns {*}
  */
 /* global getDefault */
-global.getDefault = global.getDefault || ((m) => (m.default ? m.default : m));
+global.getDefault = global.getDefault || (m => (m.default ? m.default : m));
 
 /**
  * We need to resolve the files as per the extensions at many places
@@ -32,10 +32,11 @@ global.pawExistsSync = global.pawExistsSync || ((filePath, fileSystem = fs) => {
   return resolvedFilePath;
 });
 
+// eslint-disable-next-line no-unused-vars
+/* global pawDebug */
 global.pawDebug = global.pawDebug || ((data, options = {}) => {
   // eslint-disable-next-line
   console.log(util.inspect(data, { depth: 10, ...options }));
-  process.exit(0);
 });
 
 /**
@@ -56,6 +57,7 @@ Array.from(process.argv).forEach((arg) => {
     lArg.indexOf('-nc') !== false
     || lArg.indexOf('--no-cache') !== false
   ) {
+    process.env.BABEL_DISABLE_CACHE = 1;
     cacheEnabled = false;
   }
 });
@@ -75,7 +77,7 @@ const babelServerOptions = getDefault(require('./src/babel/node.js'))({
  * compiled code even if it lies in node_modules
  */
 require('@babel/register')({
-  presets: getDefault(babelServerOptions.presets),
+  presets: babelServerOptions.presets,
   plugins: babelServerOptions.plugins,
   cache: cacheEnabled,
   ignore: [

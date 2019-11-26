@@ -13,21 +13,39 @@ export type ReactComponent = ComponentType<RouteComponentProps<any>>
   | ComponentType<IComponent>;
 export type RouteComponent = Promise<ReactComponent>;
 
+type DynamicImportType = () => Promise<{ default: ComponentType<any>; }>;
+
 export interface IRoute extends RouteProps {
-  path?: string;
-  getRouteSeo?: any;
-  compiled: boolean;
+  compiled?: boolean;
+  component?: DynamicImportType;
   delay?: number;
   error?: RouteComponent;
-  layout?: RouteComponent;
+  layout?: DynamicImportType;
   loadData?: any;
-  seo?: any;
-  routes?: (Route) [];
-  skeleton?: RouteComponent;
-  component?: RouteComponent & { preload: any };
-  timeout?: number;
   modules?: string [];
+  path?: string;
+  props?: {
+    [key: string]: any;
+  };
+  routes?: (Route) [];
+  seo?: any;
+  skeleton?: RouteComponent;
+  timeout?: number;
   webpack?: string [];
 }
 
-export type Route = IRoute & RouteConfig;
+export interface ICompiledRoute extends RouteConfig {
+  path?: string;
+  getRouteSeo: any;
+  loadData?: any;
+  component?: RouteConfig.component & { preload?: any };
+  props?: {
+    [key: string]: any;
+  };
+  routes?: CompiledRoute[];
+  modules?: string[];
+  webpack?: string[];
+}
+
+export type Route = IRoute ;
+export type CompiledRoute = ICompiledRoute;

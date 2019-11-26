@@ -1,5 +1,4 @@
 import express from 'express';
-import _ from 'lodash';
 import hsts from 'hsts';
 // @ts-ignore
 import { URL } from 'universal-url';
@@ -10,13 +9,19 @@ import RouteHandler from '../router/handler';
 import ServerHandler from './handler';
 import env from '../config';
 import { assetsToArray } from '../utils/utils';
+/**
+ * pawSeoConfig & pawPwaConfig is taken care by webpack resolver
+ */
+// @ts-ignore
+// eslint-disable-next-line
+import pwaSchema from 'pawPwaConfig';
 
 /**
  * Initialize Route handler for PWA details
  * @type {RouteHandler}
  */
 const rHandler = new RouteHandler({
-  env: _.assignIn({}, env),
+  env: { ...env },
   isServer: true,
 });
 /* tslint:disable: variable-name */
@@ -36,14 +41,14 @@ if (env.serverSideRender) {
  * @type {*}
  */
 const sHandler = new ServerHandler({
-  env: _.assignIn({}, env),
+  env: { ...env },
 });
 
-const serverMiddlewares: express.Application[] = [];
+const serverMiddlewareList: express.Application[] = [];
 sHandler.addPlugin(new ProjectServer({
   addPlugin: sHandler.addPlugin,
   addMiddleware: (middleware: express.Application) => {
-    serverMiddlewares.push(middleware);
+    serverMiddlewareList.push(middleware);
   },
 }));
 
@@ -54,10 +59,9 @@ sHandler.addPlugin(new ProjectServer({
 const app = express();
 
 // Disable x-powered-by (security issues)
-app.use((req, res, next) => {
-  res.setHeader('X-Powered-By', 'PawJS');
-  next();
-});
+// Completely remove x-powered-by, previously it was PawJS
+// But have removed it on various request
+app.disable('x-powered-by');
 /**
  * Enable trust proxy, i.e. allow data from
  * X-Protocol
@@ -65,10 +69,6 @@ app.use((req, res, next) => {
  * X-Forwarded-For
  */
 app.enable('trust proxy');
-
-serverMiddlewares.forEach((middleware: NextHandleFunction) => {
-  app.use(middleware);
-});
 
 /**
  * HSTS settings
@@ -94,7 +94,12 @@ if (hstsSettings.enabled) {
   });
 }
 
+serverMiddlewareList.forEach((middleware: NextHandleFunction) => {
+  app.use(middleware);
+});
+
 app.get(`${env.appRootUrl}/manifest.json`, (req, res) => {
+  // res.json({ ...pwaSchema });
   res.json(rHandler.getPwaSchema());
 });
 
@@ -110,7 +115,7 @@ app.get('*', (req, res, next) => {
   const fullUrl = `${req.protocol}://${req.get('host')}${req.originalUrl}`;
 
   const clientRouteHandler = new RouteHandler({
-    env: _.assignIn({}, env),
+    env: { ...env },
     isServer: true,
   });
 
@@ -133,6 +138,7 @@ app.get('*', (req, res, next) => {
       assets,
       routeHandler: clientRouteHandler,
       cssDependencyMap: res.locals.cssDependencyMap,
+      jsDependencyMap: res.locals.jsDependencyMap,
     });
   }
   // If server side render is enabled then, then let the routes load
@@ -154,6 +160,7 @@ app.get('*', (req, res, next) => {
       assets,
       routeHandler: clientRouteHandler,
       cssDependencyMap: res.locals.cssDependencyMap,
+      jsDependencyMap: res.locals.jsDependencyMap,
     });
   });
 });
@@ -176,7 +183,7 @@ export default (
   Object.keys(PAW_GLOBAL).forEach((key) => {
     const val = PAW_GLOBAL[key];
     app.locals[key] = val;
-    serverMiddlewares.forEach((sm: express.Application) => {
+    serverMiddlewareList.forEach((sm: express.Application) => {
       if (sm && sm.locals) {
         // eslint-disable-next-line
         sm.locals[key] = val;

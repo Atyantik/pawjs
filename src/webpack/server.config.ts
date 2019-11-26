@@ -32,7 +32,7 @@ export default {
       imageRule({
         outputPath: 'build/images/',
         publicPath: `${pawConfig.resourcesBaseUrl}images/`,
-        name: '[hash].[ext]',
+        name: '[hash]-[name].[ext]',
         context: directories.src,
       }),
     ],

@@ -53,6 +53,7 @@ serviceWorker.workbox.routing.setDefaultHandler(({ event }) => {
   if (
     request.url.indexOf(serviceWorker.location.origin) !== -1
     && request.headers.get('accept').indexOf('html') !== -1
+    && request.mode === 'navigate'
   ) {
     return networkFirstHandler.handle({ event }).then((response) => {
       if (!response) {
@@ -62,7 +63,10 @@ serviceWorker.workbox.routing.setDefaultHandler(({ event }) => {
         );
       }
       return response;
-    });
+    }).catch(() => new Response(
+      getOfflineHtml(),
+      { headers: { 'Content-Type': 'text/html' } },
+    ));
   }
 
   return networkFirstHandler.handle({ event });

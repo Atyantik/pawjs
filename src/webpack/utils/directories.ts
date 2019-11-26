@@ -1,7 +1,6 @@
 /* global getDefault */
 /* global pawExistsSync */
 import path from 'path';
-import assignIn from 'lodash/assignIn';
 
 interface IDirectories {
   root: string;
@@ -11,12 +10,14 @@ interface IDirectories {
 }
 
 const projectRoot = path.normalize(path.join(__dirname, '..', '..', '..'));
-let directories: IDirectories = assignIn({}, {
-  root: path.resolve(projectRoot, 'demo'),
-  src: path.resolve(projectRoot, 'demo', 'src'),
-  dist: path.join(projectRoot, 'demo', 'dist'),
-  build: path.join(projectRoot, 'demo', 'dist', 'build'),
-});
+let directories: IDirectories = {
+  ...{
+    root: path.resolve(projectRoot, 'demo'),
+    src: path.resolve(projectRoot, 'demo', 'src'),
+    dist: path.join(projectRoot, 'demo', 'dist'),
+    build: path.join(projectRoot, 'demo', 'dist', 'build'),
+  },
+};
 if (typeof process.env.PROJECT_ROOT !== 'undefined') {
   /**
    * Default directory list
@@ -32,15 +33,15 @@ if (typeof process.env.PROJECT_ROOT !== 'undefined') {
   try {
     const directoriesConfigPath = pawExistsSync(`${process.env.PROJECT_ROOT}/directories`);
     if (directoriesConfigPath) {
-      directories = assignIn(
-        directories,
+      directories = {
+        ...directories,
         // eslint-disable-next-line
-        getDefault(require(directoriesConfigPath)),
-      );
+        ...getDefault(require(directoriesConfigPath)),
+      };
     }
   } catch (ex) {
     // do nothing
   }
 }
 
-export default assignIn({}, directories);
+export default {...directories};

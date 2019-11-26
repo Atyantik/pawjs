@@ -13,6 +13,16 @@ const { spawn } = ChildProcess;
  * Current process directory
  */
 const processDir: string = process.cwd();
+let pawConfigWarningDisplayed = false;
+const renderPawConfigWarning = () => {
+  if (!pawConfigWarningDisplayed) {
+    // eslint-disable-next-line no-console
+    console.warn('==> pawconfig.json has been depreciated and would'
+      + ' be removed in upcoming release Please use .env files instead. '
+      + 'Refer to https://www.reactpwa.com/blog/using-dot-env/');
+  }
+  pawConfigWarningDisplayed = true;
+};
 
 /**
  * We need the program to exit clean even if the
@@ -150,6 +160,9 @@ export default class CliHandler {
 
     if (!this.pawConfigManualPath) {
       process.env.PAW_CONFIG_PATH = path.join(this.projectRoot, 'pawconfig.json');
+      if (fs.existsSync(path.resolve(process.env.PAW_CONFIG_PATH))) {
+        renderPawConfigWarning();
+      }
     }
   }
 
@@ -164,6 +177,7 @@ export default class CliHandler {
    * @param manual
    */
   updateConfigPath(configPath: string, manual = true) {
+    renderPawConfigWarning();
     // store the absolute value of project root
     let pawConfig = configPath;
     if (!path.isAbsolute(configPath)) {
@@ -407,7 +421,7 @@ export default class CliHandler {
       'Disable cache. Ideally used for PawJS core/plugin development',
     );
 
-    this.program.option('-c, --config <configPath>', 'Set path to pawconfig.json');
+    this.program.option('-c, --config <configPath>', '(DEPRECATED) Set path to pawconfig.json');
 
     this.program
       .command('start')

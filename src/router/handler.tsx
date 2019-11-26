@@ -9,62 +9,71 @@ import ErrorComponent from '../components/Error';
 import RouteCompiler from './compiler';
 import PwaIcon192 from '../resources/images/pwa-icon-192x192.png';
 import PwaIcon512 from '../resources/images/pwa-icon-512x512.png';
-import { ReactComponent, Route } from '../@types/route';
-import { IPlugin } from '../@types/pawjs';
+import { CompiledRoute, ReactComponent, Route } from '../@types/route';
 import AbstractPlugin from '../abstract-plugin';
+// @ts-ignore
+// eslint-disable-next-line
+import pawSeoSchema from 'pawSeoConfig';
+// @ts-ignore
+// eslint-disable-next-line
+import pawPwaSchema from 'pawPwaConfig';
 
 export default class RouteHandler extends AbstractPlugin {
-  static defaultPwaSchema = {
-    name: 'PawJS',
-    short_name: 'PawJS',
+  static defaultPwaSchema = Object.keys(pawPwaSchema).length
+    ? { ...pawPwaSchema }
+    : {
+      name: 'PawJS',
+      short_name: 'PawJS',
 
-    // Possible values ltr(left to right)/rtl(right to left)
-    dir: 'ltr',
+      // Possible values ltr(left to right)/rtl(right to left)
+      dir: 'ltr',
 
-    // language: Default en-US
-    lang: 'en-US',
+      // language: Default en-US
+      lang: 'en-US',
 
-    // Orientation of web-app possible:
-    // any, natural, landscape, landscape-primary, landscape-secondary,
-    // portrait, portrait-primary, portrait-secondary
-    orientation: 'any',
-    start_url: '/',
-    background_color: '#fff',
-    theme_color: '#fff',
-    display: 'standalone',
-    description: 'A highly scalable & plug-able, Progressive Web Application foundation with the best Developer Experience.',
-    icons: [
-      {
-        src: PwaIcon192,
-        sizes: '192x192',
+      // Orientation of web-app possible:
+      // any, natural, landscape, landscape-primary, landscape-secondary,
+      // portrait, portrait-primary, portrait-secondary
+      orientation: 'any',
+      start_url: '/',
+      background_color: '#fff',
+      theme_color: '#fff',
+      display: 'standalone',
+      description: 'A highly scalable & plug-able, Progressive Web Application foundation with the best Developer Experience.',
+      icons: [
+        {
+          src: PwaIcon192,
+          sizes: '192x192',
+        },
+        {
+          src: PwaIcon512,
+          sizes: '512x512',
+        },
+      ],
+    };
+
+  static defaultSeoSchema = Object.keys(pawSeoSchema).length
+    ? { ...pawSeoSchema }
+    : {
+      title: 'PawJS',
+      description: RouteHandler.defaultPwaSchema.description,
+      keywords: [],
+      image: '',
+      site_name: RouteHandler.defaultPwaSchema.name,
+      twitter: {
+        site: '',
+        creator: '',
       },
-      {
-        src: PwaIcon512,
-        sizes: '512x512',
+      facebook: {
+        admins: [],
       },
-    ],
-  };
-
-  static defaultSeoSchema = {
-    title: 'PawJS',
-    description: RouteHandler.defaultPwaSchema.description,
-    keywords: [],
-    image: '',
-    site_name: RouteHandler.defaultPwaSchema.name,
-    twitter: {
-      site: '',
-      creator: '',
-    },
-    facebook: {
-      admins: [],
-    },
-    type: 'article', // article/product/music/video
-    type_details: {
-      section: '', // Lifestyle/sports/news
-      published_time: '',
-      modified_time: '',
-    },
-  };
+      type: 'article', // article/product/music/video
+      type_details: {
+        section: '', // Lifestyle/sports/news
+        published_time: '',
+        modified_time: '',
+      },
+    };
 
   static computeRootMatch = (pathname: string) => ({
     path: '/', url: '/', params: {}, isExact: pathname === '/',
@@ -99,7 +108,7 @@ export default class RouteHandler extends AbstractPlugin {
     return branch;
   };
 
-  routes: Route [] = [];
+  routes: CompiledRoute [] = [];
 
   components = {
     NotFoundComponent,
@@ -165,12 +174,15 @@ export default class RouteHandler extends AbstractPlugin {
     let timeout = 10000;
 
     this.setDefaultSeoSchema = (schema = {}) => {
+      // eslint-disable-next-line no-console
+      console.warn('DEPRECIATED: Do not set SEO Schema from router! Use `src/seo.ts` instead.');
       seoSchema = Object.assign(seoSchema, schema);
     };
 
     this.getDefaultSeoSchema = () => ({ ...seoSchema });
 
     this.setPwaSchema = (schema = {}) => {
+      console.warn('DEPRECIATED: Do not set PWA Schema from router! Use `src/pwa.tsx` instead.');
       pwaSchema = Object.assign(pwaSchema, schema);
     };
 
@@ -232,11 +244,10 @@ export default class RouteHandler extends AbstractPlugin {
   getRoutes() {
     const routes = _cloneDeep(this.routes);
     routes.push({
-      // @ts-ignore
       component: this.get404Component(),
-      seo: {
+      getRouteSeo: () => ({
         title: 'Page not found',
-      },
+      }),
     });
     return routes;
   }

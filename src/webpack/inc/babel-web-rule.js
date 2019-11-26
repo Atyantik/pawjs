@@ -27,6 +27,7 @@ const rule = (options = {}) => {
       {
         loader: 'babel-loader',
         options: {
+          retainLines: true,
           presets: [
             [
               babelPresetEnv,

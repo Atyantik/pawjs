@@ -47,6 +47,10 @@ const defaultMeta = (pwaSchema: any) => [
     content: 'yes',
   },
   {
+    name: 'theme-color',
+    content: get(pwaSchema, 'theme_color', '#fff'),
+  },
+  {
     name: 'apple-mobile-web-app-capable',
     content: 'yes',
   },
@@ -214,17 +218,25 @@ export const generateMeta = (data = {}, options = {
   /**
    * Manage keywords (allow string and array as well)
    */
-  if (typeof seoData.keywords === 'string' && seoData.keywords.trim().length) {
-    generatedSchema.push({
-      name: 'keywords',
-      content: seoData.keywords,
-    });
-  }
-  if (Array.isArray(seoData.keywords) && seoData.keywords.length) {
-    generatedSchema.push({
-      name: 'keywords',
-      content: seoData.keywords.join(','),
-    });
+  if (process.env.ENABLE_KEYWORDS
+    && (
+      process.env.ENABLE_KEYWORDS === 'true'
+      || process.env.ENABLE_KEYWORDS === '1'
+      || process.env.ENABLE_KEYWORDS === 'yes'
+    )
+  ) {
+    if (typeof seoData.keywords === 'string' && seoData.keywords.trim().length) {
+      generatedSchema.push({
+        name: 'keywords',
+        content: seoData.keywords,
+      });
+    }
+    if (Array.isArray(seoData.keywords) && seoData.keywords.length) {
+      generatedSchema.push({
+        name: 'keywords',
+        content: seoData.keywords.join(','),
+      });
+    }
   }
 
   /**

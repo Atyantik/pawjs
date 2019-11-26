@@ -42,7 +42,7 @@ wHandler
       wConfigs.forEach((wConfig: IPawjsWebpackConfig) => {
         const config = wConfig;
         if (!config.devtool) {
-          config.devtool = 'eval';
+          config.devtool = 'eval-source-map';
           if (!config.resolve) config.resolve = {};
           if (!config.resolve.alias) config.resolve.alias = {};
           if (!config.resolve.alias['react-dom']) {
@@ -100,8 +100,7 @@ wHandler
 
             // check for Hot Module replacement plugin and add it if necessary
             if (!wConfig.plugins) wConfig.plugins = [];
-            const hasHotPlugin = wConfig
-              .plugins
+            const hasHotPlugin = wConfig.plugins
               .some(p => p instanceof webpack.HotModuleReplacementPlugin);
 
             if (!hasHotPlugin) {
@@ -287,9 +286,14 @@ try {
       const commonServer = getCommonServer();
       commonServerMiddleware = commonServer.default;
 
-      const { cssDependencyMap, ...assets } = normalizeAssets(res.locals.webpackStats);
+      const {
+        jsDependencyMap,
+        cssDependencyMap,
+        ...assets
+      } = normalizeAssets(res.locals.webpackStats);
       res.locals.assets = assets;
       res.locals.cssDependencyMap = cssDependencyMap;
+      res.locals.jsDependencyMap = jsDependencyMap;
 
       return commonServerMiddleware(req, res, next, PAW_GLOBAL);
     } catch (ex) {
@@ -309,13 +313,11 @@ try {
     let afterStart: any;
     try {
       const commonServer = getCommonServer();
-      // eslint-disable-next-line
       beforeStart = commonServer.beforeStart;
-      // eslint-disable-next-line
       afterStart = commonServer.afterStart;
     } catch (ex) {
-      // eslint-disable-next-line
-      console.log(ex);
+      // eslint-disable-next-line no-console
+      console.error(ex);
     }
 
     const nodeServerConfig = {
@@ -325,7 +327,7 @@ try {
 
     beforeStart(nodeServerConfig, PAW_GLOBAL, (err: Error) => {
       if (err) {
-        // eslint-disable-next-line
+        // eslint-disable-next-line no-console
         console.error(err);
         return;
       }
@@ -335,7 +337,7 @@ try {
         nodeServerConfig.host || '0.0.0.0',
         () => {
           serverStarted = true;
-          // eslint-disable-next-line
+          // eslint-disable-next-line no-console
           console.log(`
 
 ===================================================
@@ -359,6 +361,6 @@ try {
     if (totalCompilationComplete >= 2) startServer();
   });
 } catch (ex) {
-  // eslint-disable-next-line
-  console.log(ex);
+  // eslint-disable-next-line no-console
+  console.error(ex);
 }

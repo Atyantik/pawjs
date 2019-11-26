@@ -7,7 +7,7 @@
   "rules": {
     "import-name": false,
     "no-implicit-dependencies": false,
-    "no-submodule-imports": [true, "@pawjs", "lodash", "react-dom"],
+    "no-submodule-imports": [true, "@pawjs", "lodash", "react-dom", "@babel"],
     "semicolon": [true, "always", "ignore-bound-class-methods"]
   },
   "indent": [true, "spaces", 2],

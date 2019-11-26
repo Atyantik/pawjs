@@ -1,7 +1,8 @@
 import React from 'react';
+import { withRouter } from 'react-router';
 import Status from './RouteStatus';
 
-export default (props: { location: any }) => {
+export default withRouter((props: { location: any }) => {
   const { location } = props;
   return (
     <Status code={404}>
@@ -12,4 +13,4 @@ export default (props: { location: any }) => {
       </div>
     </Status>
   );
-};
+});

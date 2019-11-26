@@ -34,10 +34,57 @@ try {
   }
 } catch (ex) {
   // eslint-disable-next-line no-console
-  console.log(ex);
+  // On no pawconfig.json found, do not display warning or error message
+  // console.warn(ex);
   config = {};
 }
 config = { ...defaultConfig, ...config };
+
+const getBool = (e: any, onUndefinedValue: any = undefined): boolean => {
+  if (typeof e === 'undefined') {
+    return onUndefinedValue;
+  }
+  if (Array.isArray(e)) {
+    return e.length > 0;
+  }
+  if (typeof e === 'object') {
+    return Object.keys(e).length > 0;
+  }
+  if (typeof e === 'string') {
+    if (e === 'true' || e === '1' || e === 'yes') {
+      return true;
+    }
+  }
+  return false;
+};
+
+// Parse config with .env file params
+config = {
+  ...config,
+  ...{
+    port: process.env.PORT || config.port,
+    host: process.env.HOST || config.host,
+    appRootUrl: process.env.APP_ROOT_URL || config.appRootUrl,
+    cdnUrl: process.env.CDN_URL || config.cdnUrl,
+    serverSideRender: getBool(process.env.SSR_ENABLED, config.serverSideRender),
+    serviceWorker: getBool(process.env.SERVICE_WORKER_ENABLED, config.serviceWorker),
+    singlePageApplication: getBool(
+      process.env.SINGLE_PAGE_APPLICATION,
+      config.singlePageApplication,
+    ),
+    asyncCSS: getBool(process.env.ASYNC_CSS, config.asyncCSS),
+    polyfill: getBool(process.env.POLYFILL_CDN) ? 'cdn' : config.polyfill,
+    clientRootElementId: process.env.CLIENT_ROOT_ELEMENT_ID || config.clientRootElementId,
+    assetsMaxAge: parseFloat(process.env.ASSETS_MAX_AGE || '') || config.assetsMaxAge,
+    hstsEnabled: getBool(process.env.HSTS_ENABLED, config.hstsEnabled),
+    hstsMaxAge: parseFloat(process.env.HSTS_MAX_AGE || '') || config.hstsMaxAge,
+    hstsIncludeSubDomains: getBool(process.env.HSTS_INCLUDE_SUBDOMAINS, config.hstsEnabled),
+    hstsPreload: getBool(process.env.HSTS_PRELOAD, config.hstsPreload),
+    hashedRoutes: getBool(process.env.USE_HASHED_ROUTES, config.hashedRoutes),
+    react: getBool(process.env.REACT_CDN) ? 'cdn' : config.react,
+    noJS: getBool(process.env.DISABLE_JS, config.noJS),
+  },
+};
 
 if (config.appRootUrl && config.appRootUrl.startsWith('http')) {
   throw new Error(
@@ -65,7 +112,7 @@ if (
   config.port = process.env.PORT.trim();
 }
 
-// If not set hashedRoutes, and staticoutput is set, then set hashedRoutes to true
+// If not set hashedRoutes, and static output is set, then set hashedRoutes to true
 if (typeof config.hashedRoutes === 'undefined' && config.singlePageApplication) {
   config.hashedRoutes = true;
 }

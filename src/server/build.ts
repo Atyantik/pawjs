@@ -9,7 +9,7 @@ import pawAssets from 'pwa-assets';
 import server, { beforeStart, afterStart } from './server';
 import pawConfig from '../config';
 
-const { cssDependencyMap, ...assets } = pawAssets;
+const { jsDependencyMap, cssDependencyMap, ...assets } = pawAssets;
 /**
  * defining the current dir
  */
@@ -18,7 +18,6 @@ const PAW_GLOBAL = {};
 
 // Set appropriate currentDir when build and run in production mode
 const filename = _find(process.argv, arg => arg.indexOf('/server.js') !== -1);
-
 if (filename) {
   currentDir = path.dirname(path.resolve(filename));
 }
@@ -29,8 +28,10 @@ const app = express();
 // Enable compression while building.
 app.use(compression());
 
-// Disable x-powered-by for all requests
-app.set('x-powered-by', 'PawJS');
+// Disable x-powered-by (security issues)
+// Completely remove x-powered-by, previously it was PawJS
+// But have removed it on various request
+app.disable('x-powered-by');
 
 app.use(`${pawConfig.appRootUrl}/sw.js`, express.static(path.join(currentDir, 'build', 'sw.js'), {
   maxAge: 0,
@@ -47,6 +48,7 @@ app.use(pawConfig.appRootUrl || '/', express.static(path.join(currentDir, 'build
 app.use((req, res, next) => {
   res.locals.assets = assets;
   res.locals.cssDependencyMap = cssDependencyMap;
+  res.locals.jsDependencyMap = jsDependencyMap;
   next();
 });
 app.use((req, res, next) => server(req, res, next, PAW_GLOBAL));

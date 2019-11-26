@@ -8,6 +8,7 @@
   "singlePageApplication": false,
   "asyncCSS": true,
   "polyfill": "internal",
+  "react": "internal",
   "clientRootElementId": "app",
   "assetsMaxAge": 2592000000,
   "hstsEnabled": true,

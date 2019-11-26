@@ -35,5 +35,9 @@
     "react",
     "redux",
     "react-redux"
-  ]
+  ],
+  "funding": {
+    "type": "opencollective",
+    "url": "https://opencollective.com/react-pwa"
+  }
 }

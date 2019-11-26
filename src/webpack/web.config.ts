@@ -28,6 +28,7 @@ const devPlugins: webpack.Plugin [] = [];
 if (process.env.PAW_DEBUG === 'true') {
   devPlugins.push(new BundleAnalyzerPlugin());
 }
+
 export default {
   name: 'web',
   target: 'web',
@@ -58,7 +59,7 @@ export default {
       imageRule({
         outputPath: 'images/',
         publicPath: `${pawConfig.resourcesBaseUrl}images/`,
-        name: '[hash].[ext]',
+        name: '[hash]-[name].[ext]',
         context: directories.src,
       }),
     ],

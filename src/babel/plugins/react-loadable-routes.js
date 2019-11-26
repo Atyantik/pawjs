@@ -7,7 +7,6 @@ module.exports = ({ types: t }) => ({
     Import(path) {
       const source = path.parentPath.node.arguments[0].value;
       const { parent } = path.parentPath;
-
       if (parent.type === 'ObjectProperty') {
         if (parent.key.name === 'component' || parent.key.name === 'layout') {
           try {
@@ -46,6 +45,7 @@ module.exports = ({ types: t }) => ({
           && path.parentPath.parentPath.parentPath.parent
         ) {
           const { parent: p } = path.parentPath.parentPath.parentPath;
+          if (!p.id) return;
           if (p.id.name === 'component' || p.id.name === 'layout') {
             try {
               const obj = path.parentPath.parentPath.parentPath.parentPath.parentPath;

@@ -81,9 +81,12 @@ if (!process.env.PROJECT_ROOT) {
 const directories = getDefault(require('../utils/directories'));
 
 const emptyClass = pawExistsSync(path.join(process.env.LIB_ROOT, 'src', 'webpack', 'utils', 'emptyClass'));
+const emptyObject = pawExistsSync(path.join(process.env.LIB_ROOT, 'src', 'webpack', 'utils', 'emptyObject'));
 const projectClientPath = pawExistsSync(`${process.env.PROJECT_ROOT}/src/client`);
 const projectServerPath = pawExistsSync(`${process.env.PROJECT_ROOT}/src/server`);
 const projectRoutesPath = pawExistsSync(`${process.env.PROJECT_ROOT}/src/routes`);
+const projectSeoConfig = pawExistsSync(`${process.env.PROJECT_ROOT}/src/seo`);
+const projectPwaConfig = pawExistsSync(`${process.env.PROJECT_ROOT}/src/pwa`);
 
 const commonResolvers = [
   'node_modules',
@@ -120,6 +123,8 @@ const resolver = {
       pawProjectClient: projectClientPath || emptyClass,
       pawProjectServer: projectServerPath || emptyClass,
       pawProjectRoutes: projectRoutesPath || emptyClass,
+      pawPwaConfig: projectPwaConfig || emptyObject,
+      pawSeoConfig: projectSeoConfig || emptyObject,
     },
     modules: commonResolvers,
     extensions: supportedExtensions.resolveExtensions,

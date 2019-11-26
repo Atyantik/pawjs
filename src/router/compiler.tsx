@@ -1,7 +1,10 @@
 import React from 'react';
 import PreloadDataManager from '../utils/preloadDataManager';
 import { Map } from '../components/Loadable';
-import { ReactComponent, Route } from '../@types/route';
+import { CompiledRoute, ReactComponent, Route } from '../@types/route';
+import NotFoundError from '../errors/not-found';
+import ServerError from '../errors/server';
+import ErrorBoundary from "../components/ErrorBoundary";
 
 export default class RouteCompiler {
   public preloadManager: PreloadDataManager;
@@ -10,15 +13,13 @@ export default class RouteCompiler {
     this.preloadManager = new PreloadDataManager();
   }
 
-  compileRoutes(routes: Route[], routerService: any): Route [] {
-    return routes.map((r) => {
-      if (r.component && r.compiled) return r;
-      return this.compileRoute(r, routerService);
-    });
+  compileRoutes(routes: Route[], routerService: any): CompiledRoute [] {
+    return routes.map(r => this.compileRoute(r, routerService));
   }
 
-  compileRoute(route: Route, routerService: any): Route {
+  compileRoute(route: Route, routerService: any): CompiledRoute {
     const {
+      exact,
       path,
       skeleton,
       error,
@@ -28,18 +29,21 @@ export default class RouteCompiler {
       seo,
       component,
       layout,
-      ...others
+      webpack,
+      modules,
+      props: routeProps,
     } = route;
 
     // JSXifiable component object
     const PARAMS = {
       errorComponent: error || routerService.getDefaultLoadErrorComponent(),
+      notFoundComponent: error || routerService.get404Component(),
       skeletonComponent: skeleton || routerService.getDefaultLoaderComponent(),
       timeout: timeout || routerService.getDefaultLoadTimeout(),
       delay: delay || routerService.getDefaultAllowedLoadDelay(),
     };
 
-    let routeSeo = {};
+    let routeSeo = { ...(seo || {}) };
 
     const updateSeo = (userSeoData = {}) => {
       routeSeo = { ...seo, ...userSeoData };
@@ -48,7 +52,13 @@ export default class RouteCompiler {
     const preLoadData = async (props: any) => {
       if (typeof loadData !== 'undefined') {
         const extraParams = await this.preloadManager.getParams();
-        return loadData({ updateSeo, ...props, ...extraParams });
+        return loadData({
+          NotFoundError,
+          ServerError,
+          updateSeo,
+          ...props,
+          ...extraParams,
+        });
       }
       return {};
     };
@@ -66,22 +76,20 @@ export default class RouteCompiler {
       },
       loading: (props: any) => {
         const {
-          err,
+          error: err,
           pastDelay,
-          info,
-          isLoading,
           timedOut,
           retry,
-          error: loadingError,
         } = props;
+        if (err instanceof NotFoundError) {
+          return <PARAMS.notFoundComponent error={err} />;
+        }
         if (err) {
-          return <PARAMS.errorComponent error={loadingError} info={info} />;
+          return <PARAMS.errorComponent error={err} />;
         } if (pastDelay) {
           return (
             <PARAMS.skeletonComponent
-              isLoading={isLoading}
-              info={info}
-              error={loadingError}
+              error={err}
               pastDelay={pastDelay}
               timedOut={timedOut}
               retry={retry}
@@ -109,26 +117,19 @@ export default class RouteCompiler {
           components.layout = Layout.default;
         }
         // @ts-ignore
-        if (RouteComponent.default) {
+        if (RouteComponent && RouteComponent.default) {
           // @ts-ignore
           components.routeComponent = RouteComponent.default;
         }
         const {
-          history,
-          location,
-          match,
           route: currentRoute,
           props: componentProps,
         } = props;
 
         components.routeComponent = (
-          // @ts-ignore
           <components.routeComponent
             // eslint-disable-next-line react/jsx-props-no-spreading
             {...componentProps}
-            history={history}
-            location={location}
-            match={match}
             route={currentRoute}
             loadedData={loadedData}
           />
@@ -136,30 +137,32 @@ export default class RouteCompiler {
 
         if (components.layout) {
           return (
-            <components.layout
-              route={currentRoute}
-              history={history}
-              location={location}
-              match={match}
-              loadedData={loadedData}
-            >
-              {components.routeComponent}
-            </components.layout>
+            <ErrorBoundary ErrorComponent={PARAMS.errorComponent}>
+              <components.layout
+                route={currentRoute}
+                loadedData={loadedData}
+              >
+                {components.routeComponent}
+              </components.layout>
+            </ErrorBoundary>
           );
         }
-        return components.routeComponent;
+        return (
+          <ErrorBoundary ErrorComponent={PARAMS.errorComponent}>
+            {components.routeComponent}
+          </ErrorBoundary>
+        );
       },
       ...(route.modules ? { modules: route.modules } : {}),
     });
-    // @ts-ignore
-    loadableComponent.compiled = true;
     return {
       path,
+      webpack,
+      modules,
+      exact,
+      props: routeProps,
       getRouteSeo: () => ({ ...routeSeo }),
-      // @ts-ignore
       component: loadableComponent,
-      seo: { ...seo },
-      ...others,
       ...(route.routes ? { routes: this.compileRoutes(route.routes, routerService) } : {}),
     };
   }

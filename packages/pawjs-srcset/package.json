@@ -32,5 +32,9 @@
     "srcset",
     "webp",
     "optimization"
-  ]
+  ],
+  "funding": {
+    "type": "opencollective",
+    "url": "https://opencollective.com/react-pwa"
+  }
 }

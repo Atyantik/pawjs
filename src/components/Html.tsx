@@ -1,8 +1,22 @@
 import React from 'react';
-// tslint:disable-next-line:no-submodule-imports
 import BabelPolyfill from '@babel/polyfill/package.json';
 import { metaKeys } from '../utils/seo';
 
+/**
+ * CDN Packages for ReactJS and PolyfillJS
+ */
+const reactCDN = [
+  `https://unpkg.com/react@${React.version}/umd/react.production.min.js`,
+  `https://unpkg.com/react-dom@${React.version}/umd/react-dom.production.min.js`,
+];
+const polyfillVer = BabelPolyfill.version > '7.6.0' ? '7.6.0' : BabelPolyfill.version;
+const polyfillCDN = [
+  `https://cdnjs.cloudflare.com/ajax/libs/babel-polyfill/${polyfillVer}/polyfill.min.js`,
+];
+
+/**
+ * toBase64: atob polyfill with Buffer
+ */
 let toBase64: (arg0: string) => string;
 // Base64 polyfill
 if (typeof atob === 'undefined' && typeof Buffer !== 'undefined') {
@@ -30,8 +44,8 @@ interface IHtmlProps {
   metaTags?: any [];
   pwaSchema: any;
   cssFiles: any [];
+  jsToBePreloaded?: any[];
   env?: any;
-  preloadCssFiles: boolean;
   assets: string [];
   head?: any [];
   footer?: any [];
@@ -43,13 +57,13 @@ interface IHtmlProps {
   noJS: boolean;
 }
 
-const html = (props: React.PropsWithChildren<IHtmlProps> = {
+export default (props: React.PropsWithChildren<IHtmlProps> = {
   preloadedData: {},
   metaTags: [],
   pwaSchema: {},
   env: {},
   cssFiles: [],
-  preloadCssFiles: false,
+  jsToBePreloaded: [],
   assets: [],
   head: [],
   footer: [],
@@ -65,8 +79,9 @@ const html = (props: React.PropsWithChildren<IHtmlProps> = {
     env,
     metaTags,
     appRootUrl,
-    preloadCssFiles,
     cssFiles,
+    jsToBePreloaded,
+    pwaSchema,
     head,
     dangerouslySetInnerHTML,
     clientRootElementId,
@@ -77,12 +92,12 @@ const html = (props: React.PropsWithChildren<IHtmlProps> = {
   } = props;
 
   const getPwaValue = (key: string, defaultValue = '') => {
-    const { pwaSchema } = props;
     if (typeof pwaSchema[key] !== 'undefined') {
       return pwaSchema[key];
     }
     return defaultValue;
   };
+
   /**
    * Get meta tag after searching through meta tags
    * @param key
@@ -108,19 +123,133 @@ const html = (props: React.PropsWithChildren<IHtmlProps> = {
     return new Proxy(metaTag, handler);
   };
 
+  /**
+   * Get page title
+   * @returns string
+   */
+  const getTitle = () => {
+    const appName = process.env.APP_NAME || '';
+    const titleSeparator = process.env.PAGE_TITLE_SEPARATOR || '|';
+    const metaTitle = getMetaValue('title').content;
+    if (!appName) {
+      return metaTitle;
+    }
+    if (metaTitle === appName) {
+      return metaTitle;
+    }
+    if (!metaTitle && appName) {
+      return appName;
+    }
+    return `${metaTitle} ${titleSeparator} ${appName}`;
+  };
+  const getHtmlClass = () => '';
+  const getBodyClass = () => '';
+  /**
+   * Render components above the content root
+   * Can be used for rendering script tags such as google tag manager
+   */
+  const renderPreContent = () => null;
+  /**
+   * Render components below the content root, mostly used to include
+   * something before the main inclusion of javascript files and after the content
+   */
+  const renderPostContent = () => footer;
+
+  /**
+   * Render CSS Files
+   */
+  const renderCSSFiles = () => cssFiles.map(path => (
+    (
+      <link rel="stylesheet" type="text/css" key={path} href={path} />
+    )
+  ));
+  /**
+   * loadPJS is a function that loads the javascript file and call the callback function
+   * Format of loadPJS = (js-path, callback)
+   */
+  const renderJSLoader = () => {
+    if (noJS) {
+      return null;
+    }
+    return (
+      <script
+        dangerouslySetInnerHTML={{ __html: 'var loadPJS=function(e,a){var n=document.createElement("script");n.src=e,n.onload=a,n.onreadystatechange=a,document.body.appendChild(n)};var fnLoadPJS = function(e,a){return function() {return loadPJS(e,a)}};' }}
+      />
+    );
+  };
+  const renderDNSPrefetch = () => {
+    if (noJS) return null;
+    const prefetchArray = [];
+    if (env.polyfill && env.polyfill === 'cdn') {
+      prefetchArray.push((
+        <link
+          rel="dns-prefetch"
+          href="//cdnjs.cloudflare.com/"
+          key="cdnjs-cloudflare-dns-prefetch"
+        />
+      ));
+    }
+    if (env.react && env.react === 'cdn') {
+      prefetchArray.push((
+        <link
+          rel="dns-prefetch"
+          href="//unpkg.com"
+          key="unpkg-dns-prefetch"
+        />
+      ));
+    }
+    return prefetchArray;
+  };
+  const renderPreLoadedData = () => {
+    if (noJS || !preloadedData) return null;
+    const PAW_PRELOADED_DATA = JSON.stringify(b64EncodeUnicode(JSON.stringify(preloadedData)));
+    return (
+      <script
+        type="text/javascript"
+        id="__pawjs_preloaded"
+        dangerouslySetInnerHTML={{ __html: `window.PAW_PRELOADED_DATA = ${PAW_PRELOADED_DATA};` }}
+      />
+    );
+  };
+  const renderJsToBePreloaded = () => {
+    if (noJS || !jsToBePreloaded || !jsToBePreloaded.length) return null;
+    const PAW_PRELOAD_JS = JSON.stringify(b64EncodeUnicode(JSON.stringify(jsToBePreloaded)));
+    return (
+      <script
+        type="text/javascript"
+        id="__pawjs_preload_js"
+        dangerouslySetInnerHTML={{ __html: `window.PAW_PRELOAD_JS = ${PAW_PRELOAD_JS};` }}
+      />
+    );
+  };
+
+  /**
+   * Render the content inside body and the client root element
+   */
+  const renderContent = () => {
+    // eslint-disable-next-line no-underscore-dangle
+    if (dangerouslySetInnerHTML && dangerouslySetInnerHTML.__html.length) {
+      return (
+        <div id={clientRootElementId} dangerouslySetInnerHTML={dangerouslySetInnerHTML} />
+      );
+    }
+    // eslint-disable-next-line no-underscore-dangle
+    if (!(dangerouslySetInnerHTML && dangerouslySetInnerHTML.__html.length)) {
+      return (
+        <div id={clientRootElementId}>{children || null}</div>
+      );
+    }
+    return null;
+  };
+
   let loadingScript = '<>';
   const jsAssets: string [] = assets.filter(path => path.endsWith('.js'));
   if (!noJS) {
     if (env.react && env.react === 'cdn') {
-      jsAssets.unshift(
-        `https://unpkg.com/react@${React.version}/umd/react.production.min.js`,
-        `https://unpkg.com/react-dom@${React.version}/umd/react-dom.production.min.js`,
-      );
+      jsAssets.unshift(...reactCDN);
     }
     if (env.polyfill && env.polyfill === 'cdn') {
-      jsAssets.unshift(
-        `https://cdnjs.cloudflare.com/ajax/libs/babel-polyfill/${BabelPolyfill.version}/polyfill.min.js`,
-      );
+      jsAssets.unshift(...polyfillCDN);
     }
     jsAssets
       .forEach((path: string) => {
@@ -136,65 +265,33 @@ const html = (props: React.PropsWithChildren<IHtmlProps> = {
    * Render the code
    * @returns {*}
    */
-  /* tslint:disable */
-  /* eslint-disable */
   return (
-    <html lang={getPwaValue('lang')} dir={getPwaValue('dir')}>
+    <html
+      lang={getPwaValue('lang')}
+      dir={getPwaValue('dir')}
+      className={`${getHtmlClass()}`}
+    >
       <head>
-        <title>{`${getMetaValue('title').content}${process.env.APP_NAME ? ` | ${process.env.APP_NAME}` : ''}`}</title>
-        {preloadCssFiles && <preload-css />}
-        {cssFiles.map(path => (
-          <link rel="stylesheet" type="text/css" key={path} href={path} />
-        ))}
-        {!noJS && (
-          <script
-            dangerouslySetInnerHTML={{
-              __html: 'var loadPJS=function(e,a){var n=document.createElement("script");n.src=e,n.onload=a,n.onreadystatechange=a,document.body.appendChild(n)};var fnLoadPJS = function(e,a){return function() {return loadPJS(e,a)}};',
-            }}
-          />
-        )}
-        {!noJS && env.polyfill && env.polyfill === 'cdn' && (
-          <link
-            rel="dns-prefetch"
-            href="//cdnjs.cloudflare.com/"
-          />
-        )}
-        {!noJS && env.react && env.react === 'cdn' && (
-          <link
-            rel="dns-prefetch"
-            href="//unpkg.com"
-          />
-        )}
+        <title>{getTitle()}</title>
+        {env.asyncCSS && <preload-css />}
+        {renderCSSFiles()}
+        {renderJSLoader()}
+        {renderDNSPrefetch()}
         <link rel="manifest" href={`${appRootUrl}/manifest.json`} />
+        {/* eslint-disable-next-line react/jsx-props-no-spreading */}
         {metaTags && metaTags.map(m => <meta key={JSON.stringify(m)} {...m} />)}
-        {
-          !noJS && preloadedData && (
-            <script
-              type="text/javascript"
-              id="__pawjs_preloaded"
-              dangerouslySetInnerHTML={{
-                __html: `window.PAW_PRELOADED_DATA = ${JSON.stringify(b64EncodeUnicode(JSON.stringify(preloadedData)))};`,
-              }}
-            />
-          )
-        }
+        {renderPreLoadedData()}
         {head}
       </head>
-      <body>
-        {Boolean(dangerouslySetInnerHTML && dangerouslySetInnerHTML.__html.length) && (
-          <div id={clientRootElementId} dangerouslySetInnerHTML={dangerouslySetInnerHTML} />
-        )}
-        {!(dangerouslySetInnerHTML && dangerouslySetInnerHTML.__html.length) && (
-          <div id={clientRootElementId}>{children || null}</div>
-        )}
-        {footer}
+      <body className={getBodyClass()}>
+        {renderPreContent()}
+        {renderContent()}
+        {renderPostContent()}
+        {renderJsToBePreloaded()}
         <script
-          dangerouslySetInnerHTML={{
-            __html: `setTimeout(${loadingScript}, 400)`
-          }}
+          dangerouslySetInnerHTML={{ __html: `(function(){var a=!1;setTimeout(function(){a||(a=!0,${loadingScript}())},2E3);document.addEventListener("readystatechange",function(c){"complete"===c.target.readyState&&setTimeout(function(){a||(a=!0,${loadingScript}())},100)})})();` }}
         />
       </body>
     </html>
   );
 };
-export default html;
