@@ -9,12 +9,6 @@ import RouteHandler from '../router/handler';
 import ServerHandler from './handler';
 import env from '../config';
 import { assetsToArray } from '../utils/utils';
-/**
- * pawSeoConfig & pawPwaConfig is taken care by webpack resolver
- */
-// @ts-ignore
-// eslint-disable-next-line
-import pwaSchema from 'pawPwaConfig';
 
 /**
  * Initialize Route handler for PWA details
@@ -99,7 +93,6 @@ serverMiddlewareList.forEach((middleware: NextHandleFunction) => {
 });
 
 app.get(`${env.appRootUrl}/manifest.json`, (req, res) => {
-  // res.json({ ...pwaSchema });
   res.json(rHandler.getPwaSchema());
 });
 

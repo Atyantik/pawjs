@@ -5,7 +5,7 @@ import React from 'react';
 import { renderRoutes } from 'react-router-config';
 import { Router } from 'react-router';
 import { HashRouter } from 'react-router-dom';
-import { render, hydrate, unmountComponentAtNode } from 'react-dom';
+import { render, hydrate } from 'react-dom';
 import {
   AsyncSeriesHook,
   AsyncParallelBailHook,
@@ -106,6 +106,7 @@ export default class ClientHandler extends AbstractPlugin {
     }
   }
 
+  // eslint-disable-next-line class-methods-use-this
   getTitle(metaTitle: string): string {
     const appName = process.env.APP_NAME || '';
     const titleSeparator = process.env.PAGE_TITLE_SEPARATOR || '|';
@@ -129,17 +130,6 @@ export default class ClientHandler extends AbstractPlugin {
     let seoData = {};
     const pwaSchema = this.routeHandler.getPwaSchema();
     const seoSchema = this.routeHandler.getDefaultSeoSchema();
-
-    // Wait for preload data manager to get executed
-    const { preloadManager: { setParams, getParams } } = this.routeHandler.routeCompiler;
-    await new Promise(r => this
-      .hooks
-      .beforeLoadData
-      .callAsync(
-        setParams,
-        getParams,
-        r,
-      ));
     currentRoutes.forEach((r: { route: ICompiledRoute, match: any }) => {
       if (r.route && r.route.component && r.route.component.preload) {
         promises.push(r.route.component.preload(undefined, {
@@ -242,6 +232,15 @@ export default class ClientHandler extends AbstractPlugin {
         '',
       ),
     );
+    const { preloadManager: { setParams, getParams } } = this.routeHandler.routeCompiler;
+    await new Promise(r => this
+      .hooks
+      .beforeLoadData
+      .callAsync(
+        setParams,
+        getParams,
+        r,
+      ));
 
     const promises: Promise<any> [] = [];
     if (window.PAW_PRELOADED_DATA) {

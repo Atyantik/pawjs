@@ -14,15 +14,6 @@ import { generateMeta } from '../utils/seo';
 import AbstractPlugin from '../abstract-plugin';
 import { CompiledRoute } from '../@types/route';
 import NotFoundError from '../errors/not-found';
-/**
- * pawSeoConfig & pawPwaConfig is taken care by webpack resolver
- */
-// @ts-ignore
-// eslint-disable-next-line
-import seoSchema from 'pawSeoConfig';
-// @ts-ignore
-// eslint-disable-next-line
-import pwaSchema from 'pawPwaConfig';
 
 type Options = {
   env: any;
@@ -126,6 +117,8 @@ export default class ServerHandler extends AbstractPlugin {
     } = this.options.env;
 
     let routes = routeHandler.getRoutes();
+    const pwaSchema = routeHandler.getPwaSchema();
+    const seoSchema = routeHandler.getDefaultSeoSchema();
     let renderedHtml = '';
     let context:any = {};
     let promises: Promise<any> [] = [];

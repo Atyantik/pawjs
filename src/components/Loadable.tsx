@@ -2,6 +2,7 @@ import React, {
   useCallback,
   useEffect, useReducer, useRef, useState,
 } from 'react';
+import { withRouter } from 'react-router';
 import loadMap, { load, LoadableState } from '../utils/loadable';
 
 // eslint-disable-next-line no-underscore-dangle
@@ -71,11 +72,21 @@ const createLoadableComponent = (
     }
   }
 
-  const useLoadableComponent = (props: any) => {
+  const loadableComponent = withRouter((props: any) => {
     const resReference = useRef(
       (res && res.completed)
         ? res : init(undefined, props),
     );
+    const clearResReference = () => {
+      // @ts-ignore
+      res = null;
+      resReference.current = {
+        completed: false,
+        resource: null,
+        loading: false,
+        error: null,
+      };
+    };
     const [previousCompleted, setPreviousCompleted] = useState(resReference.current.completed);
     useEffect(
       () => {
@@ -185,18 +196,31 @@ const createLoadableComponent = (
         previousCompleted,
       ],
     );
+
+    const historyCallback = useCallback(
+      () => {
+        // @ts-ignore
+        res = null;
+        resReference.current = init(undefined, props);
+        isModuleLoading.current = false;
+        updateLoadableState(init(undefined, props));
+        loadModule();
+      },
+      [
+        props,
+      ],
+    );
+    const historyUnlisten: any = useRef(null);
     useEffect(
       () => {
         loadModule();
+        props.history.listen(historyCallback);
+        historyUnlisten.current = props.history.listen(historyCallback);
         return () => {
-          // @ts-ignore
-          res = null;
-          resReference.current = {
-            completed: false,
-            resource: null,
-            loading: false,
-            error: null,
-          };
+          if (historyUnlisten.current) {
+            historyUnlisten.current();
+          }
+          clearResReference();
         };
       },
       [],
@@ -231,9 +255,10 @@ const createLoadableComponent = (
       return opts.render(resReference.current.resource, props);
     }
     return null;
-  };
-  useLoadableComponent.preload = init;
-  return useLoadableComponent;
+  });
+  // @ts-ignore
+  loadableComponent.preload = init;
+  return loadableComponent;
 };
 
 export default (opts: { render?: any; loading?: any; }) => createLoadableComponent(load, opts);
