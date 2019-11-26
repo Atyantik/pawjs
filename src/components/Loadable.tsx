@@ -123,7 +123,6 @@ const createLoadableComponent = (
         clearTimeout(timedOutTimeoutRef.current);
       }
     };
-
     useEffect(
       () => {
         isMounted.current = true;
@@ -197,16 +196,26 @@ const createLoadableComponent = (
       ],
     );
 
+    const [location, setLocation] = useState(props.history.location);
     const historyCallback = useCallback(
-      () => {
+      (newLocation) => {
         // @ts-ignore
         res = null;
-        resReference.current = init(undefined, props);
-        isModuleLoading.current = false;
-        updateLoadableState(init(undefined, props));
-        loadModule();
+        if (
+          newLocation.pathname === location.pathname && (
+            newLocation.search !== location.search
+            || newLocation.hash !== location.hash
+          )
+        ) {
+          resReference.current = init(undefined, props);
+          isModuleLoading.current = false;
+          updateLoadableState(init(undefined, props));
+          loadModule();
+        }
+        setLocation(newLocation);
       },
       [
+        location,
         props,
       ],
     );
@@ -214,7 +223,6 @@ const createLoadableComponent = (
     useEffect(
       () => {
         loadModule();
-        props.history.listen(historyCallback);
         historyUnlisten.current = props.history.listen(historyCallback);
         return () => {
           if (historyUnlisten.current) {
