@@ -29,7 +29,7 @@ export interface IRoute extends RouteProps {
   };
   routes?: (Route) [];
   seo?: any;
-  skeleton?: RouteComponent;
+  skeleton?: ReactComponent;
   timeout?: number;
   webpack?: string [];
 }

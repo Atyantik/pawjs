@@ -17,5 +17,9 @@
   "license": "MIT",
   "devDependencies": {
     "@pawjs/pawjs": "file:.."
+  },
+  "dependencies": {
+    "bulma": "^0.8.0",
+    "cross-fetch": "^3.0.4"
   }
 }

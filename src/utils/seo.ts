@@ -289,7 +289,7 @@ export const generateMeta = (data = {}, options = {
   /**
    * Site name
    */
-  if (seoData.site_name.length) {
+  if (seoData.site_name && seoData.site_name.length) {
     generatedSchema.push({
       property: 'og:site_name',
       content: seoData.site_name,
@@ -299,7 +299,7 @@ export const generateMeta = (data = {}, options = {
   /**
    * Manage Primary Image
    */
-  const hasImage = !!seoData.image.length;
+  const hasImage = (seoData.image && !!seoData.image.length);
 
   if (hasImage) {
     let images = hasImage ? seoData.image : [];

@@ -312,6 +312,7 @@ export default class ServerHandler extends AbstractPlugin {
       promises = [];
       return next();
     } catch (ex) {
+      console.log(ex);
       let components = {
         errorComponent: routeHandler.getErrorComponent(),
       };

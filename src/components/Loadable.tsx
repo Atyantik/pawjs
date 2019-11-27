@@ -72,6 +72,7 @@ const createLoadableComponent = (
     }
   }
 
+  let previousRouterProps = '';
   const loadableComponent = withRouter((props: any) => {
     const {
       history: propsHistory,
@@ -79,29 +80,15 @@ const createLoadableComponent = (
       match: propsMatch,
       route: propsRoute,
     } = props;
-    const resReference = useRef(
-      (res && res.completed)
-        ? res : init(undefined, props),
-    );
-    const clearResReference = () => {
-      // @ts-ignore
-      res = null;
-      resReference.current = {
-        completed: false,
-        resource: null,
-        loading: false,
-        error: null,
-      };
-    };
-    const [previousCompleted, setPreviousCompleted] = useState(resReference.current.completed);
-    useEffect(
-      () => {
-        setPreviousCompleted(resReference.current.completed);
-      },
-      [
-        resReference.current.completed,
-      ],
-    );
+    const receivedRouterProps = JSON.stringify({
+      propsLocation,
+      propsMatch,
+      propsRoute,
+    });
+    // Initialisation
+    // Set res reference
+    const resReference = useRef(init(undefined, props));
+    // Current state of application
     const [
       loadableState,
       updateLoadableState,
@@ -110,17 +97,34 @@ const createLoadableComponent = (
       {
         ...initialState,
         ...{
+          timedOut: false,
           loading: resReference.current.loading,
           error: resReference.current.error,
           pastDelay: opts.delay <= 0,
         },
       },
     );
+    const previousCompleted = useRef(resReference.current.completed);
+    // Set past delay timeout ref
     const pastDelayTimeoutRef: any = useRef();
+    // Set timedOut timeout ref
     const timedOutTimeoutRef: any = useRef();
+    // Set mounted state of current component
     const isMounted = useRef(false);
+    // Set loading state of the module
     const isModuleLoading = useRef(false);
+    const resetLoadableState = () => {
+      if (isMounted.current) {
+        updateLoadableState({
+          timedOut: false,
+          loading: resReference.current.loading,
+          error: resReference.current.error,
+          pastDelay: opts.delay <= 0,
+        });
+      }
+    };
 
+    // Clear timeouts for pastDelay and timedOut
     const clearTimeouts = () => {
       if (pastDelayTimeoutRef.current) {
         clearTimeout(pastDelayTimeoutRef.current);
@@ -129,33 +133,24 @@ const createLoadableComponent = (
         clearTimeout(timedOutTimeoutRef.current);
       }
     };
-    useEffect(
-      () => {
-        isMounted.current = true;
-        return () => {
-          isMounted.current = false;
-          clearTimeouts();
-        };
-      },
-      [],
-    );
+
+    // load current module
     const loadModule = useCallback(
       () => {
         if (
-          // Do not load if current res reference is not present
           !resReference
-          || (resReference.current.completed && previousCompleted)
-          // If module is already loaded, then we do not need to load it twice
-          || isModuleLoading.current
-          // Also, Do not load if current component is not mounted anymore
+          || !resReference.current
+          || (resReference.current.completed && previousCompleted.current)
+          || !resReference.current.promise
           || !isMounted.current
+          || isModuleLoading.current
         ) {
           return false;
         }
+        // Set module loading to true
         isModuleLoading.current = true;
         // Clear previous timeouts
         clearTimeouts();
-
         if (opts.delay > 0) {
           pastDelayTimeoutRef.current = setTimeout(
             () => {
@@ -178,83 +173,72 @@ const createLoadableComponent = (
             opts.timeout,
           );
         }
-
-        if (resReference.current.promise) {
-          resReference.current.promise
-            .finally(() => {
-              if (isMounted.current) {
-                clearTimeouts();
-                updateLoadableState({
-                  type: 'UPDATE',
-                  payload: {
-                    loading: resReference.current.loading,
-                    error: resReference.current.error,
-                  },
-                });
-              }
-              isModuleLoading.current = false;
+        const update = () => {
+          if (isMounted.current) {
+            clearTimeouts();
+            updateLoadableState({
+              type: 'UPDATE',
+              payload: {
+                timedOut: false,
+                pastDelay: false,
+                loading: resReference.current.loading,
+                error: resReference.current.error,
+              },
             });
-        }
+          }
+          previousCompleted.current = resReference.current.completed;
+          isModuleLoading.current = false;
+        };
+        resReference.current.promise
+          .then(update)
+          .catch(update);
         return true;
       },
       [
-        previousCompleted,
-      ],
-    );
-
-    const [location, setLocation] = useState(propsLocation);
-    const historyCallback = useCallback(
-      (newLocation) => {
-        // @ts-ignore
-        res = null;
-        if (
-          newLocation.pathname === location.pathname && (
-            newLocation.search !== location.search
-            || newLocation.hash !== location.hash
-          )
-        ) {
-          resReference.current = init(undefined, props);
-          isModuleLoading.current = false;
-          updateLoadableState(init(undefined, props));
-          loadModule();
-        }
-        setLocation(newLocation);
-      },
-      [
-        location,
         props,
       ],
     );
-    const historyUnlisten: any = useRef(null);
+    const retry = useCallback(
+      () => {
+        // reset state of res
+        previousCompleted.current = false;
+        res = loadFn(opts.loader, undefined, props);
+        resReference.current = res;
+        resetLoadableState();
+        loadModule();
+      },
+      [
+        props,
+      ],
+    );
+    if (previousRouterProps && previousRouterProps !== receivedRouterProps) {
+      // Component will receive props
+      // The route has been changed, and the component remains the same
+      // console.log('Props changed, route changed');
+      retry();
+      previousRouterProps = receivedRouterProps;
+    } else if (!previousRouterProps) {
+      previousRouterProps = receivedRouterProps;
+    }
+
     useEffect(
       () => {
+        // component did mount
+        isMounted.current = true;
         loadModule();
-        historyUnlisten.current = props.history.listen(historyCallback);
         return () => {
-          if (historyUnlisten.current) {
-            historyUnlisten.current();
-          }
-          clearResReference();
+          // component will unmount
+          isMounted.current = false;
+          clearTimeouts();
         };
       },
       [],
     );
-
-    const retry = () => {
-      // @ts-ignore
-      res = null;
-      resReference.current = init(undefined, props);
-      updateLoadableState({
-        ...{
-          error: resReference.current.error,
-          loading: resReference.current.loading,
-          timedOut: false,
-          pastDelay: opts.delay <= 0,
-        },
-      });
-      loadModule();
-    };
-    if (loadableState.loading || loadableState.error) {
+    if (
+      loadableState.loading
+      || resReference.current.loading
+      || loadableState.error
+    ) {
       if (!opts.loading) return null;
       return (
         <opts.loading
