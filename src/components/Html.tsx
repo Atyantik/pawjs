@@ -242,7 +242,7 @@ export default (props: React.PropsWithChildren<IHtmlProps> = {
     return null;
   };
 
-  let loadingScript = '<>';
+  // let loadingScript = '<>';
   const jsAssets: string [] = assets.filter(path => path.endsWith('.js'));
   if (!noJS) {
     if (env.react && env.react === 'cdn') {
@@ -251,15 +251,15 @@ export default (props: React.PropsWithChildren<IHtmlProps> = {
     if (env.polyfill && env.polyfill === 'cdn') {
       jsAssets.unshift(...polyfillCDN);
     }
-    jsAssets
-      .forEach((path: string) => {
-        loadingScript = loadingScript.replace(
-          '<>',
-          `fnLoadPJS(${JSON.stringify(path)}, <>)`,
-        );
-      });
+    // jsAssets
+    //   .forEach((path: string) => {
+    //     loadingScript = loadingScript.replace(
+    //       '<>',
+    //       `fnLoadPJS(${JSON.stringify(path)}, <>)`,
+    //     );
+    //   });
   }
-  loadingScript = loadingScript.replace('<>', 'function(){}');
+  // loadingScript = loadingScript.replace('<>', 'function(){}');
 
   /**
    * Render the code
@@ -288,9 +288,11 @@ export default (props: React.PropsWithChildren<IHtmlProps> = {
         {renderContent()}
         {renderPostContent()}
         {renderJsToBePreloaded()}
-        <script
-          dangerouslySetInnerHTML={{ __html: `(function(){var a=!1;setTimeout(function(){a||(a=!0,${loadingScript}())},2E3);document.addEventListener("readystatechange",function(c){"complete"===c.target.readyState&&setTimeout(function(){a||(a=!0,${loadingScript}())},100)})})();` }}
-        />
+        {/* tslint:disable-next-line */}
+        {
+          jsAssets
+            .map(path => <script key={path} src={path} />)
+        }
       </body>
     </html>
   );
