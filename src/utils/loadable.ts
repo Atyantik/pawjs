@@ -87,8 +87,9 @@ export default (
   }
 
   state.promise = Promise.all(promises)
-    .then(() => {
+    .then((res) => {
       state.completed = true;
+      return res;
     })
     .catch(() => {
       // Do nothing on error caught, as it is already set to

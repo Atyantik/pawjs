@@ -32,6 +32,8 @@ interface IApplication {
 export default class ServerHandler extends AbstractPlugin {
   options: Options;
 
+  routeHandler: RouteHandler | undefined;
+
   hooks: {
     beforeStart: AsyncSeriesHook<any>,
     afterStart: AsyncSeriesHook<any>,
@@ -115,6 +117,7 @@ export default class ServerHandler extends AbstractPlugin {
       appRootUrl,
       noJS,
     } = this.options.env;
+    this.routeHandler = routeHandler;
 
     let routes = routeHandler.getRoutes();
     const pwaSchema = routeHandler.getPwaSchema();
@@ -312,7 +315,8 @@ export default class ServerHandler extends AbstractPlugin {
       promises = [];
       return next();
     } catch (ex) {
-      console.log(ex);
+      // eslint-disable-next-line no-console
+      console.warn(ex);
       let components = {
         errorComponent: routeHandler.getErrorComponent(),
       };
