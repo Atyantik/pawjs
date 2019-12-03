@@ -123,67 +123,77 @@ export default class ClientHandler extends AbstractPlugin {
   }
 
   async updatePageMeta(location: HistoryLocation) {
-    if (this.routeHandler === null) return false;
-    const currentRoutes = this.getCurrentRoutes(location);
-    const promises: Promise<any> [] = [];
+    /**
+     * Update page meta tag once the window is idle
+     */
+    window.requestIdleCallback(
+      async (deadline: any) => {
+        if (deadline.timeRemaining() > 0 || deadline.didTimeout) {
+          if (this.routeHandler === null) return false;
+          const currentRoutes = this.getCurrentRoutes(location);
+          const promises: Promise<any> [] = [];
 
-    let seoData = {};
-    const pwaSchema = this.routeHandler.getPwaSchema();
-    const seoSchema = this.routeHandler.getDefaultSeoSchema();
-    currentRoutes.forEach((r: { route: ICompiledRoute, match: any }) => {
-      if (r.route && r.route.component && r.route.component.preload) {
-        promises.push(r.route.component.preload(undefined, {
-          route: r.route,
-          match: r.match,
-        }));
-      }
-    });
-    await Promise.all(promises);
-    currentRoutes.forEach((r: { route: ICompiledRoute, match: any }) => {
-      let routeSeo = {};
-      if (r.route.getRouteSeo) {
-        routeSeo = r.route.getRouteSeo();
-      }
-      seoData = { ...seoData, ...routeSeo };
-    });
-    const metaTags = generateMeta(seoData, {
-      seoSchema,
-      pwaSchema,
-      baseUrl: window.location.origin,
-      url: window.location.href,
-    });
+          let seoData = {};
+          const pwaSchema = this.routeHandler.getPwaSchema();
+          const seoSchema = this.routeHandler.getDefaultSeoSchema();
+          currentRoutes.forEach((r: { route: ICompiledRoute, match: any }) => {
+            if (r.route && r.route.component && r.route.component.preload) {
+              promises.push(r.route.component.preload(undefined, {
+                route: r.route,
+                match: r.match,
+              }));
+            }
+          });
+          await Promise.all(promises);
+          currentRoutes.forEach((r: { route: ICompiledRoute, match: any }) => {
+            let routeSeo = {};
+            if (r.route.getRouteSeo) {
+              routeSeo = r.route.getRouteSeo();
+            }
+            seoData = { ...seoData, ...routeSeo };
+          });
+          const metaTags = generateMeta(seoData, {
+            seoSchema,
+            pwaSchema,
+            baseUrl: window.location.origin,
+            url: window.location.href,
+          });
 
-    metaTags.forEach((meta) => {
-      let metaSearchStr = 'meta';
-      let firstMetaSearchStr = '';
-      const htmlMeta: any = {};
+          metaTags.forEach((meta) => {
+            let metaSearchStr = 'meta';
+            let firstMetaSearchStr = '';
+            const htmlMeta: any = {};
 
-      if (meta.name === 'title') {
-        document.title = this.getTitle(meta.content);
-      }
+            if (meta.name === 'title') {
+              document.title = this.getTitle(meta.content);
+            }
 
-      Object.keys(meta).forEach((key) => {
-        htmlMeta[getPossibleHtmlName(key)] = meta[key];
-        if (!firstMetaSearchStr) {
-          firstMetaSearchStr = `meta[${getPossibleHtmlName(key)}=${JSON.stringify(meta[key])}]`;
+            Object.keys(meta).forEach((key) => {
+              htmlMeta[getPossibleHtmlName(key)] = meta[key];
+              if (!firstMetaSearchStr) {
+                firstMetaSearchStr = `meta[${getPossibleHtmlName(key)}=${JSON.stringify(meta[key])}]`;
+              }
+              metaSearchStr += `[${getPossibleHtmlName(key)}=${JSON.stringify(meta[key])}]`;
+            });
+
+            const alreadyExists = document.querySelector(metaSearchStr);
+            if (!alreadyExists) {
+              const previousExists = document.querySelector(firstMetaSearchStr);
+              if (previousExists && previousExists.remove) {
+                previousExists.remove();
+              }
+
+              const metaElement = document.createElement('meta');
+              Object.keys(htmlMeta).forEach((htmlMetaKey) => {
+                metaElement.setAttribute(htmlMetaKey, htmlMeta[htmlMetaKey]);
+              });
+              document.getElementsByTagName('head')[0].appendChild(metaElement);
+            }
+          });
         }
-        metaSearchStr += `[${getPossibleHtmlName(key)}=${JSON.stringify(meta[key])}]`;
-      });
-
-      const alreadyExists = document.querySelector(metaSearchStr);
-      if (!alreadyExists) {
-        const previousExists = document.querySelector(firstMetaSearchStr);
-        if (previousExists && previousExists.remove) {
-          previousExists.remove();
-        }
-
-        const metaElement = document.createElement('meta');
-        Object.keys(htmlMeta).forEach((htmlMetaKey) => {
-          metaElement.setAttribute(htmlMetaKey, htmlMeta[htmlMetaKey]);
-        });
-        document.getElementsByTagName('head')[0].appendChild(metaElement);
-      }
-    });
+        return true;
+      },
+    );
     return true;
   }
 
@@ -359,6 +369,15 @@ export default class ClientHandler extends AbstractPlugin {
     if (!this.options.env.serverSideRender) {
       this.updatePageMeta(this.history.location);
     }
-    return this.renderApplication();
+    /**
+     * Render application only if loaded
+     */
+    window.requestIdleCallback(
+      (deadline: any) => {
+        if (deadline.timeRemaining() > 0 || deadline.didTimeout) {
+          this.renderApplication();
+        }
+      },
+    );
   }
 }
