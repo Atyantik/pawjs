@@ -1,5 +1,6 @@
 import express from 'express';
 import hsts from 'hsts';
+import url from 'url';
 // @ts-ignore
 import { URL } from 'universal-url';
 // eslint-disable-next-line
@@ -96,12 +97,20 @@ app.get(`${env.appRootUrl}/manifest.json`, (req, res) => {
   res.json(rHandler.getPwaSchema());
 });
 
+const assetExtensions = /\.(jpg|jpeg|gif|svg|mov|bmp|css|js|png|webp|pdf|doc|docx|json)/;
+const isAssetRequest = (path: string) => {
+  const parsedUrl = url.parse(path);
+  if (!parsedUrl.pathname) return false;
+  return assetExtensions.test(parsedUrl.pathname);
+};
+
 app.get('*', (req, res, next) => {
   if (
     req.path.endsWith('favicon.png')
     || req.path.endsWith('favicon.ico')
     || req.path.endsWith('favicon.jpg')
     || req.path.endsWith('favicon.jpeg')
+    || isAssetRequest(req.path)
   ) {
     return next();
   }
