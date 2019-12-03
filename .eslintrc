@@ -3,7 +3,6 @@
     "browser": true,
     "commonjs": true,
     "es6": true,
-
     "node": true,
     "mocha": true,
     "jest/globals": true
@@ -11,9 +10,11 @@
   "parser": "babel-eslint",
   "extends": [
     "airbnb",
-    "plugin:jest/recommended"
+    "plugin:jest/recommended",
+    "plugin:import/typescript"
   ],
   "parserOptions": {
+    "typescript": true,
     "ecmaVersion": 7,
     "ecmaFeatures": {
       "classes": true,
@@ -28,7 +29,12 @@
     "react-hooks"
   ],
   "rules": {
-    "react/jsx-filename-extension": [1, { "extensions": [".js", ".jsx"] }],
+    "arrow-parens": [
+      1,
+      "as-needed",
+      { "requireForBlockBody": true }
+    ],
+    "react/jsx-filename-extension": [1, { "extensions": [".js", ".jsx", ".ts", ".tsx"] }],
     "react-hooks/rules-of-hooks": "error",
     // Jest Rules
     "jest/no-disabled-tests": "warn",
@@ -36,13 +42,27 @@
     "jest/no-identical-title": "error",
     "jest/prefer-to-have-length": "warn",
     "jest/valid-expect": "error",
-    "import/no-extraneous-dependencies": false
+    "import/no-extraneous-dependencies": 0
   },
   "settings": {
     "import/resolver": {
+      "typescript": {
+        "directory": "./"
+      },
       "webpack": {
         "config": "./src/webpack/inc/webpack-resolver-config.js"
       }
     }
-  }
+  },
+  "overrides": [
+    {
+      "files": ["*.ts", "*.tsx"],
+      "parser": "@typescript-eslint/parser",
+      "rules": {
+        "no-undef": "off",
+        "no-unused-vars": "off",
+        "react/prop-types": "off"
+      }
+    }
+  ]
 }

@@ -79,5 +79,5 @@ demo/package-lock.json
 
 # docs for now
 docs
-.esdoc.json
 .external-ecmascript.js
+.esdoc.json

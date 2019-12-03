@@ -1,6 +1,6 @@
 {
   "name": "@pawjs/sass",
-  "version": "2.2.0",
+  "version": "2.2.4",
   "description": "Add Sass support to your project",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -13,9 +13,9 @@
     "@pawjs/pawjs": "^2.4.0"
   },
   "dependencies": {
-    "node-sass": "^4.11.0",
-    "sass-loader": "^7.1.0",
-    "tapable": "^2.0.0-beta.4"
+    "node-sass": "^4.13.0",
+    "sass-loader": "^8.0.0",
+    "tapable": "^2.0.0-beta.8"
   },
   "main": "webpack.js",
   "repository": {
@@ -30,5 +30,9 @@
     "image",
     "webpack-image-loader",
     "image-optimizer"
-  ]
+  ],
+  "funding": {
+    "type": "opencollective",
+    "url": "https://opencollective.com/react-pwa"
+  }
 }

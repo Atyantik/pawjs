@@ -1,6 +1,0 @@
-{
-  "name": "AnimatedAtom",
-  "version": "0.0.1",
-  "private": true,
-  "main": "./animated-atom.js"
-}

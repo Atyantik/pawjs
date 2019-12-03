@@ -8,7 +8,7 @@ const configLabels = {
       enabled: true,
     },
     pngquant: {
-      quality: '95-100',
+      quality: [0.95, 1],
       speed: 2,
     },
     gifsicle: {
@@ -27,7 +27,7 @@ const configLabels = {
       enabled: true,
     },
     pngquant: {
-      quality: '65-90',
+      quality: [0.65, 0.9],
       speed: 4,
     },
     gifsicle: {
@@ -46,7 +46,7 @@ const configLabels = {
       enabled: false,
     },
     pngquant: {
-      quality: '45-65',
+      quality: [0.45, 0.65],
       speed: 10,
     },
     gifsicle: {

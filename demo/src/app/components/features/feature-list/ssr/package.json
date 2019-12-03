@@ -1,6 +1,0 @@
-{
-  "name": "SSR",
-  "version": "0.0.1",
-  "private": true,
-  "main": "./ssr.js"
-}

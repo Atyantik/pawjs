@@ -39,9 +39,7 @@ export default class PawImageOptimizerWebpack {
             newUse.push({
               loader: 'sass-loader',
               options: {
-                outputStyle: doCompress ? 'compressed' : 'expanded',
                 sourceMap,
-                sourceMapContents: sourceMap,
               },
             });
 
@@ -51,7 +49,6 @@ export default class PawImageOptimizerWebpack {
               use: newUse,
             });
           });
-
           c.module.rules = [...c.module.rules, ...sassRules];
         });
       } catch (ex) {

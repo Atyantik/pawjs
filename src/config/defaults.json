@@ -8,9 +8,12 @@
   "singlePageApplication": false,
   "asyncCSS": true,
   "polyfill": "internal",
+  "react": "internal",
   "clientRootElementId": "app",
+  "assetsMaxAge": 2592000000,
   "hstsEnabled": true,
-  "hstsmaxAge": 31536000,
+  "hstsMaxAge": 31536000,
   "hstsIncludeSubDomains": true,
-  "hstsPreload": false
+  "hstsPreload": false,
+  "noJS": false
 }

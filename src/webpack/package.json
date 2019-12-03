@@ -2,5 +2,5 @@
   "name": "webpack-paw",
   "version": "0.0.1",
   "private": true,
-  "main": "./index.js"
+  "main": "./index.ts"
 }

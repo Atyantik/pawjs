@@ -1,6 +1,0 @@
-{
-  "name": "CreateNewPage",
-  "version": "0.0.1",
-  "private": true,
-  "main": "./create-new-page.js"
-}
