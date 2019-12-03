@@ -80,3 +80,4 @@ demo/package-lock.json
 # docs for now
 docs
 .external-ecmascript.js
+.esdoc.json

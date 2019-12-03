@@ -9,7 +9,7 @@
   "author": "Atyantik Technologies Private Limited <tirthbodawala@atyantik.com>",
   "license": "MIT",
   "peerDependencies": {
-    "@pawjs/pawjs": "^2.0.0",
+    "@pawjs/pawjs": "^2.4.0",
     "file-loader": "^2.0.0",
     "react": "^16.4.1"
   },
