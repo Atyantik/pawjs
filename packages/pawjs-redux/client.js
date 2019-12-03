@@ -58,6 +58,7 @@ export default class ReduxClient extends ReduxTapable {
 
       // eslint-disable-next-line
       app.children = (
+        // eslint-disable-next-line react/jsx-props-no-spreading
         <Provider {...providerProps}>
           {app.children}
         </Provider>

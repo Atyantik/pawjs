@@ -1,6 +1,0 @@
-{
-  "name": "PendingDocs",
-  "version": "0.0.1",
-  "private": true,
-  "main": "./pending.js"
-}

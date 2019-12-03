@@ -1,5 +1,7 @@
 import { AsyncSeriesHook } from 'tapable';
-import _ from 'lodash';
+import uniq from 'lodash/uniq';
+import each from 'lodash/each';
+import cloneDeep from 'lodash/cloneDeep';
 import RouteCompiler from '../../../router/compiler';
 
 const NotFoundComponent = () => {};
@@ -63,7 +65,7 @@ export default class RouteHandler {
       env: options.env,
     });
     this.hooks = {
-      initRoutes: new AsyncSeriesHook(),
+      initRoutes: new AsyncSeriesHook(['URL']),
     };
 
     // Private methods
@@ -71,8 +73,8 @@ export default class RouteHandler {
     let loaderComponent = AsyncRouteLoaderComponent;
     let notFoundComponent = NotFoundComponent;
     let errorComponent = ErrorComponent;
-    let seoSchema = Object.assign({}, RouteHandler.defaultSeoSchema);
-    let pwaSchema = Object.assign({}, RouteHandler.defaultPwaSchema);
+    let seoSchema = { ...RouteHandler.defaultSeoSchema };
+    let pwaSchema = { ...RouteHandler.defaultPwaSchema };
     pwaSchema.start_url = options.env.appRootUrl || '/';
     if (!pwaSchema.start_url.endsWith('/')) {
       pwaSchema.start_url = `${pwaSchema.start_url}/`;
@@ -85,13 +87,13 @@ export default class RouteHandler {
       seoSchema = Object.assign(seoSchema, schema);
     };
 
-    this.getDefaultSeoSchema = () => Object.assign({}, seoSchema);
+    this.getDefaultSeoSchema = () => ({ ...seoSchema });
 
     this.setPwaSchema = (schema = {}) => {
       pwaSchema = Object.assign(pwaSchema, schema);
     };
 
-    this.getPwaSchema = () => Object.assign({}, pwaSchema);
+    this.getPwaSchema = () => ({ ...pwaSchema });
 
     this.setDefaultLoadErrorComponent = (component) => {
       loadErrorComponent = component;
@@ -136,19 +138,19 @@ export default class RouteHandler {
   addRoute(route) {
     const compiledRoute = this.routeCompiler.compileRoute(route, this);
     this.routes.push(compiledRoute);
-    this.routes = _.uniq(this.routes);
+    this.routes = uniq(this.routes);
   }
 
   addRoutes(routes) {
     const compiledRoutes = this.routeCompiler.compileRoutes(routes, this);
     this.routes = this.routes.concat(compiledRoutes);
-    this.routes = _.uniq(this.routes);
+    this.routes = uniq(this.routes);
   }
 
   addPlugin(plugin) {
     try {
       if (plugin.hooks && Object.keys(plugin.hooks).length) {
-        _.each(plugin.hooks, (hookValue, hookName) => {
+        each(plugin.hooks, (hookValue, hookName) => {
           this.hooks[hookName] = hookValue;
         });
       }
@@ -162,7 +164,7 @@ export default class RouteHandler {
   }
 
   getRoutes() {
-    const routes = _.cloneDeep(this.routes);
+    const routes = cloneDeep(this.routes);
     routes.push({
       component: this.get404Component(),
     });

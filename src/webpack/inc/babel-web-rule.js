@@ -11,7 +11,7 @@ let presetTypescript = require('@babel/preset-typescript');
 
 presetTypescript = presetTypescript.default ? presetTypescript.default : presetTypescript;
 
-let babelPlugins = require('./babel-plugins');
+let babelPlugins = require('../../babel/plugin');
 
 babelPlugins = babelPlugins.default ? babelPlugins.default : babelPlugins;
 
@@ -27,12 +27,13 @@ const rule = (options = {}) => {
       {
         loader: 'babel-loader',
         options: {
+          retainLines: true,
           presets: [
             [
               babelPresetEnv,
               {
                 targets: {
-                  browsers: ['last 2 versions', 'safari >= 7', 'ie >= 9'],
+                  browsers: ['last 2 versions', 'safari >= 7', 'ie >= 11'],
                 },
               },
             ],
