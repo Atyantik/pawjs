@@ -1,11 +1,13 @@
 import { AsyncSeriesHook } from 'tapable';
 import _uniq from 'lodash/uniq';
 import _cloneDeep from 'lodash/cloneDeep';
+import React from 'react';
 import { matchPath } from 'react-router';
 import AsyncRouteLoadErrorComponent from '../components/AsyncRouteLoadError';
 import AsyncRouteLoaderComponent from '../components/AsyncRouteLoader';
 import NotFoundComponent from '../components/NotFound';
 import ErrorComponent from '../components/Error';
+import Status from '../components/RouteStatus';
 import RouteCompiler from './compiler';
 import PwaIcon192 from '../resources/images/pwa-icon-192x192.png';
 import PwaIcon512 from '../resources/images/pwa-icon-512x512.png';
@@ -216,14 +218,22 @@ export default class RouteHandler extends AbstractPlugin {
 
     this.getDefaultLoadTimeout = () => timeout;
 
-    this.set404Component = (component = () => null) => {
-      notFoundComponent = component;
+    this.set404Component = (Component = () => null) => {
+      notFoundComponent = () => (
+        <Status code={404}>
+          <Component />
+        </Status>
+      );
       return this;
     };
     this.get404Component = () => notFoundComponent;
 
-    this.setErrorComponent = (component = () => null) => {
-      errorComponent = component;
+    this.setErrorComponent = (Component = () => null) => {
+      errorComponent = () => (
+        <Status code={500}>
+          <Component />
+        </Status>
+      );;
     };
 
     this.getErrorComponent = () => errorComponent;
