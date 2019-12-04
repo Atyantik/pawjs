@@ -5,7 +5,9 @@ class ServerError extends Error {
 
   constructor(...args: any) {
     super(...args);
-    Error.captureStackTrace(this, ServerError);
+    if (Error.captureStackTrace && typeof Error.captureStackTrace === 'function') {
+      Error.captureStackTrace(this, ServerError);
+    }
   }
 }
 
