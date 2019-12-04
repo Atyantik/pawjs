@@ -218,22 +218,22 @@ export default class RouteHandler extends AbstractPlugin {
 
     this.getDefaultLoadTimeout = () => timeout;
 
-    this.set404Component = (Component = () => null) => {
+    this.set404Component = (COMPONENT = () => null) => {
       notFoundComponent = () => (
         <Status code={404}>
-          <Component />
+          <COMPONENT />
         </Status>
       );
       return this;
     };
     this.get404Component = () => notFoundComponent;
 
-    this.setErrorComponent = (Component = () => null) => {
+    this.setErrorComponent = (COMPONENT = () => null) => {
       errorComponent = () => (
         <Status code={500}>
-          <Component />
+          <COMPONENT />
         </Status>
-      );;
+      );
     };
 
     this.getErrorComponent = () => errorComponent;
