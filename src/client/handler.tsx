@@ -265,7 +265,7 @@ export default class ClientHandler extends AbstractPlugin {
             match: r.match,
           });
           promises.push(preloadInit.promise);
-        } else {
+        } else if (r.route && r.route.component && r.route.component.preload) {
           const preloadInit = r.route.component.preload(undefined, {
             route: r.route,
             match: r.match,
@@ -379,5 +379,6 @@ export default class ClientHandler extends AbstractPlugin {
         }
       },
     );
+    return true;
   }
 }
