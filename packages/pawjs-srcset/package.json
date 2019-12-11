@@ -1,6 +1,6 @@
 {
   "name": "@pawjs/srcset",
-  "version": "2.1.4",
+  "version": "2.1.5",
   "description": "Add pwa-srcset-loader for image resize and proper srcset loading",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -15,7 +15,7 @@
   },
   "dependencies": {
     "prop-types": "^15.7.2",
-    "pwa-srcset-loader": "^2.0.3",
+    "pwa-srcset-loader": "^2.0.4",
     "webp-loader": "^0.6.0"
   },
   "main": "webpack.js",
