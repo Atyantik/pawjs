@@ -325,7 +325,7 @@ export default class CliHandler {
         env,
         shell: true,
         detached: true,
-        stdio: 'inherit',
+        stdio: ['pipe', 'pipe', process.stderr],
       },
     );
 
@@ -359,7 +359,7 @@ export default class CliHandler {
             env,
             shell: true,
             detached: true,
-            stdio: 'inherit',
+            stdio: ['pipe', 'pipe', process.stderr],
           },
         );
       }
@@ -379,7 +379,7 @@ export default class CliHandler {
       env,
       shell: true,
       detached: true,
-      stdio: 'inherit',
+      stdio: ['pipe', 'pipe', process.stderr],
     });
   }
 
