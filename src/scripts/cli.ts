@@ -375,31 +375,12 @@ export default class CliHandler {
     const env = Object.create(process.env);
     env.NODE_ENV = 'test';
 
-    // let tscRoot = this.libRoot;
-    // if (fs.existsSync(path.join(this.projectRoot, 'tsconfig.json'))) {
-    //   tscRoot = this.projectRoot;
-    // }
-    // const tsc = spawn(this.searchCommand('tsc'), ['-p', tscRoot], {
-    //   env,
-    //   shell: true,
-    //   detached: true,
-    //   stdio: 'inherit',
-    // });
-
-    // tsc.on('close', (errorCode) => {
-    //   if (!this.searchCommand) {
-    //     // eslint-disable-next-line no-console
-    //     console.log('Application not configured properly, cannot search for commands');
-    //     return;
-    //   }
-    //   if (!errorCode) {
-    //     spawn(this.searchCommand('jest'), ['--verbose'], {
-    //       env,
-    //       shell: true,
-    //       stdio: [process.stdin, process.stdout, 'pipe'],
-    //     });
-    //   }
-    // });
+    spawn(this.searchCommand('jest'), ['--verbose'], {
+      env,
+      shell: true,
+      detached: true,
+      stdio: 'inherit',
+    });
   }
 
   run() {
