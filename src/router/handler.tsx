@@ -3,16 +3,6 @@ import _uniq from 'lodash/uniq';
 import _cloneDeep from 'lodash/cloneDeep';
 import React from 'react';
 import { matchPath } from 'react-router';
-import AsyncRouteLoadErrorComponent from '../components/AsyncRouteLoadError';
-import AsyncRouteLoaderComponent from '../components/AsyncRouteLoader';
-import NotFoundComponent from '../components/NotFound';
-import ErrorComponent from '../components/Error';
-import Status from '../components/RouteStatus';
-import RouteCompiler from './compiler';
-import PwaIcon192 from '../resources/images/pwa-icon-192x192.png';
-import PwaIcon512 from '../resources/images/pwa-icon-512x512.png';
-import { CompiledRoute, ReactComponent, Route } from '../@types/route';
-import AbstractPlugin from '../abstract-plugin';
 // @ts-ignore
 // eslint-disable-next-line
 import pawSeoSchema from 'pawSeoConfig';
@@ -20,7 +10,19 @@ import pawSeoSchema from 'pawSeoConfig';
 // eslint-disable-next-line
 import pawPwaSchema from 'pawPwaConfig';
 
-export default class RouteHandler extends AbstractPlugin {
+import PwaIcon192 from '../resources/images/pwa-icon-192x192.png';
+import PwaIcon512 from '../resources/images/pwa-icon-512x512.png';
+import AsyncRouteLoadErrorComponent from '../components/AsyncRouteLoadError';
+import AsyncRouteLoaderComponent from '../components/AsyncRouteLoader';
+import NotFoundComponent from '../components/NotFound';
+import ErrorComponent from '../components/Error';
+import Status from '../components/RouteStatus';
+import RouteCompiler from './compiler';
+import { CompiledRoute, ReactComponent, Route } from '../@types/route';
+import AbstractPlugin from '../abstract-plugin';
+import { IRouteHandler } from './IRouteHandler';
+
+export default class RouteHandler extends AbstractPlugin implements IRouteHandler {
   static defaultPwaSchema = Object.keys(pawPwaSchema).length
     ? { ...pawPwaSchema }
     : {
