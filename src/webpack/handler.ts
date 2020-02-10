@@ -29,7 +29,6 @@ export default class WebpackHandler extends AbstractPlugin {
       init: new SyncHook(),
       beforeConfig: new SyncHook(['env', 'type', 'config']),
     };
-    this.addPlugin = this.addPlugin.bind(this);
     this.envConfigs = {
       development: {
         web: [webConfig],
