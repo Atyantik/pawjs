@@ -57,7 +57,6 @@ export default class ClientHandler extends AbstractPlugin {
 
   constructor(options: { env: any; }) {
     super();
-    this.addPlugin = this.addPlugin.bind(this);
     this.manageHistoryChange = this.manageHistoryChange.bind(this);
 
     window.PAW_HISTORY = window.PAW_HISTORY || createBrowserHistory({

@@ -15,6 +15,7 @@ import AbstractPlugin from '../abstract-plugin';
 import { CompiledRoute } from '../@types/route';
 import NotFoundError from '../errors/not-found';
 
+
 type Options = {
   env: any;
 };
@@ -45,7 +46,6 @@ export default class ServerHandler extends AbstractPlugin {
 
   constructor(options: Options) {
     super();
-    this.addPlugin = this.addPlugin.bind(this);
     this.hooks = {
       beforeStart: new AsyncSeriesHook(['config', 'appOptions']),
       afterStart: new AsyncSeriesHook(['appOptions']),
