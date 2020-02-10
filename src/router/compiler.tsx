@@ -1,3 +1,4 @@
+/* tslint:disable:jsx-no-multiline-js */
 import React from 'react';
 import PreloadDataManager from '../utils/preloadDataManager';
 import { Map } from '../components/Loadable';
