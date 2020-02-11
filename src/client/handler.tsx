@@ -7,6 +7,7 @@ import { Router } from 'react-router';
 import { HashRouter } from 'react-router-dom';
 import { render, hydrate } from 'react-dom';
 import {
+  Hook,
   AsyncSeriesHook,
   AsyncParallelBailHook,
   SyncHook,
@@ -49,6 +50,7 @@ export default class ClientHandler extends AbstractPlugin {
     beforeLoadData: AsyncSeriesHook<any>;
     renderRoutes: AsyncSeriesHook<any>;
     renderComplete: SyncHook<any, any>;
+    [s: string]: Hook<any, any> | AsyncSeriesHook<any>,
   };
 
   options: {

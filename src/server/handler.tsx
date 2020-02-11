@@ -1,4 +1,5 @@
 import {
+  Hook,
   AsyncSeriesHook,
 } from 'tapable';
 import express from 'express';
@@ -42,6 +43,7 @@ export default class ServerHandler extends AbstractPlugin {
     beforeAppRender: AsyncSeriesHook<any>,
     beforeHtmlRender: AsyncSeriesHook<any>,
     renderRoutes: AsyncSeriesHook<any>,
+    [s: string]: Hook<any, any> | AsyncSeriesHook<any>,
   };
 
   constructor(options: Options) {

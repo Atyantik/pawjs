@@ -32,7 +32,7 @@ export default class ReduxClient extends ReduxTapable {
           return cloneDeep(initialState);
         },
       };
-      await new Promise(r => this.hooks.reduxInitialState.callAsync(state, app, r));
+      await new Promise(resolve => this.hooks.reduxInitialState.callAsync(state, app, resolve));
       let composeEnhancers = compose;
       // eslint-disable-next-line
       if (process.env.PAW_ENV !== 'production' && window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__) {

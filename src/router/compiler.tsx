@@ -1,10 +1,14 @@
+/* tslint:disable:jsx-no-multiline-js */
 import React from 'react';
+import { renderRoutes } from 'react-router-config';
+
 import PreloadDataManager from '../utils/preloadDataManager';
 import { Map } from '../components/Loadable';
 import { CompiledRoute, ReactComponent, Route } from '../@types/route';
 import NotFoundError from '../errors/not-found';
 import ServerError from '../errors/server';
 import ErrorBoundary from '../components/ErrorBoundary';
+import { IRouteHandler } from './IRouteHandler';
 
 export default class RouteCompiler {
   public preloadManager: PreloadDataManager;
@@ -13,11 +17,11 @@ export default class RouteCompiler {
     this.preloadManager = new PreloadDataManager();
   }
 
-  compileRoutes(routes: Route[], routerService: any): CompiledRoute [] {
+  compileRoutes(routes: Route[], routerService: IRouteHandler): CompiledRoute [] {
     return routes.map(r => this.compileRoute(r, routerService));
   }
 
-  compileRoute(route: Route, routerService: any): CompiledRoute {
+  compileRoute(route: Route, routerService: IRouteHandler): CompiledRoute {
     const {
       exact,
       path,
@@ -32,6 +36,7 @@ export default class RouteCompiler {
       webpack,
       modules,
       props: routeProps,
+      routes,
     } = route;
 
     // JSXifiable component object
@@ -162,7 +167,13 @@ export default class RouteCompiler {
             match={propsMatch}
             route={propsRoute}
             loadedData={loadedData}
-          />
+          >
+            {
+              propsRoute && propsRoute.routes
+                ? renderRoutes(propsRoute.routes)
+                : undefined
+            }
+          </components.routeComponent>
         );
 
         if (components.layout) {
@@ -198,7 +209,7 @@ export default class RouteCompiler {
       props: routeProps,
       getRouteSeo: () => ({ ...routeSeo }),
       component: loadableComponent,
-      ...(route.routes ? { routes: this.compileRoutes(route.routes, routerService) } : {}),
+      ...(routes ? { routes: this.compileRoutes(routes, routerService) } : {}),
     };
   }
 }

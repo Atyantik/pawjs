@@ -16,6 +16,7 @@ export type RouteComponent = Promise<ReactComponent>;
 type DynamicImportType = () => Promise<{ default: ComponentType<any>; }>;
 
 export interface IRoute extends RouteProps {
+  exact?: boolean;
   compiled?: boolean;
   component?: DynamicImportType;
   delay?: number;
