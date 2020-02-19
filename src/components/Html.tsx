@@ -294,7 +294,9 @@ export default (props: React.PropsWithChildren<IHtmlProps> = {
         }
         {/* tslint:disable-next-line */}
         {
-          process.env.asyncJS && (<script dangerouslySetInnerHTML={{ __html: loadingScript }} />)
+          process.env.asyncJS && (
+            <script dangerouslySetInnerHTML={{ __html: `setTimeout(function(){ ${loadingScript}() }, 1);` }} />
+          )
         }
       </body>
     </html>
