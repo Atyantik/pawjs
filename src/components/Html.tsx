@@ -242,7 +242,7 @@ export default (props: React.PropsWithChildren<IHtmlProps> = {
     return null;
   };
 
-  // let loadingScript = '<>';
+  let loadingScript = '<>';
   const jsAssets: string [] = assets.filter(path => path.endsWith('.js'));
   if (!noJS) {
     if (env.react && env.react === 'cdn') {
@@ -251,15 +251,15 @@ export default (props: React.PropsWithChildren<IHtmlProps> = {
     if (env.polyfill && env.polyfill === 'cdn') {
       jsAssets.unshift(...polyfillCDN);
     }
-    // jsAssets
-    //   .forEach((path: string) => {
-    //     loadingScript = loadingScript.replace(
-    //       '<>',
-    //       `fnLoadPJS(${JSON.stringify(path)}, <>)`,
-    //     );
-    //   });
+    jsAssets
+      .forEach((path: string) => {
+        loadingScript = loadingScript.replace(
+          '<>',
+          `fnLoadPJS(${JSON.stringify(path)}, <>)`,
+        );
+      });
   }
-  // loadingScript = loadingScript.replace('<>', 'function(){}');
+  loadingScript = loadingScript.replace('<>', 'function(){}');
 
   /**
    * Render the code
@@ -290,8 +290,11 @@ export default (props: React.PropsWithChildren<IHtmlProps> = {
         {renderJsToBePreloaded()}
         {/* tslint:disable-next-line */}
         {
-          jsAssets
-            .map(path => <script key={path} src={path} />)
+          !process.env.asyncJS && jsAssets.map(path => <script key={path} src={path} />)
+        }
+        {/* tslint:disable-next-line */}
+        {
+          process.env.asyncJS && (<script dangerouslySetInnerHTML={{ __html: loadingScript }} />)
         }
       </body>
     </html>
