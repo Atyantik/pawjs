@@ -48,14 +48,14 @@ const populate = (chunks:any [], type: string, publicPath: string) => {
     }
     moduleReasons = uniq(compact(moduleReasons));
     if (chunk.names.indexOf('vendors~client') === -1) {
-    arr.push({
-      path: `${publicPath}${typeFileName}`,
-      modules: moduleReasons,
-    });
-  } else {
-    arr.push({
-      path: `${publicPath}${typeFileName}`,
-      modules: moduleReasons,
+      arr.push({
+        path: `${publicPath}${typeFileName}`,
+        modules: moduleReasons,
+      });
+    } else {
+      arr.unshift({
+        path: `${publicPath}${typeFileName}`,
+        modules: moduleReasons,
     });
   }
   });
