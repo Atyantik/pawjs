@@ -11,14 +11,12 @@
     "build": "npm run build:prod",
     "build:dev": "node ./paw.js --no-cache --root=./demo --env=development --verbose build",
     "build:prod": "node ./paw.js --no-cache  --config=./demo/prod.pawconfig.json --root=./demo --env=production build",
-    "lint": "node ./paw.js lint",
     "lint:fix": "eslint -c ./.eslintrc --ignore-path ./.gitignore --fix ./src",
     "publish-npm:beta": "npm publish --tag=next",
     "start": "npm run start:dev",
     "start:dev": "BABEL_DISABLE_CACHE=1 node ./paw.js --no-cache --root=./demo --env=development start",
     "start:prod": "node ./paw.js --no-cache --root=./demo --env=production start",
-    "test:demo": "cross-env PROJECT_ROOT=./demo node ./paw.js --no-cache --verbose test",
-    "test": "cross-env node ./paw.js test"
+    "test:demo": "cross-env PROJECT_ROOT=./demo node ./paw.js --no-cache --verbose test"
   },
   "bin": {
     "paw": "./paw.js",
