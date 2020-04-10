@@ -18,8 +18,8 @@ import pawConfig from '../config';
 import fontRule from './inc/babel-font-rule';
 
 let projectSW = '';
-if (fs.existsSync(path.join(directories.src, 'sw.js'))) {
-  projectSW = fs.readFileSync(path.join(directories.src, 'sw.js'), 'utf-8');
+if (pawExistsSync(path.join(directories.src, 'sw'))) {
+  projectSW = fs.readFileSync(pawExistsSync(path.join(directories.src, 'sw')), 'utf-8');
 }
 
 const isHot = typeof process.env.PAW_HOT !== 'undefined' ? process.env.PAW_HOT === 'true' : false;
@@ -101,7 +101,6 @@ export default {
       new SwVariables({
         fileName: 'sw.js',
         variables: { workboxDebug: true, ...pawConfig },
-        text: projectSW,
       }),
     ] : []),
     ...devPlugins,

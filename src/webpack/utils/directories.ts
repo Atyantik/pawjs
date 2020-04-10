@@ -44,4 +44,4 @@ if (typeof process.env.PROJECT_ROOT !== 'undefined') {
   }
 }
 
-export default {...directories};
+export default { ...directories };

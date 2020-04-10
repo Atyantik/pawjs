@@ -81,8 +81,10 @@ if (!process.env.PROJECT_ROOT) {
 const directories = getDefault(require('../utils/directories'));
 
 const emptyClass = pawExistsSync(path.join(process.env.LIB_ROOT, 'src', 'webpack', 'utils', 'emptyClass'));
+const emptyFunction = pawExistsSync(path.join(process.env.LIB_ROOT, 'src', 'webpack', 'utils', 'emptyFunction'));
 const emptyObject = pawExistsSync(path.join(process.env.LIB_ROOT, 'src', 'webpack', 'utils', 'emptyObject'));
 const projectClientPath = pawExistsSync(`${process.env.PROJECT_ROOT}/src/client`);
+const projectSWPath = pawExistsSync(`${process.env.PROJECT_ROOT}/src/sw`);
 const projectServerPath = pawExistsSync(`${process.env.PROJECT_ROOT}/src/server`);
 const projectRoutesPath = pawExistsSync(`${process.env.PROJECT_ROOT}/src/routes`);
 const projectSeoConfig = pawExistsSync(`${process.env.PROJECT_ROOT}/src/seo`);
@@ -121,6 +123,7 @@ const resolver = {
     alias: {
       pawjs: path.resolve(path.join(process.env.LIB_ROOT)),
       pawProjectClient: projectClientPath || emptyClass,
+      pawProjectSW: projectSWPath || emptyFunction,
       pawProjectServer: projectServerPath || emptyClass,
       pawProjectRoutes: projectRoutesPath || emptyClass,
       pawPwaConfig: projectPwaConfig || emptyObject,

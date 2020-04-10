@@ -30,7 +30,12 @@ class SwVariables {
 
       if (compilation.assets[fileName]) {
         let src = compilation.assets[fileName].source();
-
+        // Append the manifest text
+        const swRevision = JSON.stringify(new Date().getTime());
+        src = `self.__PAW_MANIFEST=[
+        { url: '/manifest.json', revision: ${swRevision} },
+        { url: '/sw.js', revision: ${swRevision} },
+        ];${src}`;
         if (offlineAssetsMapping && offlineAssetsMapping.length) {
           src = `${src};self.paw__offline_assets = ${JSON.stringify(offlineAssetsMapping)}`;
         }
