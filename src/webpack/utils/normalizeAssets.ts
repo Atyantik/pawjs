@@ -47,10 +47,17 @@ const populate = (chunks:any [], type: string, publicPath: string) => {
       moduleReasons.unshift('pawProjectClient');
     }
     moduleReasons = uniq(compact(moduleReasons));
-    arr.push({
-      path: `${publicPath}${typeFileName}`,
-      modules: moduleReasons,
+    if (chunk.names.indexOf('vendors~client') === -1) {
+      arr.push({
+        path: `${publicPath}${typeFileName}`,
+        modules: moduleReasons,
+      });
+    } else {
+      arr.unshift({
+        path: `${publicPath}${typeFileName}`,
+        modules: moduleReasons,
     });
+  }
   });
   return arr;
 };

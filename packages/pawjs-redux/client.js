@@ -9,12 +9,12 @@ export default class ReduxClient extends ReduxTapable {
   constructor() {
     super();
     this.hooks = {
-      reduxInitialState: new AsyncSeriesHook(['state', 'application']),
+      reduxInitialState: new AsyncSeriesHook(['state']),
     };
   }
 
   apply(clientHandler) {
-    clientHandler.hooks.beforeRender.tapPromise('AddReduxProvider', async (app) => {
+    clientHandler.hooks.beforeLoadData.tapPromise('AddReduxProvider', async (setParams, getParams) => {
       const providerProps = {};
       if (!this.reducers) return;
 
@@ -32,7 +32,7 @@ export default class ReduxClient extends ReduxTapable {
           return cloneDeep(initialState);
         },
       };
-      await new Promise(resolve => this.hooks.reduxInitialState.callAsync(state, app, resolve));
+      await new Promise(r => this.hooks.reduxInitialState.callAsync(state, r));
       let composeEnhancers = compose;
       // eslint-disable-next-line
       if (process.env.PAW_ENV !== 'production' && window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__) {
@@ -50,16 +50,18 @@ export default class ReduxClient extends ReduxTapable {
           ),
         );
         providerProps.store = window.paw__reduxStore;
+        setParams('store', providerProps.store);
       } catch (ex) {
         // console.log redux error
         // eslint-disable-next-line
         console.error(ex);
       }
+    });
 
+    clientHandler.hooks.beforeRender.tapPromise('AddReduxProvider', async (app) => {
       // eslint-disable-next-line
       app.children = (
-        // eslint-disable-next-line react/jsx-props-no-spreading
-        <Provider {...providerProps}>
+        <Provider store={window.paw__reduxStore}>
           {app.children}
         </Provider>
       );
