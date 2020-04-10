@@ -142,7 +142,7 @@ export default class ClientHandler extends AbstractPlugin {
               promises.push(r.route.component.preload(undefined, {
                 route: r.route,
                 match: r.match,
-              }));
+              }).promise);
             }
           });
           await Promise.all(promises);
