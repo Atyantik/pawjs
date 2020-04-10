@@ -16,7 +16,6 @@ import AbstractPlugin from '../abstract-plugin';
 import { CompiledRoute } from '../@types/route';
 import NotFoundError from '../errors/not-found';
 
-
 type Options = {
   env: any;
 };
