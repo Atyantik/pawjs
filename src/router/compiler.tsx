@@ -57,13 +57,14 @@ export default class RouteCompiler {
     const preLoadData = async (props: any) => {
       if (typeof loadData !== 'undefined') {
         const extraParams = await this.preloadManager.getParams();
-        return loadData({
+        const loadedData = await loadData({
           NotFoundError,
           ServerError,
           updateSeo,
           ...props,
           ...extraParams,
         });
+        return loadedData || {};
       }
       return {};
     };
