@@ -44,6 +44,8 @@ export default class ClientHandler extends AbstractPlugin {
 
   history: any;
 
+  updatePageMetaTimeout = 0;
+
   hooks: {
     beforeRender: AsyncSeriesHook<any>;
     locationChange: AsyncParallelBailHook<any, any>;
@@ -124,77 +126,87 @@ export default class ClientHandler extends AbstractPlugin {
   }
 
   async updatePageMeta(location: HistoryLocation) {
+    const updatePageMetaOnIdle = async (deadline: any) => {
+      if (deadline.timeRemaining() > 0 || deadline.didTimeout) {
+        if (this.routeHandler === null) return false;
+        const currentRoutes = this.getCurrentRoutes(location);
+        const promises: Promise<any> [] = [];
+
+        let seoData = {};
+        const pwaSchema = this.routeHandler.getPwaSchema();
+        const seoSchema = this.routeHandler.getDefaultSeoSchema();
+        currentRoutes.forEach((r: { route: ICompiledRoute, match: any }) => {
+          if (r.route && r.route.component && r.route.component.preload) {
+            promises.push(r.route.component.preload(undefined, {
+              route: r.route,
+              match: r.match,
+            }).promise);
+          }
+        });
+        await Promise.all(promises);
+        currentRoutes.forEach((r: { route: ICompiledRoute, match: any }) => {
+          let routeSeo = {};
+          if (r.route.getRouteSeo) {
+            routeSeo = r.route.getRouteSeo();
+          }
+          seoData = { ...seoData, ...routeSeo };
+        });
+        const metaTags = generateMeta(seoData, {
+          seoSchema,
+          pwaSchema,
+          baseUrl: window.location.origin,
+          url: window.location.href,
+        });
+
+        metaTags.forEach((meta) => {
+          let metaSearchStr = 'meta';
+          let firstMetaSearchStr = '';
+          const htmlMeta: any = {};
+
+          if (meta.name === 'title') {
+            document.title = this.getTitle(meta.content);
+          }
+
+          Object.keys(meta).forEach((key) => {
+            htmlMeta[getPossibleHtmlName(key)] = meta[key];
+            if (!firstMetaSearchStr) {
+              firstMetaSearchStr = `meta[${getPossibleHtmlName(key)}=${JSON.stringify(meta[key])}]`;
+            }
+            metaSearchStr += `[${getPossibleHtmlName(key)}=${JSON.stringify(meta[key])}]`;
+          });
+
+          const alreadyExists = document.querySelector(metaSearchStr);
+          if (!alreadyExists) {
+            const previousExists = document.querySelector(firstMetaSearchStr);
+            if (previousExists && previousExists.remove) {
+              previousExists.remove();
+            }
+
+            const metaElement = document.createElement('meta');
+            Object.keys(htmlMeta).forEach((htmlMetaKey) => {
+              metaElement.setAttribute(htmlMetaKey, htmlMeta[htmlMetaKey]);
+            });
+            document.getElementsByTagName('head')[0].appendChild(metaElement);
+          }
+        });
+      } else {
+        if (this.updatePageMetaTimeout) {
+          window.cancelIdleCallback(this.updatePageMetaTimeout);
+        }
+        /**
+         * Update page meta tag once the window is idle
+         */
+        window.requestIdleCallback(updatePageMetaOnIdle);
+      }
+      return true;
+    };
+    if (this.updatePageMetaTimeout) {
+      window.cancelIdleCallback(this.updatePageMetaTimeout);
+    }
     /**
      * Update page meta tag once the window is idle
      */
-    window.requestIdleCallback(
-      async (deadline: any) => {
-        if (deadline.timeRemaining() > 0 || deadline.didTimeout) {
-          if (this.routeHandler === null) return false;
-          const currentRoutes = this.getCurrentRoutes(location);
-          const promises: Promise<any> [] = [];
-
-          let seoData = {};
-          const pwaSchema = this.routeHandler.getPwaSchema();
-          const seoSchema = this.routeHandler.getDefaultSeoSchema();
-          currentRoutes.forEach((r: { route: ICompiledRoute, match: any }) => {
-            if (r.route && r.route.component && r.route.component.preload) {
-              promises.push(r.route.component.preload(undefined, {
-                route: r.route,
-                match: r.match,
-              }).promise);
-            }
-          });
-          await Promise.all(promises);
-          currentRoutes.forEach((r: { route: ICompiledRoute, match: any }) => {
-            let routeSeo = {};
-            if (r.route.getRouteSeo) {
-              routeSeo = r.route.getRouteSeo();
-            }
-            seoData = { ...seoData, ...routeSeo };
-          });
-          const metaTags = generateMeta(seoData, {
-            seoSchema,
-            pwaSchema,
-            baseUrl: window.location.origin,
-            url: window.location.href,
-          });
-
-          metaTags.forEach((meta) => {
-            let metaSearchStr = 'meta';
-            let firstMetaSearchStr = '';
-            const htmlMeta: any = {};
-
-            if (meta.name === 'title') {
-              document.title = this.getTitle(meta.content);
-            }
-
-            Object.keys(meta).forEach((key) => {
-              htmlMeta[getPossibleHtmlName(key)] = meta[key];
-              if (!firstMetaSearchStr) {
-                firstMetaSearchStr = `meta[${getPossibleHtmlName(key)}=${JSON.stringify(meta[key])}]`;
-              }
-              metaSearchStr += `[${getPossibleHtmlName(key)}=${JSON.stringify(meta[key])}]`;
-            });
-
-            const alreadyExists = document.querySelector(metaSearchStr);
-            if (!alreadyExists) {
-              const previousExists = document.querySelector(firstMetaSearchStr);
-              if (previousExists && previousExists.remove) {
-                previousExists.remove();
-              }
-
-              const metaElement = document.createElement('meta');
-              Object.keys(htmlMeta).forEach((htmlMetaKey) => {
-                metaElement.setAttribute(htmlMetaKey, htmlMeta[htmlMetaKey]);
-              });
-              document.getElementsByTagName('head')[0].appendChild(metaElement);
-            }
-          });
-        }
-        return true;
-      },
-    );
+    window.requestIdleCallback(updatePageMetaOnIdle);
     return true;
   }
 
@@ -373,13 +385,18 @@ export default class ClientHandler extends AbstractPlugin {
     /**
      * Render application only if loaded
      */
-    window.requestIdleCallback(
-      (deadline: any) => {
-        if (deadline.timeRemaining() > 0 || deadline.didTimeout) {
-          this.renderApplication();
+    const idleTimeout = 0;
+    const renderOnIdle = (deadline: any) => {
+      if (deadline.timeRemaining() > 0 || deadline.didTimeout) {
+        this.renderApplication();
+      } else {
+        if (idleTimeout) {
+          window.cancelIdleCallback(idleTimeout);
         }
-      },
-    );
+        window.requestIdleCallback(renderOnIdle);
+      }
+    };
+    window.requestIdleCallback(renderOnIdle);
     return true;
   }
 }

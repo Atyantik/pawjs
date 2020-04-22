@@ -67,6 +67,8 @@ const loadApplication = async (deadline: any) => {
         console.log(ex);
       });
     });
+  } else {
+    window.requestIdleCallback(loadApplication, { timeout: 2000 });
   }
 };
 window.requestIdleCallback(loadApplication, { timeout: 2000 });
