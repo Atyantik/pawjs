@@ -201,12 +201,12 @@ export default class ClientHandler extends AbstractPlugin {
       return true;
     };
     if (this.updatePageMetaTimeout) {
-      window.cancelIdleCallback(this.updatePageMetaTimeout);
+      this.updatePageMetaTimeout = window.cancelIdleCallback(this.updatePageMetaTimeout);
     }
     /**
      * Update page meta tag once the window is idle
      */
-    window.requestIdleCallback(updatePageMetaOnIdle);
+    this.updatePageMetaTimeout = window.requestIdleCallback(updatePageMetaOnIdle);
     return true;
   }
 

@@ -43,6 +43,7 @@ const cHandler = new ClientHandler({
   env: { ...env },
 });
 
+let loadApplicationTimeout = 0;
 const loadApplication = async (deadline: any) => {
   if ((deadline.timeRemaining() > 0 || deadline.didTimeout)) {
 
@@ -68,9 +69,12 @@ const loadApplication = async (deadline: any) => {
       });
     });
   } else {
-    window.requestIdleCallback(loadApplication, { timeout: 2000 });
+    if (loadApplicationTimeout) {
+      window.cancelIdleCallback(loadApplicationTimeout);
+    }
+    loadApplicationTimeout = window.requestIdleCallback(loadApplication, { timeout: 2000 });
   }
 };
-window.requestIdleCallback(loadApplication, { timeout: 2000 });
+loadApplicationTimeout = window.requestIdleCallback(loadApplication, { timeout: 2000 });
 
 export default cHandler;
