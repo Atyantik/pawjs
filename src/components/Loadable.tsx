@@ -1,6 +1,8 @@
 import React, {
   useCallback,
-  useEffect, useReducer, useRef, useState,
+  useEffect,
+  useReducer,
+  useRef,
 } from 'react';
 import { withRouter } from 'react-router';
 import loadMap, { load, LoadableState } from '../utils/loadable';
@@ -80,7 +82,7 @@ const createLoadableComponent = (
       match: propsMatch,
       route: propsRoute,
     } = props;
-    const receivedRouterProps = JSON.stringify({
+    const previousRouterProps = useRef({
       propsLocation,
       propsMatch,
       propsRoute,
@@ -211,14 +213,30 @@ const createLoadableComponent = (
         props,
       ],
     );
-    if (previousRouterProps && previousRouterProps !== receivedRouterProps) {
+    if (
+      previousRouterProps
+      && previousRouterProps.current
+      && previousRouterProps.current.propsMatch
+      && previousRouterProps.current.propsMatch.path
+      && previousRouterProps.current.propsMatch.path === propsMatch.path
+      && previousRouterProps.current.propsLocation
+      && previousRouterProps.current.propsLocation.key !== propsLocation.key
+    ) {
       // Component will receive props
       // The route has been changed, and the component remains the same
       // console.log('Props changed, route changed');
       retry();
-      previousRouterProps = receivedRouterProps;
-    } else if (!previousRouterProps) {
-      previousRouterProps = receivedRouterProps;
+      previousRouterProps.current = {
+        propsLocation,
+        propsMatch,
+        propsRoute,
+      };
+    } else if (!previousRouterProps || !previousRouterProps.current) {
+      previousRouterProps.current = {
+        propsLocation,
+        propsMatch,
+        propsRoute,
+      };
     }
 
     useEffect(
@@ -228,6 +246,8 @@ const createLoadableComponent = (
         loadModule();
         return () => {
           // component will unmount
+          // @ts-ignore
+          res = undefined;
           isMounted.current = false;
           clearTimeouts();
         };
@@ -269,7 +289,6 @@ const loadableMap = (opts: any) => {
   if (typeof opts.render !== 'function') {
     throw new Error('Loadable\'s Map requires a `render(loaded, props)` function');
   }
-
   return createLoadableComponent(loadMap, opts);
 };
 
