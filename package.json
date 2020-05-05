@@ -16,9 +16,7 @@
     "start": "npm run start:dev",
     "start:dev": "BABEL_DISABLE_CACHE=1 node ./paw.js --no-cache --root=./demo --env=development start",
     "start:prod": "node ./paw.js --no-cache --root=./demo --env=production start",
-    "test:demo": "cross-env PROJECT_ROOT=./demo node ./paw.js --no-cache --verbose test",
-    "snyk-protect": "snyk protect",
-    "prepare": "npm run snyk-protect"
+    "test:demo": "cross-env PROJECT_ROOT=./demo node ./paw.js --no-cache --verbose test"
   },
   "bin": {
     "paw": "./paw.js",
