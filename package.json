@@ -146,6 +146,5 @@
     "@types/react-router-config": "^5.0.1",
     "@types/react-router-dom": "^5.1.5",
     "@types/webpack": "^4.41.12"
-  },
-  "snyk": true
+  }
 }
