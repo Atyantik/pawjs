@@ -20,6 +20,7 @@ interface IConfig {
   hashedRoutes?: boolean;
   react?: string;
   noJS?: boolean;
+  hotReload?: boolean;
 }
 let config: IConfig = {};
 try {
@@ -83,6 +84,17 @@ config = {
     hashedRoutes: getBool(process.env.USE_HASHED_ROUTES, config.hashedRoutes),
     react: getBool(process.env.REACT_CDN) ? 'cdn' : config.react,
     noJS: getBool(process.env.DISABLE_JS, config.noJS),
+    /**
+     * Hor reload should be turned off by default in production env.
+     * Be careful, if you don’t use your app like SPA and turn on hotReload, then maximum number of websocket connections (HMR) is 6 (browser dependent).
+     * After that your new pages will not be dynamically imported
+     */
+    hotReload: getBool(
+      process.env.HOT_RELOAD,
+      typeof config.hotReload !== 'undefined'
+        ? config.hotReload
+        : process.env.NODE_ENV !== 'production',
+    ),
   },
 };
 
