@@ -94,7 +94,7 @@ export default class ServerHandler extends AbstractPlugin {
           head={app.htmlProps.head}
           footer={app.htmlProps.footer}
           env={app.htmlProps.env}
-          appRootUrl={app.appRootUrl || ''}
+          appRootUrl={app.appRootUrl || (app.htmlProps.env && app.htmlProps.env.appRootUrl) || ''}
           clientRootElementId={this.options.env.clientRootElementId}
           dangerouslySetInnerHTML={(htmlContent ? { __html: htmlContent } : { __html: '' })}
         />
