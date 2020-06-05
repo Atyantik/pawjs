@@ -207,7 +207,14 @@ const createLoadableComponent = (
         res = loadFn(opts.loader, undefined, props);
         resReference.current = res;
         resetLoadableState();
-        loadModule();
+        if (res.promise && res.promise.then) {
+          res.promise.then(() => {
+            loadModule();
+          });
+        } else {
+          loadModule();
+        }
+
       },
       [
         props,
