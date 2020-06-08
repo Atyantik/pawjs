@@ -49,6 +49,7 @@ export default class ClientHandler extends AbstractPlugin {
   hooks: {
     beforeRender: AsyncSeriesHook<any>;
     locationChange: AsyncParallelBailHook<any, any>;
+    postMetaUpdate: AsyncParallelBailHook<any, any>;
     beforeLoadData: AsyncSeriesHook<any>;
     renderRoutes: AsyncSeriesHook<any>;
     renderComplete: SyncHook<any, any>;
@@ -71,6 +72,7 @@ export default class ClientHandler extends AbstractPlugin {
 
     this.hooks = {
       locationChange: new AsyncParallelBailHook(['location', 'action']),
+      postMetaUpdate: new AsyncParallelBailHook(['location', 'action']),
       beforeLoadData: new AsyncSeriesHook(['setParams', 'getParams']),
       beforeRender: new AsyncSeriesHook(['Application']),
       renderRoutes: new AsyncSeriesHook(['AppRoutes']),
@@ -102,10 +104,11 @@ export default class ClientHandler extends AbstractPlugin {
   manageHistoryChange(location: HistoryLocation, action: string) {
     this.hooks.locationChange.callAsync(location, action, () => null);
     if (this.routeHandler) {
-      this.updatePageMeta(location).catch((e) => {
-        // eslint-disable-next-line
-        console.log(e);
-      });
+      this.updatePageMeta(location, action)
+        .catch((e) => {
+          // eslint-disable-next-line
+          console.log(e);
+        });
     }
   }
 
@@ -125,7 +128,7 @@ export default class ClientHandler extends AbstractPlugin {
     return `${metaTitle} ${titleSeparator} ${appName}`;
   }
 
-  async updatePageMeta(location: HistoryLocation) {
+  async updatePageMeta(location: HistoryLocation, action = '') {
     const updatePageMetaOnIdle = async (deadline: any) => {
       if (deadline.timeRemaining() > 0 || deadline.didTimeout) {
         if (this.routeHandler === null) return false;
@@ -189,6 +192,9 @@ export default class ClientHandler extends AbstractPlugin {
             document.getElementsByTagName('head')[0].appendChild(metaElement);
           }
         });
+        if (action) {
+          this.hooks.postMetaUpdate.callAsync(location, action, () => null);
+        }
       } else {
         if (this.updatePageMetaTimeout) {
           window.cancelIdleCallback(this.updatePageMetaTimeout);
