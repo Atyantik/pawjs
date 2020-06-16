@@ -36,6 +36,9 @@ const populate = (chunks:any [], type: string, publicPath: string) => {
     each(chunk.modules, (m) => {
       moduleReasons = moduleReasons.concat(map(m.reasons, 'userRequest'));
     });
+    each(chunk.origins, (m) => {
+      moduleReasons = moduleReasons.concat(m.request);
+    });
 
     if (
       Array.isArray(chunk.names)
