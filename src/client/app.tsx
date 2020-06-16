@@ -46,7 +46,6 @@ const cHandler = new ClientHandler({
 let loadApplicationTimeout = 0;
 const loadApplication = async (deadline: any) => {
   if ((deadline.timeRemaining() > 0 || deadline.didTimeout)) {
-
     cHandler.addPlugin(new ProjectClient({ addPlugin: cHandler.addPlugin }));
     let { URL } : any = window;
     if (typeof window.URL === 'undefined') {
