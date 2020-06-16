@@ -1,5 +1,4 @@
 import React from 'react';
-import BabelPolyfill from '@babel/polyfill/package.json';
 import { metaKeys } from '../utils/seo';
 
 /**
@@ -8,10 +7,6 @@ import { metaKeys } from '../utils/seo';
 const reactCDN = [
   `https://unpkg.com/react@${React.version}/umd/react.production.min.js`,
   `https://unpkg.com/react-dom@${React.version}/umd/react-dom.production.min.js`,
-];
-const polyfillVer = BabelPolyfill.version > '7.6.0' ? '7.6.0' : BabelPolyfill.version;
-const polyfillCDN = [
-  `https://cdnjs.cloudflare.com/ajax/libs/babel-polyfill/${polyfillVer}/polyfill.min.js`,
 ];
 
 /**
@@ -247,9 +242,6 @@ export default (props: React.PropsWithChildren<IHtmlProps> = {
   if (!noJS) {
     if (env.react && env.react === 'cdn') {
       jsAssets.unshift(...reactCDN);
-    }
-    if (env.polyfill && env.polyfill === 'cdn') {
-      jsAssets.unshift(...polyfillCDN);
     }
     jsAssets
       .forEach((path: string) => {

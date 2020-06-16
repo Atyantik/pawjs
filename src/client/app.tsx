@@ -47,14 +47,8 @@ let loadApplicationTimeout = 0;
 const loadApplication = async (deadline: any) => {
   if ((deadline.timeRemaining() > 0 || deadline.didTimeout)) {
     cHandler.addPlugin(new ProjectClient({ addPlugin: cHandler.addPlugin }));
-    let { URL } : any = window;
-    if (typeof window.URL === 'undefined') {
-      // @ts-ignore
-      URL = await import('universal-url-lite');
-      URL = URL.default ? URL.default : URL;
-    }
     // Get all the routes async manner and execute the code!
-    rHandler.hooks.initRoutes.callAsync(new URL(window.location.href), (err: Error) => {
+    rHandler.hooks.initRoutes.callAsync(window.location.href, (err: Error) => {
       if (err) {
         // eslint-disable-next-line
         console.log(err);

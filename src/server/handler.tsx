@@ -1,7 +1,7 @@
 import {
   Hook,
   AsyncSeriesHook,
-} from 'tapable';
+} from '@pawjs/tapable';
 import express from 'express';
 import React from 'react';
 import _ from 'lodash';

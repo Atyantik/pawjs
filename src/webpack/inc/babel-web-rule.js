@@ -23,6 +23,9 @@ const rule = (options = {}) => {
   const o = _.assignIn({}, defaultOptions, options);
   return {
     test: /\.(mj|j|t)sx?$/,
+    exclude: [
+      /node_modules\/core-js\//,
+    ],
     use: [
       {
         loader: 'babel-loader',
@@ -32,6 +35,8 @@ const rule = (options = {}) => {
             [
               babelPresetEnv,
               {
+                useBuiltIns: 'entry',
+                corejs: '3.6',
                 targets: {
                   browsers: ['last 2 versions', 'safari >= 7', 'ie >= 11'],
                 },

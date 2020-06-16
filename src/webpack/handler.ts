@@ -1,11 +1,9 @@
-import each from 'lodash/each';
-import { Hook, SyncHook } from 'tapable';
+import { Hook, SyncHook } from '@pawjs/tapable';
 
 // non npm imports
 import serverConfig from './server.config';
 import webConfig from './web.config';
 import babelCssRules from './inc/babel-css-rule';
-import { IPlugin } from '../@types/pawjs';
 import AbstractPlugin from '../abstract-plugin';
 
 export default class WebpackHandler extends AbstractPlugin {

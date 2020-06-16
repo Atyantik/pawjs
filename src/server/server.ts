@@ -1,8 +1,6 @@
 import express from 'express';
 import hsts from 'hsts';
 import url from 'url';
-// @ts-ignore
-import { URL } from 'universal-url';
 // eslint-disable-next-line
 import ProjectServer from 'pawProjectServer';
 import { NextHandleFunction } from 'connect';
@@ -145,7 +143,7 @@ app.get('*', (req, res, next) => {
   }
   // If server side render is enabled then, then let the routes load
   // Wait for all routes to load everything!
-  return clientRouteHandler.hooks.initRoutes.callAsync(new URL(fullUrl), (err: Error) => {
+  return clientRouteHandler.hooks.initRoutes.callAsync(fullUrl, (err: Error) => {
     if (err) {
       // eslint-disable-next-line
       console.log(err);

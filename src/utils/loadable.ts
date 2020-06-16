@@ -26,12 +26,12 @@ export const load = (
   state.promise = promise.then((resource) => {
     state.resource = resource;
     state.completed = true;
+    state.loading = false;
     return resource;
   }).catch((err: Error) => {
     state.error = err;
-    throw err;
-  }).finally(() => {
     state.loading = false;
+    throw err;
   });
   return state;
 };
@@ -89,14 +89,13 @@ export default (
   state.promise = Promise.all(promises)
     .then((res) => {
       state.completed = true;
+      state.loading = false;
       return res;
     })
     .catch(() => {
+      state.loading = false;
       // Do nothing on error caught, as it is already set to
       // state.error in above code!
-    })
-    .finally(() => {
-      state.loading = false;
     });
   return state;
 };

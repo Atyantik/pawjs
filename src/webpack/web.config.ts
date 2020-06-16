@@ -36,7 +36,7 @@ export default {
   context: directories.root,
   entry: {
     client: [
-      ...(pawConfig.polyfill === 'cdn' ? [] : ['@babel/polyfill']),
+      ...(pawConfig.polyfill === 'cdn' ? [] : ['core-js/stable', 'regenerator-runtime/runtime']),
       // Initial entry point for dev
       pawExistsSync(path.join(process.env.LIB_ROOT || '', './src/client/app')),
     ],

@@ -93,6 +93,8 @@ export default class RouteCompiler {
         } = props;
         if (err instanceof NotFoundError) {
           return (
+            // @ts-ignore
+            // eslint-disable-next-line react/jsx-pascal-case
             <PARAMS.notFoundComponent
               error={err}
               history={propsHistory}
@@ -104,6 +106,8 @@ export default class RouteCompiler {
         }
         if (err) {
           return (
+            // @ts-ignore
+            // eslint-disable-next-line react/jsx-pascal-case
             <PARAMS.errorComponent
               error={err}
               history={propsHistory}
@@ -114,6 +118,8 @@ export default class RouteCompiler {
           );
         } if (pastDelay) {
           return (
+            // @ts-ignore
+            // eslint-disable-next-line react/jsx-pascal-case
             <PARAMS.skeletonComponent
               error={err}
               pastDelay={pastDelay}
@@ -180,6 +186,7 @@ export default class RouteCompiler {
         if (components.layout) {
           return (
             <ErrorBoundary
+              // @ts-ignore
               ErrorComponent={PARAMS.errorComponent}
             >
               <components.layout
@@ -195,6 +202,7 @@ export default class RouteCompiler {
           );
         }
         return (
+          // @ts-ignore
           <ErrorBoundary ErrorComponent={PARAMS.errorComponent}>
             {components.routeComponent}
           </ErrorBoundary>
