@@ -16,7 +16,9 @@
     "start": "npm run start:dev",
     "start:dev": "BABEL_DISABLE_CACHE=1 node ./paw.js --no-cache --root=./demo --env=development start",
     "start:prod": "node ./paw.js --no-cache --root=./demo --env=production start",
-    "test:demo": "cross-env PROJECT_ROOT=./demo node ./paw.js --no-cache --verbose test"
+    "test:demo": "cross-env PROJECT_ROOT=./demo node ./paw.js --no-cache --verbose test",
+    "snyk-protect": "snyk protect",
+    "prepare": "npm run snyk-protect"
   },
   "bin": {
     "paw": "./paw.js",
@@ -109,7 +111,7 @@
     "react-router-config": "^5.1.1",
     "react-router-dom": "^5.2.0",
     "regenerator-runtime": "^0.13.5",
-    "snyk": "^1.341.1",
+    "snyk": "^1.342.2",
     "style-loader": "^1.2.1",
     "supertest": "^4.0.2",
     "synk": "0.0.2",
@@ -146,5 +148,6 @@
     "@types/react-router-config": "^5.0.1",
     "@types/react-router-dom": "^5.1.5",
     "@types/webpack": "^4.41.17"
-  }
+  },
+  "snyk": true
 }
