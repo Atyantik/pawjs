@@ -42,7 +42,8 @@ export default (options: any = {}) => {
           options: {
             ident: 'postcss',
             plugins: () => [
-              postcssPresetEnv(/* pluginOptions */),
+              postcssPresetEnv({
+              }),
             ],
           },
         },
