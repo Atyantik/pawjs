@@ -38,6 +38,10 @@ wHandler
       wType: string,
       wConfigs: IPawjsWebpackConfig [],
     ) => {
+      if (!pawConfig.hotReload) {
+        return undefined;
+      }
+
       // Add eval devtool to all the configs
       wConfigs.forEach((wConfig: IPawjsWebpackConfig) => {
         const config = wConfig;
@@ -245,12 +249,14 @@ try {
   // res.locals but its not needed anyway.
   app.use(webMiddleware);
 
-  // Add hot middleware to the update
-  app.use(webpackHotMiddleware(webCompiler, {
-    log: false,
-    path: '/__hmr_update',
-    heartbeat: 2000,
-  }));
+  if (pawConfig.hotReload) {
+    // Add hot middleware to the update
+    app.use(webpackHotMiddleware(webCompiler, {
+      log: false,
+      path: '/__hmr_update',
+      heartbeat: 2000,
+    }));
+  }
 
   app.use(pawConfig.appRootUrl || '', express.static(serverOptions.contentBase));
 
