@@ -85,8 +85,9 @@ config = {
     react: getBool(process.env.REACT_CDN) ? 'cdn' : config.react,
     noJS: getBool(process.env.DISABLE_JS, config.noJS),
     /**
-     * Hor reload should be turned off by default in production env.
-     * Be careful, if you don’t use your app like SPA and turn on hotReload, then maximum number of websocket connections (HMR) is 6 (browser dependent).
+     * Hot reload should be turned off by default in production env.
+     * Be careful, if you don’t use your app like SPA and turn on hotReload,
+     * then maximum number of websocket connections (HMR) is 6 (browser dependent).
      * After that your new pages will not be dynamically imported
      */
     hotReload: getBool(

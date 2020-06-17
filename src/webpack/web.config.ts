@@ -22,7 +22,7 @@ if (pawExistsSync(path.join(directories.src, 'sw'))) {
   projectSW = fs.readFileSync(pawExistsSync(path.join(directories.src, 'sw')), 'utf-8');
 }
 
-const isHot = typeof process.env.PAW_HOT !== 'undefined' ? process.env.PAW_HOT === 'true' : false;
+const isHot = typeof process.env.PAW_HOT !== 'undefined' ? process.env.PAW_HOT === 'true' : pawConfig.hotReload;
 
 const devPlugins: webpack.Plugin [] = [];
 if (process.env.PAW_DEBUG === 'true') {
@@ -50,7 +50,7 @@ export default {
   stats: true,
   module: {
     rules: [
-      webRule(),
+      webRule({ hot: isHot }),
       ...cssRule({ hot: isHot }),
       fontRule({
         outputPath: 'fonts/',

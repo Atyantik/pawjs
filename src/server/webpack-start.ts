@@ -28,122 +28,120 @@ console.log(`
   Thank you for your patience.
 =========================================================
 `);
-wHandler
-  .hooks
-  .beforeConfig
-  .tap(
-    'AddHotReplacementPlugin',
-    (
-      wEnv: string,
-      wType: string,
-      wConfigs: IPawjsWebpackConfig [],
-    ) => {
-      if (!pawConfig.hotReload) {
-        return undefined;
-      }
-
-      // Add eval devtool to all the configs
-      wConfigs.forEach((wConfig: IPawjsWebpackConfig) => {
-        const config = wConfig;
-        if (!config.devtool) {
-          config.devtool = 'eval-source-map';
-          if (!config.resolve) config.resolve = {};
-          if (!config.resolve.alias) config.resolve.alias = {};
-          if (!config.resolve.alias['react-dom']) {
-            config.resolve.alias['react-dom'] = '@hot-loader/react-dom';
-          }
-        }
-      });
-
-      // Web specific configurations
-      if (wType === 'web') {
-        wConfigs.forEach((webpackConfig: IPawjsWebpackConfig) => {
-          const wConfig = webpackConfig;
-          if (
-            typeof wConfig.entry !== 'undefined'
-            && typeof wConfig.entry.client !== 'undefined'
-            && Array.isArray(wConfig.entry.client)
-          ) {
-            const libRoot = process.env.LIB_ROOT;
-            if (typeof libRoot === 'undefined') {
-              return;
+if (pawConfig.hotReload) {
+  wHandler
+    .hooks
+    .beforeConfig
+    .tap(
+      'AddHotReplacementPlugin',
+      (
+        wEnv: string,
+        wType: string,
+        wConfigs: IPawjsWebpackConfig [],
+      ) => {
+        // Add eval devtool to all the configs
+        wConfigs.forEach((wConfig: IPawjsWebpackConfig) => {
+          const config = wConfig;
+          if (!config.devtool) {
+            config.devtool = 'eval-source-map';
+            if (!config.resolve) config.resolve = {};
+            if (!config.resolve.alias) config.resolve.alias = {};
+            if (!config.resolve.alias['react-dom']) {
+              config.resolve.alias['react-dom'] = '@hot-loader/react-dom';
             }
-            let clientIndex = wConfig
-              .entry
-              .client
-              .indexOf(
-                pawExistsSync(path.join(libRoot, 'src', 'client', 'app')),
-              );
+          }
+        });
 
-            // Add webpack-hot-middleware as entry point
-            const hotMiddlewareString = 'webpack-hot-middleware/client?name=web&'
-              + 'path=/__hmr_update&timeout=2000&overlay=true&quiet=false';
+        // Web specific configurations
+        if (wType === 'web') {
+          wConfigs.forEach((webpackConfig: IPawjsWebpackConfig) => {
+            const wConfig = webpackConfig;
+            if (
+              typeof wConfig.entry !== 'undefined'
+              && typeof wConfig.entry.client !== 'undefined'
+              && Array.isArray(wConfig.entry.client)
+            ) {
+              const libRoot = process.env.LIB_ROOT;
+              if (typeof libRoot === 'undefined') {
+                return;
+              }
+              let clientIndex = wConfig
+                .entry
+                .client
+                .indexOf(
+                  pawExistsSync(path.join(libRoot, 'src', 'client', 'app')),
+                );
 
-            if (!wConfig.entry.client.includes(hotMiddlewareString)) {
-              if (clientIndex === -1) {
-                wConfig.entry.client.unshift(hotMiddlewareString);
-              } else {
-                wConfig.entry.client.splice(clientIndex, 0, hotMiddlewareString);
-                clientIndex += 1;
+              // Add webpack-hot-middleware as entry point
+              const hotMiddlewareString = 'webpack-hot-middleware/client?name=web&'
+                + 'path=/__hmr_update&timeout=2000&overlay=true&quiet=false';
+
+              if (!wConfig.entry.client.includes(hotMiddlewareString)) {
+                if (clientIndex === -1) {
+                  wConfig.entry.client.unshift(hotMiddlewareString);
+                } else {
+                  wConfig.entry.client.splice(clientIndex, 0, hotMiddlewareString);
+                  clientIndex += 1;
+                }
+              }
+
+              // Replace app with hot-app
+              if (
+                wConfig.entry.client.includes(
+                  pawExistsSync(
+                    path.join(libRoot, 'src', 'client', 'app'),
+                  ),
+                )
+              ) {
+                // eslint-disable-next-line
+                wConfig.entry.client[clientIndex] = pawExistsSync(
+                  path.join(libRoot, 'src', 'client', 'hot-app'),
+                );
+              }
+
+              // check for Hot Module replacement plugin and add it if necessary
+              if (!wConfig.plugins) wConfig.plugins = [];
+              const hasHotPlugin = wConfig.plugins
+                .some(p => p instanceof webpack.HotModuleReplacementPlugin);
+
+              if (!hasHotPlugin) {
+                wConfig.plugins.unshift(new webpack.HotModuleReplacementPlugin({
+                  multiStep: true,
+                }));
               }
             }
-
-            // Replace app with hot-app
-            if (
-              wConfig.entry.client.includes(
-                pawExistsSync(
-                  path.join(libRoot, 'src', 'client', 'app'),
-                ),
-              )
-            ) {
-              // eslint-disable-next-line
-              wConfig.entry.client[clientIndex] = pawExistsSync(
-                path.join(libRoot, 'src', 'client', 'hot-app'),
-              );
-            }
-
-            // check for Hot Module replacement plugin and add it if necessary
-            if (!wConfig.plugins) wConfig.plugins = [];
-            const hasHotPlugin = wConfig.plugins
-              .some(p => p instanceof webpack.HotModuleReplacementPlugin);
-
-            if (!hasHotPlugin) {
-              wConfig.plugins.unshift(new webpack.HotModuleReplacementPlugin({
-                multiStep: true,
-              }));
-            }
-          }
-        });
-      }
-      if (wType === 'server') {
-        wConfigs.forEach((webpackConfig: IPawjsWebpackConfig) => {
-          const wConfig = webpackConfig;
-          // Add express as externals
-          if (!wConfig.externals) {
-            wConfig.externals = {};
-          }
-
-          wConfig.externals.express = 'express';
-
-          if (!wConfig.module) wConfig.module = { rules: [] };
-          // do not emit image files for server!
-          wConfig.module.rules.forEach((r: any) => {
-            const rule = r;
-            if (rule.use && Array.isArray(rule.use)) {
-              rule.use.forEach((use: any) => {
-                const u = use;
-                if (u.loader && u.loader === 'file-loader') {
-                  if (!u.options) u.options = {};
-                  u.options.emitFile = typeof u.options.emitFile !== 'undefined'
-                    ? u.options.emitFile : false;
-                }
-              });
-            }
           });
-        });
-      }
-    },
-  );
+        }
+        if (wType === 'server') {
+          wConfigs.forEach((webpackConfig: IPawjsWebpackConfig) => {
+            const wConfig = webpackConfig;
+            // Add express as externals
+            if (!wConfig.externals) {
+              wConfig.externals = {};
+            }
+
+            wConfig.externals.express = 'express';
+
+            if (!wConfig.module) wConfig.module = { rules: [] };
+            // do not emit image files for server!
+            wConfig.module.rules.forEach((r: any) => {
+              const rule = r;
+              if (rule.use && Array.isArray(rule.use)) {
+                rule.use.forEach((use: any) => {
+                  const u = use;
+                  if (u.loader && u.loader === 'file-loader') {
+                    if (!u.options) u.options = {};
+                    u.options.emitFile = typeof u.options.emitFile !== 'undefined'
+                      ? u.options.emitFile : false;
+                  }
+                });
+              }
+            });
+          });
+        }
+      },
+    );
+}
 
 try {
   // Server configurations
