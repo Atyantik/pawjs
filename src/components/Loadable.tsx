@@ -32,6 +32,7 @@ const createLoadableComponent = (
     webpack: [],
     modules: [],
     loadedData: null,
+    selfManageNewProps: false,
     ...options,
   };
 
@@ -221,7 +222,8 @@ const createLoadableComponent = (
       ],
     );
     if (
-      previousRouterProps
+      !opts.selfManageNewProps
+      && previousRouterProps
       && previousRouterProps.current
       && previousRouterProps.current.propsMatch
       && previousRouterProps.current.propsMatch.path

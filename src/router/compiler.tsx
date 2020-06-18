@@ -37,6 +37,7 @@ export default class RouteCompiler {
       modules,
       props: routeProps,
       routes,
+      selfManageNewProps,
     } = route;
 
     // JSXifiable component object
@@ -69,6 +70,9 @@ export default class RouteCompiler {
       return {};
     };
     const loadableComponent = Map({
+      selfManageNewProps:
+        typeof selfManageNewProps !== 'undefined'
+          ? !!selfManageNewProps : false,
       timeout: PARAMS.timeout,
       delay: PARAMS.delay,
       loader: {

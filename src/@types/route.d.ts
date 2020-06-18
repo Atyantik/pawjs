@@ -33,6 +33,7 @@ export interface IRoute extends RouteProps {
   skeleton?: ReactComponent;
   timeout?: number;
   webpack?: string [];
+  selfManageNewProps?: boolean;
 }
 
 export interface ICompiledRoute extends RouteConfig {
