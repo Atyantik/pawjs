@@ -80,7 +80,10 @@ setDefaultHandler(({ event }) => {
     ));
   }
 
-  return new NetworkFirst().handle({ event, request });
+  return new NetworkFirst().handle({
+    event,
+    request
+  }).catch(e => console.log(e));
 });
 
 // eslint-disable-next-line no-underscore-dangle
