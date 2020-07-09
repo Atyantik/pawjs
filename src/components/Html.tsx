@@ -1,4 +1,5 @@
 import React from 'react';
+import serialize from 'serialize-javascript';
 import { metaKeys } from '../utils/seo';
 
 /**
@@ -8,31 +9,6 @@ const reactCDN = [
   `https://unpkg.com/react@${React.version}/umd/react.production.min.js`,
   `https://unpkg.com/react-dom@${React.version}/umd/react-dom.production.min.js`,
 ];
-
-/**
- * toBase64: atob polyfill with Buffer
- */
-let toBase64: (arg0: string) => string;
-// Base64 polyfill
-if (typeof atob === 'undefined' && typeof Buffer !== 'undefined') {
-  toBase64 = (str) => {
-    if (!str) return str;
-    return Buffer.from(str, 'latin1').toString('base64');
-  };
-} else if (typeof atob !== 'undefined') {
-  toBase64 = atob;
-}
-
-// first we use encodeURIComponent to get percent-encoded UTF-8,
-// then we convert the percent encodings into raw bytes which
-// can be fed into btoa.
-const b64EncodeUnicode = (str: string) => toBase64(
-  encodeURIComponent(str)
-    .replace(
-      /%([0-9A-F]{2})/g,
-      (match, p1) => String.fromCharCode(parseInt(`0x${p1}`, 16)),
-    ),
-);
 
 interface IHtmlProps {
   preloadedData?: any;
@@ -197,7 +173,12 @@ export default (props: React.PropsWithChildren<IHtmlProps> = {
   };
   const renderPreLoadedData = () => {
     if (noJS || !preloadedData) return null;
-    const PAW_PRELOADED_DATA = JSON.stringify(b64EncodeUnicode(JSON.stringify(preloadedData)));
+    const PAW_PRELOADED_DATA = serialize(preloadedData);
+    if (PAW_PRELOADED_DATA.length > 50000) {
+      // eslint-disable-next-line no-console
+      console.warn('PRELOADED DATA is too lengthy to append to html');
+      return null;
+    }
     return (
       <script
         type="text/javascript"
@@ -208,7 +189,7 @@ export default (props: React.PropsWithChildren<IHtmlProps> = {
   };
   const renderJsToBePreloaded = () => {
     if (noJS || !jsToBePreloaded || !jsToBePreloaded.length) return null;
-    const PAW_PRELOAD_JS = JSON.stringify(b64EncodeUnicode(JSON.stringify(jsToBePreloaded)));
+    const PAW_PRELOAD_JS = serialize(jsToBePreloaded);
     return (
       <script
         type="text/javascript"

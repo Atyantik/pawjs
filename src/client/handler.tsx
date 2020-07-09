@@ -30,13 +30,6 @@ type HistoryLocation = {
   state?: any;
 };
 
-const b64DecodeUnicode = (str: string) => decodeURIComponent(
-  atob(str)
-    .split('')
-    .map(c => `%${(`00${c.charCodeAt(0).toString(16)}`).slice(-2)}`)
-    .join(''),
-);
-
 export default class ClientHandler extends AbstractPlugin {
   historyUnlistener = null;
 
@@ -273,7 +266,7 @@ export default class ClientHandler extends AbstractPlugin {
 
     const promises: Promise<any> [] = [];
     if (window.PAW_PRELOADED_DATA) {
-      const preloadedData = JSON.parse(b64DecodeUnicode(window.PAW_PRELOADED_DATA));
+      const preloadedData = window.PAW_PRELOADED_DATA;
       currentPageRoutes.forEach((r: { route: ICompiledRoute, match: any }, i: number) => {
         if (
           (typeof preloadedData[i] !== 'undefined')
@@ -285,6 +278,16 @@ export default class ClientHandler extends AbstractPlugin {
           });
           promises.push(preloadInit.promise);
         } else if (r.route && r.route.component && r.route.component.preload) {
+          const preloadInit = r.route.component.preload(undefined, {
+            route: r.route,
+            match: r.match,
+          });
+          promises.push(preloadInit.promise);
+        }
+      });
+    } else {
+      currentPageRoutes.forEach((r: { route: ICompiledRoute, match: any }, i: number) => {
+        if (r.route && r.route.component && r.route.component.preload) {
           const preloadInit = r.route.component.preload(undefined, {
             route: r.route,
             match: r.match,
