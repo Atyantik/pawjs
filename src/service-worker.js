@@ -2,6 +2,7 @@ import 'core-js/stable';
 import 'regenerator-runtime/runtime';
 import { precacheAndRoute } from 'workbox-precaching';
 import { registerRoute, setDefaultHandler } from 'workbox-routing';
+import { ExpirationPlugin } from 'workbox-expiration';
 import {
   NetworkFirst,
   NetworkOnly,
@@ -16,7 +17,6 @@ const serviceWorker = self;
 precacheAndRoute(self.__WB_MANIFEST);
 // eslint-disable-next-line no-underscore-dangle,no-restricted-globals
 precacheAndRoute(self.__PAW_MANIFEST);
-
 
 // // eslint-disable-next-line
 // const serviceWorker = self;
@@ -51,14 +51,44 @@ setDefaultHandler(({ event }) => {
     request.url.indexOf(serviceWorker.location.origin) !== -1
     && assetsRegExp.test(request.url)
   ) {
-    return new CacheFirst().handle({ event, request });
+    return new CacheFirst(
+      {
+        // You need to provide a cache name when using expiration.
+        cacheName: 'external_assets',
+        plugins: [
+          new ExpirationPlugin({
+            // Keep at most 50 entries.
+            maxEntries: 50,
+            // Don't keep any entries for more than 30 days.
+            maxAgeSeconds: 30 * 24 * 60 * 60,
+            // Automatically cleanup if quota is exceeded.
+            purgeOnQuotaError: true,
+          }),
+        ],
+      },
+    ).handle({ event, request });
   }
 
   if (
     request.url.indexOf(serviceWorker.location.origin) === -1
     && assetsRegExp.test(request.url)
   ) {
-    return new StaleWhileRevalidate().handle({ event, request });
+    return new StaleWhileRevalidate(
+      {
+        // You need to provide a cache name when using expiration.
+        cacheName: 'internal_assets',
+        plugins: [
+          new ExpirationPlugin({
+            // Keep at most 50 entries.
+            maxEntries: 50,
+            // Don't keep any entries for more than 30 days.
+            maxAgeSeconds: 30 * 24 * 60 * 60,
+            // Automatically cleanup if quota is exceeded.
+            purgeOnQuotaError: true,
+          }),
+        ],
+      },
+    ).handle({ event, request });
   }
 
   if (
@@ -66,23 +96,52 @@ setDefaultHandler(({ event }) => {
     && request.headers.get('accept').indexOf('html') !== -1
     && request.mode === 'navigate'
   ) {
-    return new NetworkFirst().handle({ event, request }).then((response) => {
-      if (!response) {
-        return new Response(
-          getOfflineHtml(),
-          { headers: { 'Content-Type': 'text/html' } },
-        );
-      }
-      return response;
-    }).catch(() => new Response(
-      getOfflineHtml(),
-      { headers: { 'Content-Type': 'text/html' } },
-    ));
+    return new NetworkFirst(
+      {
+        // You need to provide a cache name when using expiration.
+        cacheName: 'internal_requests',
+        plugins: [
+          new ExpirationPlugin({
+            // Keep at most 50 entries.
+            maxEntries: 50,
+            // Don't keep any entries for more than 30 days.
+            maxAgeSeconds: 30 * 24 * 60 * 60,
+            // Automatically cleanup if quota is exceeded.
+            purgeOnQuotaError: true,
+          }),
+        ],
+      },
+    ).handle({ event, request })
+      .then((response) => {
+        if (!response) {
+          return new Response(
+            getOfflineHtml(),
+            { headers: { 'Content-Type': 'text/html' } },
+          );
+        }
+        return response;
+      }).catch(() => new Response(
+        getOfflineHtml(),
+        { headers: { 'Content-Type': 'text/html' } },
+      ));
   }
 
-  return new NetworkFirst().handle({
+  return new NetworkFirst({
+    // You need to provide a cache name when using expiration.
+    cacheName: 'other_requests',
+    plugins: [
+      new ExpirationPlugin({
+        // Keep at most 50 entries.
+        maxEntries: 50,
+        // Don't keep any entries for more than 30 days.
+        maxAgeSeconds: 30 * 24 * 60 * 60,
+        // Automatically cleanup if quota is exceeded.
+        purgeOnQuotaError: true,
+      }),
+    ],
+  }).handle({
     event,
-    request
+    request,
   }).catch(e => console.log(e));
 });
 
