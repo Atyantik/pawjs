@@ -174,7 +174,7 @@ export default (props: React.PropsWithChildren<IHtmlProps> = {
   const renderPreLoadedData = () => {
     if (noJS || !preloadedData) return null;
     const PAW_PRELOADED_DATA = serialize(preloadedData);
-    if (PAW_PRELOADED_DATA.length > 50000) {
+    if (PAW_PRELOADED_DATA.length > 200000) {
       // eslint-disable-next-line no-console
       console.warn('PRELOADED DATA is too lengthy to append to html');
       return null;
