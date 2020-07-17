@@ -119,10 +119,13 @@ const createLoadableComponent = (
     const resetLoadableState = () => {
       if (isMounted.current) {
         updateLoadableState({
-          timedOut: false,
-          loading: resReference.current.loading,
-          error: resReference.current.error,
-          pastDelay: opts.delay <= 0,
+          type: 'UPDATE',
+          payload: {
+            timedOut: false,
+            loading: resReference.current.loading,
+            error: resReference.current.error,
+            pastDelay: opts.delay <= 0,
+          },
         });
       }
     };
