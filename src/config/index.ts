@@ -7,6 +7,7 @@ interface IConfig {
   cdnUrl?: string;
   serverSideRender?: boolean;
   serviceWorker?: boolean;
+  safariServiceWorker?: boolean;
   singlePageApplication?: boolean;
   asyncCSS?: boolean;
   polyfill?: string;
@@ -69,6 +70,7 @@ config = {
     cdnUrl: process.env.CDN_URL || config.cdnUrl,
     serverSideRender: getBool(process.env.SSR_ENABLED, config.serverSideRender),
     serviceWorker: getBool(process.env.SERVICE_WORKER_ENABLED, config.serviceWorker),
+    safariServiceWorker: getBool(process.env.SAFARI_SERVICE_WORKER, config.safariServiceWorker),
     singlePageApplication: getBool(
       process.env.SINGLE_PAGE_APPLICATION,
       config.singlePageApplication,

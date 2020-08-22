@@ -5,6 +5,7 @@
   "cdnUrl": "",
   "serverSideRender": true,
   "serviceWorker": true,
+  "safariServiceWorker": true,
   "singlePageApplication": false,
   "asyncCSS": true,
   "polyfill": "internal",

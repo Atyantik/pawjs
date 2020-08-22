@@ -210,7 +210,13 @@ export default class ClientHandler extends AbstractPlugin {
   }
 
   manageServiceWorker() {
-    if (this.options.env.serviceWorker) {
+    const isSafari = /^((?!chrome|android).)*safari/i.test(window.navigator.userAgent);
+    const disableInSafari = !this.options.env.safariServiceWorker;
+    let registerServiceWorker = this.options.env.serviceWorker;
+    if (disableInSafari && isSafari) {
+      registerServiceWorker = false;
+    }
+    if (registerServiceWorker) {
       this.hooks.renderComplete.tap('AddServiceWorker', (err) => {
         if (err) return;
         if ('serviceWorker' in navigator) {
