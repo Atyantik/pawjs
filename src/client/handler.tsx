@@ -39,6 +39,8 @@ export default class ClientHandler extends AbstractPlugin {
 
   updatePageMetaTimeout = 0;
 
+  loaded = false;
+
   hooks: {
     beforeRender: AsyncSeriesHook<any>;
     locationChange: AsyncParallelBailHook<any, any>;
@@ -61,6 +63,13 @@ export default class ClientHandler extends AbstractPlugin {
       basename: options.env.appRootUrl,
     });
     this.history = window.PAW_HISTORY;
+    if (
+      this.historyUnlistener
+      && typeof this.historyUnlistener === 'function'
+    ) {
+      // @ts-ignore
+      this.historyUnlistener();
+    }
     this.historyUnlistener = this.history.listen(this.manageHistoryChange);
 
     this.hooks = {
@@ -95,6 +104,7 @@ export default class ClientHandler extends AbstractPlugin {
   }
 
   manageHistoryChange(location: HistoryLocation, action: string) {
+    if (!this.loaded) return;
     this.hooks.locationChange.callAsync(location, action, () => null);
     if (this.routeHandler) {
       this.updatePageMeta(location, action)
@@ -404,6 +414,7 @@ export default class ClientHandler extends AbstractPlugin {
     const renderOnIdle = (deadline: any) => {
       if (deadline.timeRemaining() > 0 || deadline.didTimeout) {
         this.renderApplication();
+        this.loaded = true;
       } else {
         if (idleTimeout) {
           window.cancelIdleCallback(idleTimeout);
