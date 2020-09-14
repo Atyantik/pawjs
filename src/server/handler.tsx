@@ -38,6 +38,7 @@ export default class ServerHandler extends AbstractPlugin {
   hooks: {
     beforeStart: AsyncSeriesHook<any>,
     afterStart: AsyncSeriesHook<any>,
+    requestStart: AsyncSeriesHook<any>,
     beforeLoadData: AsyncSeriesHook<any>,
     beforeAppRender: AsyncSeriesHook<any>,
     beforeHtmlRender: AsyncSeriesHook<any>,
@@ -50,6 +51,7 @@ export default class ServerHandler extends AbstractPlugin {
     this.hooks = {
       beforeStart: new AsyncSeriesHook(['config', 'appOptions']),
       afterStart: new AsyncSeriesHook(['appOptions']),
+      requestStart: new AsyncSeriesHook(['request', 'response']),
       beforeLoadData: new AsyncSeriesHook(['setParams', 'getParams', 'request', 'response']),
       beforeAppRender: new AsyncSeriesHook(['application', 'request', 'response']),
       beforeHtmlRender: new AsyncSeriesHook(['application', 'request', 'response']),
@@ -119,6 +121,18 @@ export default class ServerHandler extends AbstractPlugin {
       noJS,
     } = this.options.env;
     this.routeHandler = routeHandler;
+
+    /**
+     * Hook at the start of request execution
+     */
+    await new Promise(r => this
+      .hooks
+      .requestStart
+      .callAsync(
+        req,
+        res,
+        r,
+      ));
 
     let routes = routeHandler.getRoutes();
     const pwaSchema = routeHandler.getPwaSchema();

@@ -178,15 +178,12 @@ export default class RouteHandler extends AbstractPlugin implements IRouteHandle
     let timeout = 10000;
 
     this.setDefaultSeoSchema = (schema = {}) => {
-      // eslint-disable-next-line no-console
-      console.warn('DEPRECIATED: Do not set SEO Schema from router! Use `src/seo.ts` instead.');
       seoSchema = Object.assign(seoSchema, schema);
     };
 
     this.getDefaultSeoSchema = () => ({ ...seoSchema });
 
     this.setPwaSchema = (schema = {}) => {
-      console.warn('DEPRECIATED: Do not set PWA Schema from router! Use `src/pwa.tsx` instead.');
       pwaSchema = Object.assign(pwaSchema, schema);
     };
 

@@ -45,6 +45,7 @@ export default class ClientHandler extends AbstractPlugin {
     beforeRender: AsyncSeriesHook<any>;
     locationChange: AsyncParallelBailHook<any, any>;
     postMetaUpdate: AsyncParallelBailHook<any, any>;
+    appStart: AsyncSeriesHook<any>,
     beforeLoadData: AsyncSeriesHook<any>;
     renderRoutes: AsyncSeriesHook<any>;
     renderComplete: SyncHook<any, any>;
@@ -74,6 +75,7 @@ export default class ClientHandler extends AbstractPlugin {
 
     this.hooks = {
       locationChange: new AsyncParallelBailHook(['location', 'action']),
+      appStart: new AsyncSeriesHook([]),
       postMetaUpdate: new AsyncParallelBailHook(['location', 'action']),
       beforeLoadData: new AsyncSeriesHook(['setParams', 'getParams']),
       beforeRender: new AsyncSeriesHook(['Application']),
@@ -395,6 +397,13 @@ export default class ClientHandler extends AbstractPlugin {
 
   async run({ routeHandler }: { routeHandler: RouteHandler }) {
     this.routeHandler = routeHandler;
+    // On app start
+    await new Promise(r => this
+      .hooks
+      .appStart
+      .callAsync(
+        r,
+      ));
     const { env } = this.options;
     const root = get(env, 'clientRootElementId', 'app');
 
