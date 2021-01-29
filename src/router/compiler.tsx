@@ -46,7 +46,7 @@ export default class RouteCompiler {
       notFoundComponent: error || routerService.get404Component(),
       skeletonComponent: skeleton || routerService.getDefaultLoaderComponent(),
       timeout: timeout || routerService.getDefaultLoadTimeout(),
-      delay: delay || routerService.getDefaultAllowedLoadDelay(),
+      delay: typeof delay === 'undefined' ? routerService.getDefaultAllowedLoadDelay() : delay,
     };
 
     let routeSeo = { ...(seo || {}) };

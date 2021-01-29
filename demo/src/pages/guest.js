@@ -47,6 +47,7 @@ export default [
     }),
     component: () => import('../components/skeleton-loading'),
     skeleton,
+    delay: 0,
     seo: {
       title: 'Skeleton Loading | ReactPWA Demo',
       description: 'Tired of adding ugly loaders? Do not let your users get confused, give them the best user experience of what is getting loaded. Use Skeleton Loading',

@@ -211,6 +211,18 @@ const createLoadableComponent = (
         res = loadFn(opts.loader, undefined, props);
         resReference.current = res;
         resetLoadableState();
+        clearTimeouts();
+        if (opts.delay > 0) {
+          pastDelayTimeoutRef.current = setTimeout(
+              () => {
+                if (isMounted.current) {
+                  isModuleLoading.current = false;
+                  updateLoadableState({ type: 'SET_PAST_DELAY', pastDelay: true });
+                }
+              },
+              opts.delay,
+          );
+        }
         if (res.promise && res.promise.then) {
           res.promise.then(() => {
             loadModule();
