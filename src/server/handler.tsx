@@ -83,6 +83,7 @@ export default class ServerHandler extends AbstractPlugin {
     htmlContent?: string,
   ) {
     await new Promise(r => this.hooks.beforeHtmlRender.callAsync(app, req, res, r));
+    const content = app.htmlProps.htmlContent ? app.htmlProps.htmlContent : htmlContent;
     return renderToString(
       (
         <Html
@@ -98,7 +99,7 @@ export default class ServerHandler extends AbstractPlugin {
           env={app.htmlProps.env}
           appRootUrl={app.appRootUrl || (app.htmlProps.env && app.htmlProps.env.appRootUrl) || ''}
           clientRootElementId={this.options.env.clientRootElementId}
-          dangerouslySetInnerHTML={(htmlContent ? { __html: htmlContent } : { __html: '' })}
+          dangerouslySetInnerHTML={(content ? { __html: content } : { __html: '' })}
         />
       ),
     );
@@ -357,17 +358,17 @@ export default class ServerHandler extends AbstractPlugin {
           >
             {/* tslint:disable-next-line:jsx-no-multiline-js */}
             {noJS && (
-              <ErrorBoundary>
-                <StaticRouter location={req.url} context={context} basename={appRootUrl}>
-                  <ErrorBoundary
-                    ErrorComponent={routeHandler.getErrorComponent()}
-                    NotFoundComponent={routeHandler.get404Component()}
-                    error={ex}
-                  >
-                    <Route path="*" component={errorComponent} />
-                  </ErrorBoundary>
-                </StaticRouter>
-              </ErrorBoundary>
+            <ErrorBoundary>
+              <StaticRouter location={req.url} context={context} basename={appRootUrl}>
+                <ErrorBoundary
+                  ErrorComponent={routeHandler.getErrorComponent()}
+                  NotFoundComponent={routeHandler.get404Component()}
+                  error={ex}
+                >
+                  <Route path="*" component={errorComponent} />
+                </ErrorBoundary>
+              </StaticRouter>
+            </ErrorBoundary>
             )}
 
           </Html>
