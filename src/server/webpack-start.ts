@@ -1,4 +1,3 @@
-/* global pawExistsSync */
 import path from 'path';
 import express from 'express';
 import webpack from 'webpack';
@@ -9,6 +8,7 @@ import { NextHandleFunction } from 'connect';
 import pawConfig from '../config';
 import directories from '../webpack/utils/directories';
 import wHandler from '../webpack';
+import { pawExistsSync } from '../global';
 // Utils
 // -- Require from string. create an export from string like `module.export = "Something";`
 import requireFromString from '../webpack/utils/requireFromString';
@@ -102,7 +102,7 @@ if (pawConfig.hotReload) {
               // check for Hot Module replacement plugin and add it if necessary
               if (!wConfig.plugins) wConfig.plugins = [];
               const hasHotPlugin = wConfig.plugins
-                .some(p => p instanceof webpack.HotModuleReplacementPlugin);
+                .some((p) => p instanceof webpack.HotModuleReplacementPlugin);
 
               if (!hasHotPlugin) {
                 wConfig.plugins.unshift(new webpack.HotModuleReplacementPlugin({
@@ -217,8 +217,8 @@ try {
 
   // Add server middleware
   const serverMiddleware:
-    webpackMiddleware.WebpackDevMiddleware
-    & NextHandleFunction = webpackMiddleware(serverCompiler, serverOptions);
+  webpackMiddleware.WebpackDevMiddleware
+  & NextHandleFunction = webpackMiddleware(serverCompiler, serverOptions);
 
   app.use(serverMiddleware);
 

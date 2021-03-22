@@ -11,7 +11,7 @@ import {
   AsyncSeriesHook,
   AsyncParallelBailHook,
   SyncHook,
-} from '@pawjs/tapable';
+} from 'tapable';
 import RouteHandler from '../router/handler';
 import ErrorBoundary from '../components/ErrorBoundary';
 import { generateMeta } from '../utils/seo';
@@ -111,7 +111,7 @@ export default class ClientHandler extends AbstractPlugin {
     if (this.routeHandler) {
       this.updatePageMeta(location, action)
         .catch((e) => {
-          // eslint-disable-next-line
+          // eslint-disable-next-line no-console
           console.log(e);
         });
     }
@@ -243,7 +243,7 @@ export default class ClientHandler extends AbstractPlugin {
         if (err) return;
         if ('serviceWorker' in navigator) {
           navigator.serviceWorker.getRegistrations().then((registrations) => {
-            registrations.forEach(registration => registration.unregister());
+            registrations.forEach((registration) => registration.unregister());
           });
         }
       });
@@ -273,7 +273,7 @@ export default class ClientHandler extends AbstractPlugin {
       ),
     );
     const { preloadManager: { setParams, getParams } } = this.routeHandler.routeCompiler;
-    await new Promise(r => this
+    await new Promise((r) => this
       .hooks
       .beforeLoadData
       .callAsync(
@@ -304,7 +304,7 @@ export default class ClientHandler extends AbstractPlugin {
         }
       });
     } else {
-      currentPageRoutes.forEach((r: { route: ICompiledRoute, match: any }, i: number) => {
+      currentPageRoutes.forEach((r: { route: ICompiledRoute, match: any }) => {
         if (r.route && r.route.component && r.route.component.preload) {
           const preloadInit = r.route.component.preload(undefined, {
             route: r.route,
@@ -350,7 +350,7 @@ export default class ClientHandler extends AbstractPlugin {
     };
 
     await (
-      new Promise(r => this.hooks.renderRoutes.callAsync(
+      new Promise((r) => this.hooks.renderRoutes.callAsync(
         {
           setRenderedRoutes: appRoutes.setRenderedRoutes,
           getRenderedRoutes: appRoutes.getRenderedRoutes,
@@ -388,7 +388,7 @@ export default class ClientHandler extends AbstractPlugin {
               preloadedElement.remove();
             }
             this.hooks.renderComplete.call();
-            resolve();
+            resolve(true);
           },
         );
       });
@@ -398,7 +398,7 @@ export default class ClientHandler extends AbstractPlugin {
   async run({ routeHandler }: { routeHandler: RouteHandler }) {
     this.routeHandler = routeHandler;
     // On app start
-    await new Promise(r => this
+    await new Promise((r) => this
       .hooks
       .appStart
       .callAsync(
@@ -408,7 +408,7 @@ export default class ClientHandler extends AbstractPlugin {
     const root = get(env, 'clientRootElementId', 'app');
 
     if (!document.getElementById(root)) {
-      // eslint-disable-next-line
+      // eslint-disable-next-line no-console
       console.warn(`#${root} element not found in HTML, thus cannot proceed further`);
       return false;
     }

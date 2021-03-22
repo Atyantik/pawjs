@@ -75,7 +75,7 @@ const createLoadableComponent = (
     }
   }
 
-  let previousRouterProps = '';
+  const previousRouterProps = '';
   const loadableComponent = withRouter((props: any) => {
     const {
       history: propsHistory,
@@ -214,13 +214,13 @@ const createLoadableComponent = (
         clearTimeouts();
         if (opts.delay > 0) {
           pastDelayTimeoutRef.current = setTimeout(
-              () => {
-                if (isMounted.current) {
-                  isModuleLoading.current = false;
-                  updateLoadableState({ type: 'SET_PAST_DELAY', pastDelay: true });
-                }
-              },
-              opts.delay,
+            () => {
+              if (isMounted.current) {
+                isModuleLoading.current = false;
+                updateLoadableState({ type: 'SET_PAST_DELAY', pastDelay: true });
+              }
+            },
+            opts.delay,
           );
         }
         if (res.promise && res.promise.then) {
@@ -230,7 +230,6 @@ const createLoadableComponent = (
         } else {
           loadModule();
         }
-
       },
       [
         props,

@@ -7,7 +7,7 @@ const defaultOptions = {
   context: directories.src,
 };
 
-const rule = options => ({
+const rule = (options) => ({
   test: /\.(eot|ttf|woff|woff2)$/,
   use: [
     {

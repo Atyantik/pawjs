@@ -197,6 +197,6 @@ export const assetsToArray = (assets: any) => {
   } else if (typeof assets === 'string') {
     allAssets.push(assets);
   }
-  allAssets = _.sortBy(allAssets, a => a.indexOf('hot-update') !== -1);
+  allAssets = _.sortBy(allAssets, (a) => a.indexOf('hot-update') !== -1);
   return _.uniq(allAssets);
 };

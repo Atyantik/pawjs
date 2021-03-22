@@ -1,4 +1,4 @@
-import { Hook, SyncHook } from '@pawjs/tapable';
+import { Hook, SyncHook } from 'tapable';
 
 // non npm imports
 import serverConfig from './server.config';

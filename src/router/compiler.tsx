@@ -18,7 +18,7 @@ export default class RouteCompiler {
   }
 
   compileRoutes(routes: Route[], routerService: IRouteHandler): CompiledRoute [] {
-    return routes.map(r => this.compileRoute(r, routerService));
+    return routes.map((r) => this.compileRoute(r, routerService));
   }
 
   compileRoute(route: Route, routerService: IRouteHandler): CompiledRoute {

@@ -59,8 +59,8 @@ const populate = (chunks:any [], type: string, publicPath: string) => {
       arr.unshift({
         path: `${publicPath}${typeFileName}`,
         modules: moduleReasons,
-    });
-  }
+      });
+    }
   });
   return arr;
 };

@@ -10,20 +10,19 @@
     "skipLibCheck": true,
     "strict": true,
     "target": "esnext",
-    "outDir": "dist"
+    "outDir": "dist",
+    "resolveJsonModule": true
   },
   "include": [
-    "**/*.ts",
-    "**/*.tsx"
+    "src",
+    ".eslintrc.js",
+    "package.json",
+    "./paw.js"
   ],
   "exclude": [
     "dist",
-    "src/extensions.js",
     "demo",
     "node_modules",
     "**/dist/**/*",
-    "src/__tests__/**",
-    "src/babel/**",
-    "src/webpack/**"
   ]
 }

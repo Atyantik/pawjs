@@ -1,7 +1,7 @@
 const path = require('path');
 
 module.exports = {
-  "extends": "./node_modules/@pawjs/pawjs/.eslintrc",
+  "extends": "./node_modules/@pawjs/pawjs/.eslintrc.js",
   "rules": {
     "import/no-extraneous-dependencies": 0,
     "react/jsx-boolean-value": 0

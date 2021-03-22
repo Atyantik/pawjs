@@ -1,9 +1,10 @@
-import fs from 'fs';
-import path from 'path';
+import * as fs from 'fs';
+import * as path from 'path';
 import uniq from 'lodash/uniq';
 
 const pRoot = process.env.PROJECT_ROOT || (process.cwd() + path.sep);
 const lRoot = process.env.LIB_ROOT || path.resolve(__dirname, '../');
+const processDir: string = path.resolve(process.cwd());
 
 const addToArrayIfExists = (arr: string [], paths: string []): void => {
   const joinedPath = path.join(...paths);
@@ -12,42 +13,50 @@ const addToArrayIfExists = (arr: string [], paths: string []): void => {
   }
 };
 
+/**
+ * @param projectRoot
+ * @param libRoot
+ */
 export default (projectRoot: string = pRoot, libRoot: string = lRoot): string [] => {
   let executablePaths = process.env.PATH ? process.env.PATH.split(path.delimiter) : [];
 
-  // Add library root to executable path without the trailing slash
-  executablePaths.unshift(libRoot.replace(/\/$/, ''));
+  const absoluteProjectRoot = !path.isAbsolute(projectRoot)
+    ? path.resolve(processDir, projectRoot)
+    : path.resolve(projectRoot);
+  const absoluteLibRoot = !path.isAbsolute(libRoot)
+    ? path.resolve(processDir, libRoot)
+    : path.resolve(libRoot);
+  // Add library root to executable path without the trailing slash,
+  // Ideally path.resolve should remove the trailing slash, but we added
+  // the extra piece of code for just in case as precaution, we can remove it in future
 
   // Include library's bin and it's node_modules's bin
-  addToArrayIfExists(executablePaths, [libRoot, '.bin']);
-  addToArrayIfExists(executablePaths, [libRoot, 'node_modules']);
-  addToArrayIfExists(executablePaths, [libRoot, 'node_modules', '.bin']);
+  addToArrayIfExists(executablePaths, [absoluteLibRoot]);
+  addToArrayIfExists(executablePaths, [absoluteLibRoot, '.bin']);
+  addToArrayIfExists(executablePaths, [absoluteLibRoot, 'node_modules']);
+  addToArrayIfExists(executablePaths, [absoluteLibRoot, 'node_modules', '.bin']);
 
+  // If PawJS is added as dependency of the current project via
+  // package.json then the below path is added to path automatically
+  // but if just in case if pawjs is added dependency of dependency
+  // then we want to include the parent node_modules and bin of parent
+  // if it exists.
   // Add parent directory node_modules of pawjs to the list
-  addToArrayIfExists(executablePaths, [libRoot, '..', 'node_modules']);
-
-  // Add parent's parent directory node_modules of pawjs to the list
-  addToArrayIfExists(executablePaths, [libRoot, '..', '..', 'node_modules']);
-
-  // Add parent to parent directory
-  // thus trying to add directory storing @pawjs/pawjs for resolution
-  addToArrayIfExists(executablePaths, [libRoot, '..', '..', '..', 'node_modules']);
-  addToArrayIfExists(executablePaths, [libRoot, '..', 'node_modules', '.bin']);
-
-  // Add project root to executable path
-  executablePaths.unshift(projectRoot.replace(/\/$/, ''));
+  addToArrayIfExists(executablePaths, [absoluteLibRoot, '..', 'node_modules']);
+  addToArrayIfExists(executablePaths, [absoluteLibRoot, '..', 'node_modules', '.bin']);
 
   // Include current folder bin and node_modules's bin
-  addToArrayIfExists(executablePaths, [projectRoot, '.bin']);
-  addToArrayIfExists(executablePaths, [projectRoot, 'node_modules']);
-  addToArrayIfExists(executablePaths, [projectRoot, 'node_modules', '.bin']);
+  addToArrayIfExists(executablePaths, [absoluteProjectRoot]);
+  addToArrayIfExists(executablePaths, [absoluteProjectRoot, '.bin']);
+  addToArrayIfExists(executablePaths, [absoluteProjectRoot, 'node_modules']);
+  addToArrayIfExists(executablePaths, [absoluteProjectRoot, 'node_modules', '.bin']);
 
   // If library root is current directory, i.e. we are developing pawjs,
   // then include the node_modules from packages as well.
   if (lRoot === process.cwd()) {
-    const packages = fs.readdirSync(path.join(libRoot, 'packages'));
+    const packages = fs.readdirSync(path.join(absoluteLibRoot, 'packages'));
     packages.forEach((p) => {
-      const packagePath = path.join(libRoot, 'packages', p);
+      const packagePath = path.join(absoluteLibRoot, 'packages', p);
       // Include package folder bin and node_modules's bin
       addToArrayIfExists(executablePaths, [packagePath, '.bin']);
       addToArrayIfExists(executablePaths, [packagePath, 'node_modules']);
