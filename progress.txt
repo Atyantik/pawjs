@@ -1,0 +1,15 @@
+# 22nd March 2021
+I have updated the rules for eslint and have integrated TypeScript with eslint, removing depreciated dependency of tslint.
+I have also removed legacy code for the support for pawconfig.json and have reduced the number of commands the CLI supports.
+
+One of the major change that I did is remove support for .env file other than the root folder. I did my research and
+I personally think the .env file should be unique and should be at the root folder only, thus removed a lot of code that was creating complexity.
+
+I also removed the code for adding parent's parent's (2) node_module detection from the path of executables.
+
+I have changed @pawjs/tapable with package 'tapable' by core create of webpack as they have added support for browsers as well.
+
+My plan futher:
+ - I want to write test case for the CLI and add comments to paw.js and cli.ts
+ - I want to update the webpack and webpack dev server with latest API
+ - I want to configure the webpack-dev-server with latest css minifier plugin and add support or CSS in JS
