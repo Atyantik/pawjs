@@ -19,7 +19,7 @@ const findCommandPath = (com: string, pathList: string []): string => {
     });
   });
   if (!execPath.length) throw new Error(`Cannot find command ${com}.`);
-  return `${execPath}`;
+  return JSON.stringify(`${execPath}`);
 };
 
 const factory = (pathList: string []) => (cmd :string): string => findCommandPath(cmd, pathList);
