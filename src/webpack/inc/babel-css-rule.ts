@@ -1,7 +1,6 @@
 import path from 'path';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
-// @ts-ignore
-import postcssPresetEnv from 'postcss-preset-env';
+import autoprefixer from 'autoprefixer';
 import assignIn from 'lodash/assignIn';
 import directories from '../utils/directories';
 
@@ -44,7 +43,7 @@ export default (options: any = {}) => {
               ident: 'postcss',
               plugins: [
                 [
-                  postcssPresetEnv,
+                  autoprefixer,
                 ],
               ],
             },
@@ -79,7 +78,7 @@ export default (options: any = {}) => {
               ident: 'postcss',
               plugins: [
                 [
-                  postcssPresetEnv,
+                  autoprefixer,
                 ],
               ],
             },

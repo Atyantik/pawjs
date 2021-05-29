@@ -75,6 +75,7 @@ export default {
   },
   plugins: [
     new webpack.EnvironmentPlugin({
+      APP_DESCRIPTION: '',
       APP_NAME: null,
       ENABLE_KEYWORDS: null,
       PAGE_TITLE_SEPARATOR: null,

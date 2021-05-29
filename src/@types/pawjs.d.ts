@@ -1,4 +1,4 @@
-import { Hook, SyncHook } from '@pawjs/tapable';
+import { Hook, SyncHook } from 'tapable';
 
 export interface IPlugin {
   hooks?: {

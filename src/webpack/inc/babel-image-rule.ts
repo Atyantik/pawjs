@@ -1,14 +1,15 @@
 import assignIn from 'lodash/assignIn';
-import { RuleSetQuery } from 'webpack';
+import { RuleSetUse } from 'webpack';
 import directories from '../utils/directories';
 
 const defaultOptions = {
+  publicPath: '',
   outputPath: 'images/',
   name: '[fullhash].[ext]',
   context: directories.src,
 };
 
-export default (options: RuleSetQuery) => ({
+export default (options: RuleSetUse & typeof defaultOptions) => ({
   test: /\.(jpe?g|png|gif|svg|webp|ico)$/i,
   use: [
     {

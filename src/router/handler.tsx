@@ -1,4 +1,4 @@
-import { AsyncSeriesHook } from '@pawjs/tapable';
+import { AsyncSeriesHook } from 'tapable';
 import _uniq from 'lodash/uniq';
 import _cloneDeep from 'lodash/cloneDeep';
 import React from 'react';

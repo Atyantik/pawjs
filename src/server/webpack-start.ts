@@ -243,15 +243,6 @@ try {
   // res.locals but its not needed anyway.
   app.use(webMiddleware);
 
-  if (pawConfig.hotReload) {
-    // Add hot middleware to the update
-    app.use(webpackHotMiddleware(webCompiler, {
-      log: false,
-      path: '/__hmr_update',
-      heartbeat: 2000,
-    }));
-  }
-
   app.use(pawConfig.appRootUrl || '', express.static(path.join((directories.src || ''), 'public')));
 
   /**
