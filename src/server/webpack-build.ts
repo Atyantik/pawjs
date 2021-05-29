@@ -121,15 +121,6 @@ const stats: webpack.Stats.ToStringOptionsObject = {
 
   // Add warnings
   warnings: true,
-
-  // Filter warnings to be shown (since webpack 2.4.0),
-  // can be a String, Regexp, a function getting the warning and returning a boolean
-  // or an Array of a combination of the above. First match wins.
-  warningsFilter: (warning: string) => (
-    warning.indexOf('node_modules/express') !== -1
-    || warning.indexOf('node_modules/encoding') !== -1
-    || warning.indexOf('config/index') !== -1
-  ),
 };
 
 // Notify the user that compilation has started and should be done soon.
@@ -250,10 +241,14 @@ wHandler.hooks.beforeConfig.tap('AddSyncedFilesPlugin', (wEnv, wType, wConfigs) 
          * We need to make sure that everything inside the public folder
          * is copied as it is to the build/public folder
          */
-        wConfig.plugins.push(new CopyWebpackPlugin([{
-          from: path.join(directories.src, 'public'),
-          to: directories.build,
-        }]));
+        wConfig.plugins.push(new CopyWebpackPlugin({
+          patterns: [
+            {
+              from: path.join(directories.src, 'public'),
+              to: directories.build,
+            },
+          ],
+        }));
         copyPublicFolder = true;
       }
 

@@ -4,7 +4,7 @@ import directories from '../utils/directories';
 
 const defaultOptions = {
   outputPath: 'images/',
-  name: '[hash].[ext]',
+  name: '[fullhash].[ext]',
   context: directories.src,
 };
 

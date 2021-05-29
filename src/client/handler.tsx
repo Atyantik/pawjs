@@ -1,7 +1,7 @@
+import React from 'react';
 import { createBrowserHistory } from 'history';
 import invert from 'lodash/invert';
 import get from 'lodash/get';
-import React from 'react';
 import { renderRoutes } from 'react-router-config';
 import { Router } from 'react-router';
 import { HashRouter } from 'react-router-dom';

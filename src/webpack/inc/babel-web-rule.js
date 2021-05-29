@@ -30,12 +30,13 @@ const rule = (options = {}) => {
       {
         loader: 'babel-loader',
         options: {
+          sourceType: 'unambiguous',
           retainLines: true,
           presets: [
             [
               babelPresetEnv,
               {
-                useBuiltIns: 'entry',
+                useBuiltIns: 'usage',
                 corejs: '3.6',
                 targets: {
                   browsers: ['last 2 versions', 'safari >= 7', 'ie >= 11'],

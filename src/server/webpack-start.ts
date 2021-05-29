@@ -111,6 +111,7 @@ if (pawConfig.hotReload) {
               }
             }
           });
+          console.dir(wConfigs);
         }
         if (wType === 'server') {
           wConfigs.forEach((webpackConfig: IPawjsWebpackConfig) => {
@@ -151,11 +152,11 @@ try {
   const webConfig = wHandler.getConfig(process.env.PAW_ENV, 'web');
 
   const devServerConfig = {
-    port: pawConfig.port,
-    host: pawConfig.host,
+    // port: pawConfig.port,
+    // host: pawConfig.host,
     serverSideRender: pawConfig.serverSideRender,
     publicPath: pawConfig.resourcesBaseUrl,
-    contentBase: path.join((directories.src || ''), 'public'),
+    // contentBase: path.join((directories.src || ''), 'public'),
   };
 
   // Create new logging entity, pawjs
@@ -178,16 +179,11 @@ try {
       errors: true,
       cachedAssets: isVerbose,
       version: isVerbose,
-      warningsFilter: (warning: string) => (
-        warning.indexOf('node_modules/express') !== -1
-        || warning.indexOf('node_modules/encoding') !== -1
-        || warning.indexOf('config/index') !== -1
-      ),
     },
-    logger: log,
-    logLevel: 'debug',
-    noInfo: !isVerbose,
-    hot: true,
+    // logger: log,
+    // logLevel: 'debug',
+    // noInfo: !isVerbose,
+    // hot: true,
   };
 
   const serverOptions: any = {
@@ -196,7 +192,7 @@ try {
   };
   const webOptions = {
     ...commonOptions,
-    inline: true,
+    // inline: true,
     serverSideRender: true,
     publicPath: pawConfig.resourcesBaseUrl,
   };
@@ -223,13 +219,13 @@ try {
   app.use(serverMiddleware);
 
   const getCommonServer = () => {
-    const mfs = serverMiddleware.fileSystem;
+    const mfs = serverMiddleware.context.outputFileSystem;
     // Get content of the server that is compiled!
     const serverFile = serverMiddleware.getFilenameFromUrl(
-      `${serverOptions.publicPath}/server.js`,
+      `${serverOptions.publicPath}server.js`,
     );
     if (!serverFile) {
-      throw new Error(`Cannot find server.js at ${serverOptions.publicPath}/server.js`);
+      throw new Error(`Cannot find server.js at ${serverOptions.publicPath}server.js`);
     }
 
     const serverContent = mfs.readFileSync(serverFile, 'utf-8');
@@ -256,7 +252,7 @@ try {
     }));
   }
 
-  app.use(pawConfig.appRootUrl || '', express.static(serverOptions.contentBase));
+  app.use(pawConfig.appRootUrl || '', express.static(path.join((directories.src || ''), 'public')));
 
   /**
    * Below is where the magic happens!
@@ -265,7 +261,7 @@ try {
    * develop code with SSR enabled.
    */
   app.use((req, res, next) => {
-    const mfs = serverMiddleware.fileSystem;
+    const mfs = serverMiddleware.context.outputFileSystem;
     const fileNameFromUrl = serverMiddleware
       .getFilenameFromUrl(serverOptions.publicPath + req.path) || '';
 
@@ -289,12 +285,11 @@ try {
       // Get content of the server that is compiled!
       const commonServer = getCommonServer();
       commonServerMiddleware = commonServer.default;
-
       const {
         jsDependencyMap,
         cssDependencyMap,
         ...assets
-      } = normalizeAssets(res.locals.webpackStats);
+      } = normalizeAssets(webMiddleware.context.stats);
       res.locals.assets = assets;
       res.locals.cssDependencyMap = cssDependencyMap;
       res.locals.jsDependencyMap = jsDependencyMap;
@@ -325,8 +320,8 @@ try {
     }
 
     const nodeServerConfig = {
-      port: devServerConfig.port,
-      host: devServerConfig.host,
+      port: pawConfig.port,
+      host: pawConfig.host,
     };
 
     beforeStart(nodeServerConfig, PAW_GLOBAL, (err: Error) => {

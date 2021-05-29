@@ -1,4 +1,4 @@
-import webpack from 'webpack';
+import webpack, { Compilation, sources } from 'webpack';
 
 class SwVariables {
   options: any;
@@ -9,79 +9,46 @@ class SwVariables {
 
   apply(compiler: webpack.Compiler) {
     const { fileName, variables, text } = this.options;
-
-    compiler.hooks.emit.tap('AddVariableToSw', (compilation) => {
-      const { chunks } = compilation;
-
-      // @ts-ignore
-      const { publicPath } = compilation.options.output;
-      const offlineAssetsMapping = [];
-
-      // Start out by getting metadata for all the assets associated with a chunk.
-      // eslint-disable-next-line
-      for (const chunk of chunks) {
-        // eslint-disable-next-line
-        if (!chunk.name) continue;
-        // eslint-disable-next-line
-        for (const file of chunk.files) {
+    compiler.hooks.thisCompilation.tap('AddVariableToSw', (compilation) => {
+      const offlineAssetsMapping: any [] = [];
+      const { chunks, options: { output: { publicPath } } } = compilation;
+      chunks.forEach((chunk) => {
+        if (!chunk.name) return;
+        (chunk?.files ?? []).forEach((file) => {
           offlineAssetsMapping.push([publicPath, file].join(''));
-        }
-      }
-
-      if (compilation.assets[fileName]) {
-        let src = compilation.assets[fileName].source();
-        // Append the manifest text
-        const swRevision = JSON.stringify(new Date().getTime());
-        src = `self.__PAW_MANIFEST=[
-        { url: '${variables.appRootUrl || ''}/manifest.json', revision: ${swRevision} },
-        { url: '${variables.appRootUrl || ''}/sw.js', revision: ${swRevision} },
-        ];${src}`;
-        if (offlineAssetsMapping && offlineAssetsMapping.length) {
-          src = `${src};self.paw__offline_assets = ${JSON.stringify(offlineAssetsMapping)}`;
-        }
-
-        if (variables) {
-          src = `${src};self.paw__injected_variables = ${JSON.stringify(variables)};`;
-        }
-        if (text && text.length) {
-          src = `${src};${text}`;
-        }
-
-        // eslint-disable-next-line
-        compilation.assets[fileName] = {
-          source: function source() {
-            return src;
-          },
-          size: function size() {
-            return src.length;
-          },
-        };
-      }
-    });
-
-    compiler.hooks.emit.tap('AddEnvToSw', (compilation) => {
-      if (compilation.assets[fileName]) {
-        let src = compilation.assets[fileName].source();
-
-        const pawEnv = Object.keys(process.env).filter(x => x.indexOf('PAW_') !== -1 && x !== 'PAW_CONFIG_PATH');
-        const env = {};
-        pawEnv.forEach((k) => {
-          // @ts-ignore
-          env[k] = process.env[k];
         });
+      });
+      compilation.hooks.processAssets.tap(
+        {
+          name: 'AddVariableToSw',
+          stage: webpack.Compilation.PROCESS_ASSETS_STAGE_OPTIMIZE,
+        },
+        () => {
+          const file = compilation.getAsset(fileName);
+          let fileSource = file?.source?.source() ?? '';
+          if (file && fileSource) {
+            const swRevision = JSON.stringify(new Date().getTime());
+            fileSource = `self.__PAW_MANIFEST=[
+            { url: '${variables.appRootUrl || ''}/manifest.json', revision: ${swRevision} },
+            { url: '${variables.appRootUrl || ''}/sw.js', revision: ${swRevision} },
+            ];${fileSource}`;
+            if (offlineAssetsMapping && offlineAssetsMapping.length) {
+              fileSource = `${fileSource};self.paw__offline_assets = ${JSON.stringify(offlineAssetsMapping)}`;
+            }
 
-        src = `self.paw__env=${JSON.stringify(env)};${src}`;
-
-        // eslint-disable-next-line
-        compilation.assets[fileName] = {
-          source: function source() {
-            return src;
-          },
-          size: function size() {
-            return src.length;
-          },
-        };
-      }
+            if (variables) {
+              fileSource = `${fileSource};self.paw__injected_variables = ${JSON.stringify(variables)};`;
+            }
+            if (text && text.length) {
+              fileSource = `${fileSource};${text}`;
+            }
+            compilation.updateAsset(
+              fileName,
+              new sources.RawSource(fileSource),
+            );
+          }
+        },
+      );
     });
   }
 }

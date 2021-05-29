@@ -92,7 +92,7 @@ config = {
      * then maximum number of websocket connections (HMR) is 6 (browser dependent).
      * After that your new pages will not be dynamically imported
      */
-    hotReload: getBool(
+    hotReload: false && getBool(
       process.env.HOT_RELOAD,
       typeof config.hotReload !== 'undefined'
         ? config.hotReload

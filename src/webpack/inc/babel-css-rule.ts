@@ -40,11 +40,14 @@ export default (options: any = {}) => {
         {
           loader: 'postcss-loader',
           options: {
-            ident: 'postcss',
-            plugins: () => [
-              postcssPresetEnv({
-              }),
-            ],
+            postcssOptions: {
+              ident: 'postcss',
+              plugins: [
+                [
+                  postcssPresetEnv,
+                ],
+              ],
+            },
           },
         },
       ],
@@ -72,10 +75,14 @@ export default (options: any = {}) => {
         {
           loader: 'postcss-loader',
           options: {
-            ident: 'postcss',
-            plugins: () => [
-              postcssPresetEnv(/* pluginOptions */),
-            ],
+            postcssOptions: {
+              ident: 'postcss',
+              plugins: [
+                [
+                  postcssPresetEnv,
+                ],
+              ],
+            },
           },
         },
       ],

@@ -59,8 +59,8 @@ const populate = (chunks:any [], type: string, publicPath: string) => {
       arr.unshift({
         path: `${publicPath}${typeFileName}`,
         modules: moduleReasons,
-    });
-  }
+      });
+    }
   });
   return arr;
 };
@@ -85,7 +85,7 @@ export default (wStats: webpack.Stats): INormalizeAssets => {
     webpackStats = [webpackStats];
   }
 
-  webpackStats.forEach((stat: webpack.Stats.ToJsonOutput) => {
+  webpackStats.forEach((stat: any ) => {
     // @ts-ignore
     const { assetsByChunkName: a, publicPath } = stat;
 
@@ -119,6 +119,7 @@ export default (wStats: webpack.Stats): INormalizeAssets => {
       jsDependencyMap = populate(stat.chunks, '.js', publicPath || '');
     }
     assets = { ...a, cssDependencyMap, jsDependencyMap };
+    console.log(assets);
   });
   return assets;
 };

@@ -64,4 +64,20 @@ export default {
       maxChunks: 1,
     }),
   ],
+  ignoreWarnings: [
+    (warning: any) => {
+      let message = '';
+      if (typeof warning === 'string') {
+        message = warning;
+      }
+      if (warning && typeof warning.message === 'string') {
+        message = warning.message;
+      }
+      return !(
+        message.indexOf('node_modules/express') !== -1
+          || message.indexOf('node_modules/encoding') !== -1
+          || message.indexOf('config/index') !== -1
+      );
+    }
+  ],
 };
