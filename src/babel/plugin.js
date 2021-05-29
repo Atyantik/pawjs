@@ -6,6 +6,7 @@ const decorators = getDefault(require('@babel/plugin-proposal-decorators'));
 const classProperties = getDefault(require('@babel/plugin-proposal-class-properties'));
 const generatorFunctions = getDefault(require('@babel/plugin-proposal-async-generator-functions'));
 const syntaxDynamicImport = getDefault(require('@babel/plugin-syntax-dynamic-import'));
+const privateMethods = getDefault(require('@babel/plugin-proposal-private-methods'));
 const reactLoadableRoutes = getDefault(require('./plugins/react-loadable-routes'));
 const dynamicImportWebpack = getDefault(require('./plugins/dynamic-import-webpack'));
 
@@ -20,6 +21,12 @@ module.exports = (options) => {
     reactLoadableRoutes,
     o.noChunk ? dynamicImportWebpack : syntaxDynamicImport,
     objectRestSpread,
+    [
+      privateMethods,
+      {
+        loose: true,
+      },
+    ],
     [
       decorators,
       {

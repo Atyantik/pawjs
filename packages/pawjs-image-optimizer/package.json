@@ -17,7 +17,7 @@
     "url": "https://opencollective.com/react-pwa"
   },
   "dependencies": {
-    "image-webpack-loader": "^6.0.0"
+    "image-webpack-loader": "^7.0.1"
   },
   "main": "webpack.js",
   "repository": {
