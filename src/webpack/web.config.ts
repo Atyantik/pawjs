@@ -87,6 +87,7 @@ export default {
       // both options are optional
       filename: 'css/[contenthash].css',
       chunkFilename: 'css/[chunkhash].css',
+      ignoreOrder: true,
     })]),
     ...(pawConfig.serviceWorker ? [
       new WorkboxPlugin.InjectManifest({
