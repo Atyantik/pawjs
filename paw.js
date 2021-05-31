@@ -63,6 +63,7 @@ Array.from(process.argv).forEach((arg) => {
 });
 
 // Get babel configuration for nodejs server
+// eslint-disable-next-line import/extensions
 const babelServerOptions = getDefault(require('./src/babel/node.js'))({
   cacheDirectory: cacheEnabled,
   hot: false,
@@ -90,6 +91,7 @@ require('@babel/register')({
 /**
  * After registering babel we can include typescript (TS) files as well
  */
+// eslint-disable-next-line import/extensions
 const CliHandler = getDefault(require('./src/scripts/cli.ts'));
 
 const handler = new CliHandler();

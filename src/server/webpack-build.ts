@@ -21,7 +21,7 @@ import ExtractEmittedAssets from '../webpack/plugins/extract-emitted-assets';
 
 const isVerbose = process.env.PAW_VERBOSE === 'true';
 
-const stats: webpack.Stats.ToStringOptionsObject = {
+const stats = {
   // fallback value for stats options when
   // an option is not defined (has precedence over local webpack defaults)
   all: undefined,
@@ -254,8 +254,8 @@ wHandler.hooks.beforeConfig.tap('AddSyncedFilesPlugin', (wEnv, wType, wConfigs) 
 
       // Initialize wConfig.module if not already exists
       if (!wConfig.module) wConfig.module = { rules: [] };
-      wConfig.module.rules.forEach((r: webpack.RuleSetRule, index: number) => {
-        const rule = r;
+      (wConfig?.module?.rules ?? []).forEach((r: webpack.RuleSetRule | '...', index: number) => {
+        const rule = r as RuleSetRule;
         /**
          * Check for babel rule and replace it with babel rule that
          * with babel web rule with param hot as false
@@ -318,7 +318,8 @@ wHandler.hooks.beforeConfig.tap('AddSyncedFilesPlugin', (wEnv, wType, wConfigs) 
       }
 
       if (!wConfig.module) wConfig.module = { rules: [] };
-      wConfig.module.rules.forEach((rule: RuleSetRule, index: number) => {
+      (wConfig?.module?.rules ?? []).forEach((moduleRule: RuleSetRule | '...', index: number) => {
+        const rule = moduleRule as RuleSetRule;
         if (isBabelRule(rule)) {
           // @ts-ignore
           wConfig.module.rules[index] = serverRule({
@@ -361,21 +362,21 @@ try {
   const webConfig = wHandler.getConfig(process.env.PAW_ENV, 'web');
 
   // Create a webpack web compiler from the web configurations
-  webpack(webConfig, (webErr: Error, webStats: webpack.Stats) => {
-    if (webErr || webStats.hasErrors()) {
+  webpack(webConfig, (webErr?: Error, webStats?: webpack.Stats) => {
+    if (webErr || webStats?.hasErrors()) {
       // eslint-disable-next-line
       console.log(webErr);
       // Handle errors here
       // eslint-disable-next-line
-      webStats.toJson && console.log(webStats.toJson());
+      webStats?.toJson && console.log(webStats.toJson());
       // eslint-disable-next-line
       console.log('Web compiler error occurred. Please handle error here');
       return;
     }
     // eslint-disable-next-line
-    console.log(webStats.toString(stats));
+    console.log(webStats?.toString(stats));
     webpack(serverConfig, (serverErr, serverStats) => {
-      if (serverErr || serverStats.hasErrors()) {
+      if (serverErr || serverStats?.hasErrors()) {
         // Handle errors here
         // eslint-disable-next-line
         console.log('Server Compiler error occurred. Please handle error here');
@@ -383,7 +384,7 @@ try {
       }
 
       // eslint-disable-next-line
-      console.log(serverStats.toString(stats));
+      console.log(serverStats?.toString(stats));
 
       if (pawConfig.singlePageApplication) {
         // eslint-disable-next-line
