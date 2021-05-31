@@ -101,6 +101,10 @@ const resolver = {
     },
     modules: commonResolvers,
     extensions: supportedExtensions.resolveExtensions,
+    fallback: {
+      // @todo: remove this or mange this properly
+      crypto: false
+    },
   },
   resolveLoader: {
     modules: loaderResolver,

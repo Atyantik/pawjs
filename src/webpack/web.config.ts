@@ -41,7 +41,7 @@ export default {
   output: {
     path: directories.build,
     publicPath: pawConfig.resourcesBaseUrl,
-    filename: 'js/[fullhash].js',
+    filename: 'js/[contenthash].js',
     chunkFilename: 'js/[chunkhash].js',
   },
   stats: true,
@@ -56,7 +56,7 @@ export default {
       imageRule({
         outputPath: 'images/',
         publicPath: `${pawConfig.resourcesBaseUrl}images/`,
-        name: '[hash]-[name].[ext]',
+        name: '[contenthash]-[name].[ext]',
         context: directories.src,
       }),
     ],
@@ -82,7 +82,7 @@ export default {
     ...(isHot ? [] : [new MiniCssExtractPlugin({
       // Options similar to the same options in webpackOptions.output
       // both options are optional
-      filename: 'css/[fullhash].css',
+      filename: 'css/[contenthash].css',
       chunkFilename: 'css/[chunkhash].css',
     })]),
     ...(pawConfig.serviceWorker ? [
