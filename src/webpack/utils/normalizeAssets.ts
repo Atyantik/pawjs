@@ -119,7 +119,6 @@ export default (wStats: webpack.Stats): INormalizeAssets => {
       jsDependencyMap = populate(stat.chunks, '.js', publicPath || '');
     }
     assets = { ...a, cssDependencyMap, jsDependencyMap };
-    console.log(assets);
   });
   return assets;
 };
