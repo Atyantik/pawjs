@@ -422,6 +422,7 @@ export default class CliHandler {
     this.program.option(
       '-nc, --no-cache',
       'Disable cache. Ideally used for PawJS core/plugin development',
+      false,
     );
 
     this.program.option('-c, --config <configPath>', '(DEPRECATED) Set path to pawconfig.json');
@@ -490,8 +491,9 @@ export default class CliHandler {
       }
     });
 
-    this.program.on('option:cache', () => {
-      if (!this.program.cache) {
+    this.program.on('option:no-cache', () => {
+      const { cache } = this.program.opts();
+      if (!cache) {
         // set PAW_CACHE to false
         process.env.PAW_CACHE = 'false';
 

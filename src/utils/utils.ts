@@ -50,7 +50,7 @@ export const loadStyle = (path: string) => {
     // Do not load css if already loaded
     const previousLink = document.getElementById(pathHash.toString());
     if (previousLink) {
-      resolve();
+      resolve(null);
       return previousLink;
     }
 
@@ -88,7 +88,7 @@ export const loadStyle = (path: string) => {
             // Declared after "," so it will be available in Interval
             // eslint-disable-next-line
             clearTimeout(timeoutId);
-            resolve();
+            resolve(null);
           }
         } catch (e) {
           // Do nothing, timeout will handle it for fail after 15 seconds
@@ -145,7 +145,7 @@ export const loadScript = (path: string, attributes: any = {}) => {
     // Do not load script if already loaded
     const previousLink = document.getElementById(pathHash);
     if (previousLink) {
-      resolve();
+      resolve(null);
       return previousLink;
     }
 
@@ -163,7 +163,7 @@ export const loadScript = (path: string, attributes: any = {}) => {
       // @ts-ignore
       if (!r && (!this.readyState || this.readyState === 'complete')) {
         r = true;
-        resolve();
+        resolve(null);
       }
     };
     // Add custom attribute added by user
