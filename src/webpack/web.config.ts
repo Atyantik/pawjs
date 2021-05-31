@@ -71,6 +71,9 @@ export default {
     ...(pawConfig.react === 'cdn' ? { react: 'React', 'react-dom': 'ReactDOM' } : {}),
   },
   plugins: [
+    new webpack.DefinePlugin({
+      'process.env': {},
+    }),
     new webpack.EnvironmentPlugin({
       APP_DESCRIPTION: '',
       APP_NAME: null,
