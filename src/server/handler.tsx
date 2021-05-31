@@ -1,9 +1,9 @@
+import React from 'react';
 import {
   Hook,
   AsyncSeriesHook,
 } from 'tapable';
 import express from 'express';
-import React from 'react';
 import _ from 'lodash';
 import { renderToString } from 'react-dom/server';
 import { renderRoutes } from 'react-router-config';
@@ -19,7 +19,7 @@ import NotFoundError from '../errors/not-found';
 type Options = {
   env: any;
 };
-type dependencyMapItem = { modules: string[], path: string };
+type DependencyMapItem = { modules: string[], path: string };
 
 interface IApplication {
   context: any;
@@ -63,11 +63,11 @@ export default class ServerHandler extends AbstractPlugin {
   // eslint-disable-next-line class-methods-use-this
   getModuleCSS(
     modules: string[],
-    dependencyMap: dependencyMapItem[],
+    dependencyMap: DependencyMapItem[],
   ) {
     const moduleCss: string [] = [];
     modules.forEach((mod) => {
-      dependencyMap.forEach((c: dependencyMapItem) => {
+      dependencyMap.forEach((c: DependencyMapItem) => {
         if (_.indexOf(c.modules, mod) !== -1) {
           moduleCss.push(c.path);
         }

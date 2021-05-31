@@ -314,7 +314,7 @@ export default class CliHandler {
       : eslintRoot;
     // eslint-disable-next-line
     console.log(`Linting with eslint...\nConfig path: ${eslintPath}`);
-    const eslint = spawn(
+    spawn(
       this.searchCommand('eslint'),
       [
         '-c',

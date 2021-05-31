@@ -1,7 +1,7 @@
-/* tslint:disable:jsx-no-multiline-js */
 import React from 'react';
 import { renderRoutes } from 'react-router-config';
 
+import { History } from 'history';
 import PreloadDataManager from '../utils/preloadDataManager';
 import { Map } from '../components/Loadable';
 import { CompiledRoute, ReactComponent, Route } from '../@types/route';
@@ -9,6 +9,17 @@ import NotFoundError from '../errors/not-found';
 import ServerError from '../errors/server';
 import ErrorBoundary from '../components/ErrorBoundary';
 import { IRouteHandler } from './IRouteHandler';
+
+type LoadingProps = {
+  error: any,
+  pastDelay: boolean;
+  timedOut: boolean;
+  retry: any;
+  history: History,
+  location: string,
+  match: any,
+  route: any,
+};
 
 export default class RouteCompiler {
   public preloadManager: PreloadDataManager;
@@ -84,7 +95,7 @@ export default class RouteCompiler {
         // Load layout as well
         ...(layout ? { Layout: layout } : {}),
       },
-      loading: (props: any) => {
+      loading: (params: LoadingProps) => {
         const {
           error: err,
           pastDelay,
@@ -94,7 +105,7 @@ export default class RouteCompiler {
           location: propsLocation,
           match: propsMatch,
           route: propsRoute,
-        } = props;
+        } = params;
         if (err instanceof NotFoundError) {
           return (
             // @ts-ignore
@@ -144,7 +155,7 @@ export default class RouteCompiler {
           RouteComponent?: ReactComponent;
           LoadData?: any;
         },
-        props: any,
+        params: any,
       ) {
         const { Layout, RouteComponent, LoadData: loadedData } = loaded;
         const components: any = {
@@ -167,7 +178,7 @@ export default class RouteCompiler {
           location: propsLocation,
           match: propsMatch,
           route: propsRoute,
-        } = props;
+        } = params;
 
         components.routeComponent = (
           <components.routeComponent

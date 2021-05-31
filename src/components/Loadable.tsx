@@ -75,7 +75,6 @@ const createLoadableComponent = (
     }
   }
 
-  const previousRouterProps = '';
   const loadableComponent = withRouter((props: any) => {
     const {
       history: propsHistory,

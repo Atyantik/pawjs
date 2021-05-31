@@ -4,7 +4,7 @@ import { IPlugin } from './@types/pawjs';
 export default abstract class AbstractPlugin {
   hooks: any;
 
-  constructor() {
+  protected constructor() {
     this.addPlugin = this.addPlugin.bind(this);
   }
 

@@ -1,4 +1,6 @@
-import _ from 'lodash';
+import each from 'lodash/each';
+import sortBy from 'lodash/sortBy';
+import uniq from 'lodash/uniq';
 
 /**
  * Check if current script is running in browser or not
@@ -159,7 +161,7 @@ export const loadScript = (path: string, attributes: any = {}) => {
     // eslint-disable-next-line
     // @ts-ignore
     // eslint-disable-next-line no-multi-assign
-    s.onload = s.onreadystatechange = function () {
+    s.onload = s.onreadystatechange = function onReadyStateChange() {
       // @ts-ignore
       if (!r && (!this.readyState || this.readyState === 'complete')) {
         r = true;
@@ -187,7 +189,7 @@ export const loadScript = (path: string, attributes: any = {}) => {
 export const assetsToArray = (assets: any) => {
   let allAssets: any = [];
   if (assets instanceof Object) {
-    _.each(assets, (a) => {
+    each(assets, (a) => {
       if (typeof a === 'string') {
         allAssets.push(a);
       } else if (a instanceof Object) {
@@ -197,6 +199,6 @@ export const assetsToArray = (assets: any) => {
   } else if (typeof assets === 'string') {
     allAssets.push(assets);
   }
-  allAssets = _.sortBy(allAssets, (a) => a.indexOf('hot-update') !== -1);
-  return _.uniq(allAssets);
+  allAssets = sortBy(allAssets, (a) => a.indexOf('hot-update') !== -1);
+  return uniq(allAssets);
 };

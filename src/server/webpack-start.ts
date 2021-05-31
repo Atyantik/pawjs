@@ -3,8 +3,6 @@ import path from 'path';
 import express from 'express';
 import webpack from 'webpack';
 import webpackMiddleware from 'webpack-dev-middleware';
-import webpackHotMiddleware from 'webpack-hot-middleware';
-import webLog from 'webpack-log';
 import { NextHandleFunction } from 'connect';
 import pawConfig from '../config';
 import directories from '../webpack/utils/directories';
@@ -46,7 +44,9 @@ if (pawConfig.hotReload) {
             config.devtool = 'eval-source-map';
             if (!config.resolve) config.resolve = {};
             if (!config.resolve.alias) config.resolve.alias = {};
+            // @ts-ignore
             if (!config.resolve.alias['react-dom']) {
+              // @ts-ignore
               config.resolve.alias['react-dom'] = '@hot-loader/react-dom';
             }
           }
@@ -111,7 +111,6 @@ if (pawConfig.hotReload) {
               }
             }
           });
-          console.dir(wConfigs);
         }
         if (wType === 'server') {
           wConfigs.forEach((webpackConfig: IPawjsWebpackConfig) => {
@@ -125,7 +124,7 @@ if (pawConfig.hotReload) {
 
             if (!wConfig.module) wConfig.module = { rules: [] };
             // do not emit image files for server!
-            wConfig.module.rules.forEach((r: any) => {
+            (wConfig?.module?.rules ?? []).forEach((r: any) => {
               const rule = r;
               if (rule.use && Array.isArray(rule.use)) {
                 rule.use.forEach((use: any) => {
@@ -158,11 +157,6 @@ try {
     publicPath: pawConfig.resourcesBaseUrl,
     // contentBase: path.join((directories.src || ''), 'public'),
   };
-
-  // Create new logging entity, pawjs
-  const log = webLog({
-    name: 'pawjs',
-  });
 
   const processEnv = process.env;
   const isVerbose = processEnv.PAW_VERBOSE === 'true';
@@ -219,6 +213,7 @@ try {
   app.use(serverMiddleware);
 
   const getCommonServer = () => {
+    // @ts-ignore
     const mfs = serverMiddleware.context.outputFileSystem;
     // Get content of the server that is compiled!
     const serverFile = serverMiddleware.getFilenameFromUrl(
@@ -252,6 +247,7 @@ try {
    * develop code with SSR enabled.
    */
   app.use((req, res, next) => {
+    // @ts-ignore
     const mfs = serverMiddleware.context.outputFileSystem;
     const fileNameFromUrl = serverMiddleware
       .getFilenameFromUrl(serverOptions.publicPath + req.path) || '';
@@ -280,7 +276,7 @@ try {
         jsDependencyMap,
         cssDependencyMap,
         ...assets
-      } = normalizeAssets(webMiddleware.context.stats);
+      } = normalizeAssets(webMiddleware.context.stats as webpack.Stats);
       res.locals.assets = assets;
       res.locals.cssDependencyMap = cssDependencyMap;
       res.locals.jsDependencyMap = jsDependencyMap;

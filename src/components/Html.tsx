@@ -144,6 +144,7 @@ export default (props: React.PropsWithChildren<IHtmlProps> = {
     }
     return (
       <script
+        // eslint-disable-next-line react/no-danger
         dangerouslySetInnerHTML={{ __html: 'var loadPJS=function(e,a){var n=document.createElement("script");n.src=e,n.onload=a,n.onreadystatechange=a,document.body.appendChild(n)};var fnLoadPJS = function(e,a){return function() {return loadPJS(e,a)}};' }}
       />
     );
@@ -183,6 +184,7 @@ export default (props: React.PropsWithChildren<IHtmlProps> = {
       <script
         type="text/javascript"
         id="__pawjs_preloaded"
+        // eslint-disable-next-line react/no-danger
         dangerouslySetInnerHTML={{ __html: `window.PAW_PRELOADED_DATA = ${PAW_PRELOADED_DATA};` }}
       />
     );
@@ -194,6 +196,7 @@ export default (props: React.PropsWithChildren<IHtmlProps> = {
       <script
         type="text/javascript"
         id="__pawjs_preload_js"
+        // eslint-disable-next-line react/no-danger
         dangerouslySetInnerHTML={{ __html: `window.PAW_PRELOAD_JS = ${PAW_PRELOAD_JS};` }}
       />
     );
@@ -206,10 +209,11 @@ export default (props: React.PropsWithChildren<IHtmlProps> = {
     // eslint-disable-next-line no-underscore-dangle
     if (dangerouslySetInnerHTML && dangerouslySetInnerHTML.__html.length) {
       return (
+        // eslint-disable-next-line react/no-danger
         <div id={clientRootElementId} dangerouslySetInnerHTML={dangerouslySetInnerHTML} />
       );
     }
-    // eslint-disable-next-line no-underscore-dangle
+    // eslint-disable-next-line no-underscore-dangle, react/no-danger
     if (!(dangerouslySetInnerHTML && dangerouslySetInnerHTML.__html.length)) {
       return (
         <div id={clientRootElementId}>{children || null}</div>
@@ -268,6 +272,7 @@ export default (props: React.PropsWithChildren<IHtmlProps> = {
         {/* tslint:disable-next-line */}
         {
           process.env.asyncJS && (
+            // eslint-disable-next-line react/no-danger
             <script dangerouslySetInnerHTML={{ __html: `setTimeout(function(){ ${loadingScript}() }, 1);` }} />
           )
         }

@@ -4,7 +4,7 @@
   "description": "A minimal pluggable reactjs framework to develop a progressive web application",
   "main": "pawj.js",
   "engines": {
-    "node": ">=12.0"
+    "node": ">=14.17"
   },
   "scripts": {
     "prepare-demo": "node ./prepare-packages.js && cd demo && npm install && cd ..",
@@ -124,6 +124,10 @@
     "webpack-dev-middleware": "^4.3.0",
     "webpack-hot-middleware": "^2.25.0",
     "webpack-log": "^3.0.2",
+    "workbox-expiration": "^6.1.5",
+    "workbox-precaching": "^6.1.5",
+    "workbox-routing": "^6.1.5",
+    "workbox-strategies": "^6.1.5",
     "workbox-webpack-plugin": "^6.1.5"
   },
   "repository": {
