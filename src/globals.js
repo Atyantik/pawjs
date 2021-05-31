@@ -1,12 +1,14 @@
-const { transformSync } = require('@babel/core');
-const supportedExtensions = require('./src/extensions');
+const fs = require('fs');
+const util = require('util');
+const supportedExtensions = require('./extensions');
+
 /**
  * As this is a mixture of ES6 and ES5 we require module that might
  * be exported as default or using the old module.exports
  * @param m array | object | any
  * @returns {*}
  */
-global.getDefault = global.getDefault || (m => (m.default ? m.default : m));
+module.exports.getDefault = ((m) => (m.default ? m.default : m));
 
 /**
  * We need to resolve the files as per the extensions at many places
@@ -15,7 +17,7 @@ global.getDefault = global.getDefault || (m => (m.default ? m.default : m));
  * in `src/extensions`
  * @type {*|Function}
  */
-global.pawExistsSync = global.pawExistsSync || ((filePath, fileSystem = fs) => {
+module.exports.pawExistsSync = ((filePath, fileSystem = fs) => {
   if (fileSystem.existsSync(filePath)) return filePath;
   let resolvedFilePath = '';
   supportedExtensions.javascript.forEach((jsExt) => {
@@ -29,28 +31,7 @@ global.pawExistsSync = global.pawExistsSync || ((filePath, fileSystem = fs) => {
   return resolvedFilePath;
 });
 
-// eslint-disable-next-line no-unused-vars
-/* global pawDebug */
-global.pawDebug = global.pawDebug || ((data, options = {}) => {
+module.exports.pawDebug = global.pawDebug || ((data, options = {}) => {
   // eslint-disable-next-line
   console.log(util.inspect(data, { depth: 10, ...options }));
 });
-const babelServerRule = require('./src/webpack/inc/babel-server-rule')({
-  cacheDirectory: false,
-  noChunk: true,
-}).use.options;
-
-module.exports = {
-  process(fileContent) {
-    const result = transformSync(fileContent, {
-      filename: 'test.js',
-      presets: [
-        "@babel/preset-env",
-        "@babel/preset-react",
-        "@babel/preset-typescript",
-      ],
-      plugins: babelServerRule.plugins,
-    });
-    return result.code;
-  },
-};

@@ -1,4 +1,3 @@
-const babelJest = require('babel-jest');
 const supportedExtensions = require('./src/extensions');
 /**
  * As this is a mixture of ES6 and ES5 we require module that might
@@ -39,12 +38,15 @@ const babelServerRule = require('./src/webpack/inc/babel-server-rule')({
   cacheDirectory: false,
   noChunk: true,
 }).use.options;
-
-const customJest = {
+require('@babel/register')({
   presets: babelServerRule.presets,
   plugins: babelServerRule.plugins,
-};
-customJest.includes = query => query === 'babel-jest';
+  cache: false,
+  ignore: [
+    /node_modules/,
+  ],
+  extensions: supportedExtensions.resolveExtensions,
+});
 
 module.exports = {
   name: 'pawjs',
@@ -70,8 +72,5 @@ module.exports = {
     'jsx',
     'json',
     'node',
-  ],
-  transform: {
-    '^.+\\.(j|t)sx?$': '<rootDir>/jest-transformer.js',
-  },
+  ]
 };

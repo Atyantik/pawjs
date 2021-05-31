@@ -1,4 +1,3 @@
-/* global pawExistsSync */
 import path from 'path';
 import express from 'express';
 import webpack from 'webpack';
@@ -7,6 +6,8 @@ import { NextHandleFunction } from 'connect';
 import pawConfig from '../config';
 import directories from '../webpack/utils/directories';
 import wHandler from '../webpack';
+import { pawExistsSync } from '../globals';
+
 // Utils
 // -- Require from string. create an export from string like `module.export = "Something";`
 import requireFromString from '../webpack/utils/requireFromString';

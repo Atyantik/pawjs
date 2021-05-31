@@ -1,4 +1,4 @@
-/* global getDefault */
+const { getDefault } = require('../../globals');
 const path = require('path');
 const fs = require('fs');
 const normalizeAssets = getDefault(require('../utils/normalizeAssets'));

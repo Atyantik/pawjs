@@ -1,38 +1,9 @@
 const fs = require('fs');
 const path = require('path');
+const { getDefault, pawExistsSync } = require('../../globals');
 const supportedExtensions = require('../../extensions.js');
 
 let cacheEnabled = true;
-
-/**
- * As this is a mixture of ES6 and ES5 we require almost module that might
- * be exported as default or using the old module.exports
- * @param m array | object | any
- * @returns {*}
- */
-/* global getDefault */
-global.getDefault = global.getDefault || ((m) => (m.default ? m.default : m));
-
-/* global pawExistsSync */
-/**
- * We need to resolve the files as per the extensions at many places
- * for example we do not want to restrict people to just .js or .jsx extension
- * we need ability like fileExistsSync to compare for all extensions we have defined
- * @type {*|Function}
- */
-global.pawExistsSync = global.pawExistsSync || ((filePath, fileSystem = fs) => {
-  if (fileSystem.existsSync(filePath)) return filePath;
-  let resolvedFilePath = '';
-  supportedExtensions.javascript.forEach((jsExt) => {
-    if (resolvedFilePath) {
-      return;
-    }
-    if (fileSystem.existsSync(filePath + jsExt)) {
-      resolvedFilePath = filePath + jsExt;
-    }
-  });
-  return resolvedFilePath;
-});
 /**
  * Traverse through all the arguments and check if the user has
  * indicated if he does not want to use cache!

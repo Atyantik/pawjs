@@ -1,4 +1,4 @@
-/* global getDefault */
+const { getDefault } = require('../globals');
 const reactHotLoader = getDefault(require('react-hot-loader/babel'));
 const lodash = getDefault(require('babel-plugin-lodash'));
 const objectRestSpread = getDefault(require('@babel/plugin-proposal-object-rest-spread'));

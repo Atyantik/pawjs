@@ -14,3 +14,4 @@ jest.config.js
 packages
 prepare-packages.js
 paw.js
+babel.config.js

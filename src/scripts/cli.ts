@@ -6,6 +6,7 @@ import path from 'path';
 import executablePaths from './executable-paths';
 import packageDetails from '../../package.json';
 import { factory as findCommandFactory } from './find-command';
+import { pawExistsSync } from '../globals';
 
 const { spawn } = ChildProcess;
 

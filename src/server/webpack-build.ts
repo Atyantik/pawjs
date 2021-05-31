@@ -1,4 +1,3 @@
-/* global pawExistsSync */
 import path from 'path';
 import fs from 'fs';
 import del from 'del';
@@ -10,14 +9,11 @@ import CopyWebpackPlugin from 'copy-webpack-plugin';
 import pawConfig from '../config';
 import directories from '../webpack/utils/directories';
 import wHandler from '../webpack';
-// @ts-ignore
 import webRule from '../webpack/inc/babel-web-rule';
-// @ts-ignore
 import serverRule from '../webpack/inc/babel-server-rule';
-// @ts-ignore
 import SyncedFilesPlugin from '../webpack/plugins/synced-files-plugin';
-// @ts-ignore
 import ExtractEmittedAssets from '../webpack/plugins/extract-emitted-assets';
+import { pawExistsSync } from '../globals';
 
 const isVerbose = process.env.PAW_VERBOSE === 'true';
 

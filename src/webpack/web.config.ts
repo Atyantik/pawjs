@@ -1,4 +1,3 @@
-/* global pawExistsSync */
 import path from 'path';
 import WorkboxPlugin from 'workbox-webpack-plugin';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
@@ -9,13 +8,11 @@ import cssRule from './inc/babel-css-rule';
 import imageRule from './inc/babel-image-rule';
 import SwVariables from './plugins/sw-variables';
 import directories from './utils/directories';
-// @ts-ignore
 import webRule from './inc/babel-web-rule';
-// @ts-ignore
 import resolverConfig from './inc/webpack-resolver-config';
 import pawConfig from '../config';
-// @ts-ignore
 import fontRule from './inc/babel-font-rule';
+import { pawExistsSync } from '../globals';
 
 let projectSW = '';
 if (pawExistsSync(path.join(directories.src, 'sw'))) {
