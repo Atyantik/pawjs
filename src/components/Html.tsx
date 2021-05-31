@@ -129,7 +129,7 @@ export default (props: React.PropsWithChildren<IHtmlProps> = {
   /**
    * Render CSS Files
    */
-  const renderCSSFiles = () => cssFiles.map(path => (
+  const renderCSSFiles = () => cssFiles.map((path) => (
     (
       <link rel="stylesheet" type="text/css" key={path} href={path} />
     )
@@ -219,7 +219,7 @@ export default (props: React.PropsWithChildren<IHtmlProps> = {
   };
 
   let loadingScript = '<>';
-  const jsAssets: string [] = assets.filter(path => path.endsWith('.js'));
+  const jsAssets: string [] = assets.filter((path) => path.endsWith('.js'));
   if (!noJS) {
     if (env.react && env.react === 'cdn') {
       jsAssets.unshift(...reactCDN);
@@ -252,7 +252,7 @@ export default (props: React.PropsWithChildren<IHtmlProps> = {
         {renderDNSPrefetch()}
         <link rel="manifest" href={`${appRootUrl}/manifest.json`} />
         {/* eslint-disable-next-line react/jsx-props-no-spreading */}
-        {metaTags && metaTags.map(m => <meta key={JSON.stringify(m)} {...m} />)}
+        {metaTags && metaTags.map((m) => <meta key={JSON.stringify(m)} {...m} />)}
         {renderPreLoadedData()}
         {head}
       </head>
@@ -263,7 +263,7 @@ export default (props: React.PropsWithChildren<IHtmlProps> = {
         {renderJsToBePreloaded()}
         {/* tslint:disable-next-line */}
         {
-          !process.env.asyncJS && jsAssets.map(path => <script key={path} src={path} />)
+          !process.env.asyncJS && jsAssets.map((path) => <script key={path} src={path} />)
         }
         {/* tslint:disable-next-line */}
         {

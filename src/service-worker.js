@@ -35,7 +35,7 @@ try {
   });
 
   const getOfflineHtml = () => {
-    const scripts = serviceWorker.paw__offline_assets.filter(a => a.endsWith('.js')).map(js => `<script type="text/javascript" src="${js}" async></script>`).join('');
+    const scripts = serviceWorker.paw__offline_assets.filter((a) => a.endsWith('.js')).map((js) => `<script type="text/javascript" src="${js}" async></script>`).join('');
     return `<!DOCTYPE html><html><head></head><body><div id="${serviceWorker.paw__injected_variables.clientRootElementId}"></div>${scripts}</body></html>`;
   };
 
@@ -137,11 +137,11 @@ try {
     }).handle({
       event,
       request,
-    }).catch(e => console.log(e));
+    }).catch((e) => console.log(e));
   });
 
   // eslint-disable-next-line no-underscore-dangle
-  const resolve = obj => (obj && obj.__esModule ? obj.default : obj);
+  const resolve = (obj) => (obj && obj.__esModule ? obj.default : obj);
   // eslint-disable-next-line import/no-unresolved,global-require
   const projectSW = resolve(require('pawProjectSW'));
 

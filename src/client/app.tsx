@@ -1,5 +1,4 @@
 // @ts-ignore
-// eslint-disable-next-line import/no-unresolved
 import ProjectClient from 'pawProjectClient';
 // @ts-ignore
 import ProjectRoutes from 'pawProjectRoutes';

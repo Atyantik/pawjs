@@ -78,6 +78,6 @@ export default {
           || message.indexOf('node_modules/encoding') !== -1
           || message.indexOf('config/index') !== -1
       );
-    }
+    },
   ],
 };

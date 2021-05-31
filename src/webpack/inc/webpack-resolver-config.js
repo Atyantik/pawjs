@@ -11,7 +11,7 @@ let cacheEnabled = true;
  * @returns {*}
  */
 /* global getDefault */
-global.getDefault = global.getDefault || (m => (m.default ? m.default : m));
+global.getDefault = global.getDefault || ((m) => (m.default ? m.default : m));
 
 /* global pawExistsSync */
 /**
@@ -70,7 +70,6 @@ require('@babel/register')({
   ],
   extensions: supportedExtensions.resolveExtensions,
 });
-
 
 if (!process.env.PROJECT_ROOT) {
   // eslint-disable-next-line

@@ -327,41 +327,6 @@ export default class CliHandler {
         stdio: [process.stdin, process.stdout, 'pipe'],
       },
     );
-
-    eslint.on('close', (errorCode) => {
-      if (!this.searchCommand) {
-        // eslint-disable-next-line no-console
-        console.log('Application not configured properly, cannot search for commands');
-        return;
-      }
-      if (!errorCode) {
-        let tslintPath = path.join(this.libRoot, 'tslint.json');
-        let tslintRoot = this.libRoot;
-        if (fs.existsSync(path.join(this.projectRoot, 'tslint.json'))) {
-          tslintPath = path.join(this.projectRoot, 'tslint.json');
-          tslintRoot = this.projectRoot;
-        }
-        const tsSrcDir = fs.existsSync(path.join(tslintRoot, 'src'))
-          ? path.join(tslintRoot, 'src')
-          : tslintRoot;
-
-        // eslint-disable-next-line
-        console.log(`Linting with tslint...\nConfig path: ${tslintPath}`);
-        spawn(
-          this.searchCommand('tslint'),
-          [
-            '-c',
-            tslintPath,
-            `${tsSrcDir}/**/*.ts{,x}`,
-          ],
-          {
-            env,
-            shell: true,
-            stdio: [process.stdin, process.stdout, 'pipe'],
-          },
-        );
-      }
-    });
   }
 
   test() {

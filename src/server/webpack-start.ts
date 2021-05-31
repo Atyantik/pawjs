@@ -102,7 +102,7 @@ if (pawConfig.hotReload) {
               // check for Hot Module replacement plugin and add it if necessary
               if (!wConfig.plugins) wConfig.plugins = [];
               const hasHotPlugin = wConfig.plugins
-                .some(p => p instanceof webpack.HotModuleReplacementPlugin);
+                .some((p) => p instanceof webpack.HotModuleReplacementPlugin);
 
               if (!hasHotPlugin) {
                 wConfig.plugins.unshift(new webpack.HotModuleReplacementPlugin({
@@ -213,8 +213,8 @@ try {
 
   // Add server middleware
   const serverMiddleware:
-    webpackMiddleware.WebpackDevMiddleware
-    & NextHandleFunction = webpackMiddleware(serverCompiler, serverOptions);
+  webpackMiddleware.WebpackDevMiddleware
+  & NextHandleFunction = webpackMiddleware(serverCompiler, serverOptions);
 
   app.use(serverMiddleware);
 

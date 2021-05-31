@@ -31,7 +31,7 @@ type HistoryLocation = {
 };
 
 export default class ClientHandler extends AbstractPlugin {
-  historyUnlistener = null;
+  historyUnlistener: any;
 
   routeHandler: RouteHandler | null = null;
 
@@ -68,7 +68,6 @@ export default class ClientHandler extends AbstractPlugin {
       this.historyUnlistener
       && typeof this.historyUnlistener === 'function'
     ) {
-      // @ts-ignore
       this.historyUnlistener();
     }
     this.historyUnlistener = this.history.listen(this.manageHistoryChange);
@@ -243,7 +242,7 @@ export default class ClientHandler extends AbstractPlugin {
         if (err) return;
         if ('serviceWorker' in navigator) {
           navigator.serviceWorker.getRegistrations().then((registrations) => {
-            registrations.forEach(registration => registration.unregister());
+            registrations.forEach((registration) => registration.unregister());
           });
         }
       });
@@ -273,7 +272,7 @@ export default class ClientHandler extends AbstractPlugin {
       ),
     );
     const { preloadManager: { setParams, getParams } } = this.routeHandler.routeCompiler;
-    await new Promise(r => this
+    await new Promise((r) => this
       .hooks
       .beforeLoadData
       .callAsync(
@@ -304,7 +303,7 @@ export default class ClientHandler extends AbstractPlugin {
         }
       });
     } else {
-      currentPageRoutes.forEach((r: { route: ICompiledRoute, match: any }, i: number) => {
+      currentPageRoutes.forEach((r: { route: ICompiledRoute, match: any }) => {
         if (r.route && r.route.component && r.route.component.preload) {
           const preloadInit = r.route.component.preload(undefined, {
             route: r.route,
@@ -350,7 +349,7 @@ export default class ClientHandler extends AbstractPlugin {
     };
 
     await (
-      new Promise(r => this.hooks.renderRoutes.callAsync(
+      new Promise((r) => this.hooks.renderRoutes.callAsync(
         {
           setRenderedRoutes: appRoutes.setRenderedRoutes,
           getRenderedRoutes: appRoutes.getRenderedRoutes,
@@ -388,7 +387,7 @@ export default class ClientHandler extends AbstractPlugin {
               preloadedElement.remove();
             }
             this.hooks.renderComplete.call();
-            resolve();
+            resolve(null);
           },
         );
       });
@@ -398,7 +397,7 @@ export default class ClientHandler extends AbstractPlugin {
   async run({ routeHandler }: { routeHandler: RouteHandler }) {
     this.routeHandler = routeHandler;
     // On app start
-    await new Promise(r => this
+    await new Promise((r) => this
       .hooks
       .appStart
       .callAsync(

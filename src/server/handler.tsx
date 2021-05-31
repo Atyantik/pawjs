@@ -82,7 +82,7 @@ export default class ServerHandler extends AbstractPlugin {
     res: express.Response,
     htmlContent?: string,
   ) {
-    await new Promise(r => this.hooks.beforeHtmlRender.callAsync(app, req, res, r));
+    await new Promise((r) => this.hooks.beforeHtmlRender.callAsync(app, req, res, r));
     const content = app.htmlProps.htmlContent ? app.htmlProps.htmlContent : htmlContent;
     return renderToString(
       (
@@ -126,7 +126,7 @@ export default class ServerHandler extends AbstractPlugin {
     /**
      * Hook at the start of request execution
      */
-    await new Promise(r => this
+    await new Promise((r) => this
       .hooks
       .requestStart
       .callAsync(
@@ -179,7 +179,7 @@ export default class ServerHandler extends AbstractPlugin {
       renderedHtml = renderedHtml.replace(
         '<preload-css></preload-css>',
         modCss.map(
-          p => `<link rel="preload" href="${p}" as="style" onerror="this.rel='stylesheet'" onload="this.rel='stylesheet'"/>`,
+          (p) => `<link rel="preload" href="${p}" as="style" onerror="this.rel='stylesheet'" onload="this.rel='stylesheet'"/>`,
         ).join(''),
       );
       res.write(renderedHtml);
@@ -203,7 +203,7 @@ export default class ServerHandler extends AbstractPlugin {
       });
     });
 
-    await new Promise(r => this
+    await new Promise((r) => this
       .hooks
       .beforeLoadData
       .callAsync(
@@ -230,7 +230,7 @@ export default class ServerHandler extends AbstractPlugin {
     try {
       const promisesData = await Promise.all(promises);
       let seoData = {};
-      currentPageRoutes.forEach((r: { route: any, match: any}, i: number) => {
+      currentPageRoutes.forEach((r: { route: any, match: any }, i: number) => {
         seoData = { ...seoData, ...r.route.getRouteSeo() };
         if (promisesData[i]) {
           preloadedData.push(promisesData[i][1]);
@@ -271,7 +271,7 @@ export default class ServerHandler extends AbstractPlugin {
         getRenderedRoutes: () => appRoutes.renderedRoutes,
       };
       await new Promise(
-        r => this.hooks.renderRoutes.callAsync(
+        (r) => this.hooks.renderRoutes.callAsync(
           {
             setRenderedRoutes: appRoutes.setRenderedRoutes,
             getRenderedRoutes: appRoutes.getRenderedRoutes,
@@ -293,7 +293,7 @@ export default class ServerHandler extends AbstractPlugin {
         routes: routes.slice(0),
       };
 
-      await new Promise(r => this.hooks.beforeAppRender.callAsync(application, req, res, r));
+      await new Promise((r) => this.hooks.beforeAppRender.callAsync(application, req, res, r));
 
       let htmlContent = this.options.env.singlePageApplication ? '' : renderToString(
         (
@@ -318,7 +318,7 @@ export default class ServerHandler extends AbstractPlugin {
       renderedHtml = renderedHtml.replace(
         '<preload-css></preload-css>',
         cssToBeIncluded.map(
-          p => `<link rel="preload" href="${p}" as="style" onload="this.rel='stylesheet'"/>`,
+          (p) => `<link rel="preload" href="${p}" as="style" onload="this.rel='stylesheet'"/>`,
         ).join(''),
       );
       res.write(renderedHtml);
@@ -377,7 +377,7 @@ export default class ServerHandler extends AbstractPlugin {
       renderedHtml = renderedHtml.replace(
         '<preload-css></preload-css>',
         cssToBeIncluded.map(
-          p => `<link rel="preload" href="${p}" as="style" onload="this.rel='stylesheet'"/>`,
+          (p) => `<link rel="preload" href="${p}" as="style" onload="this.rel='stylesheet'"/>`,
         ).join(''),
       );
       res.write(renderedHtml);

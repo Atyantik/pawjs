@@ -13,7 +13,7 @@ export const load = (
   const p = loader(props);
   let promise = p;
   if (typeof p.then === 'undefined') {
-    promise = new Promise(res => res(p));
+    promise = new Promise((res) => res(p));
   }
   const state: LoadableState = {
     promise,

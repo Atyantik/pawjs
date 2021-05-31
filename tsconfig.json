@@ -1,12 +1,22 @@
 {
   "compilerOptions": {
     "declaration": true,
+    "allowJs": true,
     "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
     "experimentalDecorators": true,
     "jsx": "react",
-    "lib": ["dom", "esnext", "dom.iterable", "scripthost", "es2015.promise"],
+    "lib": [
+      "dom",
+      "esnext",
+      "dom.iterable",
+      "scripthost",
+      "es2015.promise"
+    ],
     "module": "amd",
     "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
     "skipLibCheck": true,
     "strict": true,
     "target": "esnext",
@@ -20,6 +30,7 @@
     "dist",
     "src/extensions.js",
     "demo",
+    "coverage",
     "node_modules",
     "**/dist/**/*",
     "src/__tests__/**",

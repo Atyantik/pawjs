@@ -220,7 +220,7 @@ wHandler.hooks.beforeConfig.tap('AddSyncedFilesPlugin', (wEnv, wType, wConfigs) 
          * Check if plugins array exists and if it does
          * check if CleanWebpackPlugin exists inside the plugin array
          */
-        const hasCleanWebpackPlugin = wConfig.plugins.some(p => p instanceof CleanWebpackPlugin);
+        const hasCleanWebpackPlugin = wConfig.plugins.some((p) => p instanceof CleanWebpackPlugin);
         if (!hasCleanWebpackPlugin) {
           /**
            * Push CleanWebpackPlugin to plugin list and ask it to clean
@@ -277,7 +277,7 @@ wHandler.hooks.beforeConfig.tap('AddSyncedFilesPlugin', (wEnv, wType, wConfigs) 
       });
 
       const hasSyncedFilePlugin = wConfig.plugins
-        && wConfig.plugins.some(p => p instanceof SyncedFilesPlugin);
+        && wConfig.plugins.some((p) => p instanceof SyncedFilesPlugin);
 
       if (!hasSyncedFilePlugin) {
         if (typeof wConfig.plugins === 'undefined') wConfig.plugins = [];
@@ -288,7 +288,7 @@ wHandler.hooks.beforeConfig.tap('AddSyncedFilesPlugin', (wEnv, wType, wConfigs) 
       }
 
       const hasExtractEmittedAssets = wConfig.plugins
-        && wConfig.plugins.some(p => p instanceof ExtractEmittedAssets);
+        && wConfig.plugins.some((p) => p instanceof ExtractEmittedAssets);
       if (!hasExtractEmittedAssets) {
         if (typeof wConfig.plugins === 'undefined') wConfig.plugins = [];
         wConfig.plugins.push(new ExtractEmittedAssets({
@@ -342,7 +342,7 @@ wHandler.hooks.beforeConfig.tap('AddSyncedFilesPlugin', (wEnv, wType, wConfigs) 
       });
 
       const hasSyncedFilePlugin = wConfig.plugins
-        && wConfig.plugins.some(p => p instanceof SyncedFilesPlugin);
+        && wConfig.plugins.some((p) => p instanceof SyncedFilesPlugin);
       if (!hasSyncedFilePlugin) {
         wConfig.plugins = wConfig.plugins || [];
         wConfig.plugins.push(new SyncedFilesPlugin({

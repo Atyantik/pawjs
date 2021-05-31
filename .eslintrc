@@ -1,75 +1,14 @@
 {
   "env": {
-    "browser": true,
-    "commonjs": true,
-    "es6": true,
     "node": true,
-    "mocha": true,
-    "jest/globals": true
+    "browser": true,
+    "jest": true
   },
-  "parser": "babel-eslint",
+  "parser": "@typescript-eslint/parser",
   "extends": [
-    "airbnb",
-    "plugin:jest/recommended",
-    "plugin:import/typescript"
+    "airbnb-typescript"
   ],
   "parserOptions": {
-    "typescript": true,
-    "ecmaVersion": 7,
-    "ecmaFeatures": {
-      "classes": true,
-      "experimentalObjectRestSpread": true,
-      "jsx": true
-    },
-    "sourceType": "module"
-  },
-  "plugins": [
-    "react",
-    "jest",
-    "react-hooks"
-  ],
-  "rules": {
-    "arrow-parens": [
-      1,
-      "as-needed",
-      { "requireForBlockBody": true }
-    ],
-    "react/jsx-filename-extension": [1, { "extensions": [".js", ".jsx", ".ts", ".tsx"] }],
-    "import/extensions": ["error", "ignorePackages", {
-      "ts": "never",
-      "tsx": "never",
-      "js": "never",
-      "jsx": "never",
-      "mjs": "never"
-    }],
-    "react-hooks/rules-of-hooks": "error",
-    // Jest Rules
-    "jest/no-disabled-tests": "warn",
-    "jest/no-focused-tests": "error",
-    "jest/no-identical-title": "error",
-    "jest/prefer-to-have-length": "warn",
-    "jest/valid-expect": "error",
-    "import/no-extraneous-dependencies": 0
-  },
-  "settings": {
-    "import/resolver": {
-      "typescript": {
-        "directory": "./"
-      },
-      "webpack": {
-        "config": "./src/webpack/inc/webpack-resolver-config.js"
-      }
-    }
-  },
-  "overrides": [
-    {
-      "files": ["*.ts", "*.tsx"],
-      "parser": "@typescript-eslint/parser",
-      "rules": {
-        "no-undef": "off",
-        "no-unused-vars": "off",
-        "react/prop-types": "off"
-      }
-    }
-  ]
+    "project": "./tsconfig.eslint.json"
+  }
 }
