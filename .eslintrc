@@ -35,5 +35,12 @@
     "unicorn/no-array-for-each": "off",
     // It's not accurate in the monorepo style
     "import/no-extraneous-dependencies": "off"
+  },
+  "settings": {
+    "import/resolver": {
+      "webpack": {
+        "config": "./src/webpack/inc/webpack-resolver-config.js"
+      }
+    }
   }
 }

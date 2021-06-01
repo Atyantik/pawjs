@@ -1,6 +1,6 @@
 {
   "name": "@pawjs/srcset",
-  "version": "2.1.6",
+  "version": "2.1.7",
   "description": "Add pwa-srcset-loader for image resize and proper srcset loading",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -9,9 +9,9 @@
   "author": "Atyantik Technologies Private Limited <tirthbodawala@atyantik.com>",
   "license": "MIT",
   "peerDependencies": {
-    "@pawjs/pawjs": "^2.4.0",
-    "file-loader": "^2.0.0",
-    "react": "^16.4.1"
+    "react": ">=17.0.2",
+    "@pawjs/pawjs": ">=3.0.2",
+    "file-loader": "^2.0.0"
   },
   "dependencies": {
     "prop-types": "^15.7.2",

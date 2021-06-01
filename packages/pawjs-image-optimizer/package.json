@@ -1,6 +1,6 @@
 {
   "name": "@pawjs/image-optimizer",
-  "version": "2.2.6",
+  "version": "2.2.7",
   "description": "Add Webpack Image Loader support to your PAWJS application",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -9,8 +9,8 @@
   "author": "Atyantik Technologies Private Limited <tirthbodawala@atyantik.com>",
   "license": "MIT",
   "peerDependencies": {
-    "react": "^16.4.1",
-    "@pawjs/pawjs": "^2.4.0"
+    "react": ">=17.0.2",
+    "@pawjs/pawjs": ">=3.0.2"
   },
   "funding": {
     "type": "opencollective",
