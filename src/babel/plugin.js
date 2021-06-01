@@ -8,6 +8,7 @@ const classProperties = getDefault(require('@babel/plugin-proposal-class-propert
 const generatorFunctions = getDefault(require('@babel/plugin-proposal-async-generator-functions'));
 const syntaxDynamicImport = getDefault(require('@babel/plugin-syntax-dynamic-import'));
 const privateMethods = getDefault(require('@babel/plugin-proposal-private-methods'));
+const moduleResolver = getDefault(require('babel-plugin-module-resolver'));
 const reactLoadableRoutes = getDefault(require('./plugins/react-loadable-routes'));
 const dynamicImportWebpack = getDefault(require('./plugins/dynamic-import-webpack'));
 

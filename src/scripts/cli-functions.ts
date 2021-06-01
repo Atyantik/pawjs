@@ -44,7 +44,7 @@ export function saveDataToFile(rawData: any, fileUrl: PathLike) {
   return new Promise((resolve, reject) => {
     try {
       Fs.writeFileSync(fileUrl, rawData, 'utf-8');
-      resolve();
+      resolve(null);
     } catch (err) {
       reject(err);
     }
