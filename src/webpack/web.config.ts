@@ -71,11 +71,9 @@ export default {
     ...(pawConfig.react === 'cdn' ? { react: 'React', 'react-dom': 'ReactDOM' } : {}),
   },
   plugins: [
-    // new webpack.DefinePlugin({
-    //   'process.env.NODE_ENV': process.env?.PAW_ENV ?? 'development',
-    // }),
-    new webpack.ProvidePlugin({
-      process: 'process/browser',
+    new webpack.DefinePlugin({
+      'process.env': {},
+      'process.env.NODE_ENV': JSON.stringify(process.env?.PAW_ENV ?? 'development'),
     }),
     new webpack.EnvironmentPlugin({
       APP_DESCRIPTION: null,
@@ -83,7 +81,7 @@ export default {
       ENABLE_KEYWORDS: null,
       PAGE_TITLE_SEPARATOR: null,
       pawConfig: JSON.stringify(pawConfig),
-      //...process.env,
+      ...process.env,
     }),
     ...(isHot ? [] : [new MiniCssExtractPlugin({
       // Options similar to the same options in webpackOptions.output
