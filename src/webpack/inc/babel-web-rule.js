@@ -38,6 +38,9 @@ const rule = (options = {}) => {
               {
                 useBuiltIns: 'entry',
                 corejs: '3.6',
+                targets: {
+                  browsers: ['last 2 versions', 'safari >= 7', 'ie >= 11'],
+                },
               },
             ],
             babelPresetReact,
