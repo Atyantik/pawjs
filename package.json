@@ -111,7 +111,7 @@
     "react-router-dom": "^5.2.0",
     "regenerator-runtime": "^0.13.7",
     "serialize-javascript": "^4.0.0",
-    "snyk": "^1.618.0",
+    "snyk": "^1.667.0",
     "style-loader": "^1.3.0",
     "supertest": "^4.0.2",
     "synk": "0.0.2",
