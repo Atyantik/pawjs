@@ -42,7 +42,12 @@ const rule = (options = {}) => {
                 },
               },
             ],
-            babelPresetReact,
+            [
+              babelPresetReact,
+              {
+                runtime: 'automatic',
+              },
+            ],
             presetTypescript,
           ],
           cacheDirectory: o.cacheDirectory,

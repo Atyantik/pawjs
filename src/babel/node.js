@@ -25,7 +25,12 @@ const rule = options => ({
             targets: { node: '10.15.3' },
           },
         ],
-        presetReact,
+        [
+          presetReact,
+          {
+            runtime: 'automatic',
+          },
+        ],
         presetTypescript,
       ],
       cacheDirectory: getCacheOption(options.cacheDirectory),

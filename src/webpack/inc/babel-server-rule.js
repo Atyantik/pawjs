@@ -26,7 +26,12 @@ const rule = options => ({
             targets: { node: '10.15.3' },
           },
         ],
-        presetReact,
+        [
+          presetReact,
+          {
+            runtime: 'automatic',
+          },
+        ],
         presetTypescript,
       ],
       cacheDirectory: typeof options.cacheDirectory !== 'undefined' ? options.cacheDirectory : process.env.PAW_CACHE === 'true',
