@@ -1,3 +1,7 @@
+coverage
+dist
+lib
+scaffold
 **/*.d.ts
 src/__tests__/webpack/dev.test.js
 src/__tests__/webpack/prod.test.js

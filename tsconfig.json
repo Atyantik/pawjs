@@ -1,29 +1,33 @@
 {
   "compilerOptions": {
+    "allowJs": true,
+    "allowSyntheticDefaultImports": true,
     "declaration": true,
+    "noEmit": true,
+    "declarationMap": false,
     "esModuleInterop": true,
-    "experimentalDecorators": true,
-    "jsx": "react",
-    "lib": ["dom", "esnext", "dom.iterable", "scripthost", "es2015.promise"],
-    "module": "amd",
+    "forceConsistentCasingInFileNames": true,
+    "jsx": "react-jsx",
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
+    "module": "esnext",
     "moduleResolution": "node",
+    "resolveJsonModule": true,
     "skipLibCheck": true,
+    "sourceMap": false,
     "strict": true,
     "target": "esnext",
-    "outDir": "dist"
+    "baseUrl": "./",
+    "types": ["react/next", "react-dom/next"]
   },
   "include": [
-    "**/*.ts",
-    "**/*.tsx"
+    "**/*"
   ],
   "exclude": [
-    "dist",
-    "src/extensions.js",
-    "demo",
-    "node_modules",
-    "**/dist/**/*",
-    "src/__tests__/**",
-    "src/babel/**",
-    "src/webpack/**"
+    "lib",
+    "scaffold"
   ]
 }

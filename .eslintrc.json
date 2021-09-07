@@ -1,0 +1,49 @@
+{
+  "extends": [
+    "airbnb-typescript"
+  ],
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "project": "./tsconfig.eslint.json"
+  },
+  "plugins": [
+    "@typescript-eslint",
+    "import"
+  ],
+  "root": true,
+  "rules": {
+    "@typescript-eslint/explicit-function-return-type": "off",
+    "@typescript-eslint/no-use-before-define": [
+      "error",
+      {
+        "classes": true,
+        "functions": false,
+        "typedefs": true,
+        "variables": true
+      }
+    ],
+    "import/no-default-export": "off",
+    "import/no-extraneous-dependencies": "off",
+    "import/prefer-default-export": "off",
+    "no-prototype-builtins": "off",
+    "no-use-before-define": "off",
+    "react/destructuring-assignment": "off",
+    "react/jsx-filename-extension": "off",
+    "react/jsx-uses-react": "off",
+    "react/react-in-jsx-scope": "off",
+    "unicorn/no-array-for-each": "off",
+    "unicorn/prevent-abbreviations": "off"
+  },
+  "settings": {
+    "import/core-modules": [
+      "react",
+      "react-dom",
+      "react-router",
+      "react-router-dom",
+      "express"
+    ]
+  },
+  "ignorePatterns": [
+    "scaffold/**/*.(ts|js|tsx|jsx)"
+  ]
+}
