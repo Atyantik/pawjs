@@ -115,12 +115,6 @@ if (pawConfig.hotReload) {
         if (wType === 'server') {
           wConfigs.forEach((webpackConfig: IPawjsWebpackConfig) => {
             const wConfig = webpackConfig;
-            // Add express as externals
-            if (!wConfig.externals) {
-              wConfig.externals = {};
-            }
-
-            wConfig.externals.express = 'express';
 
             if (!wConfig.module) wConfig.module = { rules: [] };
             // do not emit image files for server!
@@ -217,8 +211,8 @@ try {
 
   // Add server middleware
   const serverMiddleware:
-    webpackMiddleware.WebpackDevMiddleware
-    & NextHandleFunction = webpackMiddleware(serverCompiler, serverOptions);
+  webpackMiddleware.WebpackDevMiddleware
+  & NextHandleFunction = webpackMiddleware(serverCompiler, serverOptions);
 
   app.use(serverMiddleware);
 

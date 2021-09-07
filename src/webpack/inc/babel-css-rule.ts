@@ -1,5 +1,7 @@
 import path from 'path';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
+import Sass from 'sass';
+import autoprefixer from 'autoprefixer';
 import assignIn from 'lodash/assignIn';
 import directories from '../utils/directories';
 
@@ -16,7 +18,7 @@ export default (options: any = {}) => {
   const o = assignIn({}, defaultOptions, options);
   return [
     {
-      test: /\.css$/,
+      test: /\.(css|s[ac]ss)$/i,
       exclude: [
         path.join(directories.src, 'resources'),
         path.join(directories.root, 'node_modules'),
@@ -35,10 +37,29 @@ export default (options: any = {}) => {
             importLoaders: 1,
           },
         },
+        {
+          loader: 'postcss-loader',
+          options: {
+            postcssOptions: {
+              ident: 'postcss',
+              plugins: [
+                [
+                  autoprefixer,
+                ],
+              ],
+            },
+          },
+        },
+        {
+          loader: 'sass-loader',
+          options: {
+            implementation: Sass,
+          },
+        },
       ],
     },
     {
-      test: /\.css$/,
+      test: /\.(css|s[ac]ss)$/i,
       include: [
         path.join(directories.src, 'resources'),
         path.join(directories.root, 'node_modules'),
@@ -55,6 +76,25 @@ export default (options: any = {}) => {
             },
             sourceMap: o.sourceMap,
             importLoaders: 2,
+          },
+        },
+        {
+          loader: 'postcss-loader',
+          options: {
+            postcssOptions: {
+              ident: 'postcss',
+              plugins: [
+                [
+                  autoprefixer,
+                ],
+              ],
+            },
+          },
+        },
+        {
+          loader: 'sass-loader',
+          options: {
+            implementation: Sass,
           },
         },
       ],
