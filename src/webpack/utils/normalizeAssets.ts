@@ -7,19 +7,19 @@ import map from 'lodash/map';
 import compact from 'lodash/compact';
 import * as webpack from 'webpack';
 
-type dependencyMap = {
+type DependencyMap = {
   path: string;
   modules: string[];
 };
 export interface INormalizeAssets {
   client?: string | string [];
   'vendor~client'?: string | string [];
-  cssDependencyMap?: dependencyMap[];
-  jsDependencyMap?: dependencyMap[];
+  cssDependencyMap?: DependencyMap[];
+  jsDependencyMap?: DependencyMap[];
 }
 
 const populate = (chunks:any [], type: string, publicPath: string) => {
-  const arr: dependencyMap [] = [];
+  const arr: DependencyMap [] = [];
   each(chunks, (chunk) => {
     let hasType = false;
     let typeFileName = '';
@@ -59,16 +59,16 @@ const populate = (chunks:any [], type: string, publicPath: string) => {
       arr.unshift({
         path: `${publicPath}${typeFileName}`,
         modules: moduleReasons,
-    });
-  }
+      });
+    }
   });
   return arr;
 };
 
 export default (wStats: webpack.Stats): INormalizeAssets => {
   let assets = {};
-  let cssDependencyMap: dependencyMap[] = [];
-  let jsDependencyMap: dependencyMap[] = [];
+  let cssDependencyMap: DependencyMap[] = [];
+  let jsDependencyMap: DependencyMap[] = [];
   let webpackStats: any = wStats.toJson();
 
   if (

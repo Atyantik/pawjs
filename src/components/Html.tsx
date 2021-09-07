@@ -251,7 +251,6 @@ export default (props: React.PropsWithChildren<IHtmlProps> = {
         {renderJSLoader()}
         {renderDNSPrefetch()}
         <link rel="manifest" href={`${appRootUrl}/manifest.json`} />
-        {/* eslint-disable-next-line react/jsx-props-no-spreading */}
         {metaTags && metaTags.map(m => <meta key={JSON.stringify(m)} {...m} />)}
         {renderPreLoadedData()}
         {head}

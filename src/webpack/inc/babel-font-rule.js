@@ -1,4 +1,4 @@
-const _ = require('lodash');
+const lodash = require('lodash');
 const directories = require('../utils/directories');
 
 const defaultOptions = {
@@ -12,7 +12,7 @@ const rule = options => ({
   use: [
     {
       loader: 'file-loader',
-      options: _.assignIn({}, defaultOptions, options),
+      options: lodash.assignIn({}, defaultOptions, options),
     },
   ],
 });
