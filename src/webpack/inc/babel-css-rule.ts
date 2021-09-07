@@ -1,7 +1,5 @@
 import path from 'path';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
-// @ts-ignore
-import postcssPresetEnv from 'postcss-preset-env';
 import assignIn from 'lodash/assignIn';
 import directories from '../utils/directories';
 
@@ -37,17 +35,6 @@ export default (options: any = {}) => {
             importLoaders: 1,
           },
         },
-        {
-          loader: 'postcss-loader',
-          options: {
-            postcssOptions: {
-              plugins: () => [
-                postcssPresetEnv({
-                }),
-              ],
-            },
-          },
-        },
       ],
     },
     {
@@ -68,17 +55,6 @@ export default (options: any = {}) => {
             },
             sourceMap: o.sourceMap,
             importLoaders: 2,
-          },
-        },
-        {
-          loader: 'postcss-loader',
-          options: {
-            postcssOptions: {
-              plugins: () => [
-                postcssPresetEnv({
-                }),
-              ],
-            },
           },
         },
       ],
