@@ -1,6 +1,45 @@
 const fs = require('fs');
 const path = require('path');
 const supportedExtensions = require('../../extensions.js');
+const packageJson = require('../../../package.json');
+
+const libRoot = path.resolve(
+  path.join(
+    __dirname,
+    '..',
+    '..',
+    '..',
+  ),
+);
+const root = process.cwd();
+
+const libraryNodeModules = path.join(libRoot, 'node_modules');
+const libraryHasNodeModules = libraryNodeModules ? fs.existsSync(libraryNodeModules) : false;
+
+const emptyClass = pawExistsSync(path.join(libRoot, 'src', 'webpack', 'utils', 'emptyClass'));
+const emptyFunction = pawExistsSync(path.join(libRoot, 'src', 'webpack', 'utils', 'emptyFunction'));
+const emptyObject = pawExistsSync(path.join(libRoot, 'src', 'webpack', 'utils', 'emptyObject'));
+const projectClientPath = pawExistsSync(`${root}/src/client`);
+const projectSWPath = pawExistsSync(`${root}/src/sw`);
+const projectServerPath = pawExistsSync(`${root}/src/server`);
+const projectRoutesPath = pawExistsSync(`${root}/src/routes`);
+const projectSeoConfig = pawExistsSync(`${root}/src/seo`);
+const projectPwaConfig = pawExistsSync(`${root}/src/pwa`);
+
+const resolveFirstToLibDependencies = (dependencies) => {
+  const resolvedDependencies = {};
+  Object.keys(dependencies).forEach((dependency) => {
+    resolvedDependencies[dependency] = fs.existsSync(path.join(libraryNodeModules, dependency))
+      ? path.resolve(path.join(libraryNodeModules, dependency))
+      : path.resolve(path.join(root, 'node_modules', dependency));
+  });
+  return resolvedDependencies;
+};
+
+/**
+ * Resolve dependencies in the library's node_modules as priority
+ */
+const dependenciesAlias = resolveFirstToLibDependencies(packageJson.dependencies);
 
 let cacheEnabled = true;
 
@@ -71,57 +110,18 @@ require('@babel/register')({
   extensions: supportedExtensions.resolveExtensions,
 });
 
-
 if (!process.env.PROJECT_ROOT) {
   // eslint-disable-next-line
   const CliHandler = getDefault(require('../../scripts/cli'));
   // eslint-disable-next-line
   (new CliHandler());
 }
-const directories = getDefault(require('../utils/directories'));
 
-const emptyClass = pawExistsSync(path.join(process.env.LIB_ROOT, 'src', 'webpack', 'utils', 'emptyClass'));
-const emptyFunction = pawExistsSync(path.join(process.env.LIB_ROOT, 'src', 'webpack', 'utils', 'emptyFunction'));
-const emptyObject = pawExistsSync(path.join(process.env.LIB_ROOT, 'src', 'webpack', 'utils', 'emptyObject'));
-const projectClientPath = pawExistsSync(`${process.env.PROJECT_ROOT}/src/client`);
-const projectSWPath = pawExistsSync(`${process.env.PROJECT_ROOT}/src/sw`);
-const projectServerPath = pawExistsSync(`${process.env.PROJECT_ROOT}/src/server`);
-const projectRoutesPath = pawExistsSync(`${process.env.PROJECT_ROOT}/src/routes`);
-const projectSeoConfig = pawExistsSync(`${process.env.PROJECT_ROOT}/src/seo`);
-const projectPwaConfig = pawExistsSync(`${process.env.PROJECT_ROOT}/src/pwa`);
-
-const commonResolvers = [
-  'node_modules',
-  path.resolve(path.join(directories.root, 'node_modules')),
-];
-
-if (
-  process.env.LIB_ROOT !== process.cwd()
-  && process.env.LIB_ROOT !== path.resolve(process.cwd(), '..')
-) {
-  if (fs.existsSync(path.join(process.env.LIB_ROOT, 'node_modules'))) {
-    commonResolvers.push(path.join(process.env.LIB_ROOT, 'node_modules'));
-  }
-
-  if (fs.existsSync(path.join(process.env.LIB_ROOT, '..', 'node_modules'))) {
-    commonResolvers.push(path.join(process.env.LIB_ROOT, '..', 'node_modules'));
-  }
-
-  if (fs.existsSync(path.join(process.env.LIB_ROOT, '..', '..', 'node_modules'))) {
-    commonResolvers.push(path.join(process.env.LIB_ROOT, '..', '..', 'node_modules'));
-  }
-
-  if (fs.existsSync(path.join(process.env.LIB_ROOT, '..', '..', '..', 'node_modules'))) {
-    commonResolvers.push(path.join(process.env.LIB_ROOT, '..', '..', '..', 'node_modules'));
-  }
-}
-
-const loaderResolver = commonResolvers.slice(0);
-loaderResolver.push(path.join(process.env.LIB_ROOT, 'src', 'webpack', 'loaders'));
 const resolver = {
   resolve: {
     alias: {
-      pawjs: path.resolve(path.join(process.env.LIB_ROOT)),
+      ...dependenciesAlias,
+      pawjs: libRoot,
       pawProjectClient: projectClientPath || emptyClass,
       pawProjectSW: projectSWPath || emptyFunction,
       pawProjectServer: projectServerPath || emptyClass,
@@ -129,11 +129,14 @@ const resolver = {
       pawPwaConfig: projectPwaConfig || emptyObject,
       pawSeoConfig: projectSeoConfig || emptyObject,
     },
-    modules: commonResolvers,
     extensions: supportedExtensions.resolveExtensions,
   },
   resolveLoader: {
-    modules: loaderResolver,
+    modules: [
+      'node_modules',
+      ...(libraryHasNodeModules ? [libraryNodeModules] : []),
+      path.join(process.env.LIB_ROOT, 'src', 'webpack', 'loaders'),
+    ],
   },
 };
 module.exports = resolver;

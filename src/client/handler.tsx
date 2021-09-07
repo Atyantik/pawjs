@@ -11,7 +11,7 @@ import {
   AsyncSeriesHook,
   AsyncParallelBailHook,
   SyncHook,
-} from '@pawjs/tapable';
+} from 'tapable';
 import RouteHandler from '../router/handler';
 import ErrorBoundary from '../components/ErrorBoundary';
 import { generateMeta } from '../utils/seo';

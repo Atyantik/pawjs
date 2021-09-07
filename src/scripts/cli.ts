@@ -3,7 +3,6 @@ import Program from 'commander';
 import dotenv from 'dotenv';
 import fs from 'fs';
 import path from 'path';
-import executablePaths from './executable-paths';
 import packageDetails from '../../package.json';
 import { factory as findCommandFactory } from './find-command';
 
@@ -48,12 +47,6 @@ export default class CliHandler {
    * Library root is the path of directory where PawJS is installed
    */
   libRoot: string = '';
-
-  /**
-   * As there is a very good possibility that many versions of same packages
-   * are installed via npm, searchCommand helps search for the path of executable
-   */
-  searchCommand: ((cmd: string) => string) | undefined;
 
   /**
    * A flag to check if the pawConfig was set manually
@@ -143,32 +136,6 @@ export default class CliHandler {
      * We expect the pawconfig.json to be in the project root folder only
      */
     process.env.PAW_CONFIG_PATH = path.join(this.projectRoot, 'pawconfig.json');
-  }
-
-  /**
-   * Create list of executable paths for our user based on
-   * project root and library root
-   */
-  updateExecutablePaths() {
-    const newNodePath = executablePaths(this.projectRoot, this.libRoot).join(path.delimiter);
-    if (!process.env.NODE_PATH) {
-      process.env.NODE_PATH = newNodePath;
-    } else {
-      process.env.NODE_PATH = [process.env.NODE_PATH, newNodePath].join(path.delimiter);
-    }
-    process.env.PATH = process.env.NODE_PATH;
-
-    if (!this.pawConfigManualPath) {
-      process.env.PAW_CONFIG_PATH = path.join(this.projectRoot, 'pawconfig.json');
-      if (fs.existsSync(path.resolve(process.env.PAW_CONFIG_PATH))) {
-        renderPawConfigWarning();
-      }
-    }
-  }
-
-  updateCommandSearch() {
-    // get the search command with the executable path list
-    this.searchCommand = findCommandFactory(executablePaths(this.projectRoot, this.libRoot));
   }
 
   /**
@@ -269,8 +236,6 @@ export default class CliHandler {
     }
     process.env.PROJECT_ROOT = pRoot;
     this.projectRoot = process.env.PROJECT_ROOT;
-    this.updateExecutablePaths();
-    this.updateCommandSearch();
   }
 
   /**
@@ -291,11 +256,6 @@ export default class CliHandler {
   }
 
   lint() {
-    if (!this.searchCommand) {
-      // eslint-disable-next-line no-console
-      console.log('Application not configured properly, cannot search for commands');
-      return;
-    }
     const env = Object.create(process.env);
     env.NODE_ENV = 'test';
 
@@ -315,7 +275,7 @@ export default class CliHandler {
     // eslint-disable-next-line
     console.log(`Linting with eslint...\nConfig path: ${eslintPath}`);
     const eslint = spawn(
-      this.searchCommand('eslint'),
+      'eslint',
       [
         '-c',
         eslintPath,
@@ -329,11 +289,6 @@ export default class CliHandler {
     );
 
     eslint.on('close', (errorCode) => {
-      if (!this.searchCommand) {
-        // eslint-disable-next-line no-console
-        console.log('Application not configured properly, cannot search for commands');
-        return;
-      }
       if (!errorCode) {
         let tslintPath = path.join(this.libRoot, 'tslint.json');
         let tslintRoot = this.libRoot;
@@ -348,7 +303,7 @@ export default class CliHandler {
         // eslint-disable-next-line
         console.log(`Linting with tslint...\nConfig path: ${tslintPath}`);
         spawn(
-          this.searchCommand('tslint'),
+          'tslint',
           [
             '-c',
             tslintPath,
@@ -365,11 +320,6 @@ export default class CliHandler {
   }
 
   test() {
-    if (!this.searchCommand) {
-      // eslint-disable-next-line no-console
-      console.log('Application not configured properly, cannot search for commands');
-      return;
-    }
     const env = Object.create(process.env);
     env.NODE_ENV = 'test';
 
@@ -377,20 +327,15 @@ export default class CliHandler {
     if (fs.existsSync(path.join(this.projectRoot, 'tsconfig.json'))) {
       tscRoot = this.projectRoot;
     }
-    const tsc = spawn(this.searchCommand('tsc'), ['-p', tscRoot], {
+    const tsc = spawn('tsc', ['-p', tscRoot], {
       env,
       shell: true,
       stdio: [process.stdin, process.stdout, 'pipe'],
     });
 
     tsc.on('close', (errorCode) => {
-      if (!this.searchCommand) {
-        // eslint-disable-next-line no-console
-        console.log('Application not configured properly, cannot search for commands');
-        return;
-      }
       if (!errorCode) {
-        spawn(this.searchCommand('jest'), ['--verbose'], {
+        spawn('jest', ['--verbose'], {
           env,
           shell: true,
           stdio: [process.stdin, process.stdout, 'pipe'],
