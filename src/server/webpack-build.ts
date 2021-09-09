@@ -250,10 +250,12 @@ wHandler.hooks.beforeConfig.tap('AddSyncedFilesPlugin', (wEnv, wType, wConfigs) 
          * We need to make sure that everything inside the public folder
          * is copied as it is to the build/public folder
          */
-        wConfig.plugins.push(new CopyWebpackPlugin([{
-          from: path.join(directories.src, 'public'),
-          to: directories.build,
-        }]));
+        wConfig.plugins.push(new CopyWebpackPlugin({
+          patterns: [{
+            from: path.join(directories.src, 'public'),
+            to: directories.build,
+          }],
+        }));
         copyPublicFolder = true;
       }
 
