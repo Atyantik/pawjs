@@ -119,7 +119,7 @@ export default class RouteHandler extends AbstractPlugin implements IRouteHandle
     ErrorComponent,
   };
 
-  hooks: { initRoutes: AsyncSeriesHook<any> };
+  hooks: { initRoutes: AsyncSeriesHook<[string, string]> };
 
   routeCompiler: RouteCompiler;
 
@@ -159,7 +159,7 @@ export default class RouteHandler extends AbstractPlugin implements IRouteHandle
     super();
     this.routeCompiler = new RouteCompiler();
     this.hooks = {
-      initRoutes: new AsyncSeriesHook(['URL']),
+      initRoutes: new AsyncSeriesHook(['URL', 'userAgent']),
     };
 
     // Private methods

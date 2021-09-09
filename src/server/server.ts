@@ -143,7 +143,7 @@ app.get('*', (req, res, next) => {
   }
   // If server side render is enabled then, then let the routes load
   // Wait for all routes to load everything!
-  return clientRouteHandler.hooks.initRoutes.callAsync(fullUrl, (err: Error) => {
+  return clientRouteHandler.hooks.initRoutes.callAsync(fullUrl, req.headers['user-agent'], (err: Error) => {
     if (err) {
       // eslint-disable-next-line
       console.log(err);
