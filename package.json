@@ -100,11 +100,11 @@
     "tslint-config-airbnb": "^5.11.2",
     "typescript": "^4.4.2",
     "universal-url": "^2.0.0",
-    "webpack": "^4.46.0",
     "webpack-bundle-analyzer": "^4.4.2",
     "webpack-dev-middleware": "^3.7.3",
     "webpack-hot-middleware": "^2.25.0",
     "webpack-log": "^3.0.2",
+    "webpack": "^4.46.0",
     "workbox-webpack-plugin": "^6.2.4"
   },
   "devDependencies": {
@@ -120,10 +120,7 @@
     "@types/react-router-config": "^5.0.3",
     "@types/react-router-dom": "^5.1.8",
     "@types/serialize-javascript": "^5.0.1",
-    "@types/supertest": "^2.0.11",
-    "@types/webpack": "^4.41.30",
-    "@types/webpack-bundle-analyzer": "^4.4.1",
-    "@types/workbox-webpack-plugin": "^5.1.8"
+    "@types/supertest": "^2.0.11"
   },
   "repository": {
     "type": "git",
