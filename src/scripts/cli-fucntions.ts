@@ -26,10 +26,10 @@ export function getDataFromUrl(url: string) {
       res.on('end', () => {
         try {
           resolve(rawData);
-        } catch (e) {
+        } catch (e: any) {
           // eslint-disable-next-line
-          console.error(e.message);
-          reject(e.message);
+          console.error(e?.message);
+          reject(e?.message ?? 'Error');
         }
       });
     }).on('error', (e) => {
@@ -44,7 +44,7 @@ export function saveDataToFile(rawData: any, fileUrl: PathLike) {
   return new Promise((resolve, reject) => {
     try {
       Fs.writeFileSync(fileUrl, rawData, 'utf-8');
-      resolve();
+      resolve(null);
     } catch (err) {
       reject(err);
     }

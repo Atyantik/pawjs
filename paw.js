@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 const fs = require('fs');
 const util = require('util');
-const supportedExtensions = require('./src/extensions');
+// eslint-disable-next-line import/extensions
+const supportedExtensions = require('./src/extensions.js');
 /**
  * As this is a mixture of ES6 and ES5 we require module that might
  * be exported as default or using the old module.exports

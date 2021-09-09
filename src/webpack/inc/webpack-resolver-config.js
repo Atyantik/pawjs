@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+// eslint-disable-next-line import/extensions
 const supportedExtensions = require('../../extensions.js');
 const packageJson = require('../../../package.json');
 
@@ -88,6 +89,7 @@ Array.from(process.argv).forEach((arg) => {
 });
 
 // Get babel configuration for nodejs
+// eslint-disable-next-line import/extensions
 const babelServer = getDefault(require('../../babel/node.js'))({
   cacheDirectory: cacheEnabled,
   hot: false,

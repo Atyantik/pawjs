@@ -1,10 +1,9 @@
 import ChildProcess from 'child_process';
-import Program from 'commander';
+import { program } from 'commander';
 import dotenv from 'dotenv';
 import fs from 'fs';
 import path from 'path';
 import packageDetails from '../../package.json';
-import { factory as findCommandFactory } from './find-command';
 
 const { spawn } = ChildProcess;
 
@@ -35,7 +34,7 @@ export default class CliHandler {
   /**
    * Set program as instance of commander
    */
-  program: Program.CommanderStatic = Program;
+  program: typeof program = program;
 
   /**
    * Project root is the path of directory where the
@@ -435,8 +434,9 @@ export default class CliHandler {
       }
     });
 
-    this.program.on('option:cache', () => {
-      if (!this.program.cache) {
+    this.program.on('option:no-cache', () => {
+      const cache =  this.program?.opts?.()?.cache ?? true;
+      if (!cache) {
         // set PAW_CACHE to false
         process.env.PAW_CACHE = 'false';
 
@@ -455,7 +455,7 @@ export default class CliHandler {
       // eslint-disable-next-line
       console.error(
         'Invalid command: %s\nSee --help for a list of available commands.',
-        Program.args.join(' '),
+        program.args.join(' '),
       );
       process.exit(1);
     });

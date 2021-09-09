@@ -1,7 +1,6 @@
 import { createBrowserHistory } from 'history';
 import invert from 'lodash/invert';
 import get from 'lodash/get';
-import React from 'react';
 import { renderRoutes } from 'react-router-config';
 import { Router } from 'react-router';
 import { HashRouter } from 'react-router-dom';
@@ -37,7 +36,7 @@ export default class ClientHandler extends AbstractPlugin {
 
   history: any;
 
-  updatePageMetaTimeout = 0;
+  updatePageMetaTimeout: any = 0;
 
   loaded = false;
 
@@ -304,7 +303,7 @@ export default class ClientHandler extends AbstractPlugin {
         }
       });
     } else {
-      currentPageRoutes.forEach((r: { route: ICompiledRoute, match: any }, i: number) => {
+      currentPageRoutes.forEach((r: { route: ICompiledRoute, match: any }) => {
         if (r.route && r.route.component && r.route.component.preload) {
           const preloadInit = r.route.component.preload(undefined, {
             route: r.route,
@@ -359,7 +358,6 @@ export default class ClientHandler extends AbstractPlugin {
       )));
 
     const children = (
-      // eslint-disable-next-line react/jsx-props-no-spreading
       <components.appRouter basename={this.options.env.appRootUrl} {...routerParams}>
         {appRoutes.renderedRoutes}
       </components.appRouter>
@@ -388,7 +386,7 @@ export default class ClientHandler extends AbstractPlugin {
               preloadedElement.remove();
             }
             this.hooks.renderComplete.call();
-            resolve();
+            resolve(null);
           },
         );
       });

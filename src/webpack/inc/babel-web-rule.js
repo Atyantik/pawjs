@@ -1,4 +1,4 @@
-const _ = require('lodash');
+const lodash = require('lodash');
 let babelPresetEnv = require('@babel/preset-env');
 
 babelPresetEnv = babelPresetEnv.default ? babelPresetEnv.default : babelPresetEnv;
@@ -20,7 +20,7 @@ const defaultOptions = {
 };
 
 const rule = (options = {}) => {
-  const o = _.assignIn({}, defaultOptions, options);
+  const o = lodash.assignIn({}, defaultOptions, options);
   return {
     test: /\.(mj|j|t)sx?$/,
     exclude: [
@@ -42,7 +42,12 @@ const rule = (options = {}) => {
                 },
               },
             ],
-            babelPresetReact,
+            [
+              babelPresetReact,
+              {
+                runtime: 'automatic',
+              },
+            ],
             presetTypescript,
           ],
           cacheDirectory: o.cacheDirectory,

@@ -1,9 +1,7 @@
-/* tslint:disable:jsx-no-multiline-js */
-import React from 'react';
 import { renderRoutes } from 'react-router-config';
 
 import PreloadDataManager from '../utils/preloadDataManager';
-import { Map } from '../components/Loadable';
+import { Map as LoadableMap } from '../components/Loadable';
 import { CompiledRoute, ReactComponent, Route } from '../@types/route';
 import NotFoundError from '../errors/not-found';
 import ServerError from '../errors/server';
@@ -69,7 +67,7 @@ export default class RouteCompiler {
       }
       return {};
     };
-    const loadableComponent = Map({
+    const loadableComponent = LoadableMap({
       selfManageNewProps:
         typeof selfManageNewProps !== 'undefined'
           ? !!selfManageNewProps : false,
@@ -98,7 +96,6 @@ export default class RouteCompiler {
         if (err instanceof NotFoundError) {
           return (
             // @ts-ignore
-            // eslint-disable-next-line react/jsx-pascal-case
             <PARAMS.notFoundComponent
               error={err}
               history={propsHistory}
@@ -111,7 +108,6 @@ export default class RouteCompiler {
         if (err) {
           return (
             // @ts-ignore
-            // eslint-disable-next-line react/jsx-pascal-case
             <PARAMS.errorComponent
               error={err}
               history={propsHistory}
@@ -123,7 +119,6 @@ export default class RouteCompiler {
         } if (pastDelay) {
           return (
             // @ts-ignore
-            // eslint-disable-next-line react/jsx-pascal-case
             <PARAMS.skeletonComponent
               error={err}
               pastDelay={pastDelay}
@@ -171,7 +166,6 @@ export default class RouteCompiler {
 
         components.routeComponent = (
           <components.routeComponent
-            // eslint-disable-next-line react/jsx-props-no-spreading
             {...componentProps}
             history={propsHistory}
             location={propsLocation}

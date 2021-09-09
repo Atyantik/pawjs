@@ -2,7 +2,9 @@
 const presetEnv = getDefault(require('@babel/preset-env'));
 const presetReact = getDefault(require('@babel/preset-react'));
 const presetTypescript = getDefault(require('@babel/preset-typescript'));
+// eslint-disable-next-line import/extensions
 const babelPlugins = getDefault(require('./plugin.js'));
+// eslint-disable-next-line import/extensions
 const supportedExtensions = getDefault(require('../extensions.js'));
 
 const getCacheOption = cacheDirectory => (
@@ -23,7 +25,12 @@ const rule = options => ({
             targets: { node: '10.15.3' },
           },
         ],
-        presetReact,
+        [
+          presetReact,
+          {
+            runtime: 'automatic',
+          },
+        ],
         presetTypescript,
       ],
       cacheDirectory: getCacheOption(options.cacheDirectory),

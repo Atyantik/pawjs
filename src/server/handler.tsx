@@ -3,7 +3,6 @@ import {
   AsyncSeriesHook,
 } from 'tapable';
 import express from 'express';
-import React from 'react';
 import _ from 'lodash';
 import { renderToString } from 'react-dom/server';
 import { renderRoutes } from 'react-router-config';
@@ -19,7 +18,7 @@ import NotFoundError from '../errors/not-found';
 type Options = {
   env: any;
 };
-type dependencyMapItem = { modules: string[], path: string };
+type DependencyMapItem = { modules: string[], path: string };
 
 interface IApplication {
   context: any;
@@ -63,11 +62,11 @@ export default class ServerHandler extends AbstractPlugin {
   // eslint-disable-next-line class-methods-use-this
   getModuleCSS(
     modules: string[],
-    dependencyMap: dependencyMapItem[],
+    dependencyMap: DependencyMapItem[],
   ) {
     const moduleCss: string [] = [];
     modules.forEach((mod) => {
-      dependencyMap.forEach((c: dependencyMapItem) => {
+      dependencyMap.forEach((c: DependencyMapItem) => {
         if (_.indexOf(c.modules, mod) !== -1) {
           moduleCss.push(c.path);
         }
@@ -230,7 +229,7 @@ export default class ServerHandler extends AbstractPlugin {
     try {
       const promisesData = await Promise.all(promises);
       let seoData = {};
-      currentPageRoutes.forEach((r: { route: any, match: any}, i: number) => {
+      currentPageRoutes.forEach((r: { route: any, match: any }, i: number) => {
         seoData = { ...seoData, ...r.route.getRouteSeo() };
         if (promisesData[i]) {
           preloadedData.push(promisesData[i][1]);
@@ -330,7 +329,7 @@ export default class ServerHandler extends AbstractPlugin {
       context = {};
       promises = [];
       return next();
-    } catch (ex) {
+    } catch (ex: any) {
       // eslint-disable-next-line no-console
       console.warn(ex);
       let components = {

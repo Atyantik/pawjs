@@ -3,7 +3,6 @@ import path from 'path';
 import WorkboxPlugin from 'workbox-webpack-plugin';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 import webpack from 'webpack';
-import fs from 'fs';
 import { BundleAnalyzerPlugin } from 'webpack-bundle-analyzer';
 import cssRule from './inc/babel-css-rule';
 import imageRule from './inc/babel-image-rule';
@@ -17,14 +16,9 @@ import pawConfig from '../config';
 // @ts-ignore
 import fontRule from './inc/babel-font-rule';
 
-let projectSW = '';
-if (pawExistsSync(path.join(directories.src, 'sw'))) {
-  projectSW = fs.readFileSync(pawExistsSync(path.join(directories.src, 'sw')), 'utf-8');
-}
-
 const isHot = typeof process.env.PAW_HOT !== 'undefined' ? process.env.PAW_HOT === 'true' : pawConfig.hotReload;
 
-const devPlugins: webpack.Plugin [] = [];
+const devPlugins: any = [];
 if (process.env.PAW_DEBUG === 'true') {
   devPlugins.push(new BundleAnalyzerPlugin());
 }
