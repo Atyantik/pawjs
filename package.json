@@ -102,7 +102,7 @@
     "universal-url": "^2.0.0",
     "webpack-bundle-analyzer": "^4.4.2",
     "webpack-dev-middleware": "^3.7.3",
-    "webpack-hot-middleware": "^2.25.0",
+    "webpack-hot-middleware": "^2.25.1",
     "webpack-log": "^3.0.2",
     "webpack": "^4.46.0",
     "workbox-webpack-plugin": "^6.2.4"
