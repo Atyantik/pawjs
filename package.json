@@ -106,7 +106,7 @@
     "webpack-dev-middleware": "^3.7.3",
     "webpack-hot-middleware": "^2.25.1",
     "webpack-log": "^3.0.2",
-    "workbox-webpack-plugin": "^6.2.4"
+    "workbox-webpack-plugin": "^6.4.0"
   },
   "devDependencies": {
     "@types/compression": "^1.7.2",
