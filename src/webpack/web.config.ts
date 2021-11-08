@@ -30,6 +30,7 @@ export default {
   context: directories.root,
   entry: {
     client: [
+      ...(isHot ? ['react-refresh/runtime'] : []),
       ...(pawConfig.polyfill === 'cdn' ? [] : ['core-js/stable', 'regenerator-runtime/runtime']),
       // Initial entry point for dev
       pawExistsSync(path.join(process.env.LIB_ROOT || '', './src/client/app')),
@@ -81,12 +82,14 @@ export default {
       }),
     ] : []),
     new webpack.EnvironmentPlugin({ pawConfig: JSON.stringify(pawConfig), ...process.env }),
-    ...(isHot ? [] : [new MiniCssExtractPlugin({
-      // Options similar to the same options in webpackOptions.output
-      // both options are optional
-      filename: 'css/[hash].css',
-      chunkFilename: 'css/[chunkhash].css',
-    })]),
+    ...(isHot ? [] : [
+      new MiniCssExtractPlugin({
+        // Options similar to the same options in webpackOptions.output
+        // both options are optional
+        filename: 'css/[hash].css',
+        chunkFilename: 'css/[chunkhash].css',
+      }),
+    ]),
     ...(pawConfig.serviceWorker ? [
       new WorkboxPlugin.InjectManifest({
         swSrc: pawExistsSync(path.join(process.env.LIB_ROOT || '', 'src', 'service-worker')),

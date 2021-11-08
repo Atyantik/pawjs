@@ -4,6 +4,7 @@ import express from 'express';
 import webpack from 'webpack';
 import webpackMiddleware from 'webpack-dev-middleware';
 import webpackHotMiddleware from 'webpack-hot-middleware';
+import ReactRefreshWebpackPlugin from '@pmmmwh/react-refresh-webpack-plugin';
 import webLog from 'webpack-log';
 import { NextHandleFunction } from 'connect';
 import pawConfig from '../config';
@@ -46,9 +47,9 @@ if (pawConfig.hotReload) {
             config.devtool = 'eval-source-map';
             if (!config.resolve) config.resolve = {};
             if (!config.resolve.alias) config.resolve.alias = {};
-            if (!config.resolve.alias['react-dom']) {
-              config.resolve.alias['react-dom'] = '@hot-loader/react-dom';
-            }
+            // if (!config.resolve.alias['react-dom']) {
+            //   config.resolve.alias['react-dom'] = '@hot-loader/react-dom';
+            // }
           }
         });
 
@@ -105,6 +106,7 @@ if (pawConfig.hotReload) {
                 .some(p => p instanceof webpack.HotModuleReplacementPlugin);
 
               if (!hasHotPlugin) {
+                wConfig.plugins.unshift(new ReactRefreshWebpackPlugin()),
                 wConfig.plugins.unshift(new webpack.HotModuleReplacementPlugin({
                   multiStep: true,
                 }));

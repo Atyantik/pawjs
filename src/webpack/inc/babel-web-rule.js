@@ -24,7 +24,7 @@ const rule = (options = {}) => {
   return {
     test: /\.(mj|j|t)sx?$/,
     exclude: [
-      /node_modules\/core-js\//,
+      /node_modules\/(?!(@pawjs|pawjs-)).*/,
     ],
     use: [
       {

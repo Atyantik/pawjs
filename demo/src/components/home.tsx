@@ -22,7 +22,7 @@ const Column = (props) => {
                 target="_blank"
                 rel="noreferrer noopener nofollow"
               >
-                Read more
+                Read more.
               </a>
             )}
           </div>

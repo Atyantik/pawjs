@@ -19,6 +19,7 @@
     "@pawjs/pawjs": "file:.."
   },
   "dependencies": {
+    "@pmmmwh/react-refresh-webpack-plugin": "^0.5.1",
     "bulma": "^0.8.0",
     "cross-fetch": "^3.0.4"
   }

@@ -1,5 +1,6 @@
 /* global getDefault */
-const reactHotLoader = getDefault(require('react-hot-loader/babel'));
+// const reactHotLoader = getDefault(require('react-hot-loader/babel'));
+const reactRefresh = getDefault(require('react-refresh/babel'));
 const lodash = getDefault(require('babel-plugin-lodash'));
 const syntaxDynamicImport = getDefault(require('@babel/plugin-syntax-dynamic-import'));
 const reactLoadableRoutes = getDefault(require('./plugins/react-loadable-routes'));
@@ -16,6 +17,6 @@ module.exports = (options) => {
     reactLoadableRoutes,
     o.noChunk ? dynamicImportWebpack : syntaxDynamicImport,
     lodash,
-    ...(o.hot ? [reactHotLoader] : []),
-  ];
+    o.hot && reactRefresh,
+  ].filter(Boolean);
 };
