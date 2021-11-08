@@ -19,6 +19,7 @@ const rule = options => ({
   use: {
     loader: 'babel-loader',
     options: {
+      compact: false,
       presets: [
         [
           presetEnv,

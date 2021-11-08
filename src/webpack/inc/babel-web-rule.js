@@ -30,6 +30,7 @@ const rule = (options = {}) => {
       {
         loader: 'babel-loader',
         options: {
+          compact: false,
           retainLines: true,
           presets: [
             [
