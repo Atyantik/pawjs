@@ -17,8 +17,8 @@ import requireFromString from '../webpack/utils/requireFromString';
 import normalizeAssets from '../webpack/utils/normalizeAssets';
 
 interface IPawjsWebpackConfig extends webpack.Configuration {
-  entry: any;
-  externals: any;
+  // entry: any;
+  // externals: any;
 }
 // Notify the user that compilation has started and should be done soon.
 // eslint-disable-next-line
@@ -45,57 +45,29 @@ if (pawConfig.hotReload) {
           const config = wConfig;
           if (!config.devtool) {
             config.devtool = 'eval-source-map';
-            if (!config.resolve) config.resolve = {};
-            if (!config.resolve.alias) config.resolve.alias = {};
-            // @ts-ignore
-            if (!config.resolve.alias['react-dom']) {
-              // @ts-ignore
-              config.resolve.alias['react-dom'] = '@hot-loader/react-dom';
-            }
           }
         });
 
         // Web specific configurations
         if (wType === 'web') {
           wConfigs.forEach((webpackConfig: IPawjsWebpackConfig) => {
-            const wConfig = webpackConfig;
-            if (
-              typeof wConfig.entry !== 'undefined'
-              && typeof wConfig.entry.client !== 'undefined'
-              && Array.isArray(wConfig.entry.client)
-            ) {
-              const libRoot = process.env.LIB_ROOT;
-              if (typeof libRoot === 'undefined') {
-                return;
-              }
-              let clientIndex = wConfig
-                .entry
-                .client
-                .indexOf(
-                  pawExistsSync(path.join(libRoot, 'src', 'client', 'app')),
-                );
+            const wConfig = webpackConfig as any;
+            if (Array.isArray(wConfig?.entry?.client)) {
+              const libRoot = process?.env?.LIB_ROOT ?? '';
 
               // Add webpack-hot-middleware as entry point
               const hotMiddlewareString = 'webpack-hot-middleware/client?name=web&'
                 + 'path=/__hmr_update&timeout=2000&overlay=true&quiet=false';
 
-              if (!wConfig.entry.client.includes(hotMiddlewareString)) {
-                if (clientIndex === -1) {
-                  wConfig.entry.client.unshift(hotMiddlewareString);
-                } else {
-                  wConfig.entry.client.splice(clientIndex, 0, hotMiddlewareString);
-                  clientIndex += 1;
-                }
-              }
+              wConfig.entry.client.unshift(hotMiddlewareString);
 
+              const clientIndex = wConfig?.entry
+                ?.client
+                ?.indexOf?.(
+                  pawExistsSync(path.join(libRoot, 'src', 'client', 'app')),
+                ) ?? -1;
               // Replace app with hot-app
-              if (
-                wConfig.entry.client.includes(
-                  pawExistsSync(
-                    path.join(libRoot, 'src', 'client', 'app'),
-                  ),
-                )
-              ) {
+              if (clientIndex !== -1) {
                 // eslint-disable-next-line
                 wConfig.entry.client[clientIndex] = pawExistsSync(
                   path.join(libRoot, 'src', 'client', 'hot-app'),
@@ -104,21 +76,16 @@ if (pawConfig.hotReload) {
 
               // check for Hot Module replacement plugin and add it if necessary
               if (!wConfig.plugins) wConfig.plugins = [];
-              const hasHotPlugin = wConfig.plugins
-                .some((p) => p instanceof webpack.HotModuleReplacementPlugin);
-
-              if (!hasHotPlugin) {
-                wConfig.plugins.unshift(new ReactRefreshWebpackPlugin()),
-                wConfig.plugins.unshift(new webpack.HotModuleReplacementPlugin({
-                  multiStep: true,
-                }));
-              }
+              wConfig.plugins.unshift(new ReactRefreshWebpackPlugin()),
+              wConfig.plugins.unshift(new webpack.HotModuleReplacementPlugin({
+                multiStep: true,
+              }));
             }
           });
         }
         if (wType === 'server') {
           wConfigs.forEach((webpackConfig: IPawjsWebpackConfig) => {
-            const wConfig = webpackConfig;
+            const wConfig = webpackConfig as any;
             // Add express as externals
             if (!wConfig.externals) {
               wConfig.externals = {};
@@ -155,11 +122,8 @@ try {
   const webConfig = wHandler.getConfig(process.env.PAW_ENV, 'web');
 
   const devServerConfig = {
-    // port: pawConfig.port,
-    // host: pawConfig.host,
     serverSideRender: pawConfig.serverSideRender,
     publicPath: pawConfig.resourcesBaseUrl,
-    // contentBase: path.join((directories.src || ''), 'public'),
   };
 
   const processEnv = process.env;
@@ -178,10 +142,6 @@ try {
       cachedAssets: isVerbose,
       version: isVerbose,
     },
-    // logger: log,
-    // logLevel: 'debug',
-    // noInfo: !isVerbose,
-    // hot: true,
   };
 
   const serverOptions: any = {
@@ -190,7 +150,6 @@ try {
   };
   const webOptions = {
     ...commonOptions,
-    // inline: true,
     serverSideRender: true,
     publicPath: pawConfig.resourcesBaseUrl,
   };
@@ -218,7 +177,7 @@ try {
 
   const getCommonServer = () => {
     // @ts-ignore
-    const mfs = serverMiddleware.context.outputFileSystem;
+    const mfs = serverMiddleware.context.outputFileSystem as any;
     // Get content of the server that is compiled!
     const serverFile = serverMiddleware.getFilenameFromUrl(
       `${serverOptions.publicPath}server.js`,
@@ -260,8 +219,7 @@ try {
    * develop code with SSR enabled.
    */
   app.use((req, res, next) => {
-    // @ts-ignore
-    const mfs = serverMiddleware.context.outputFileSystem;
+    const mfs = serverMiddleware.context.outputFileSystem as any;
     const fileNameFromUrl = serverMiddleware
       .getFilenameFromUrl(serverOptions.publicPath + req.path) || '';
 
@@ -289,7 +247,7 @@ try {
         jsDependencyMap,
         cssDependencyMap,
         ...assets
-      } = normalizeAssets(webMiddleware.context.stats);
+      } = normalizeAssets(webMiddleware.context.stats as webpack.Stats);
       res.locals.assets = assets;
       res.locals.cssDependencyMap = cssDependencyMap;
       res.locals.jsDependencyMap = jsDependencyMap;

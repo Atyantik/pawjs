@@ -7,9 +7,15 @@ import directories from '../utils/directories';
 
 const isProduction = process.env.PAW_ENV === 'production';
 
+const root = process.cwd();
+
+const localIdentName = isProduction
+    ? '[contenthash:base64:5]'
+    : '[name]__[local]--[hash:base64:5]';
+
 const defaultOptions = {
+  localIdentName,
   sourceMap: !isProduction,
-  localIdentName: isProduction ? '[hash:base64:5]' : '[path][name]__[local]',
   compress: isProduction,
   hot: false,
 };
@@ -24,6 +30,7 @@ export default (options: any = {}) => {
         path.join(directories.root, 'node_modules'),
       ],
       use: [
+        // Translates CSS into CommonJS
         {
           loader: o.hot ? 'style-loader' : MiniCssExtractPlugin.loader,
         },
@@ -31,50 +38,20 @@ export default (options: any = {}) => {
           loader: 'css-loader',
           options: {
             modules: {
-              localIdentName: o.localIdentName,
+              localIdentName,
+              mode: (resourcePath: string) => {
+                if (/pure\.(css|s[ac]ss)$/i.test(resourcePath)) {
+                  return 'pure';
+                }
+                if (/global\.(css|s[ac]ss)$/i.test(resourcePath)) {
+                  return 'global';
+                }
+                return 'local';
+              },
+              localIdentContext: path.resolve(root, 'src'),
+              // exportLocalsConvention: 'camelCase',
+              // namedExport: true,
             },
-            sourceMap: o.sourceMap,
-            importLoaders: 1,
-          },
-        },
-        {
-          loader: 'postcss-loader',
-          options: {
-            postcssOptions: {
-              ident: 'postcss',
-              plugins: [
-                [
-                  autoprefixer,
-                ],
-              ],
-            },
-          },
-        },
-        {
-          loader: 'sass-loader',
-          options: {
-            implementation: Sass,
-          },
-        },
-      ],
-    },
-    {
-      test: /\.(css|s[ac]ss)$/i,
-      include: [
-        path.join(directories.src, 'resources'),
-        path.join(directories.root, 'node_modules'),
-      ],
-      use: [
-        {
-          loader: o.hot ? 'style-loader' : MiniCssExtractPlugin.loader,
-        },
-        {
-          loader: 'css-loader',
-          options: {
-            modules: {
-              localIdentName: '[local]',
-            },
-            sourceMap: o.sourceMap,
             importLoaders: 2,
           },
         },
@@ -91,10 +68,64 @@ export default (options: any = {}) => {
             },
           },
         },
+        // Compiles Sass to CSS
         {
           loader: 'sass-loader',
           options: {
+            // Prefer `dart-sass`
             implementation: Sass,
+            sassOptions: {
+              fiber: false,
+            },
+          },
+        },
+      ],
+    },
+    {
+      test: /\.(css|s[ac]ss)$/i,
+      include: [
+        path.join(directories.src, 'resources'),
+        path.join(directories.root, 'node_modules'),
+      ],
+      use: [
+        // Translates CSS into CommonJS
+        {
+          loader: MiniCssExtractPlugin.loader,
+        },
+        {
+          loader: 'css-loader',
+          options: {
+            modules: {
+              localIdentName: '[local]',
+              localIdentContext: path.resolve(root, 'src'),
+              // exportLocalsConvention: 'camelCase',
+              // namedExport: true,
+            },
+            importLoaders: 2,
+          },
+        },
+        {
+          loader: 'postcss-loader',
+          options: {
+            postcssOptions: {
+              ident: 'postcss',
+              plugins: [
+                [
+                  autoprefixer,
+                ],
+              ],
+            },
+          },
+        },
+        // Compiles Sass to CSS
+        {
+          loader: 'sass-loader',
+          options: {
+            // Prefer `dart-sass`
+            implementation: Sass,
+            sassOptions: {
+              fiber: false,
+            },
           },
         },
       ],

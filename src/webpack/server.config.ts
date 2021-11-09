@@ -3,6 +3,7 @@ import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 import webpack from 'webpack';
 import cssRule from './inc/babel-css-rule';
 import imageRule from './inc/babel-image-rule';
+import assetsRule from './inc/babel-assets-rule';
 import directories from './utils/directories';
 import pawConfig from '../config';
 import resolverConfig from './inc/webpack-resolver-config';
@@ -26,17 +27,16 @@ export default {
       },
       serverRule({ hot: false, noChunk: true, cacheDirectory: process.env.PAW_CACHE === 'true' }),
       ...cssRule(),
-      fontRule({
-        emitFile: false,
-        outputPath: 'build/fonts/',
-        publicPath: `${pawConfig.resourcesBaseUrl}fonts/`,
-      }),
       imageRule({
         outputPath: 'build/images/',
-        publicPath: `${pawConfig.resourcesBaseUrl}images/`,
-        name: '[contenthash]-[name].[ext]',
-        context: directories.src,
       }),
+      // assetsRule({
+      //   outputPath: 'build/assets/',
+      // }),
+      // {
+      //   resourceQuery: /raw/,
+      //   type: 'asset/source',
+      // },
     ],
   },
   context: directories.root,

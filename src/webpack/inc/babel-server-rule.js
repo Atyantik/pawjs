@@ -24,7 +24,7 @@ const rule = options => ({
         [
           presetEnv,
           {
-            targets: { node: '10.15.3' },
+            targets: { node: '12' },
           },
         ],
         [

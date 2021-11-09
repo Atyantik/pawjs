@@ -1,19 +1,9 @@
 const lodash = require('lodash');
-let babelPresetEnv = require('@babel/preset-env');
-
-babelPresetEnv = babelPresetEnv.default ? babelPresetEnv.default : babelPresetEnv;
-
-let babelPresetReact = require('@babel/preset-react');
-
-babelPresetReact = babelPresetReact.default ? babelPresetReact.default : babelPresetReact;
-
-let presetTypescript = require('@babel/preset-typescript');
-
-presetTypescript = presetTypescript.default ? presetTypescript.default : presetTypescript;
-
-let babelPlugins = require('../../babel/plugin');
-
-babelPlugins = babelPlugins.default ? babelPlugins.default : babelPlugins;
+const { getDefault } = require('../../globals');
+const babelPresetEnv = getDefault(require('@babel/preset-env'));
+const babelPresetReact = getDefault(require('@babel/preset-react'));
+const presetTypescript = getDefault(require('@babel/preset-typescript'));
+const babelPlugins = getDefault(require('../../babel/plugin'));
 
 const defaultOptions = {
   cacheDirectory: process.env.PAW_CACHE === 'true',
@@ -40,7 +30,8 @@ const rule = (options = {}) => {
                 useBuiltIns: 'entry',
                 corejs: '3.6',
                 targets: {
-                  browsers: ['last 2 versions', 'safari >= 7', 'ie >= 11'],
+                  // Target all browsers that are not dead
+                  browsers: ['defaults', 'not dead'],
                 },
               },
             ],
@@ -48,6 +39,8 @@ const rule = (options = {}) => {
               babelPresetReact,
               {
                 runtime: 'automatic',
+                useBuiltIns: true,
+                development: process?.env?.PAW_ENV === 'development',
               },
             ],
             presetTypescript,

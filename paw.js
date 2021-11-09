@@ -1,4 +1,6 @@
 #!/usr/bin/env node
+// Read configurations from the .env as soon as possible
+require('dotenv').config();
 const { getDefault } = require('./src/globals');
 const { resolveExtensions } = getDefault(require('./src/extensions'));
 

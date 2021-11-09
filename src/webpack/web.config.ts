@@ -1,4 +1,3 @@
-/* global pawExistsSync */
 import path from 'path';
 import WorkboxPlugin from 'workbox-webpack-plugin';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
@@ -6,6 +5,7 @@ import webpack, { WebpackPluginInstance } from 'webpack';
 import { BundleAnalyzerPlugin } from 'webpack-bundle-analyzer';
 import cssRule from './inc/babel-css-rule';
 import imageRule from './inc/babel-image-rule';
+import assetsRule from './inc/babel-assets-rule';
 import SwVariables from './plugins/sw-variables';
 import directories from './utils/directories';
 import webRule from './inc/babel-web-rule';
@@ -28,8 +28,8 @@ export default {
   context: directories.root,
   entry: {
     client: [
-      ...(isHot ? ['react-refresh/runtime'] : []),
       ...(pawConfig.polyfill === 'cdn' ? [] : ['core-js/stable', 'regenerator-runtime/runtime']),
+      ...(isHot ? ['react-refresh/runtime'] : []),
       // Initial entry point for dev
       pawExistsSync(path.join(process.env.LIB_ROOT || '', './src/client/app')),
     ],
@@ -39,6 +39,7 @@ export default {
     publicPath: pawConfig.resourcesBaseUrl,
     filename: 'js/[contenthash].js',
     chunkFilename: 'js/[chunkhash].js',
+    assetModuleFilename: 'assets/[contenthash]-[name][ext][query]',
   },
   stats: true,
   module: {
@@ -50,24 +51,19 @@ export default {
       },
       webRule({ hot: isHot }),
       ...cssRule({ hot: isHot }),
-      fontRule({
-        outputPath: 'fonts/',
-        publicPath: `${pawConfig.resourcesBaseUrl}fonts/`,
-      }),
       imageRule({
         outputPath: 'images/',
-        publicPath: `${pawConfig.resourcesBaseUrl}images/`,
-        name: '[contenthash]-[name].[ext]',
-        context: directories.src,
       }),
+      // assetsRule({
+      //   outputPath: 'assets/',
+      // }),
+      // {
+      //   resourceQuery: /raw/,
+      //   type: 'asset/source',
+      // },
     ],
   },
   ...resolverConfig,
-  // optimization: {
-  //   splitChunks: {
-  //     chunks: 'all',
-  //   },
-  // },
   externals: {
     ...(pawConfig.react === 'cdn' ? { react: 'React', 'react-dom': 'ReactDOM' } : {}),
   },
@@ -84,14 +80,12 @@ export default {
       pawConfig: JSON.stringify(pawConfig),
       ...process.env,
     }),
-    ...(isHot ? [] : [
-      new MiniCssExtractPlugin({
-        // Options similar to the same options in webpackOptions.output
-        // both options are optional
-        filename: 'css/[contenthash].css',
-        chunkFilename: 'css/[chunkhash].css',
-      }),
-    ]),
+    new MiniCssExtractPlugin({
+      // Options similar to the same options in webpackOptions.output
+      // both options are optional
+      filename: 'css/[contenthash].css',
+      chunkFilename: 'css/[chunkhash].css',
+    }),
     ...(pawConfig.serviceWorker ? [
       new WorkboxPlugin.InjectManifest({
         swSrc: pawExistsSync(path.join(process.env.LIB_ROOT || '', 'src', 'service-worker')),

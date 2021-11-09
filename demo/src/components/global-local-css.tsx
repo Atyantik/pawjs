@@ -1,6 +1,7 @@
-import React from 'react';
 import GuestLayout from './guest-layout';
+import '../resources/css/global.css';
 import localStyles from './local-styles.css';
+console.log(localStyles);
 
 export default () => (
   <GuestLayout>
