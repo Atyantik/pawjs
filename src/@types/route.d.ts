@@ -1,6 +1,5 @@
 import { RouteComponentProps, RouteProps } from 'react-router';
 import { ComponentType } from 'react';
-import { RouteConfig } from 'react-router-config';
 
 interface IComponent {
   loadedData?: any;
@@ -36,11 +35,11 @@ export interface IRoute extends RouteProps {
   selfManageNewProps?: boolean;
 }
 
-export interface ICompiledRoute extends RouteConfig {
+export interface ICompiledRoute {
   path?: string;
   getRouteSeo: any;
   loadData?: any;
-  component?: RouteConfig.component & { preload?: any };
+  element?: any & { preload?: any };
   props?: {
     [key: string]: any;
   };

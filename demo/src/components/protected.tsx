@@ -1,5 +1,6 @@
 import React from 'react';
-import { Route, Redirect } from 'react-router-dom';
+import { Route } from 'react-router';
+import { Navigate as Redirect } from 'react-router-dom';
 import cookie from '../libs/cookie';
 
 export default class Protected extends React.Component {

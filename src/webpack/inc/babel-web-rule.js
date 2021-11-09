@@ -22,7 +22,7 @@ const defaultOptions = {
 const rule = (options = {}) => {
   const o = lodash.assignIn({}, defaultOptions, options);
   return {
-    test: /\.(mj|j|t)sx?$/,
+    test: /\.(j|t)sx?$/,
     exclude: [
       /node_modules\/(?!(@pawjs|pawjs-)).*/,
     ],

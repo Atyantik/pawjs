@@ -1,9 +1,7 @@
-import { createBrowserHistory } from 'history';
 import invert from 'lodash/invert';
 import get from 'lodash/get';
-import { renderRoutes } from 'react-router-config';
-import { Router } from 'react-router';
-import { HashRouter } from 'react-router-dom';
+import { Outlet, useNavigationType } from 'react-router';
+import { Routes, Route, HashRouter, BrowserRouter } from 'react-router-dom';
 import { render, hydrate } from 'react-dom';
 import {
   Hook,
@@ -17,6 +15,8 @@ import { generateMeta } from '../utils/seo';
 import possibleStandardNames from '../utils/reactPossibleStandardNames';
 import AbstractPlugin from '../abstract-plugin';
 import { ICompiledRoute } from '../@types/route';
+import { useLayoutEffect } from 'react';
+import { useLocation } from 'react-router';
 
 const possibleHtmlNames = invert(possibleStandardNames);
 const getPossibleHtmlName = (key: string): string => possibleHtmlNames[key] || key;
@@ -30,11 +30,7 @@ type HistoryLocation = {
 };
 
 export default class ClientHandler extends AbstractPlugin {
-  historyUnlistener = null;
-
   routeHandler: RouteHandler | null = null;
-
-  history: any;
 
   updatePageMetaTimeout: any = 0;
 
@@ -58,19 +54,6 @@ export default class ClientHandler extends AbstractPlugin {
   constructor(options: { env: any; }) {
     super();
     this.manageHistoryChange = this.manageHistoryChange.bind(this);
-
-    window.PAW_HISTORY = window.PAW_HISTORY || createBrowserHistory({
-      basename: options.env.appRootUrl,
-    });
-    this.history = window.PAW_HISTORY;
-    if (
-      this.historyUnlistener
-      && typeof this.historyUnlistener === 'function'
-    ) {
-      // @ts-ignore
-      this.historyUnlistener();
-    }
-    this.historyUnlistener = this.history.listen(this.manageHistoryChange);
 
     this.hooks = {
       locationChange: new AsyncParallelBailHook(['location', 'action']),
@@ -105,6 +88,7 @@ export default class ClientHandler extends AbstractPlugin {
   }
 
   manageHistoryChange(location: HistoryLocation, action: string) {
+    console.log('I am here in manage history change');
     if (!this.loaded) return;
     this.hooks.locationChange.callAsync(location, action, () => null);
     if (this.routeHandler) {
@@ -143,11 +127,11 @@ export default class ClientHandler extends AbstractPlugin {
         const pwaSchema = this.routeHandler.getPwaSchema();
         const seoSchema = this.routeHandler.getDefaultSeoSchema();
         currentRoutes.forEach((r: { route: ICompiledRoute, match: any }) => {
-          if (r.route && r.route.component && r.route.component.preload) {
-            promises.push(r.route.component.preload(undefined, {
+          if (r?.route?.element?.preload) {
+            promises.push(r.route.element.preload(undefined, {
               route: r.route,
               match: r.match,
-            }).promise);
+            })?.promise);
           }
         });
         await Promise.all(promises);
@@ -287,15 +271,15 @@ export default class ClientHandler extends AbstractPlugin {
       currentPageRoutes.forEach((r: { route: ICompiledRoute, match: any }, i: number) => {
         if (
           (typeof preloadedData[i] !== 'undefined')
-          && r.route && r.route.component && r.route.component.preload
+          && r.route && r.route.element && r.route.element.preload
         ) {
-          const preloadInit = r.route.component.preload(preloadedData[i], {
+          const preloadInit = r.route.element.preload(preloadedData[i], {
             route: r.route,
             match: r.match,
           });
           promises.push(preloadInit.promise);
-        } else if (r.route && r.route.component && r.route.component.preload) {
-          const preloadInit = r.route.component.preload(undefined, {
+        } else if (r.route && r.route.element && r.route.element.preload) {
+          const preloadInit = r.route.element.preload(undefined, {
             route: r.route,
             match: r.match,
           });
@@ -304,8 +288,8 @@ export default class ClientHandler extends AbstractPlugin {
       });
     } else {
       currentPageRoutes.forEach((r: { route: ICompiledRoute, match: any }) => {
-        if (r.route && r.route.component && r.route.component.preload) {
-          const preloadInit = r.route.component.preload(undefined, {
+        if (r.route && r.route.element && r.route.element.preload) {
+          const preloadInit = r.route.element.preload(undefined, {
             route: r.route,
             match: r.match,
           });
@@ -324,23 +308,43 @@ export default class ClientHandler extends AbstractPlugin {
     const routes = this.routeHandler.getRoutes();
     const currentPageRoutes = this.getCurrentRoutes();
     const components: any = {};
-    components.appRouter = this.useHashRouter() ? HashRouter : Router;
-
-    let routerParams: any = {
-      history: this.history,
+    components.appRouter = this.useHashRouter() ? HashRouter : BrowserRouter;
+    const renderRoutes = (routes: any, level = 0) => {
+      return routes.map((r: any, index: number) => {
+        const { element: ElementComponent, ...others } = r;
+        if (!r.children) {
+          return (
+            <Route element={<ElementComponent />} key={`${level}_${index}`} {...others} />
+          )
+        }
+        return (
+          <Route element={<ElementComponent />} key={`${level}_${index}`} {...others}>
+            {renderRoutes(r.children, level + 1)}
+          </Route>
+        );
+      });
     };
-    if (this.options.env.singlePageApplication && this.options.env.hashedRoutes) {
-      routerParams = {};
-    }
+
+    const NavigationListner: React.FC = ({ children }) => {
+      const navigationType = useNavigationType();
+      const location = useLocation();
+      useLayoutEffect(
+        () => {
+          this.manageHistoryChange(location, navigationType);
+        },
+        [navigationType, location]
+      );
+      return <>{ children }</>;
+    };
 
     const appRoutes = {
       renderedRoutes: (
-        <ErrorBoundary
-          ErrorComponent={this.routeHandler.getErrorComponent()}
-          NotFoundComponent={this.routeHandler.get404Component()}
-        >
-          {renderRoutes(routes)}
-        </ErrorBoundary>
+        <NavigationListner>
+          <Routes>
+            {renderRoutes(routes)}
+          </Routes>
+          <Outlet />
+        </NavigationListner>
       ),
       setRenderedRoutes: (r: JSX.Element) => {
         appRoutes.renderedRoutes = r;
@@ -357,13 +361,8 @@ export default class ClientHandler extends AbstractPlugin {
         r,
       )));
 
-    const children = (
-      <components.appRouter basename={this.options.env.appRootUrl} {...routerParams}>
-        {appRoutes.renderedRoutes}
-      </components.appRouter>
-    );
     const application = {
-      children,
+      children: appRoutes.renderedRoutes,
       currentRoutes: currentPageRoutes.slice(0),
       routes: routes.slice(0),
     };
@@ -373,9 +372,16 @@ export default class ClientHandler extends AbstractPlugin {
         // Render according to routes!
         renderer(
           (
-            <ErrorBoundary>
-              {application.children}
-            </ErrorBoundary>
+            <components.appRouter
+              basename={this.options.env.appRootUrl}
+            >
+              <ErrorBoundary
+                ErrorComponent={this?.routeHandler?.getErrorComponent()}
+                NotFoundComponent={this?.routeHandler?.get404Component()}
+              >
+                {application.children}
+              </ErrorBoundary>
+            </components.appRouter>
           ),
           domRootReference,
           () => {
@@ -412,7 +418,7 @@ export default class ClientHandler extends AbstractPlugin {
     }
     await this.preloadCurrentRoutes();
     if (!this.options.env.serverSideRender) {
-      this.updatePageMeta(this.history.location);
+      this.updatePageMeta(window.location);
     }
     /**
      * Render application only if loaded

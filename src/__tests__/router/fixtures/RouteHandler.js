@@ -166,7 +166,7 @@ export default class RouteHandler {
   getRoutes() {
     const routes = cloneDeep(this.routes);
     routes.push({
-      component: this.get404Component(),
+      element: this.get404Component(),
     });
     return routes;
   }

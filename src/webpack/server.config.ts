@@ -22,6 +22,11 @@ export default {
   entry: pawExistsSync(path.join(process.env.LIB_ROOT || '', './src/server/server')),
   module: {
     rules: [
+      {
+        test: /\.mjs$/,
+        include: /node_modules/,
+        type: "javascript/auto",
+      },
       serverRule({ hot: false, noChunk: true, cacheDirectory: process.env.PAW_CACHE === 'true' }),
       ...cssRule(),
       fontRule({

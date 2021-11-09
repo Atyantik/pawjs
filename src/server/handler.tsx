@@ -5,8 +5,8 @@ import {
 import express from 'express';
 import _ from 'lodash';
 import { renderToString } from 'react-dom/server';
-import { renderRoutes } from 'react-router-config';
-import { StaticRouter, Route } from 'react-router';
+import { Routes, Route, Outlet } from 'react-router-dom';
+import { StaticRouter } from 'react-router-dom/server';
 import RouteHandler from '../router/handler';
 import Html from '../components/Html';
 import ErrorBoundary from '../components/ErrorBoundary';
@@ -213,9 +213,9 @@ export default class ServerHandler extends AbstractPlugin {
         r,
       ));
     currentPageRoutes.forEach(({ route, match }: any) => {
-      if (route.component.preload) {
+      if (route.element.preload) {
         promises.push(
-          route.component.preload(
+          route.element.preload(
             undefined,
             {
               route,
@@ -255,14 +255,30 @@ export default class ServerHandler extends AbstractPlugin {
         env: { ...this.options.env },
       };
 
+      const renderRoutes = (routes: any, level = 0) => {
+        return routes.map((r: any, index: number) => {
+          const { element: ElementComponent, ...others } = r;
+          if (!r.children) {
+            return (
+              <Route element={<ElementComponent />} key={`${level}_${index}`} {...others} />
+            )
+          }
+          return (
+            <Route element={<ElementComponent />} key={`${level}_${index}`} {...others}>
+              {renderRoutes(r.children, level + 1)}
+            </Route>
+          );
+        });
+      };
+
       const appRoutes = {
         renderedRoutes: (
-          <ErrorBoundary
-            ErrorComponent={routeHandler.getErrorComponent()}
-            NotFoundComponent={routeHandler.get404Component()}
-          >
-            {renderRoutes(routes)}
-          </ErrorBoundary>
+          <>
+            <Routes>
+              {renderRoutes(routes)}
+            </Routes>
+            <Outlet />
+          </>
         ),
         setRenderedRoutes: (r: JSX.Element) => {
           appRoutes.renderedRoutes = r;
@@ -284,7 +300,7 @@ export default class ServerHandler extends AbstractPlugin {
         context,
         htmlProps,
         children: (
-          <StaticRouter location={req.url} context={context} basename={appRootUrl}>
+          <StaticRouter location={req.url} basename={appRootUrl}>
             {appRoutes.renderedRoutes}
           </StaticRouter>
         ),
@@ -342,7 +358,6 @@ export default class ServerHandler extends AbstractPlugin {
       }
       res.status(context.status || ex.code || 500).type('text/html');
       res.write('<!DOCTYPE html>');
-      const errorComponent = () => <components.errorComponent error={ex} info={ex.stack} />;
       renderedHtml = renderToString(
         (
           <Html
@@ -358,13 +373,13 @@ export default class ServerHandler extends AbstractPlugin {
             {/* tslint:disable-next-line:jsx-no-multiline-js */}
             {noJS && (
             <ErrorBoundary>
-              <StaticRouter location={req.url} context={context} basename={appRootUrl}>
+              <StaticRouter location={req.url} basename={appRootUrl}>
                 <ErrorBoundary
                   ErrorComponent={routeHandler.getErrorComponent()}
                   NotFoundComponent={routeHandler.get404Component()}
                   error={ex}
                 >
-                  <Route path="*" component={errorComponent} />
+                  <Route path="*" element={<components.errorComponent error={ex} info={ex.stack} />} />
                 </ErrorBoundary>
               </StaticRouter>
             </ErrorBoundary>

@@ -21,7 +21,6 @@ export default class RouteCompiler {
 
   compileRoute(route: Route, routerService: IRouteHandler): CompiledRoute {
     const {
-      exact,
       path,
       skeleton,
       error,
@@ -33,13 +32,12 @@ export default class RouteCompiler {
       layout,
       webpack,
       modules,
-      props: routeProps,
       routes,
       selfManageNewProps,
     } = route;
 
     // JSXifiable component object
-    const PARAMS = {
+    const PARAMS: any = {
       errorComponent: error || routerService.getDefaultLoadErrorComponent(),
       notFoundComponent: error || routerService.get404Component(),
       skeletonComponent: skeleton || routerService.getDefaultLoaderComponent(),
@@ -88,19 +86,12 @@ export default class RouteCompiler {
           pastDelay,
           timedOut,
           retry,
-          history: propsHistory,
-          location: propsLocation,
-          match: propsMatch,
           route: propsRoute,
         } = props;
         if (err instanceof NotFoundError) {
           return (
-            // @ts-ignore
             <PARAMS.notFoundComponent
               error={err}
-              history={propsHistory}
-              location={propsLocation}
-              match={propsMatch}
               route={propsRoute}
             />
           );
@@ -110,23 +101,16 @@ export default class RouteCompiler {
             // @ts-ignore
             <PARAMS.errorComponent
               error={err}
-              history={propsHistory}
-              location={propsLocation}
-              match={propsMatch}
               route={propsRoute}
             />
           );
         } if (pastDelay) {
           return (
-            // @ts-ignore
             <PARAMS.skeletonComponent
               error={err}
               pastDelay={pastDelay}
               timedOut={timedOut}
               retry={retry}
-              history={propsHistory}
-              location={propsLocation}
-              match={propsMatch}
               route={propsRoute}
             />
           );
@@ -158,18 +142,12 @@ export default class RouteCompiler {
         }
         const {
           props: componentProps,
-          history: propsHistory,
-          location: propsLocation,
-          match: propsMatch,
           route: propsRoute,
         } = props;
 
         components.routeComponent = (
           <components.routeComponent
             {...componentProps}
-            history={propsHistory}
-            location={propsLocation}
-            match={propsMatch}
             route={propsRoute}
             loadedData={loadedData}
           >
@@ -188,9 +166,6 @@ export default class RouteCompiler {
               ErrorComponent={PARAMS.errorComponent}
             >
               <components.layout
-                history={propsHistory}
-                location={propsLocation}
-                match={propsMatch}
                 route={propsRoute}
                 loadedData={loadedData}
               >
@@ -212,10 +187,8 @@ export default class RouteCompiler {
       path,
       webpack,
       modules,
-      exact,
-      props: routeProps,
       getRouteSeo: () => ({ ...routeSeo }),
-      component: loadableComponent,
+      element: loadableComponent,
       ...(routes ? { routes: this.compileRoutes(routes, routerService) } : {}),
     };
   }

@@ -15,7 +15,7 @@ let babelPlugins = require('../../babel/plugin');
 babelPlugins = babelPlugins.default ? babelPlugins.default : babelPlugins;
 
 const rule = options => ({
-  test: /\.(mj|j|t)sx?$/,
+  test: /\.(j|t)sx?$/,
   use: {
     loader: 'babel-loader',
     options: {

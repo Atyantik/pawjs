@@ -1,5 +1,5 @@
 import React from 'react';
-import { Redirect } from 'react-router-dom';
+import { Navigate as Redirect } from 'react-router-dom';
 import Authenticator from './fake-authenticator';
 
 export default class Logout extends React.Component {

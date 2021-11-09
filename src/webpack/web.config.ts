@@ -45,6 +45,11 @@ export default {
   stats: true,
   module: {
     rules: [
+      {
+        test: /\.mjs$/,
+        include: /node_modules/,
+        type: "javascript/auto",
+      },
       webRule({ hot: isHot }),
       ...cssRule({ hot: isHot }),
       fontRule({

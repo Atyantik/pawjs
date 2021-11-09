@@ -4,7 +4,8 @@ import React, {
   useReducer,
   useRef,
 } from 'react';
-import { withRouter } from 'react-router';
+import { useLocation }  from 'react-router';
+import { useMatch } from 'react-router-dom';
 import loadMap, { load, LoadableState } from '../utils/loadable';
 
 // eslint-disable-next-line no-underscore-dangle
@@ -75,17 +76,12 @@ const createLoadableComponent = (
     }
   }
 
-  const loadableComponent = withRouter((props: any) => {
-    const {
-      history: propsHistory,
-      location: propsLocation,
-      match: propsMatch,
-      route: propsRoute,
-    } = props;
+  const loadableComponent = (props: any) => {
+    const propsLocation = useLocation();
+    const propsMatch = useMatch(propsLocation.pathname);
     const previousRouterProps = useRef({
       propsLocation,
       propsMatch,
-      propsRoute,
     });
     // Initialisation
     // Set res reference
@@ -240,8 +236,8 @@ const createLoadableComponent = (
       && previousRouterProps
       && previousRouterProps.current
       && previousRouterProps.current.propsMatch
-      && previousRouterProps.current.propsMatch.path
-      && previousRouterProps.current.propsMatch.path === propsMatch.path
+      && previousRouterProps.current.propsMatch.pathname
+      && previousRouterProps.current.propsMatch.pathname === propsMatch?.pathname
       && previousRouterProps.current.propsLocation
       && previousRouterProps.current.propsLocation.key !== propsLocation.key
     ) {
@@ -252,13 +248,11 @@ const createLoadableComponent = (
       previousRouterProps.current = {
         propsLocation,
         propsMatch,
-        propsRoute,
       };
     } else if (!previousRouterProps || !previousRouterProps.current) {
       previousRouterProps.current = {
         propsLocation,
         propsMatch,
-        propsRoute,
       };
     }
 
@@ -289,10 +283,6 @@ const createLoadableComponent = (
           pastDelay={loadableState.pastDelay}
           timedOut={loadableState.timedOut}
           error={loadableState.error}
-          history={propsHistory}
-          location={propsLocation}
-          match={propsMatch}
-          route={propsRoute}
         />
       );
     }
@@ -300,7 +290,7 @@ const createLoadableComponent = (
       return opts.render(resReference.current.resource, props);
     }
     return null;
-  });
+  };
   // @ts-ignore
   loadableComponent.preload = init;
   return loadableComponent;
