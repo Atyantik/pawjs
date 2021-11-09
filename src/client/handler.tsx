@@ -373,7 +373,7 @@ export default class ClientHandler extends AbstractPlugin {
         renderer(
           (
             <components.appRouter
-              basename={this.options.env.appRootUrl}
+              basename={this?.options?.env?.appRootUrl}
             >
               <ErrorBoundary
                 ErrorComponent={this?.routeHandler?.getErrorComponent()}
