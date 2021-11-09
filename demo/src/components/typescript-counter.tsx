@@ -4,7 +4,7 @@ import GuestLayout from './guest-layout';
 const { useState } = React;
 
 export default function () {
-  const [counter, setCounter] = useState(0);
+  const [counter, setCounter] = useState(10);
   const incrementCounter = (): void => {
     setCounter(counter + 1);
   };

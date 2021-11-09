@@ -2,23 +2,21 @@
 import path from 'path';
 import WorkboxPlugin from 'workbox-webpack-plugin';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
-import webpack from 'webpack';
+import webpack, { WebpackPluginInstance } from 'webpack';
 import { BundleAnalyzerPlugin } from 'webpack-bundle-analyzer';
 import cssRule from './inc/babel-css-rule';
 import imageRule from './inc/babel-image-rule';
 import SwVariables from './plugins/sw-variables';
 import directories from './utils/directories';
-// @ts-ignore
 import webRule from './inc/babel-web-rule';
-// @ts-ignore
 import resolverConfig from './inc/webpack-resolver-config';
 import pawConfig from '../config';
-// @ts-ignore
 import fontRule from './inc/babel-font-rule';
+import { pawExistsSync } from '../globals';
 
 const isHot = typeof process.env.PAW_HOT !== 'undefined' ? process.env.PAW_HOT === 'true' : pawConfig.hotReload;
 
-const devPlugins: any = [];
+const devPlugins: WebpackPluginInstance[] = [];
 if (process.env.PAW_DEBUG === 'true') {
   devPlugins.push(new BundleAnalyzerPlugin());
 }
@@ -39,7 +37,7 @@ export default {
   output: {
     path: directories.build,
     publicPath: pawConfig.resourcesBaseUrl,
-    filename: 'js/[hash].js',
+    filename: 'js/[contenthash].js',
     chunkFilename: 'js/[chunkhash].js',
   },
   stats: true,
@@ -59,39 +57,38 @@ export default {
       imageRule({
         outputPath: 'images/',
         publicPath: `${pawConfig.resourcesBaseUrl}images/`,
-        name: '[hash]-[name].[ext]',
+        name: '[contenthash]-[name].[ext]',
         context: directories.src,
       }),
     ],
   },
   ...resolverConfig,
-  optimization: {
-    splitChunks: {
-      chunks: 'all',
-    },
-  },
+  // optimization: {
+  //   splitChunks: {
+  //     chunks: 'all',
+  //   },
+  // },
   externals: {
     ...(pawConfig.react === 'cdn' ? { react: 'React', 'react-dom': 'ReactDOM' } : {}),
   },
   plugins: [
-    ...(pawConfig.react === 'cdn' ? [
-      new webpack.ProvidePlugin({
-        React: 'React',
-        react: 'React',
-        'window.react': 'React',
-        'window.React': 'React',
-        ReactDom: 'ReactDOM',
-        ReactDOM: 'ReactDOM',
-        'window.ReactDOM': 'ReactDOM',
-        'window.ReactDom': 'ReactDOM',
-      }),
-    ] : []),
-    new webpack.EnvironmentPlugin({ pawConfig: JSON.stringify(pawConfig), ...process.env }),
+    new webpack.DefinePlugin({
+      'process.env': {},
+      'process.env.NODE_ENV': JSON.stringify(process.env?.PAW_ENV ?? 'development'),
+    }),
+    new webpack.EnvironmentPlugin({
+      APP_DESCRIPTION: null,
+      APP_NAME: null,
+      ENABLE_KEYWORDS: null,
+      PAGE_TITLE_SEPARATOR: null,
+      pawConfig: JSON.stringify(pawConfig),
+      ...process.env,
+    }),
     ...(isHot ? [] : [
       new MiniCssExtractPlugin({
         // Options similar to the same options in webpackOptions.output
         // both options are optional
-        filename: 'css/[hash].css',
+        filename: 'css/[contenthash].css',
         chunkFilename: 'css/[chunkhash].css',
       }),
     ]),

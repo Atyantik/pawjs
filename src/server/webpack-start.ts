@@ -1,15 +1,15 @@
-/* global pawExistsSync */
 import path from 'path';
 import express from 'express';
 import webpack from 'webpack';
 import webpackMiddleware from 'webpack-dev-middleware';
 import webpackHotMiddleware from 'webpack-hot-middleware';
 import ReactRefreshWebpackPlugin from '@pmmmwh/react-refresh-webpack-plugin';
-import webLog from 'webpack-log';
 import { NextHandleFunction } from 'connect';
 import pawConfig from '../config';
 import directories from '../webpack/utils/directories';
 import wHandler from '../webpack';
+import { pawExistsSync } from '../globals';
+
 // Utils
 // -- Require from string. create an export from string like `module.export = "Something";`
 import requireFromString from '../webpack/utils/requireFromString';
@@ -47,9 +47,11 @@ if (pawConfig.hotReload) {
             config.devtool = 'eval-source-map';
             if (!config.resolve) config.resolve = {};
             if (!config.resolve.alias) config.resolve.alias = {};
-            // if (!config.resolve.alias['react-dom']) {
-            //   config.resolve.alias['react-dom'] = '@hot-loader/react-dom';
-            // }
+            // @ts-ignore
+            if (!config.resolve.alias['react-dom']) {
+              // @ts-ignore
+              config.resolve.alias['react-dom'] = '@hot-loader/react-dom';
+            }
           }
         });
 
@@ -103,7 +105,7 @@ if (pawConfig.hotReload) {
               // check for Hot Module replacement plugin and add it if necessary
               if (!wConfig.plugins) wConfig.plugins = [];
               const hasHotPlugin = wConfig.plugins
-                .some(p => p instanceof webpack.HotModuleReplacementPlugin);
+                .some((p) => p instanceof webpack.HotModuleReplacementPlugin);
 
               if (!hasHotPlugin) {
                 wConfig.plugins.unshift(new ReactRefreshWebpackPlugin()),
@@ -117,10 +119,16 @@ if (pawConfig.hotReload) {
         if (wType === 'server') {
           wConfigs.forEach((webpackConfig: IPawjsWebpackConfig) => {
             const wConfig = webpackConfig;
+            // Add express as externals
+            if (!wConfig.externals) {
+              wConfig.externals = {};
+            }
+
+            wConfig.externals.express = 'express';
 
             if (!wConfig.module) wConfig.module = { rules: [] };
             // do not emit image files for server!
-            wConfig.module.rules.forEach((r: any) => {
+            (wConfig?.module?.rules ?? []).forEach((r: any) => {
               const rule = r;
               if (rule.use && Array.isArray(rule.use)) {
                 rule.use.forEach((use: any) => {
@@ -147,17 +155,12 @@ try {
   const webConfig = wHandler.getConfig(process.env.PAW_ENV, 'web');
 
   const devServerConfig = {
-    port: pawConfig.port,
-    host: pawConfig.host,
+    // port: pawConfig.port,
+    // host: pawConfig.host,
     serverSideRender: pawConfig.serverSideRender,
     publicPath: pawConfig.resourcesBaseUrl,
-    contentBase: path.join((directories.src || ''), 'public'),
+    // contentBase: path.join((directories.src || ''), 'public'),
   };
-
-  // Create new logging entity, pawjs
-  const log = webLog({
-    name: 'pawjs',
-  });
 
   const processEnv = process.env;
   const isVerbose = processEnv.PAW_VERBOSE === 'true';
@@ -174,16 +177,11 @@ try {
       errors: true,
       cachedAssets: isVerbose,
       version: isVerbose,
-      warningsFilter: (warning: string) => (
-        warning.indexOf('node_modules/express') !== -1
-        || warning.indexOf('node_modules/encoding') !== -1
-        || warning.indexOf('config/index') !== -1
-      ),
     },
-    logger: log,
-    logLevel: 'debug',
-    noInfo: !isVerbose,
-    hot: true,
+    // logger: log,
+    // logLevel: 'debug',
+    // noInfo: !isVerbose,
+    // hot: true,
   };
 
   const serverOptions: any = {
@@ -192,7 +190,7 @@ try {
   };
   const webOptions = {
     ...commonOptions,
-    inline: true,
+    // inline: true,
     serverSideRender: true,
     publicPath: pawConfig.resourcesBaseUrl,
   };
@@ -219,13 +217,14 @@ try {
   app.use(serverMiddleware);
 
   const getCommonServer = () => {
-    const mfs = serverMiddleware.fileSystem;
+    // @ts-ignore
+    const mfs = serverMiddleware.context.outputFileSystem;
     // Get content of the server that is compiled!
     const serverFile = serverMiddleware.getFilenameFromUrl(
-      `${serverOptions.publicPath}/server.js`,
+      `${serverOptions.publicPath}server.js`,
     );
     if (!serverFile) {
-      throw new Error(`Cannot find server.js at ${serverOptions.publicPath}/server.js`);
+      throw new Error(`Cannot find server.js at ${serverOptions.publicPath}server.js`);
     }
 
     const serverContent = mfs.readFileSync(serverFile, 'utf-8');
@@ -252,7 +251,7 @@ try {
     }));
   }
 
-  app.use(pawConfig.appRootUrl || '', express.static(serverOptions.contentBase));
+  app.use(pawConfig.appRootUrl || '', express.static(path.join((directories.src || ''), 'public')));
 
   /**
    * Below is where the magic happens!
@@ -261,7 +260,8 @@ try {
    * develop code with SSR enabled.
    */
   app.use((req, res, next) => {
-    const mfs = serverMiddleware.fileSystem;
+    // @ts-ignore
+    const mfs = serverMiddleware.context.outputFileSystem;
     const fileNameFromUrl = serverMiddleware
       .getFilenameFromUrl(serverOptions.publicPath + req.path) || '';
 
@@ -285,12 +285,11 @@ try {
       // Get content of the server that is compiled!
       const commonServer = getCommonServer();
       commonServerMiddleware = commonServer.default;
-
       const {
         jsDependencyMap,
         cssDependencyMap,
         ...assets
-      } = normalizeAssets(res.locals.webpackStats);
+      } = normalizeAssets(webMiddleware.context.stats);
       res.locals.assets = assets;
       res.locals.cssDependencyMap = cssDependencyMap;
       res.locals.jsDependencyMap = jsDependencyMap;
@@ -321,8 +320,8 @@ try {
     }
 
     const nodeServerConfig = {
-      port: devServerConfig.port,
-      host: devServerConfig.host,
+      port: pawConfig.port,
+      host: pawConfig.host,
     };
 
     beforeStart(nodeServerConfig, PAW_GLOBAL, (err: Error) => {

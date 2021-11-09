@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import fs from 'fs';
 import path from 'path';
 import packageDetails from '../../package.json';
+import { pawExistsSync } from '../globals';
 
 const { spawn } = ChildProcess;
 

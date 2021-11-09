@@ -3,7 +3,7 @@ const directories = require('../utils/directories');
 
 const defaultOptions = {
   outputPath: 'fonts/',
-  name: '[hash].[ext]',
+  name: '[contenthash].[ext]',
   context: directories.src,
 };
 

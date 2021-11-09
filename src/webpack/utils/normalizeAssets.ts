@@ -85,7 +85,7 @@ export default (wStats: webpack.Stats): INormalizeAssets => {
     webpackStats = [webpackStats];
   }
 
-  webpackStats.forEach((stat: webpack.Stats.ToJsonOutput) => {
+  webpackStats.forEach((stat: any) => {
     // @ts-ignore
     const { assetsByChunkName: a, publicPath } = stat;
 

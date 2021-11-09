@@ -163,7 +163,7 @@ const addUpdateMeta = (source: any [] = [], customMetas: any [] = []) => {
  * @param str
  * @returns {string}
  */
-export const getTextFromHtml = (str = '') => str.replace(/<(?:.|\n)*?>/gm, '').trim();
+export const getTextFromHtml = (str = '') => (str?.replace?.(/<(?:.|\n)*?>/gm, '')?.trim?.()) ?? '';
 
 /**
  * Return array of meta tags required for the route

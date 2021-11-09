@@ -1,4 +1,4 @@
-const normalizeAssets = require('../../../webpack/utils/normalizeAssets');
+import normalizeAssets from "../../../webpack/utils/normalizeAssets";
 
 class MockWebpackAssets {
   constructor(type = 'MIXED') {

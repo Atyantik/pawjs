@@ -219,7 +219,7 @@ export default (props: React.PropsWithChildren<IHtmlProps> = {
   };
 
   let loadingScript = '<>';
-  const jsAssets: string [] = assets.filter(path => path.endsWith('.js'));
+  const jsAssets: string [] = assets.filter(path => (path.endsWith('.js') && path.indexOf('hot-update') === -1));
   if (!noJS) {
     if (env.react && env.react === 'cdn') {
       jsAssets.unshift(...reactCDN);

@@ -1,4 +1,3 @@
-/* global pawExistsSync */
 import path from 'path';
 import fs from 'fs';
 import del from 'del';
@@ -10,18 +9,15 @@ import CopyWebpackPlugin from 'copy-webpack-plugin';
 import pawConfig from '../config';
 import directories from '../webpack/utils/directories';
 import wHandler from '../webpack';
-// @ts-ignore
 import webRule from '../webpack/inc/babel-web-rule';
-// @ts-ignore
 import serverRule from '../webpack/inc/babel-server-rule';
-// @ts-ignore
 import SyncedFilesPlugin from '../webpack/plugins/synced-files-plugin';
-// @ts-ignore
 import ExtractEmittedAssets from '../webpack/plugins/extract-emitted-assets';
+import { pawExistsSync } from '../globals';
 
 const isVerbose = process.env.PAW_VERBOSE === 'true';
 
-const stats: webpack.Stats.ToStringOptionsObject = {
+const stats = {
   // fallback value for stats options when
   // an option is not defined (has precedence over local webpack defaults)
   all: undefined,
@@ -121,15 +117,6 @@ const stats: webpack.Stats.ToStringOptionsObject = {
 
   // Add warnings
   warnings: true,
-
-  // Filter warnings to be shown (since webpack 2.4.0),
-  // can be a String, Regexp, a function getting the warning and returning a boolean
-  // or an Array of a combination of the above. First match wins.
-  warningsFilter: (warning: string) => (
-    warning.indexOf('node_modules/express') !== -1
-    || warning.indexOf('node_modules/encoding') !== -1
-    || warning.indexOf('config/index') !== -1
-  ),
 };
 
 // Notify the user that compilation has started and should be done soon.
@@ -229,7 +216,7 @@ wHandler.hooks.beforeConfig.tap('AddSyncedFilesPlugin', (wEnv, wType, wConfigs) 
          * Check if plugins array exists and if it does
          * check if CleanWebpackPlugin exists inside the plugin array
          */
-        const hasCleanWebpackPlugin = wConfig.plugins.some(p => p instanceof CleanWebpackPlugin);
+        const hasCleanWebpackPlugin = wConfig.plugins.some((p) => p instanceof CleanWebpackPlugin);
         if (!hasCleanWebpackPlugin) {
           /**
            * Push CleanWebpackPlugin to plugin list and ask it to clean
@@ -251,18 +238,20 @@ wHandler.hooks.beforeConfig.tap('AddSyncedFilesPlugin', (wEnv, wType, wConfigs) 
          * is copied as it is to the build/public folder
          */
         wConfig.plugins.push(new CopyWebpackPlugin({
-          patterns: [{
-            from: path.join(directories.src, 'public'),
-            to: directories.build,
-          }],
+          patterns: [
+            {
+              from: path.join(directories.src, 'public'),
+              to: directories.build,
+            },
+          ],
         }));
         copyPublicFolder = true;
       }
 
       // Initialize wConfig.module if not already exists
       if (!wConfig.module) wConfig.module = { rules: [] };
-      wConfig.module.rules.forEach((r: webpack.RuleSetRule, index: number) => {
-        const rule = r;
+      (wConfig?.module?.rules ?? []).forEach((r: webpack.RuleSetRule | '...', index: number) => {
+        const rule = r as RuleSetRule;
         /**
          * Check for babel rule and replace it with babel rule that
          * with babel web rule with param hot as false
@@ -284,7 +273,7 @@ wHandler.hooks.beforeConfig.tap('AddSyncedFilesPlugin', (wEnv, wType, wConfigs) 
       });
 
       const hasSyncedFilePlugin = wConfig.plugins
-        && wConfig.plugins.some(p => p instanceof SyncedFilesPlugin);
+        && wConfig.plugins.some((p) => p instanceof SyncedFilesPlugin);
 
       if (!hasSyncedFilePlugin) {
         if (typeof wConfig.plugins === 'undefined') wConfig.plugins = [];
@@ -295,7 +284,7 @@ wHandler.hooks.beforeConfig.tap('AddSyncedFilesPlugin', (wEnv, wType, wConfigs) 
       }
 
       const hasExtractEmittedAssets = wConfig.plugins
-        && wConfig.plugins.some(p => p instanceof ExtractEmittedAssets);
+        && wConfig.plugins.some((p) => p instanceof ExtractEmittedAssets);
       if (!hasExtractEmittedAssets) {
         if (typeof wConfig.plugins === 'undefined') wConfig.plugins = [];
         wConfig.plugins.push(new ExtractEmittedAssets({
@@ -325,7 +314,8 @@ wHandler.hooks.beforeConfig.tap('AddSyncedFilesPlugin', (wEnv, wType, wConfigs) 
       }
 
       if (!wConfig.module) wConfig.module = { rules: [] };
-      wConfig.module.rules.forEach((rule: RuleSetRule, index: number) => {
+      (wConfig?.module?.rules ?? []).forEach((moduleRule: RuleSetRule | '...', index: number) => {
+        const rule = moduleRule as RuleSetRule;
         if (isBabelRule(rule)) {
           // @ts-ignore
           wConfig.module.rules[index] = serverRule({
@@ -348,7 +338,7 @@ wHandler.hooks.beforeConfig.tap('AddSyncedFilesPlugin', (wEnv, wType, wConfigs) 
       });
 
       const hasSyncedFilePlugin = wConfig.plugins
-        && wConfig.plugins.some(p => p instanceof SyncedFilesPlugin);
+        && wConfig.plugins.some((p) => p instanceof SyncedFilesPlugin);
       if (!hasSyncedFilePlugin) {
         wConfig.plugins = wConfig.plugins || [];
         wConfig.plugins.push(new SyncedFilesPlugin({
@@ -368,21 +358,21 @@ try {
   const webConfig = wHandler.getConfig(process.env.PAW_ENV, 'web');
 
   // Create a webpack web compiler from the web configurations
-  webpack(webConfig, (webErr: Error, webStats: webpack.Stats) => {
-    if (webErr || webStats.hasErrors()) {
+  webpack(webConfig, (webErr?: Error, webStats?: webpack.Stats) => {
+    if (webErr || webStats?.hasErrors()) {
       // eslint-disable-next-line
       console.log(webErr);
       // Handle errors here
       // eslint-disable-next-line
-      webStats.toJson && console.log(webStats.toJson());
+      webStats?.toJson && console.log(webStats.toJson());
       // eslint-disable-next-line
       console.log('Web compiler error occurred. Please handle error here');
       return;
     }
     // eslint-disable-next-line
-    console.log(webStats.toString(stats));
+    console.log(webStats?.toString(stats));
     webpack(serverConfig, (serverErr, serverStats) => {
-      if (serverErr || serverStats.hasErrors()) {
+      if (serverErr || serverStats?.hasErrors()) {
         // Handle errors here
         // eslint-disable-next-line
         console.log('Server Compiler error occurred. Please handle error here');
@@ -390,7 +380,7 @@ try {
       }
 
       // eslint-disable-next-line
-      console.log(serverStats.toString(stats));
+      console.log(serverStats?.toString(stats));
 
       if (pawConfig.singlePageApplication) {
         // eslint-disable-next-line

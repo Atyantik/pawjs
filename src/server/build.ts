@@ -17,7 +17,7 @@ let currentDir = __dirname;
 const PAW_GLOBAL = {};
 
 // Set appropriate currentDir when build and run in production mode
-const filename = _find(process.argv, arg => arg.indexOf('/server.js') !== -1);
+const filename = _find(process.argv, (arg) => arg.indexOf('/server.js') !== -1);
 if (filename) {
   currentDir = path.dirname(path.resolve(filename));
 }

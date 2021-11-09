@@ -143,26 +143,30 @@ app.get('*', (req, res, next) => {
   }
   // If server side render is enabled then, then let the routes load
   // Wait for all routes to load everything!
-  return clientRouteHandler.hooks.initRoutes.callAsync(fullUrl, req.headers['user-agent'], (err: Error) => {
-    if (err) {
-      // eslint-disable-next-line
-      console.log(err);
-      // @todo: Handle Error
-      return next();
-    }
+  return clientRouteHandler.hooks.initRoutes.callAsync(
+    fullUrl,
+    req?.headers?.['user-agent'] ?? '',
+    (err) => {
+      if (err) {
+        // eslint-disable-next-line
+        console.log(err);
+        // @todo: Handle Error
+        return next();
+      }
 
-    // Once we have all the routes, pass the handler to the
-    // server run at this point we should have cssDependencyMap as well.
-    return sHandler.run({
-      req,
-      res,
-      next,
-      assets,
-      routeHandler: clientRouteHandler,
-      cssDependencyMap: res.locals.cssDependencyMap,
-      jsDependencyMap: res.locals.jsDependencyMap,
-    });
-  });
+      // Once we have all the routes, pass the handler to the
+      // server run at this point we should have cssDependencyMap as well.
+      return sHandler.run({
+        req,
+        res,
+        next,
+        assets,
+        routeHandler: clientRouteHandler,
+        cssDependencyMap: res.locals.cssDependencyMap,
+        jsDependencyMap: res.locals.jsDependencyMap,
+      });
+    },
+  );
 });
 
 /**

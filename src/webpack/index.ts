@@ -1,9 +1,7 @@
 import path from 'path';
 import directories from './utils/directories';
 import WebpackHandler from './handler';
-
-/* global getDefault */
-/* global pawExistsSync */
+import { getDefault, pawExistsSync } from '../globals';
 
 const handlerInstance = new WebpackHandler();
 const hasProjectWebpackPlugin = pawExistsSync(path.join(directories.src, 'webpack'));

@@ -1,5 +1,3 @@
-import { renderRoutes } from 'react-router-config';
-
 import PreloadDataManager from '../utils/preloadDataManager';
 import { Map as LoadableMap } from '../components/Loadable';
 import { CompiledRoute, ReactComponent, Route } from '../@types/route';
@@ -150,13 +148,7 @@ export default class RouteCompiler {
             {...componentProps}
             route={propsRoute}
             loadedData={loadedData}
-          >
-            {
-              propsRoute && propsRoute.routes
-                ? renderRoutes(propsRoute.routes)
-                : undefined
-            }
-          </components.routeComponent>
+          />
         );
 
         if (components.layout) {

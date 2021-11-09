@@ -88,7 +88,6 @@ export default class ClientHandler extends AbstractPlugin {
   }
 
   manageHistoryChange(location: HistoryLocation, action: string) {
-    console.log('I am here in manage history change');
     if (!this.loaded) return;
     this.hooks.locationChange.callAsync(location, action, () => null);
     if (this.routeHandler) {

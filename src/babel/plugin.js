@@ -1,5 +1,4 @@
-/* global getDefault */
-// const reactHotLoader = getDefault(require('react-hot-loader/babel'));
+const { getDefault } = require('../globals');
 const reactRefresh = getDefault(require('react-refresh/babel'));
 const lodash = getDefault(require('babel-plugin-lodash'));
 const syntaxDynamicImport = getDefault(require('@babel/plugin-syntax-dynamic-import'));

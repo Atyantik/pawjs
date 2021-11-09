@@ -5,3 +5,16 @@ scaffold
 **/*.d.ts
 src/__tests__/webpack/dev.test.js
 src/__tests__/webpack/prod.test.js
+dist
+src/extensions.js
+demo
+node_modules
+src/__tests__
+src/babel/**
+src/webpack/**
+jest-transformer.js
+jest.config.js
+packages
+prepare-packages.js
+paw.js
+babel.config.js

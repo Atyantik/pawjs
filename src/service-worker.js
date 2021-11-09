@@ -35,7 +35,8 @@ try {
   });
 
   const getOfflineHtml = () => {
-    const scripts = serviceWorker.paw__offline_assets.filter(a => a.endsWith('.js')).map(js => `<script type="text/javascript" src="${js}" async></script>`).join('');
+    serviceWorker.paw__offline_assets = serviceWorker.paw__offline_assets || [];
+    const scripts = serviceWorker.paw__offline_assets.filter((a) => a.endsWith('.js')).map((js) => `<script type="text/javascript" src="${js}" async></script>`).join('');
     return `<!DOCTYPE html><html><head></head><body><div id="${serviceWorker.paw__injected_variables.clientRootElementId}"></div>${scripts}</body></html>`;
   };
 
@@ -73,6 +74,7 @@ try {
           ],
         },
       ).handle({ event, request }).catch((ex) => {
+        // eslint-disable-next-line no-console
         console.log(ex);
       });
     }
@@ -82,6 +84,7 @@ try {
       && assetsRegExp.test(request.url)
     ) {
       return new NetworkOnly().handle({ event, request }).catch((ex) => {
+        // eslint-disable-next-line no-console
         console.log(ex);
       });
     }
@@ -137,11 +140,12 @@ try {
     }).handle({
       event,
       request,
-    }).catch(e => console.log(e));
+      // eslint-disable-next-line no-console
+    }).catch((e) => console.log(e));
   });
 
   // eslint-disable-next-line no-underscore-dangle
-  const resolve = obj => (obj && obj.__esModule ? obj.default : obj);
+  const resolve = (obj) => (obj && obj.__esModule ? obj.default : obj);
   // eslint-disable-next-line import/no-unresolved,global-require
   const projectSW = resolve(require('pawProjectSW'));
 
