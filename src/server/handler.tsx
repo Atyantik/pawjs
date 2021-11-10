@@ -261,8 +261,8 @@ export default class ServerHandler extends AbstractPlugin {
         env: { ...this.options.env },
       };
 
-      const renderRoutes = (routes: any, level = 0) => {
-        return routes.map((r: any, index: number) => {
+      const renderRoutes = (routesToRender: any, level = 0) => {
+        return routesToRender.map((r: any, index: number) => {
           const { element: ElementComponent, ...others } = r;
           if (!r.children) {
             return (

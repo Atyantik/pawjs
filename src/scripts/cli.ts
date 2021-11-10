@@ -10,16 +10,6 @@ const { spawn } = ChildProcess;
  * Current process directory
  */
 const processDir: string = process.cwd();
-let pawConfigWarningDisplayed = false;
-const renderPawConfigWarning = () => {
-  if (!pawConfigWarningDisplayed) {
-    // eslint-disable-next-line no-console
-    console.warn('==> pawconfig.json has been depreciated and would'
-      + ' be removed in upcoming release Please use .env files instead. '
-      + 'Refer to https://www.reactpwa.com/blog/using-dot-env/');
-  }
-  pawConfigWarningDisplayed = true;
-};
 
 /**
  * We need the program to exit clean even if the
@@ -125,12 +115,12 @@ export default class CliHandler {
    * Start server depending on the env variable
    */
   startServer() {
-    process.env.PAW_HOT = process?.env?.PAW_HOT ?? (process?.env?.PAW_ENV === 'development' ? 'true' : 'false');
+    process.env.PAW_HOT = process.env?.PAW_HOT ?? (process.env?.PAW_ENV === 'development' ? 'true' : 'false');
     import('../server/webpack-start');
   }
 
   buildProd() {
-    process.env.PAW_HOT = process?.env?.PAW_HOT ?? 'false';
+    process.env.PAW_HOT = process.env?.PAW_HOT ?? 'false';
     import('../server/webpack-build');
   }
 

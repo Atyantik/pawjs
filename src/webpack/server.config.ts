@@ -25,13 +25,13 @@ export default {
         include: /node_modules/,
         type: "javascript/auto",
       },
-      // assetsRule({
-      //   outputPath: 'build/assets/',
-      // }),
-      // {
-      //   resourceQuery: /raw/,
-      //   type: 'asset/source',
-      // },
+      assetsRule({
+        outputPath: 'build/assets/',
+      }),
+      {
+        resourceQuery: /raw/,
+        type: 'asset/source',
+      },
       serverRule({ hot: false, noChunk: true, cacheDirectory: process.env.PAW_CACHE === 'true' }),
       ...cssRule(),
       imageRule({

@@ -49,13 +49,13 @@ export default {
         include: /node_modules/,
         type: "javascript/auto",
       },
-      // assetsRule({
-      //   outputPath: 'assets/',
-      // }),
-      // {
-      //   resourceQuery: /raw/,
-      //   type: 'asset/source',
-      // },
+      assetsRule({
+        outputPath: 'assets/',
+      }),
+      {
+        resourceQuery: /raw/,
+        type: 'asset/source',
+      },
       webRule({ hot: isHot }),
       ...cssRule({ hot: isHot }),
       imageRule({

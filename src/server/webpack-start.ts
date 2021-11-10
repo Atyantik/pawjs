@@ -61,8 +61,7 @@ if (pawConfig.hotReload) {
 
               wConfig.entry.client.unshift(hotMiddlewareString);
 
-              const clientIndex = wConfig?.entry
-                ?.client
+              const clientIndex = wConfig.entry.client
                 ?.indexOf?.(
                   pawExistsSync(path.join(libRoot, 'src', 'client', 'app')),
                 ) ?? -1;
@@ -76,7 +75,7 @@ if (pawConfig.hotReload) {
 
               // check for Hot Module replacement plugin and add it if necessary
               if (!wConfig.plugins) wConfig.plugins = [];
-              wConfig.plugins.unshift(new ReactRefreshWebpackPlugin()),
+              wConfig.plugins.unshift(new ReactRefreshWebpackPlugin());
               wConfig.plugins.unshift(new webpack.HotModuleReplacementPlugin({
                 multiStep: true,
               }));

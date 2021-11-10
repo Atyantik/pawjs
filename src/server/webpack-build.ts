@@ -250,7 +250,8 @@ wHandler.hooks.beforeConfig.tap('AddSyncedFilesPlugin', (wEnv, wType, wConfigs) 
 
       // Initialize wConfig.module if not already exists
       if (!wConfig.module) wConfig.module = { rules: [] };
-      (wConfig?.module?.rules ?? []).forEach((r: webpack.RuleSetRule | '...', index: number) => {
+      if (!wConfig.module.rules) wConfig.module.rules = [];
+      wConfig.module.rules.forEach((r: webpack.RuleSetRule | '...', index: number) => {
         const rule = r as RuleSetRule;
         /**
          * Check for babel rule and replace it with babel rule that
@@ -314,7 +315,8 @@ wHandler.hooks.beforeConfig.tap('AddSyncedFilesPlugin', (wEnv, wType, wConfigs) 
       }
 
       if (!wConfig.module) wConfig.module = { rules: [] };
-      (wConfig?.module?.rules ?? []).forEach((moduleRule: RuleSetRule | '...', index: number) => {
+      if (!wConfig.module.rules) wConfig.module.rules = [];
+      wConfig.module.rules.forEach((moduleRule: RuleSetRule | '...', index: number) => {
         const rule = moduleRule as RuleSetRule;
         if (isBabelRule(rule)) {
           // @ts-ignore
