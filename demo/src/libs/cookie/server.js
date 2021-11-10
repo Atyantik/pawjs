@@ -1,3 +1,3 @@
 export default {
-  getItem: (...args) => null,
+  getItem: () => null,
 };
