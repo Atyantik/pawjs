@@ -131,4 +131,4 @@ export const imageAssetsExtensions = [
   'tiff',
 ];
 
-export const extensionRegex = (assetsList: string[]) => new RegExp(`\\.(${assetsList.join('|')})`);
+export const extensionRegex = (assetsList: string[]) => new RegExp(`\\.(${assetsList.join('|')})$`);

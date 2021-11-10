@@ -90,7 +90,7 @@ export default (options: any = {}) => {
       use: [
         // Translates CSS into CommonJS
         {
-          loader: MiniCssExtractPlugin.loader,
+          loader: o.hot ? 'style-loader' : MiniCssExtractPlugin.loader,
         },
         {
           loader: 'css-loader',

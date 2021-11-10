@@ -1,5 +1,5 @@
 import React from 'react';
-import { Navigate as Redirect } from 'react-router-dom';
+import { Redirect } from '@pawjs/pawjs/redirect';
 import GuestLayout from './guest-layout';
 import cookie from '../libs/cookie';
 import Authenticator from './fake-authenticator';

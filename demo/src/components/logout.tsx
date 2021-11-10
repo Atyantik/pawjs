@@ -1,16 +1,14 @@
 import React from 'react';
-import { Navigate as Redirect } from 'react-router-dom';
+import { Redirect } from '@pawjs/pawjs/redirect';
 import Authenticator from './fake-authenticator';
 
+console.log('Am here...');
 export default class Logout extends React.Component {
   onLogoutRedirectUrl = '/login';
 
-  constructor(props) {
-    super(props);
-    this.state = {
-      logout: false,
-    };
-  }
+  state = {
+    logout: false,
+  };
 
   componentDidMount() {
     Authenticator.logout();

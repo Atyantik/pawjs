@@ -38,7 +38,7 @@ export default [
   {
     path: '/skeleton-loading',
     exact: true,
-    loadData: async () => new Promise((r) => {
+    loadData: async ({ match }) => new Promise((r) => {
       setTimeout(() => {
         fetch('https://www.atyantik.com/wp-json/wp/v2/posts/?per_page=4&_fields[]=title&_fields[]=excerpt&_fields[]=jetpack_featured_media_url')
           .then(res => res.json())

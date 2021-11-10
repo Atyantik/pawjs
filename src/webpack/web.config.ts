@@ -39,7 +39,7 @@ export default {
     publicPath: pawConfig.resourcesBaseUrl,
     filename: 'js/[contenthash].js',
     chunkFilename: 'js/[chunkhash].js',
-    assetModuleFilename: 'assets/[contenthash]-[name][ext][query]',
+    // assetModuleFilename: 'assets/[contenthash]-[name][ext][query]',
   },
   stats: true,
   module: {
@@ -49,11 +49,6 @@ export default {
         include: /node_modules/,
         type: "javascript/auto",
       },
-      webRule({ hot: isHot }),
-      ...cssRule({ hot: isHot }),
-      imageRule({
-        outputPath: 'images/',
-      }),
       // assetsRule({
       //   outputPath: 'assets/',
       // }),
@@ -61,6 +56,11 @@ export default {
       //   resourceQuery: /raw/,
       //   type: 'asset/source',
       // },
+      webRule({ hot: isHot }),
+      ...cssRule({ hot: isHot }),
+      imageRule({
+        outputPath: 'images/',
+      }),
     ],
   },
   ...resolverConfig,

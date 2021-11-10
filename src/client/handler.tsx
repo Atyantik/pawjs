@@ -17,6 +17,7 @@ import AbstractPlugin from '../abstract-plugin';
 import { ICompiledRoute } from '../@types/route';
 import { useLayoutEffect } from 'react';
 import { useLocation } from 'react-router';
+import { RedirectProvider } from '../components/Redirect';
 
 const possibleHtmlNames = invert(possibleStandardNames);
 const getPossibleHtmlName = (key: string): string => possibleHtmlNames[key] || key;
@@ -314,7 +315,7 @@ export default class ClientHandler extends AbstractPlugin {
         if (!r.children) {
           return (
             <Route element={<ElementComponent />} key={`${level}_${index}`} {...others} />
-          )
+          );
         }
         return (
           <Route element={<ElementComponent />} key={`${level}_${index}`} {...others}>
@@ -331,7 +332,7 @@ export default class ClientHandler extends AbstractPlugin {
         () => {
           this.manageHistoryChange(location, navigationType);
         },
-        [navigationType, location]
+        [navigationType, location],
       );
       return <>{ children }</>;
     };
@@ -371,16 +372,18 @@ export default class ClientHandler extends AbstractPlugin {
         // Render according to routes!
         renderer(
           (
-            <components.appRouter
-              basename={this?.options?.env?.appRootUrl}
-            >
-              <ErrorBoundary
-                ErrorComponent={this?.routeHandler?.getErrorComponent()}
-                NotFoundComponent={this?.routeHandler?.get404Component()}
+            <RedirectProvider>
+              <components.appRouter
+                basename={this?.options?.env?.appRootUrl}
               >
-                {application.children}
-              </ErrorBoundary>
-            </components.appRouter>
+                <ErrorBoundary
+                  ErrorComponent={this?.routeHandler?.getErrorComponent()}
+                  NotFoundComponent={this?.routeHandler?.get404Component()}
+                >
+                  {application.children}
+                </ErrorBoundary>
+              </components.appRouter>
+            </RedirectProvider>
           ),
           domRootReference,
           () => {

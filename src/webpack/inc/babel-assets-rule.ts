@@ -1,10 +1,8 @@
 import assignIn from 'lodash/assignIn';
-import directories from '../utils/directories';
 import { extensionRegex, staticAssetsExtensions } from '../utils/assets';
 
 const defaultOptions = {
   outputPath: 'assets/',
-  name: '[contenthash].[ext]',
 };
 
 export default (options: any) => ({

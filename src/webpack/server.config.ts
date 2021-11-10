@@ -25,11 +25,6 @@ export default {
         include: /node_modules/,
         type: "javascript/auto",
       },
-      serverRule({ hot: false, noChunk: true, cacheDirectory: process.env.PAW_CACHE === 'true' }),
-      ...cssRule(),
-      imageRule({
-        outputPath: 'build/images/',
-      }),
       // assetsRule({
       //   outputPath: 'build/assets/',
       // }),
@@ -37,6 +32,11 @@ export default {
       //   resourceQuery: /raw/,
       //   type: 'asset/source',
       // },
+      serverRule({ hot: false, noChunk: true, cacheDirectory: process.env.PAW_CACHE === 'true' }),
+      ...cssRule(),
+      imageRule({
+        outputPath: 'build/images/',
+      }),
     ],
   },
   context: directories.root,

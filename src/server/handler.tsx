@@ -14,6 +14,12 @@ import { generateMeta } from '../utils/seo';
 import AbstractPlugin from '../abstract-plugin';
 import { CompiledRoute } from '../@types/route';
 import NotFoundError from '../errors/not-found';
+import { RedirectProvider } from '../components/Redirect';
+import { createPath, To } from 'history';
+
+const createHref = (to: To) => {
+  return typeof to === 'string' ? to : createPath(to);
+};
 
 type Options = {
   env: any;
@@ -261,7 +267,7 @@ export default class ServerHandler extends AbstractPlugin {
           if (!r.children) {
             return (
               <Route element={<ElementComponent />} key={`${level}_${index}`} {...others} />
-            )
+            );
           }
           return (
             <Route element={<ElementComponent />} key={`${level}_${index}`} {...others}>
@@ -312,16 +318,19 @@ export default class ServerHandler extends AbstractPlugin {
 
       let htmlContent = this.options.env.singlePageApplication ? '' : renderToString(
         (
-          <ErrorBoundary>
-            {application.children}
-          </ErrorBoundary>
+          <RedirectProvider staticContext={application.context}>
+            <ErrorBoundary>
+              {application.children}
+            </ErrorBoundary>
+          </RedirectProvider>
         ),
       );
 
-      if (context.url) {
+      const redirectUrl = createHref(context?.to ?? '');
+      if (redirectUrl) {
         // can use the `context.status` that
         // we added in RedirectWithStatus
-        res.redirect(context.status || 301, context.url);
+        res.redirect(301, redirectUrl);
         return next();
       }
       if (context.status < 200 || context.status >= 300) {
