@@ -76,9 +76,10 @@ export default class ClientHandler extends AbstractPlugin {
   getCurrentRoutes(location: HistoryLocation | typeof window.location = window.location) {
     if (!this.routeHandler) return [];
     const routes = this.routeHandler.getRoutes();
-    const pathname = this.useHashRouter()
-      ? (location.hash || '').replace('#', '')
-      : window.location.pathname;
+    let pathname = location.pathname;
+    if (this.useHashRouter() && location.hash) {
+      pathname = ((location.hash || '').replace('#', '') || location.pathname);
+    }
     return RouteHandler.matchRoutes(
       routes,
       pathname.replace(
@@ -309,8 +310,8 @@ export default class ClientHandler extends AbstractPlugin {
     const currentPageRoutes = this.getCurrentRoutes();
     const components: any = {};
     components.appRouter = this.useHashRouter() ? HashRouter : BrowserRouter;
-    const renderRoutes = (routes: any, level = 0) => {
-      return routes.map((r: any, index: number) => {
+    const renderRoutes = (rRoutes: any, level = 0) => {
+      return rRoutes.map((r: any, index: number) => {
         const { element: ElementComponent, ...others } = r;
         if (!r.children) {
           return (

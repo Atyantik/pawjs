@@ -8,7 +8,6 @@ import directories from './utils/directories';
 import pawConfig from '../config';
 import resolverConfig from './inc/webpack-resolver-config';
 import serverRule from './inc/babel-server-rule';
-import fontRule from './inc/babel-font-rule';
 import { pawExistsSync } from '../globals';
 
 const isProduction = process.env.PAW_ENV === 'production';

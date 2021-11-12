@@ -39,7 +39,7 @@ export default {
     publicPath: pawConfig.resourcesBaseUrl,
     filename: 'js/[contenthash].js',
     chunkFilename: 'js/[chunkhash].js',
-    // assetModuleFilename: 'assets/[contenthash]-[name][ext][query]',
+    assetModuleFilename: 'assets/[contenthash]-[name][ext][query]',
   },
   stats: true,
   module: {

@@ -120,7 +120,7 @@ export default class CliHandler {
   }
 
   buildProd() {
-    process.env.PAW_HOT = process.env?.PAW_HOT ?? 'false';
+    process.env.PAW_HOT = 'false';
     import('../server/webpack-build');
   }
 

@@ -13,6 +13,7 @@ import webRule from '../webpack/inc/babel-web-rule';
 import serverRule from '../webpack/inc/babel-server-rule';
 import SyncedFilesPlugin from '../webpack/plugins/synced-files-plugin';
 import ExtractEmittedAssets from '../webpack/plugins/extract-emitted-assets';
+
 import { pawExistsSync } from '../globals';
 
 const isVerbose = process.env.PAW_VERBOSE === 'true';
@@ -292,6 +293,11 @@ wHandler.hooks.beforeConfig.tap('AddSyncedFilesPlugin', (wEnv, wType, wConfigs) 
           outputPath: directories.dist,
         }));
       }
+
+      const util = require('util');
+      fs.writeFileSync('/tmp/web.js', util.inspect(wConfig, { depth: 20 }));
+
+      //console.log(util.inspect(wConfig, { depth: 20 }));
     });
   }
   if (wType === 'server') {
