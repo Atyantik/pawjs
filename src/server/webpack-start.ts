@@ -8,7 +8,6 @@ import { NextHandleFunction } from 'connect';
 import pawConfig from '../config';
 import directories from '../webpack/utils/directories';
 import wHandler from '../webpack';
-import { pawExistsSync } from '../globals';
 
 // Utils
 // -- Require from string. create an export from string like `module.export = "Something";`
@@ -53,25 +52,12 @@ if (pawConfig.hotReload) {
           wConfigs.forEach((webpackConfig: IPawjsWebpackConfig) => {
             const wConfig = webpackConfig as any;
             if (Array.isArray(wConfig?.entry?.client)) {
-              const libRoot = process?.env?.LIB_ROOT ?? '';
 
               // Add webpack-hot-middleware as entry point
               const hotMiddlewareString = 'webpack-hot-middleware/client?name=web&'
                 + 'path=/__hmr_update&timeout=2000&overlay=true&quiet=false';
 
               wConfig.entry.client.unshift(hotMiddlewareString);
-
-              const clientIndex = wConfig.entry.client
-                ?.indexOf?.(
-                  pawExistsSync(path.join(libRoot, 'src', 'client', 'app')),
-                ) ?? -1;
-              // Replace app with hot-app
-              if (clientIndex !== -1) {
-                // eslint-disable-next-line
-                wConfig.entry.client[clientIndex] = pawExistsSync(
-                  path.join(libRoot, 'src', 'client', 'hot-app'),
-                );
-              }
 
               // check for Hot Module replacement plugin and add it if necessary
               if (!wConfig.plugins) wConfig.plugins = [];

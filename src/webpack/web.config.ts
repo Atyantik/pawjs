@@ -28,7 +28,6 @@ export default {
   context: directories.root,
   entry: {
     client: [
-      ...(pawConfig.polyfill === 'cdn' ? [] : ['core-js/stable', 'regenerator-runtime/runtime']),
       ...(isHot ? ['react-refresh/runtime'] : []),
       // Initial entry point for dev
       pawExistsSync(path.join(process.env.LIB_ROOT || '', './src/client/app')),

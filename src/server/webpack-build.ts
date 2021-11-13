@@ -293,11 +293,6 @@ wHandler.hooks.beforeConfig.tap('AddSyncedFilesPlugin', (wEnv, wType, wConfigs) 
           outputPath: directories.dist,
         }));
       }
-
-      const util = require('util');
-      fs.writeFileSync('/tmp/web.js', util.inspect(wConfig, { depth: 20 }));
-
-      //console.log(util.inspect(wConfig, { depth: 20 }));
     });
   }
   if (wType === 'server') {
