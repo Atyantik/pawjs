@@ -2,11 +2,9 @@ import PreloadDataManager from '../utils/preloadDataManager';
 import { Map as LoadableMap } from '../components/Loadable';
 import { CompiledRoute, ReactComponent, Route } from '../@types/route';
 import NotFoundError from '../errors/not-found';
-import ServerError from '../errors/server';
 import RedirectError from '../errors/redirect';
 import { Redirect } from '../components/Paw';
 import { IRouteHandler } from './IRouteHandler';
-
 export default class RouteCompiler {
   public preloadManager: PreloadDataManager;
 
@@ -35,13 +33,16 @@ export default class RouteCompiler {
       selfManageNewProps,
     } = route;
 
+    // If we have skeleton for route then default delay is 0
+    const defaultDelay = skeleton ? 0 : routerService.getDefaultAllowedLoadDelay();
+
     // JSXifiable component object
     const PARAMS: any = {
       errorComponent: error || routerService.getDefaultLoadErrorComponent(),
       notFoundComponent: error || routerService.get404Component(),
       skeletonComponent: skeleton || routerService.getDefaultLoaderComponent(),
       timeout: timeout || routerService.getDefaultLoadTimeout(),
-      delay: typeof delay === 'undefined' ? routerService.getDefaultAllowedLoadDelay() : delay,
+      delay: typeof delay === 'undefined' ? defaultDelay : delay,
     };
 
     let routeSeo = { ...(seo || {}) };
@@ -54,8 +55,6 @@ export default class RouteCompiler {
       if (typeof loadData !== 'undefined') {
         const extraParams = await this.preloadManager.getParams();
         const loadedData = await loadData({
-          NotFoundError,
-          ServerError,
           updateSeo,
           ...props,
           ...extraParams,
@@ -105,7 +104,6 @@ export default class RouteCompiler {
         }
         if (err) {
           return (
-            // @ts-ignore
             <PARAMS.errorComponent
               error={err}
               route={propsRoute}

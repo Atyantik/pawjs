@@ -82,7 +82,6 @@ const Redirect: React.FC<NavigateProps & { statusCode?: number }> = (props) => {
   const { isInitialRender, setRedirect } = useContext(PawContext);
   const { statusCode, ...navigationProps } = props;
   if (!isInitialRender()) {
-    console.log(navigationProps);
     return (
       <Navigate {...navigationProps} />
     );

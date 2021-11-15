@@ -336,11 +336,7 @@ export default class ServerHandler extends AbstractPlugin {
       const application = {
         context,
         htmlProps,
-        children: (
-          <StaticRouter location={req.url} basename={appRootUrl}>
-            {appRoutes.renderedRoutes}
-          </StaticRouter>
-        ),
+        children: appRoutes.renderedRoutes,
         currentRoutes: currentPageRoutes.slice(0),
         routes: routes.slice(0),
       };
@@ -349,14 +345,16 @@ export default class ServerHandler extends AbstractPlugin {
 
       let htmlContent = this.options.env.singlePageApplication ? '' : renderToString(
         (
-          <PawProvider staticContext={application.context}>
-            <ErrorBoundary
-              NotFoundComponent={routeHandler.get404Component()}
-              ErrorComponent={routeHandler.getErrorComponent()}
-            >
-              {application.children}
-            </ErrorBoundary>
-          </PawProvider>
+          <StaticRouter location={req.url} basename={appRootUrl}>
+            <PawProvider staticContext={application.context}>
+              <ErrorBoundary
+                NotFoundComponent={routeHandler.get404Component()}
+                ErrorComponent={routeHandler.getErrorComponent()}
+              >
+                {application.children}
+              </ErrorBoundary>
+            </PawProvider>
+          </StaticRouter>
         ),
       );
       console.log(context);
@@ -396,11 +394,11 @@ export default class ServerHandler extends AbstractPlugin {
       }
       const application = {
         children: (
-          <PawProvider>
-            <StaticRouter location={req.url} basename={appRootUrl}>
+          <StaticRouter location={req.url} basename={appRootUrl}>
+            <PawProvider>
               <components.errorComponent error={ex} />
-            </StaticRouter>
-          </PawProvider>
+            </PawProvider>
+          </StaticRouter>
         ),
       };
       res.status(context?.statusCode ?? ex.code ?? 500).type('text/html');

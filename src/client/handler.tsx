@@ -124,66 +124,71 @@ export default class ClientHandler extends AbstractPlugin {
         const currentRoutes = this.getCurrentRoutes(location);
         const promises: Promise<any> [] = [];
 
-        let seoData = {};
-        const pwaSchema = this.routeHandler.getPwaSchema();
-        const seoSchema = this.routeHandler.getDefaultSeoSchema();
-        currentRoutes.forEach((r: { route: ICompiledRoute, match: any }) => {
-          if (r?.route?.element?.preload) {
-            promises.push(r.route.element.preload(undefined, {
-              route: r.route,
-              match: r.match,
-            })?.promise);
-          }
-        });
-        await Promise.all(promises);
-        currentRoutes.forEach((r: { route: ICompiledRoute, match: any }) => {
-          let routeSeo = {};
-          if (r.route.getRouteSeo) {
-            routeSeo = r.route.getRouteSeo();
-          }
-          seoData = { ...seoData, ...routeSeo };
-        });
-        const metaTags = generateMeta(seoData, {
-          seoSchema,
-          pwaSchema,
-          baseUrl: window.location.origin,
-          url: window.location.href,
-        });
-
-        metaTags.forEach((meta) => {
-          let metaSearchStr = 'meta';
-          let firstMetaSearchStr = '';
-          const htmlMeta: any = {};
-
-          if (meta.name === 'title') {
-            document.title = this.getTitle(meta.content);
-          }
-
-          Object.keys(meta).forEach((key) => {
-            htmlMeta[getPossibleHtmlName(key)] = meta[key];
-            if (!firstMetaSearchStr) {
-              firstMetaSearchStr = `meta[${getPossibleHtmlName(key)}=${JSON.stringify(meta[key])}]`;
+        try {
+          let seoData = {};
+          const pwaSchema = this.routeHandler.getPwaSchema();
+          const seoSchema = this.routeHandler.getDefaultSeoSchema();
+          currentRoutes.forEach((r: { route: ICompiledRoute, match: any }) => {
+            if (r?.route?.element?.preload) {
+              promises.push(r.route.element.preload(undefined, {
+                route: r.route,
+                match: r.match,
+              })?.promise);
             }
-            metaSearchStr += `[${getPossibleHtmlName(key)}=${JSON.stringify(meta[key])}]`;
+          });
+          await Promise.all(promises);
+          currentRoutes.forEach((r: { route: ICompiledRoute, match: any }) => {
+            let routeSeo = {};
+            if (r.route.getRouteSeo) {
+              routeSeo = r.route.getRouteSeo();
+            }
+            seoData = { ...seoData, ...routeSeo };
+          });
+          const metaTags = generateMeta(seoData, {
+            seoSchema,
+            pwaSchema,
+            baseUrl: window.location.origin,
+            url: window.location.href,
           });
 
-          const alreadyExists = document.querySelector(metaSearchStr);
-          if (!alreadyExists) {
-            const previousExists = document.querySelector(firstMetaSearchStr);
-            if (previousExists && previousExists.remove) {
-              previousExists.remove();
+          metaTags.forEach((meta) => {
+            let metaSearchStr = 'meta';
+            let firstMetaSearchStr = '';
+            const htmlMeta: any = {};
+
+            if (meta.name === 'title') {
+              document.title = this.getTitle(meta.content);
             }
 
-            const metaElement = document.createElement('meta');
-            Object.keys(htmlMeta).forEach((htmlMetaKey) => {
-              metaElement.setAttribute(htmlMetaKey, htmlMeta[htmlMetaKey]);
+            Object.keys(meta).forEach((key) => {
+              htmlMeta[getPossibleHtmlName(key)] = meta[key];
+              if (!firstMetaSearchStr) {
+                firstMetaSearchStr = `meta[${getPossibleHtmlName(key)}=${JSON.stringify(meta[key])}]`;
+              }
+              metaSearchStr += `[${getPossibleHtmlName(key)}=${JSON.stringify(meta[key])}]`;
             });
-            document.getElementsByTagName('head')[0].appendChild(metaElement);
+
+            const alreadyExists = document.querySelector(metaSearchStr);
+            if (!alreadyExists) {
+              const previousExists = document.querySelector(firstMetaSearchStr);
+              if (previousExists && previousExists.remove) {
+                previousExists.remove();
+              }
+
+              const metaElement = document.createElement('meta');
+              Object.keys(htmlMeta).forEach((htmlMetaKey) => {
+                metaElement.setAttribute(htmlMetaKey, htmlMeta[htmlMetaKey]);
+              });
+              document.getElementsByTagName('head')[0].appendChild(metaElement);
+            }
+          });
+          if (action) {
+            this.hooks.postMetaUpdate.callAsync(location, action, () => null);
           }
-        });
-        if (action) {
-          this.hooks.postMetaUpdate.callAsync(location, action, () => null);
+        } catch (ex) {
+          console.error('ERR:: Unhandled error in load data', ex);
         }
+
       } else {
         if (this.updatePageMetaTimeout) {
           window.cancelIdleCallback(this.updatePageMetaTimeout);
@@ -373,18 +378,18 @@ export default class ClientHandler extends AbstractPlugin {
         // Render according to routes!
         renderer(
           (
-            <PawProvider>
-              <ErrorBoundary
-                ErrorComponent={this?.routeHandler?.getErrorComponent()}
-                NotFoundComponent={this?.routeHandler?.get404Component()}
-              >
-                <components.appRouter
-                  basename={this?.options?.env?.appRootUrl}
+            <components.appRouter
+              basename={this?.options?.env?.appRootUrl}
+            >
+              <PawProvider>
+                <ErrorBoundary
+                  ErrorComponent={this?.routeHandler?.getErrorComponent()}
+                  NotFoundComponent={this?.routeHandler?.get404Component()}
                 >
                   {application.children}
-                </components.appRouter>
-              </ErrorBoundary>
-            </PawProvider>
+                </ErrorBoundary>
+              </PawProvider>
+            </components.appRouter>
           ),
           domRootReference,
           () => {

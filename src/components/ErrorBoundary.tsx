@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { HttpStatus, Redirect } from './Paw';
 import NotFoundError from '../errors/not-found';
 import RedirectError from '../errors/redirect';
+import ServerError from '../errors/server';
 
 interface IErrorProps {
   ErrorComponent?: React.ComponentType<any>;
@@ -10,7 +11,7 @@ interface IErrorProps {
 }
 interface IErrorState {
   hasError: boolean;
-  error: null | Error;
+  error: null | Error | ServerError | NotFoundError | RedirectError;
   errorInfo: any;
 }
 
@@ -50,7 +51,8 @@ class ErrorBoundary extends Component<React.PropsWithChildren<IErrorProps>, IErr
       }
       // You can render any custom fallback UI
       return (
-        <HttpStatus statusCode={500}>
+        // @ts-ignore
+        <HttpStatus statusCode={error?.getStatusCode?.() ?? 500}>
           <div>
             <h1>An error occurred</h1>
             <h2>Error Stack:</h2>
