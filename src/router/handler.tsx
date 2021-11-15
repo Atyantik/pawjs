@@ -15,7 +15,6 @@ import AsyncRouteLoadErrorComponent from '../components/AsyncRouteLoadError';
 import AsyncRouteLoaderComponent from '../components/AsyncRouteLoader';
 import NotFoundComponent from '../components/NotFound';
 import ErrorComponent from '../components/Error';
-import Status from '../components/RouteStatus';
 import RouteCompiler from './compiler';
 import { CompiledRoute, ReactComponent, Route } from '../@types/route';
 import AbstractPlugin from '../abstract-plugin';
@@ -217,9 +216,7 @@ export default class RouteHandler extends AbstractPlugin implements IRouteHandle
 
     this.set404Component = (COMPONENT = () => null) => {
       notFoundComponent = () => (
-        <Status code={404}>
-          <COMPONENT />
-        </Status>
+        <COMPONENT />
       );
       return this;
     };
@@ -227,9 +224,7 @@ export default class RouteHandler extends AbstractPlugin implements IRouteHandle
 
     this.setErrorComponent = (COMPONENT = () => null) => {
       errorComponent = () => (
-        <Status code={500}>
-          <COMPONENT />
-        </Status>
+        <COMPONENT />
       );
     };
 

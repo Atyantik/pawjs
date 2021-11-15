@@ -1,5 +1,5 @@
 import React from 'react';
-import { Redirect } from '@pawjs/pawjs/redirect';
+import { Redirect } from '@pawjs/pawjs';
 import Authenticator from './fake-authenticator';
 
 console.log('Am here...');

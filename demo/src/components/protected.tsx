@@ -1,5 +1,5 @@
 import React from 'react';
-import { Redirect } from '@pawjs/pawjs/redirect';
+import { Redirect } from '@pawjs/pawjs';
 import cookie from '../libs/cookie';
 
 export default class Protected extends React.Component {

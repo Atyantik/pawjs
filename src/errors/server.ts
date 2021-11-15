@@ -1,5 +1,5 @@
 class ServerError extends Error {
-  code: number = 500;
+  statusCode: number = 500;
 
   name: string = 'ServerError';
 
@@ -8,6 +8,22 @@ class ServerError extends Error {
     if (Error.captureStackTrace && typeof Error.captureStackTrace === 'function') {
       Error.captureStackTrace(this, ServerError);
     }
+  }
+
+  setStatusCode(code: number) {
+    this.statusCode = code;
+  }
+
+  getStatusCode() {
+    return this.statusCode;
+  }
+
+  set code(code: number) {
+    this.statusCode = code;
+  }
+
+  get code(): number {
+    return this.statusCode;
   }
 }
 

@@ -3,7 +3,8 @@ import { Map as LoadableMap } from '../components/Loadable';
 import { CompiledRoute, ReactComponent, Route } from '../@types/route';
 import NotFoundError from '../errors/not-found';
 import ServerError from '../errors/server';
-import ErrorBoundary from '../components/ErrorBoundary';
+import RedirectError from '../errors/redirect';
+import { Redirect } from '../components/Paw';
 import { IRouteHandler } from './IRouteHandler';
 
 export default class RouteCompiler {
@@ -94,6 +95,14 @@ export default class RouteCompiler {
             />
           );
         }
+        if (err instanceof RedirectError) {
+          return (
+            <Redirect
+              to={err.getRedirect()}
+              statusCode={err.getStatusCode()}
+            />
+          );
+        }
         if (err) {
           return (
             // @ts-ignore
@@ -153,25 +162,15 @@ export default class RouteCompiler {
 
         if (components.layout) {
           return (
-            <ErrorBoundary
-              // @ts-ignore
-              ErrorComponent={PARAMS.errorComponent}
+            <components.layout
+              route={propsRoute}
+              loadedData={loadedData}
             >
-              <components.layout
-                route={propsRoute}
-                loadedData={loadedData}
-              >
-                {components.routeComponent}
-              </components.layout>
-            </ErrorBoundary>
+              {components.routeComponent}
+            </components.layout>
           );
         }
-        return (
-          // @ts-ignore
-          <ErrorBoundary ErrorComponent={PARAMS.errorComponent}>
-            {components.routeComponent}
-          </ErrorBoundary>
-        );
+        return components.routeComponent;
       },
       ...(route.modules ? { modules: route.modules } : {}),
     });

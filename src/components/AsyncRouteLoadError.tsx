@@ -1,5 +1,4 @@
-import React from 'react';
-import Status from './RouteStatus';
+import { HttpStatus } from './Paw';
 
 export default (props = {
   error: {
@@ -12,7 +11,7 @@ export default (props = {
 }) => {
   const { error, info } = props;
   return (
-    <Status code={500}>
+    <HttpStatus statusCode={500}>
       <div>
         <h1>A Server error has occurred</h1>
         <h2>Error Stack:</h2>
@@ -29,6 +28,6 @@ export default (props = {
           </pre>
         </code>
       </div>
-    </Status>
+    </HttpStatus>
   );
 };

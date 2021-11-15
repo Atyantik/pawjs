@@ -1,16 +1,13 @@
-import React from 'react';
 import Header from './header';
 import Footer from './footer';
 
-export default function (props) {
-  // eslint-disable-next-line
-  const { children } = props;
-  return (
-    <div>
-      <Header />
-      {children}
-      <br />
-      <Footer />
-    </div>
-  );
-}
+const GuestLayout: React.FC = ({ children }) => (
+  <div>
+    <Header />
+    {children}
+    <br />
+    <Footer />
+  </div>
+);
+
+export default GuestLayout;

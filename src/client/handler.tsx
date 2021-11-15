@@ -17,7 +17,7 @@ import AbstractPlugin from '../abstract-plugin';
 import { ICompiledRoute } from '../@types/route';
 import { useLayoutEffect } from 'react';
 import { useLocation } from 'react-router';
-import { RedirectProvider } from '../components/Redirect';
+import { PawProvider } from '../components/Paw';
 
 const possibleHtmlNames = invert(possibleStandardNames);
 const getPossibleHtmlName = (key: string): string => possibleHtmlNames[key] || key;
@@ -373,18 +373,18 @@ export default class ClientHandler extends AbstractPlugin {
         // Render according to routes!
         renderer(
           (
-            <RedirectProvider>
-              <components.appRouter
-                basename={this?.options?.env?.appRootUrl}
+            <PawProvider>
+              <ErrorBoundary
+                ErrorComponent={this?.routeHandler?.getErrorComponent()}
+                NotFoundComponent={this?.routeHandler?.get404Component()}
               >
-                <ErrorBoundary
-                  ErrorComponent={this?.routeHandler?.getErrorComponent()}
-                  NotFoundComponent={this?.routeHandler?.get404Component()}
+                <components.appRouter
+                  basename={this?.options?.env?.appRootUrl}
                 >
                   {application.children}
-                </ErrorBoundary>
-              </components.appRouter>
-            </RedirectProvider>
+                </components.appRouter>
+              </ErrorBoundary>
+            </PawProvider>
           ),
           domRootReference,
           () => {

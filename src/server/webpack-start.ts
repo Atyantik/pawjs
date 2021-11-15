@@ -5,6 +5,7 @@ import webpackMiddleware from 'webpack-dev-middleware';
 import webpackHotMiddleware from 'webpack-hot-middleware';
 import ReactRefreshWebpackPlugin from '@pmmmwh/react-refresh-webpack-plugin';
 import { NextHandleFunction } from 'connect';
+import { assetsToArray } from '../utils/utils';
 import pawConfig from '../config';
 import directories from '../webpack/utils/directories';
 import wHandler from '../webpack';
@@ -15,10 +16,8 @@ import requireFromString from '../webpack/utils/requireFromString';
 // Assets normalizer appending publicPath
 import normalizeAssets from '../webpack/utils/normalizeAssets';
 
-interface IPawjsWebpackConfig extends webpack.Configuration {
-  // entry: any;
-  // externals: any;
-}
+interface IPawjsWebpackConfig extends webpack.Configuration {}
+
 // Notify the user that compilation has started and should be done soon.
 // eslint-disable-next-line
 console.log(`
@@ -227,15 +226,16 @@ try {
     try {
       // Get content of the server that is compiled!
       const commonServer = getCommonServer();
+      const expressApp = commonServer.app;
       commonServerMiddleware = commonServer.default;
       const {
         jsDependencyMap,
         cssDependencyMap,
         ...assets
       } = normalizeAssets(webMiddleware.context.stats as webpack.Stats);
-      res.locals.assets = assets;
-      res.locals.cssDependencyMap = cssDependencyMap;
-      res.locals.jsDependencyMap = jsDependencyMap;
+      expressApp.locals.assets = assetsToArray(assets);
+      expressApp.locals.cssDependencyMap = cssDependencyMap;
+      expressApp.locals.jsDependencyMap = jsDependencyMap;
 
       return commonServerMiddleware(req, res, next, PAW_GLOBAL);
     } catch (ex) {

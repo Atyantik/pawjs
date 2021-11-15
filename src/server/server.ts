@@ -7,7 +7,12 @@ import { NextHandleFunction } from 'connect';
 import RouteHandler from '../router/handler';
 import ServerHandler from './handler';
 import env from '../config';
-import { assetsToArray } from '../utils/utils';
+
+/**
+ * Initialize express application
+ * @type {*|Function}
+ */
+const app = express();
 
 /**
  * Initialize Route handler for PWA details
@@ -35,6 +40,7 @@ if (env.serverSideRender) {
  */
 const sHandler = new ServerHandler({
   env: { ...env },
+  expressApp: app,
 });
 
 const serverMiddlewareList: express.Application[] = [];
@@ -44,12 +50,6 @@ sHandler.addPlugin(new ProjectServer({
     serverMiddlewareList.push(middleware);
   },
 }));
-
-/**
- * Initialize express application
- * @type {*|Function}
- */
-const app = express();
 
 // Disable x-powered-by (security issues)
 // Completely remove x-powered-by, previously it was PawJS
@@ -125,9 +125,6 @@ app.get('*', (req, res, next) => {
     clientRouteHandler.addPlugin(new ProjectRoutes({ addPlugin: clientRouteHandler.addPlugin }));
   }
 
-  // Get the resources
-  const assets = assetsToArray(res.locals.assets);
-
   // If no server side rendering is necessary simply
   // run the handler and return streamed data
   if (!env.serverSideRender) {
@@ -135,10 +132,7 @@ app.get('*', (req, res, next) => {
       req,
       res,
       next,
-      assets,
       routeHandler: clientRouteHandler,
-      cssDependencyMap: res.locals.cssDependencyMap,
-      jsDependencyMap: res.locals.jsDependencyMap,
     });
   }
   // If server side render is enabled then, then let the routes load
@@ -160,14 +154,13 @@ app.get('*', (req, res, next) => {
         req,
         res,
         next,
-        assets,
         routeHandler: clientRouteHandler,
-        cssDependencyMap: res.locals.cssDependencyMap,
-        jsDependencyMap: res.locals.jsDependencyMap,
       });
     },
   );
 });
+
+export { app };
 
 /**
  * Export this a middleware export.

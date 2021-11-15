@@ -6,8 +6,9 @@ import compression from 'compression';
 // @ts-ignore
 // eslint-disable-next-line
 import pawAssets from 'pwa-assets';
-import server, { beforeStart, afterStart } from './server';
+import server, { app as serverApp, beforeStart, afterStart } from './server';
 import pawConfig from '../config';
+import { assetsToArray } from '../utils/utils';
 
 const { jsDependencyMap, cssDependencyMap, ...assets } = pawAssets;
 /**
@@ -45,12 +46,12 @@ app.use(pawConfig.appRootUrl || '/', express.static(path.join(currentDir, 'build
   maxAge: cacheTime,
 }));
 
-app.use((req, res, next) => {
-  res.locals.assets = assets;
-  res.locals.cssDependencyMap = cssDependencyMap;
-  res.locals.jsDependencyMap = jsDependencyMap;
-  next();
-});
+// Add assets to app locals, so it should not be passed with every request,
+// thus optimizing the request payload
+serverApp.locals.assets = assetsToArray(assets);
+serverApp.locals.cssDependencyMap = cssDependencyMap;
+serverApp.locals.jsDependencyMap = jsDependencyMap;
+
 app.use((req, res, next) => server(req, res, next, PAW_GLOBAL));
 
 export default app;

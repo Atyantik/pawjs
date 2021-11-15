@@ -9,7 +9,8 @@ interface IComponent {
 }
 export type ReactComponent = ComponentType<RouteComponentProps<any>>
 | ComponentType<any>
-| ComponentType<IComponent>;
+| ComponentType<IComponent>
+| ReactNode;
 export type RouteComponent = Promise<ReactComponent>;
 
 type DynamicImportType = () => Promise<{ default: ComponentType<any>; }>;

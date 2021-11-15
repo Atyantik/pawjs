@@ -2,21 +2,11 @@ import React from 'react';
 import serialize from 'serialize-javascript';
 import { metaKeys } from '../utils/seo';
 
-/**
- * CDN Packages for ReactJS and PolyfillJS
- */
-const reactCDN = [
-  `https://unpkg.com/react@${React.version}/umd/react.production.min.js`,
-  `https://unpkg.com/react-dom@${React.version}/umd/react-dom.production.min.js`,
-];
-
 interface IHtmlProps {
   preloadedData?: any;
   metaTags?: any [];
   pwaSchema: any;
   cssFiles: any [];
-  jsToBePreloaded?: any[];
-  env?: any;
   assets: string [];
   head?: any [];
   footer?: any [];
@@ -25,16 +15,14 @@ interface IHtmlProps {
   dangerouslySetInnerHTML?: {
     __html: string,
   };
-  noJS: boolean;
+  serverError?: React.ReactNode,
 }
 
 export default (props: React.PropsWithChildren<IHtmlProps> = {
   preloadedData: {},
   metaTags: [],
   pwaSchema: {},
-  env: {},
   cssFiles: [],
-  jsToBePreloaded: [],
   assets: [],
   head: [],
   footer: [],
@@ -43,15 +31,13 @@ export default (props: React.PropsWithChildren<IHtmlProps> = {
   dangerouslySetInnerHTML: {
     __html: '',
   },
-  noJS: false,
+  serverError: null,
 }) => {
   const {
     preloadedData,
-    env,
     metaTags,
     appRootUrl,
     cssFiles,
-    jsToBePreloaded,
     pwaSchema,
     head,
     dangerouslySetInnerHTML,
@@ -59,7 +45,7 @@ export default (props: React.PropsWithChildren<IHtmlProps> = {
     children,
     footer,
     assets,
-    noJS,
+    serverError,
   } = props;
 
   const getPwaValue = (key: string, defaultValue = '') => {
@@ -134,45 +120,8 @@ export default (props: React.PropsWithChildren<IHtmlProps> = {
       <link rel="stylesheet" type="text/css" key={path} href={path} />
     )
   ));
-  /**
-   * loadPJS is a function that loads the javascript file and call the callback function
-   * Format of loadPJS = (js-path, callback)
-   */
-  const renderJSLoader = () => {
-    if (noJS) {
-      return null;
-    }
-    return (
-      <script
-        dangerouslySetInnerHTML={{ __html: 'var loadPJS=function(e,a){var n=document.createElement("script");n.src=e,n.onload=a,n.onreadystatechange=a,document.body.appendChild(n)};var fnLoadPJS = function(e,a){return function() {return loadPJS(e,a)}};' }}
-      />
-    );
-  };
-  const renderDNSPrefetch = () => {
-    if (noJS) return null;
-    const prefetchArray = [];
-    if (env.polyfill && env.polyfill === 'cdn') {
-      prefetchArray.push((
-        <link
-          rel="dns-prefetch"
-          href="//cdnjs.cloudflare.com/"
-          key="cdnjs-cloudflare-dns-prefetch"
-        />
-      ));
-    }
-    if (env.react && env.react === 'cdn') {
-      prefetchArray.push((
-        <link
-          rel="dns-prefetch"
-          href="//unpkg.com"
-          key="unpkg-dns-prefetch"
-        />
-      ));
-    }
-    return prefetchArray;
-  };
   const renderPreLoadedData = () => {
-    if (noJS || !preloadedData) return null;
+    if (!preloadedData) return null;
     const PAW_PRELOADED_DATA = serialize(preloadedData);
     if (PAW_PRELOADED_DATA.length > 200000) {
       // eslint-disable-next-line no-console
@@ -187,18 +136,6 @@ export default (props: React.PropsWithChildren<IHtmlProps> = {
       />
     );
   };
-  const renderJsToBePreloaded = () => {
-    if (noJS || !jsToBePreloaded || !jsToBePreloaded.length) return null;
-    const PAW_PRELOAD_JS = serialize(jsToBePreloaded);
-    return (
-      <script
-        type="text/javascript"
-        id="__pawjs_preload_js"
-        dangerouslySetInnerHTML={{ __html: `window.PAW_PRELOAD_JS = ${PAW_PRELOAD_JS};` }}
-      />
-    );
-  };
-
   /**
    * Render the content inside body and the client root element
    */
@@ -218,21 +155,7 @@ export default (props: React.PropsWithChildren<IHtmlProps> = {
     return null;
   };
 
-  let loadingScript = '<>';
   const jsAssets: string [] = assets.filter(path => (path.endsWith('.js') && path.indexOf('hot-update') === -1));
-  if (!noJS) {
-    if (env.react && env.react === 'cdn') {
-      jsAssets.unshift(...reactCDN);
-    }
-    jsAssets
-      .forEach((path: string) => {
-        loadingScript = loadingScript.replace(
-          '<>',
-          `fnLoadPJS(${JSON.stringify(path)}, <>)`,
-        );
-      });
-  }
-  loadingScript = loadingScript.replace('<>', 'function(){}');
 
   /**
    * Render the code
@@ -246,30 +169,20 @@ export default (props: React.PropsWithChildren<IHtmlProps> = {
     >
       <head>
         <title>{getTitle()}</title>
-        {env.asyncCSS && <preload-css />}
         {renderCSSFiles()}
-        {renderJSLoader()}
-        {renderDNSPrefetch()}
         <link rel="manifest" href={`${appRootUrl}/manifest.json`} />
         {metaTags && metaTags.map(m => <meta key={JSON.stringify(m)} {...m} />)}
         {renderPreLoadedData()}
         {head}
       </head>
       <body className={getBodyClass()}>
+        {serverError}
         {renderPreContent()}
         {renderContent()}
         {renderPostContent()}
-        {renderJsToBePreloaded()}
-        {/* tslint:disable-next-line */}
-        {
-          !process.env.asyncJS && jsAssets.map(path => <script key={path} src={path} />)
-        }
-        {/* tslint:disable-next-line */}
-        {
-          process.env.asyncJS && (
-            <script dangerouslySetInnerHTML={{ __html: `setTimeout(function(){ ${loadingScript}() }, 1);` }} />
-          )
-        }
+        {jsAssets.map(js => (
+          <script key={js} src={js} defer async />
+        ))}
       </body>
     </html>
   );

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Redirect } from '@pawjs/pawjs/redirect';
+import { Redirect } from '@pawjs/pawjs';
 import GuestLayout from './guest-layout';
 import cookie from '../libs/cookie';
 import Authenticator from './fake-authenticator';

@@ -1,12 +1,16 @@
-class NotFoundError extends Error {
-  statusCode: number = 404;
+import { To } from 'react-router';
 
-  name: string = 'NotFound';
+class RedirectError extends Error {
+  statusCode: number = 302;
+
+  to: To = '';
+
+  name: string = 'RedirectError';
 
   constructor(...args: any) {
     super(...args);
     if (Error.captureStackTrace && typeof Error.captureStackTrace === 'function') {
-      Error.captureStackTrace(this, NotFoundError);
+      Error.captureStackTrace(this, RedirectError);
     }
   }
 
@@ -18,6 +22,14 @@ class NotFoundError extends Error {
     return this.statusCode;
   }
 
+  setRedirect(to: To) {
+    this.to = to;
+  }
+
+  getRedirect() {
+    return this.to;
+  }
+
   set code(code: number) {
     this.statusCode = code;
   }
@@ -27,4 +39,4 @@ class NotFoundError extends Error {
   }
 }
 
-export default NotFoundError;
+export default RedirectError;
