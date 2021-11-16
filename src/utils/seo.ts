@@ -9,6 +9,7 @@ import first from 'lodash/first';
 import isEqual from 'lodash/isEqual';
 import uniqWith from 'lodash/uniqWith';
 import { isBrowser } from './utils';
+import { getTextFromHtml } from '../plugins/html-to-text';
 
 const defaultMeta = (pwaSchema: any) => [
   {
@@ -157,13 +158,6 @@ const addUpdateMeta = (source: any [] = [], customMetas: any [] = []) => {
     }
   });
 };
-
-/**
- * Get text from html string
- * @param str
- * @returns {string}
- */
-export const getTextFromHtml = (str = '') => (str?.replace?.(/<(?:.|\n)*?>/gm, '')?.trim?.()) ?? '';
 
 /**
  * Return array of meta tags required for the route

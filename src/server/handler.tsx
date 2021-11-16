@@ -8,6 +8,7 @@ import _ from 'lodash';
 import { renderToString, renderToNodeStream } from 'react-dom/server';
 import { Routes, Route, Outlet } from 'react-router-dom';
 import { StaticRouter } from 'react-router-dom/server';
+import { CookiesProvider } from 'react-cookie';
 import RouteHandler from '../router/handler';
 import Html from '../components/Html';
 import ErrorBoundary from '../components/ErrorBoundary';
@@ -17,6 +18,7 @@ import { CompiledRoute } from '../@types/route';
 import NotFoundError from '../errors/not-found';
 import RedirectError from '../errors/redirect';
 import { PawProvider } from '../components/Paw';
+import { getBaseRequestUrl, getFullRequestUrl } from '../utils/server';
 
 const createHref = (to: To) => {
   return typeof to === 'string' ? to : createPath(to);
@@ -69,40 +71,6 @@ export default class ServerHandler extends AbstractPlugin {
       renderRoutes: new AsyncSeriesHook(['appRoutes', 'request', 'response']),
     };
     this.options = options;
-  }
-
-  getBaseRequestUrl(req: express.Request) {
-    try {
-      const host = req.get('X-Host') || req.get('X-Forwarded-Host') || req.get('host');
-      const protocol = req.protocol
-        || req.get('X-Forwarded-Protocol')
-        || req.get('X-Forwarded-Proto')
-        || (req.secure ? 'https' : 'http');
-      return `${protocol}://${host}`;
-    } catch (ex) {
-      return `${req.protocol}://${req.get('host')}`;
-      // Some error with parsing of url
-    }
-  }
-
-  getFullRequestUrl(req: express.Request) {
-    try {
-      const baseUrl = this.getBaseRequestUrl(req);
-      const parsedUrl = new URL(req.originalUrl, baseUrl);
-
-      let pathName = '/';
-      if (parsedUrl.pathname) {
-        pathName = parsedUrl.pathname;
-        if (!pathName.endsWith('/')) {
-          pathName += '/';
-        }
-      }
-      return `${baseUrl}${pathName}${parsedUrl.search || ''}`;
-    } catch (ex) {
-      const baseUrl = `${req.protocol}://${req.get('host')}`;
-      return `${baseUrl}${req.originalUrl}`;
-      // Some error with parsing of url
-    }
   }
 
   getModuleCSS(
@@ -197,8 +165,8 @@ export default class ServerHandler extends AbstractPlugin {
     let promises: Promise<any> [] = [];
     const preloadedData: any[] = [];
     const modulesInRoutes: string[] = ['pawProjectClient'];
-    const baseUrl = this.getBaseRequestUrl(req);
-    const fullUrl = this.getFullRequestUrl(req);
+    const baseUrl = getBaseRequestUrl(req);
+    const fullUrl = getFullRequestUrl(req);
     res.locals.fullUrl = fullUrl;
     let metaTags = generateMeta({}, {
       baseUrl,
@@ -239,6 +207,24 @@ export default class ServerHandler extends AbstractPlugin {
     });
 
     const cssToBeIncluded = this.getModuleCSS(modulesInRoutes);
+
+    /**
+     * Add cookies and search params to load data
+     */
+    // @ts-ignore universalCookies is part of the request
+    routeHandler.routeCompiler.preloadManager.setParams('getCookies', () => req.universalCookies);
+    const getSearchParams = (): URLSearchParams => {
+      let searchParams;
+      try {
+        const searchUrl = new URL(fullUrl);
+        searchParams = new URLSearchParams(searchUrl.search);
+      } catch (ex) {
+        searchParams = new URLSearchParams('');
+      }
+      return searchParams;
+    };
+    routeHandler.routeCompiler.preloadManager.setParams('getSearchParams', () => getSearchParams);
+
 
     await new Promise(r => this
       .hooks
@@ -345,25 +331,27 @@ export default class ServerHandler extends AbstractPlugin {
 
       let htmlContent = this.options.env.singlePageApplication ? '' : renderToString(
         (
-          <StaticRouter location={req.url} basename={appRootUrl}>
-            <PawProvider staticContext={application.context}>
-              <ErrorBoundary
-                NotFoundComponent={routeHandler.get404Component()}
-                ErrorComponent={routeHandler.getErrorComponent()}
-              >
-                {application.children}
-              </ErrorBoundary>
-            </PawProvider>
-          </StaticRouter>
+          // @ts-ignore universalCookies is provided from universalCookies express middleware
+          <CookiesProvider cookies={req.universalCookies}>
+            <StaticRouter location={req.url} basename={appRootUrl}>
+              <PawProvider staticContext={application.context}>
+                <ErrorBoundary
+                  NotFoundComponent={routeHandler.get404Component()}
+                  ErrorComponent={routeHandler.getErrorComponent()}
+                >
+                  {application.children}
+                </ErrorBoundary>
+              </PawProvider>
+            </StaticRouter>
+          </CookiesProvider>
         ),
       );
-      console.log(context);
 
       const redirectUrl = createHref(context.redirect?.to ?? '');
       if (redirectUrl) {
         // can use the `context.status` that
         // we added in RedirectWithStatus
-        res.redirect(context?.statusCode ?? 302, redirectUrl);
+        res.redirect(context.statusCode ?? 302, redirectUrl);
         return next();
       }
       renderedHtml = await this.renderHtml(application, req, res, htmlContent) as string;
@@ -394,11 +382,14 @@ export default class ServerHandler extends AbstractPlugin {
       }
       const application = {
         children: (
-          <StaticRouter location={req.url} basename={appRootUrl}>
-            <PawProvider>
-              <components.errorComponent error={ex} />
-            </PawProvider>
-          </StaticRouter>
+          // @ts-ignore universalCookies is provided from universalCookies express middleware
+          <CookiesProvider cookies={req.universalCookies}>
+            <StaticRouter location={req.url} basename={appRootUrl}>
+              <PawProvider>
+                <components.errorComponent error={ex} />
+              </PawProvider>
+            </StaticRouter>
+          </CookiesProvider>
         ),
       };
       res.status(context.statusCode ?? ex.code ?? 500).type('text/html');

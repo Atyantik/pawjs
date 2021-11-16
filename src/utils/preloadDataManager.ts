@@ -1,7 +1,7 @@
 export default class PreloadDataManager {
   params: any = {};
 
-  setParams(paramName: string, paramValue = null) {
+  setParams(paramName: string, paramValue: any = null) {
     if (paramName) {
       this.params[paramName] = paramValue;
     }

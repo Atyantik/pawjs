@@ -1,18 +1,21 @@
 import express from 'express';
 import hsts from 'hsts';
-import url from 'url';
+import cookiesMiddleware from 'universal-cookie-express';
 // eslint-disable-next-line
 import ProjectServer from 'pawProjectServer';
 import { NextHandleFunction } from 'connect';
 import RouteHandler from '../router/handler';
 import ServerHandler from './handler';
 import env from '../config';
+import { getFullRequestUrl } from '../utils/server';
 
 /**
  * Initialize express application
  * @type {*|Function}
  */
 const app = express();
+// Enable universal cookies
+app.use(cookiesMiddleware());
 
 /**
  * Initialize Route handler for PWA details
@@ -96,8 +99,9 @@ app.get(`${env.appRootUrl}/manifest.json`, (req, res) => {
 });
 
 const assetExtensions = /\.(jpg|jpeg|gif|svg|mov|bmp|css|js|png|webp|pdf|doc|docx|json)/;
-const isAssetRequest = (path: string) => {
-  const parsedUrl = url.parse(path);
+const isAssetRequest = (req: express.Request) => {
+  const fullUrl = getFullRequestUrl(req);
+  const parsedUrl = new URL(fullUrl);
   if (!parsedUrl.pathname) return false;
   return assetExtensions.test(parsedUrl.pathname);
 };
@@ -108,7 +112,7 @@ app.get('*', (req, res, next) => {
     || req.path.endsWith('favicon.ico')
     || req.path.endsWith('favicon.jpg')
     || req.path.endsWith('favicon.jpeg')
-    || isAssetRequest(req.path)
+    || isAssetRequest(req)
   ) {
     return next();
   }

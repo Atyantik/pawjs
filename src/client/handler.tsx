@@ -9,6 +9,8 @@ import {
   AsyncParallelBailHook,
   SyncHook,
 } from 'tapable';
+import { CookiesProvider } from 'react-cookie';
+import Cookies from 'universal-cookie';
 import RouteHandler from '../router/handler';
 import ErrorBoundary from '../components/ErrorBoundary';
 import { generateMeta } from '../utils/seo';
@@ -262,6 +264,18 @@ export default class ClientHandler extends AbstractPlugin {
       ),
     );
     const { preloadManager: { setParams, getParams } } = this.routeHandler.routeCompiler;
+    setParams('getCookies', () => new Cookies());
+    const getSearchParams = (): URLSearchParams => {
+      let searchParams;
+      try {
+        searchParams = new URLSearchParams(window.location.search);
+      } catch (ex) {
+        searchParams = new URLSearchParams('');
+      }
+      return searchParams;
+    };
+    setParams('getSearchParams', getSearchParams);
+
     await new Promise(r => this
       .hooks
       .beforeLoadData
@@ -378,18 +392,20 @@ export default class ClientHandler extends AbstractPlugin {
         // Render according to routes!
         renderer(
           (
-            <components.appRouter
-              basename={this?.options?.env?.appRootUrl}
-            >
-              <PawProvider>
-                <ErrorBoundary
-                  ErrorComponent={this?.routeHandler?.getErrorComponent()}
-                  NotFoundComponent={this?.routeHandler?.get404Component()}
-                >
-                  {application.children}
-                </ErrorBoundary>
-              </PawProvider>
-            </components.appRouter>
+            <CookiesProvider>
+              <components.appRouter
+                basename={this?.options?.env?.appRootUrl}
+              >
+                <PawProvider>
+                  <ErrorBoundary
+                    ErrorComponent={this?.routeHandler?.getErrorComponent()}
+                    NotFoundComponent={this?.routeHandler?.get404Component()}
+                  >
+                    {application.children}
+                  </ErrorBoundary>
+                </PawProvider>
+              </components.appRouter>
+            </CookiesProvider>
           ),
           domRootReference,
           () => {

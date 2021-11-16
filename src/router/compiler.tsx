@@ -56,7 +56,7 @@ export default class RouteCompiler {
         const extraParams = await this.preloadManager.getParams();
         const loadedData = await loadData({
           updateSeo,
-          ...props,
+          ...(props?.match ? { match: props.match } : {}),
           ...extraParams,
         });
         return loadedData || {};
