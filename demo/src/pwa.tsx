@@ -25,7 +25,7 @@ export default {
     {
       src: PwaIcon192,
       sizes: '192x192',
-      purpose: 'any maskable',
+      purpose: 'maskable',
     },
     {
       src: PwaIcon512,
