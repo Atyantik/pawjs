@@ -11,7 +11,6 @@ import directories from './utils/directories';
 import webRule from './inc/babel-web-rule';
 import resolverConfig from './inc/webpack-resolver-config';
 import pawConfig from '../config';
-import fontRule from './inc/babel-font-rule';
 import { pawExistsSync } from '../globals';
 
 const isHot = typeof process.env.PAW_HOT !== 'undefined' ? process.env.PAW_HOT === 'true' : pawConfig.hotReload;

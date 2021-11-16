@@ -79,7 +79,7 @@ if (pawConfig.hotReload) {
 
             if (!wConfig.module) wConfig.module = { rules: [] };
             // do not emit image files for server!
-            (wConfig?.module?.rules ?? []).forEach((r: any) => {
+            (wConfig.module.rules ?? []).forEach((r: any) => {
               const rule = r;
               if (rule.use && Array.isArray(rule.use)) {
                 rule.use.forEach((use: any) => {

@@ -168,7 +168,7 @@ export default class ServerHandler extends AbstractPlugin {
     /**
      * Get assets from cached app locals
      */
-    const assets = (this.options?.expressApp?.locals?.assets ?? []) || [];
+    const assets = (this.options.expressApp?.locals?.assets ?? []) || [];
     const {
       serverSideRender,
       appRootUrl,
@@ -359,7 +359,7 @@ export default class ServerHandler extends AbstractPlugin {
       );
       console.log(context);
 
-      const redirectUrl = createHref(context?.redirect?.to ?? '');
+      const redirectUrl = createHref(context.redirect?.to ?? '');
       if (redirectUrl) {
         // can use the `context.status` that
         // we added in RedirectWithStatus
@@ -367,7 +367,7 @@ export default class ServerHandler extends AbstractPlugin {
         return next();
       }
       renderedHtml = await this.renderHtml(application, req, res, htmlContent) as string;
-      res.status(context?.statusCode ?? 200).type('text/html');
+      res.status(context.statusCode ?? 200).type('text/html');
       res.write('<!DOCTYPE html>');
       res.write(renderedHtml);
       res.end();
@@ -401,7 +401,7 @@ export default class ServerHandler extends AbstractPlugin {
           </StaticRouter>
         ),
       };
-      res.status(context?.statusCode ?? ex.code ?? 500).type('text/html');
+      res.status(context.statusCode ?? ex.code ?? 500).type('text/html');
       res.write('<!DOCTYPE html>');
       renderedHtml = renderToString(
         (

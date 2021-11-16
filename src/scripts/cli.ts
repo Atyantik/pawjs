@@ -115,7 +115,7 @@ export default class CliHandler {
    * Start server depending on the env variable
    */
   startServer() {
-    process.env.PAW_HOT = process.env?.PAW_HOT ?? (process.env?.PAW_ENV === 'development' ? 'true' : 'false');
+    process.env.PAW_HOT = process.env.PAW_HOT ?? (process.env.PAW_ENV === 'development' ? 'true' : 'false');
     import('../server/webpack-start');
   }
 

@@ -1,4 +1,3 @@
-import { HttpStatus } from '@pawjs/pawjs';
 import GuestLayout from './guest-layout';
 import '../resources/css/global.css';
 import localStyles from './local-styles.css';

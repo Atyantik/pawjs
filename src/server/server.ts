@@ -139,7 +139,7 @@ app.get('*', (req, res, next) => {
   // Wait for all routes to load everything!
   return clientRouteHandler.hooks.initRoutes.callAsync(
     fullUrl,
-    req?.headers?.['user-agent'] ?? '',
+    req.headers?.['user-agent'] ?? '',
     (err) => {
       if (err) {
         // eslint-disable-next-line

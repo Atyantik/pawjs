@@ -78,7 +78,7 @@ export default class ClientHandler extends AbstractPlugin {
     const routes = this.routeHandler.getRoutes();
     let pathname = location.pathname;
     if (this.useHashRouter() && location.hash) {
-      pathname = ((location.hash || '').replace('#', '') || location.pathname);
+      pathname = location.hash.replace('#', '') || location.pathname;
     }
     return RouteHandler.matchRoutes(
       routes,
