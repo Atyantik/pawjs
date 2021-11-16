@@ -18,6 +18,7 @@ const defaultOptions = {
   sourceMap: !isProduction,
   compress: isProduction,
   hot: false,
+  emit: true,
 };
 
 export default (options: any = {}) => {
@@ -31,9 +32,8 @@ export default (options: any = {}) => {
       ],
       use: [
         // Translates CSS into CommonJS
-        {
-          loader: o.hot ? 'style-loader' : MiniCssExtractPlugin.loader,
-        },
+        ...(o.hot ? [{ loader: 'style-loader' }] : []),
+        ...(!o.hot ? [{ loader: MiniCssExtractPlugin.loader, options: { emit: o.emit } }] : []),
         {
           loader: 'css-loader',
           options: {
@@ -89,9 +89,8 @@ export default (options: any = {}) => {
       ],
       use: [
         // Translates CSS into CommonJS
-        {
-          loader: o.hot ? 'style-loader' : MiniCssExtractPlugin.loader,
-        },
+        ...(o.hot ? [{ loader: 'style-loader' }] : []),
+        ...(!o.hot ? [{ loader: MiniCssExtractPlugin.loader, options: { emit: o.emit } }] : []),
         {
           loader: 'css-loader',
           options: {

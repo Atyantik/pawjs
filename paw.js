@@ -1,6 +1,25 @@
 #!/usr/bin/env node
+const fs = require('fs');
+const path = require('path');
+
+let useCustomEnvPath = false;
 // Read configurations from the .env as soon as possible
-require('dotenv').config();
+if (process.env.ENV_CONFIG_PATH) {
+  let envFilePath = process.env.ENV_CONFIG_PATH;
+  if (!path.isAbsolute(process.env.ENV_CONFIG_PATH)) {
+    envFilePath = path.resolve(process.cwd(), envFilePath);
+  }
+  if (fs.existsSync(envFilePath)) {
+    useCustomEnvPath = true;
+    require('dotenv').config({
+      path: envFilePath,
+    });
+  }
+}
+if (!useCustomEnvPath) {
+  require('dotenv').config();
+}
+
 const { getDefault } = require('./src/globals');
 const { resolveExtensions } = getDefault(require('./src/extensions'));
 

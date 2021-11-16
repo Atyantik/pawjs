@@ -1,5 +1,6 @@
 import path from 'path';
 import fs from 'fs';
+import fse from 'fs-extra';
 import del from 'del';
 import mv from 'mv';
 import request from 'supertest';
@@ -11,7 +12,6 @@ import directories from '../webpack/utils/directories';
 import wHandler from '../webpack';
 import webRule from '../webpack/inc/babel-web-rule';
 import serverRule from '../webpack/inc/babel-server-rule';
-import SyncedFilesPlugin from '../webpack/plugins/synced-files-plugin';
 import ExtractEmittedAssets from '../webpack/plugins/extract-emitted-assets';
 
 import { pawExistsSync } from '../globals';
@@ -130,27 +130,6 @@ console.log(`
   Thank you for your patience.
 ===================================================
 `);
-const imageExtensions: string [] = [
-  'jpg',
-  'jpeg',
-  'png',
-  'gif',
-  'svg',
-  'webp',
-];
-const isImageRule = (rule: RuleSetRule) => {
-  let isValid = true;
-  imageExtensions.forEach((ext) => {
-    if (!isValid) return;
-    if (rule.test instanceof RegExp) {
-      // rule.test: RegExp
-      isValid = rule.test.test(`.${ext}`);
-    } else {
-      isValid = false;
-    }
-  });
-  return isValid;
-};
 
 const isBabelRule = (rule: RuleSetRule) => {
   if (typeof rule === 'undefined') return false;
@@ -162,40 +141,6 @@ const isBabelRule = (rule: RuleSetRule) => {
     typeof rule.use === 'object'
     && rule.use.loader === 'babel-loader'
   );
-};
-const hasSyncedFileLoader = (rule: RuleSetRule) => {
-  let hasSyncFile = false;
-  if (Array.isArray(rule.use) && rule.use.length) {
-    rule.use.forEach((u: any) => {
-      if (hasSyncFile) return;
-      if (
-        u.loader === pawExistsSync(
-          path.join(__dirname, '../webpack/plugins/synced-files-plugin/loader.js'),
-        )
-      ) {
-        hasSyncFile = true;
-      }
-    });
-  }
-
-  if (rule.oneOf && rule.oneOf.length) {
-    rule.oneOf.forEach((oneOf: RuleSetRule) => {
-      if (hasSyncFile) return;
-      if (oneOf.use && Array.isArray(oneOf.use)) {
-        oneOf.use.forEach((u: any) => {
-          if (hasSyncFile) return;
-          if (
-            u.loader === pawExistsSync(
-              path.join(__dirname, '../webpack/plugins/synced-files-plugin/loader.js'),
-            )
-          ) {
-            hasSyncFile = true;
-          }
-        });
-      }
-    });
-  }
-  return hasSyncFile;
 };
 
 let cleanDistFolder = false;
@@ -263,27 +208,7 @@ wHandler.hooks.beforeConfig.tap('AddSyncedFilesPlugin', (wEnv, wType, wConfigs) 
           // @ts-ignore
           wConfig.module.rules[index] = webRule({ hot: false });
         }
-
-        if (isImageRule(rule) && !hasSyncedFileLoader(rule)) {
-          if (rule.use) {
-            rule.use = SyncedFilesPlugin.loader(rule.use);
-          }
-          if (rule.oneOf) {
-            rule.oneOf = SyncedFilesPlugin.loaderOneOf(rule.oneOf);
-          }
-        }
       });
-
-      const hasSyncedFilePlugin = wConfig.plugins
-        && wConfig.plugins.some((p) => p instanceof SyncedFilesPlugin);
-
-      if (!hasSyncedFilePlugin) {
-        if (typeof wConfig.plugins === 'undefined') wConfig.plugins = [];
-        wConfig.plugins.push(new SyncedFilesPlugin({
-          outputPath: syncedOutputPath,
-          outputFileName: syncedOutputFilename,
-        }));
-      }
 
       const hasExtractEmittedAssets = wConfig.plugins
         && wConfig.plugins.some((p) => p instanceof ExtractEmittedAssets);
@@ -326,29 +251,7 @@ wHandler.hooks.beforeConfig.tap('AddSyncedFilesPlugin', (wEnv, wType, wConfigs) 
             hot: false,
           });
         }
-
-        if (isImageRule(rule) && !hasSyncedFileLoader(rule)) {
-          if (rule.use) {
-            // eslint-disable-next-line
-            rule.use = SyncedFilesPlugin.loader(rule.use);
-          }
-
-          if (rule.oneOf) {
-            // eslint-disable-next-line
-            rule.oneOf = SyncedFilesPlugin.loaderOneOf(rule.oneOf);
-          }
-        }
       });
-
-      const hasSyncedFilePlugin = wConfig.plugins
-        && wConfig.plugins.some((p) => p instanceof SyncedFilesPlugin);
-      if (!hasSyncedFilePlugin) {
-        wConfig.plugins = wConfig.plugins || [];
-        wConfig.plugins.push(new SyncedFilesPlugin({
-          outputPath: syncedOutputPath,
-          outputFileName: syncedOutputFilename,
-        }));
-      }
     });
   }
 });
@@ -374,13 +277,36 @@ try {
     }
     // eslint-disable-next-line
     console.log(webStats?.toString(stats));
-    webpack(serverConfig, (serverErr, serverStats) => {
+    webpack(serverConfig, async (serverErr, serverStats) => {
       if (serverErr || serverStats?.hasErrors()) {
         // Handle errors here
         // eslint-disable-next-line
-        console.log('Server Compiler error occurred. Please handle error here');
+        console.log(serverStats?.toString(stats));
         return;
       }
+      try {
+        if (fs.existsSync(path.resolve(directories.dist, 'images'))) {
+          fse.moveSync(
+            path.resolve(directories.dist, 'images'),
+            path.resolve(directories.build, 'images'),
+            { overwrite: true },
+          );
+        }
+      } catch (ex) { console.log(ex); }
+
+      try {
+        if (fs.existsSync(path.resolve(directories.dist, 'assets'))) {
+          fse.moveSync(
+            path.resolve(directories.dist, 'assets'),
+            path.resolve(directories.build, 'assets'),
+            { overwrite: true },
+          );
+        }
+
+      } catch (ex) {
+        console.log(ex);
+      }
+
 
       // eslint-disable-next-line
       console.log(serverStats?.toString(stats));

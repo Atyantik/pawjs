@@ -5,7 +5,7 @@
   "scripts": {
     "build": "npm run build:prod",
     "build:dev": "pawjs --no-cache --env=development --verbose build",
-    "build:prod": "pawjs --no-cache --env=production build",
+    "build:prod": "ENV_CONFIG_PATH=./.prod.env pawjs --no-cache --env=production build",
     "lint": "eslint -c ./node_modules/@pawjs/pawjs/.eslintrc --ignore-path ./node_modules/@pawjs/pawjs/.gitignore ./src",
     "lint:fix": "eslint -c @pawjs/pawjs/.eslintrc --ignore-path @pawjs/pawjs/.gitignore --fix ./src",
     "start": "npm run start:dev",
@@ -22,6 +22,7 @@
   "dependencies": {
     "@pmmmwh/react-refresh-webpack-plugin": "^0.5.1",
     "bulma": "^0.9.3",
-    "cross-fetch": "^3.0.4"
+    "cross-fetch": "^3.0.4",
+    "fs-extra": "^10.0.0"
   }
 }

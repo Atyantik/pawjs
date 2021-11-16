@@ -20,10 +20,12 @@ export default {
   theme_color: '#fff',
   display: 'standalone',
   description: process.env.APP_DESCRIPTION,
+  appleTouchIcon: PwaIcon192,
   icons: [
     {
       src: PwaIcon192,
       sizes: '192x192',
+      purpose: 'any maskable',
     },
     {
       src: PwaIcon512,

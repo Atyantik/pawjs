@@ -25,16 +25,16 @@ export default {
         type: "javascript/auto",
       },
       assetsRule({
-        outputPath: 'build/assets/',
+        outputPath: `${pawConfig.resourcesBaseUrl}/build/images/`.replace('//', '/')
       }),
       {
         resourceQuery: /raw/,
         type: 'asset/source',
       },
       serverRule({ hot: false, noChunk: true, cacheDirectory: process.env.PAW_CACHE === 'true' }),
-      ...cssRule(),
+      ...cssRule({ emit: false }),
       imageRule({
-        outputPath: 'build/images/',
+        outputPath: `${pawConfig.resourcesBaseUrl}/build/images/`.replace('//', '/')
       }),
     ],
   },
