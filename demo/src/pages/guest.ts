@@ -1,13 +1,13 @@
 import fetch from 'cross-fetch';
 import skeleton from '../components/skeleton';
+import { IRoute } from '@pawjs/pawjs';
 import FeaturesImage from '../resources/images/seo/features.png';
 import CSSGlobalLocalImage from '../resources/images/seo/css-global-local.png';
 import SkeletonImage from '../resources/images/seo/skeleton-loading.png';
 
-export default [
+const routes: IRoute[] = [
   {
     path: '/home',
-    exact: true,
     component: () => import('../components/home'),
     seo: {
       title: 'Home | ReactPWA Demo',
@@ -17,7 +17,6 @@ export default [
   },
   {
     path: '/global-local-css',
-    exact: true,
     component: () => import('../components/global-local-css'),
     seo: {
       title: 'CSS - Globally & Locally | ReactPWA Demo',
@@ -27,7 +26,6 @@ export default [
   },
   {
     path: '/typescript-counter',
-    exact: true,
     component: () => import('../components/typescript-counter'),
     seo: {
       title: 'TypeScript Counter | ReactPWA Demo',
@@ -37,7 +35,6 @@ export default [
   },
   {
     path: '/skeleton-loading',
-    exact: true,
     loadData: async () => new Promise((r) => {
       setTimeout(() => {
         fetch('https://www.atyantik.com/wp-json/wp/v2/posts/?per_page=4&_fields[]=title&_fields[]=excerpt&_fields[]=jetpack_featured_media_url')
@@ -56,7 +53,6 @@ export default [
   },
   {
     path: '/contribute',
-    exact: true,
     component: () => import('../components/contribute'),
     seo: {
       title: 'Contribute | ReactPWA Demo',
@@ -64,3 +60,5 @@ export default [
     },
   },
 ];
+
+export default routes;

@@ -6,7 +6,7 @@ const javascriptExtensions = [
   '.ts',
   '.tsx',
 ];
-const javascriptExtensionRegExp = /\.(mj|j|t)sx?$/;
+const javascriptExtensionRegExp = /\.(j|t)sx?$/;
 
 // Including web assembly
 const resolveExtensions = ['.wasm']

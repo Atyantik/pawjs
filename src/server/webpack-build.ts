@@ -1,27 +1,20 @@
-/* global pawExistsSync */
 import path from 'path';
 import fs from 'fs';
-import del from 'del';
-import mv from 'mv';
+import fse from 'fs-extra';
 import request from 'supertest';
-import webpack, { RuleSetRule } from 'webpack';
+import webpack from 'webpack';
 import { CleanWebpackPlugin } from 'clean-webpack-plugin';
 import CopyWebpackPlugin from 'copy-webpack-plugin';
 import pawConfig from '../config';
 import directories from '../webpack/utils/directories';
 import wHandler from '../webpack';
-// @ts-ignore
-import webRule from '../webpack/inc/babel-web-rule';
-// @ts-ignore
-import serverRule from '../webpack/inc/babel-server-rule';
-// @ts-ignore
-import SyncedFilesPlugin from '../webpack/plugins/synced-files-plugin';
-// @ts-ignore
 import ExtractEmittedAssets from '../webpack/plugins/extract-emitted-assets';
+
+import { pawExistsSync } from '../globals';
 
 const isVerbose = process.env.PAW_VERBOSE === 'true';
 
-const stats: webpack.Stats.ToStringOptionsObject = {
+const stats = {
   // fallback value for stats options when
   // an option is not defined (has precedence over local webpack defaults)
   all: undefined,
@@ -121,15 +114,6 @@ const stats: webpack.Stats.ToStringOptionsObject = {
 
   // Add warnings
   warnings: true,
-
-  // Filter warnings to be shown (since webpack 2.4.0),
-  // can be a String, Regexp, a function getting the warning and returning a boolean
-  // or an Array of a combination of the above. First match wins.
-  warningsFilter: (warning: string) => (
-    warning.indexOf('node_modules/express') !== -1
-    || warning.indexOf('node_modules/encoding') !== -1
-    || warning.indexOf('config/index') !== -1
-  ),
 };
 
 // Notify the user that compilation has started and should be done soon.
@@ -142,83 +126,10 @@ console.log(`
   Thank you for your patience.
 ===================================================
 `);
-const imageExtensions: string [] = [
-  'jpg',
-  'jpeg',
-  'png',
-  'gif',
-  'svg',
-  'webp',
-];
-const isImageRule = (rule: RuleSetRule) => {
-  let isValid = true;
-  imageExtensions.forEach((ext) => {
-    if (!isValid) return;
-    if (rule.test instanceof RegExp) {
-      // rule.test: RegExp
-      isValid = rule.test.test(`.${ext}`);
-    } else {
-      isValid = false;
-    }
-  });
-  return isValid;
-};
-
-const isBabelRule = (rule: RuleSetRule) => {
-  if (typeof rule === 'undefined') return false;
-  if (Array.isArray(rule.use)) {
-    return rule.use.some((u: any) => u.loader && u.loader === 'babel-loader');
-  }
-
-  return (
-    typeof rule.use === 'object'
-    && rule.use.loader === 'babel-loader'
-  );
-};
-const hasSyncedFileLoader = (rule: RuleSetRule) => {
-  let hasSyncFile = false;
-  if (Array.isArray(rule.use) && rule.use.length) {
-    rule.use.forEach((u: any) => {
-      if (hasSyncFile) return;
-      if (
-        u.loader === pawExistsSync(
-          path.join(__dirname, '../webpack/plugins/synced-files-plugin/loader.js'),
-        )
-      ) {
-        hasSyncFile = true;
-      }
-    });
-  }
-
-  if (rule.oneOf && rule.oneOf.length) {
-    rule.oneOf.forEach((oneOf: RuleSetRule) => {
-      if (hasSyncFile) return;
-      if (oneOf.use && Array.isArray(oneOf.use)) {
-        oneOf.use.forEach((u: any) => {
-          if (hasSyncFile) return;
-          if (
-            u.loader === pawExistsSync(
-              path.join(__dirname, '../webpack/plugins/synced-files-plugin/loader.js'),
-            )
-          ) {
-            hasSyncFile = true;
-          }
-        });
-      }
-    });
-  }
-  return hasSyncFile;
-};
 
 let cleanDistFolder = false;
 let copyPublicFolder = !fs.existsSync(path.join(directories.src, 'public'));
 wHandler.hooks.beforeConfig.tap('AddSyncedFilesPlugin', (wEnv, wType, wConfigs) => {
-  // Before fresh build remove images sync file from previous build
-  const syncedOutputFilename = 'synced-files.json';
-  const syncedOutputPath = directories.dist;
-  if (fs.existsSync(path.join(syncedOutputPath, syncedOutputFilename))) {
-    fs.unlinkSync(path.join(syncedOutputPath, syncedOutputFilename));
-  }
   // Web specific configurations
   if (wType === 'web') {
     wConfigs.forEach((c: webpack.Configuration) => {
@@ -229,7 +140,7 @@ wHandler.hooks.beforeConfig.tap('AddSyncedFilesPlugin', (wEnv, wType, wConfigs) 
          * Check if plugins array exists and if it does
          * check if CleanWebpackPlugin exists inside the plugin array
          */
-        const hasCleanWebpackPlugin = wConfig.plugins.some(p => p instanceof CleanWebpackPlugin);
+        const hasCleanWebpackPlugin = wConfig.plugins.some((p) => p instanceof CleanWebpackPlugin);
         if (!hasCleanWebpackPlugin) {
           /**
            * Push CleanWebpackPlugin to plugin list and ask it to clean
@@ -251,51 +162,18 @@ wHandler.hooks.beforeConfig.tap('AddSyncedFilesPlugin', (wEnv, wType, wConfigs) 
          * is copied as it is to the build/public folder
          */
         wConfig.plugins.push(new CopyWebpackPlugin({
-          patterns: [{
-            from: path.join(directories.src, 'public'),
-            to: directories.build,
-          }],
+          patterns: [
+            {
+              from: path.join(directories.src, 'public'),
+              to: directories.build,
+            },
+          ],
         }));
         copyPublicFolder = true;
       }
 
-      // Initialize wConfig.module if not already exists
-      if (!wConfig.module) wConfig.module = { rules: [] };
-      wConfig.module.rules.forEach((r: webpack.RuleSetRule, index: number) => {
-        const rule = r;
-        /**
-         * Check for babel rule and replace it with babel rule that
-         * with babel web rule with param hot as false
-         */
-        if (isBabelRule(rule)) {
-          // We already know that wConfig.module is not undefined
-          // @ts-ignore
-          wConfig.module.rules[index] = webRule({ hot: false });
-        }
-
-        if (isImageRule(rule) && !hasSyncedFileLoader(rule)) {
-          if (rule.use) {
-            rule.use = SyncedFilesPlugin.loader(rule.use);
-          }
-          if (rule.oneOf) {
-            rule.oneOf = SyncedFilesPlugin.loaderOneOf(rule.oneOf);
-          }
-        }
-      });
-
-      const hasSyncedFilePlugin = wConfig.plugins
-        && wConfig.plugins.some(p => p instanceof SyncedFilesPlugin);
-
-      if (!hasSyncedFilePlugin) {
-        if (typeof wConfig.plugins === 'undefined') wConfig.plugins = [];
-        wConfig.plugins.push(new SyncedFilesPlugin({
-          outputPath: syncedOutputPath,
-          outputFileName: syncedOutputFilename,
-        }));
-      }
-
       const hasExtractEmittedAssets = wConfig.plugins
-        && wConfig.plugins.some(p => p instanceof ExtractEmittedAssets);
+        && wConfig.plugins.some((p) => p instanceof ExtractEmittedAssets);
       if (!hasExtractEmittedAssets) {
         if (typeof wConfig.plugins === 'undefined') wConfig.plugins = [];
         wConfig.plugins.push(new ExtractEmittedAssets({
@@ -323,39 +201,6 @@ wHandler.hooks.beforeConfig.tap('AddSyncedFilesPlugin', (wEnv, wType, wConfigs) 
         // @ts-ignore
         wConfig.externals['pwa-assets'] = './assets.json';
       }
-
-      if (!wConfig.module) wConfig.module = { rules: [] };
-      wConfig.module.rules.forEach((rule: RuleSetRule, index: number) => {
-        if (isBabelRule(rule)) {
-          // @ts-ignore
-          wConfig.module.rules[index] = serverRule({
-            noChunk: true,
-            hot: false,
-          });
-        }
-
-        if (isImageRule(rule) && !hasSyncedFileLoader(rule)) {
-          if (rule.use) {
-            // eslint-disable-next-line
-            rule.use = SyncedFilesPlugin.loader(rule.use);
-          }
-
-          if (rule.oneOf) {
-            // eslint-disable-next-line
-            rule.oneOf = SyncedFilesPlugin.loaderOneOf(rule.oneOf);
-          }
-        }
-      });
-
-      const hasSyncedFilePlugin = wConfig.plugins
-        && wConfig.plugins.some(p => p instanceof SyncedFilesPlugin);
-      if (!hasSyncedFilePlugin) {
-        wConfig.plugins = wConfig.plugins || [];
-        wConfig.plugins.push(new SyncedFilesPlugin({
-          outputPath: syncedOutputPath,
-          outputFileName: syncedOutputFilename,
-        }));
-      }
     });
   }
 });
@@ -368,95 +213,86 @@ try {
   const webConfig = wHandler.getConfig(process.env.PAW_ENV, 'web');
 
   // Create a webpack web compiler from the web configurations
-  webpack(webConfig, (webErr: Error, webStats: webpack.Stats) => {
-    if (webErr || webStats.hasErrors()) {
+  webpack(webConfig, (webErr?: Error, webStats?: webpack.Stats) => {
+    if (webErr || webStats?.hasErrors()) {
       // eslint-disable-next-line
       console.log(webErr);
       // Handle errors here
       // eslint-disable-next-line
-      webStats.toJson && console.log(webStats.toJson());
+      webStats?.toJson && console.log(webStats.toJson());
       // eslint-disable-next-line
       console.log('Web compiler error occurred. Please handle error here');
       return;
     }
     // eslint-disable-next-line
-    console.log(webStats.toString(stats));
-    webpack(serverConfig, (serverErr, serverStats) => {
-      if (serverErr || serverStats.hasErrors()) {
+    console.log(webStats?.toString(stats));
+    webpack(serverConfig, async (serverErr, serverStats) => {
+      if (serverErr || serverStats?.hasErrors()) {
         // Handle errors here
-        // eslint-disable-next-line
-        console.log('Server Compiler error occurred. Please handle error here');
+        if (serverErr) console.log(serverErr);
+        console.log(serverStats?.toString?.(stats) );
         return;
       }
 
-      // eslint-disable-next-line
-      console.log(serverStats.toString(stats));
+      // Move the images folder created from server compilation
+      try {
+        if (fs.existsSync(path.resolve(directories.dist, 'images'))) {
+          fse.moveSync(
+            path.resolve(directories.dist, 'images'),
+            path.resolve(directories.build, 'images'),
+            { overwrite: true },
+          );
+        }
+      } catch (ex) { console.log(ex); }
 
+      try {
+        if (fs.existsSync(path.resolve(directories.dist, 'assets'))) {
+          fse.moveSync(
+            path.resolve(directories.dist, 'assets'),
+            path.resolve(directories.build, 'assets'),
+            { overwrite: true },
+          );
+        }
+      } catch (ex) { console.log(ex); }
+
+      console.log(serverStats?.toString(stats));
       if (pawConfig.singlePageApplication) {
-        // eslint-disable-next-line
         console.log('Creating static files...');
         // @ts-ignore
         const outputConfig = serverConfig[0].output;
-        // eslint-disable-next-line
         let server = require(pawExistsSync(path.join(outputConfig.path, outputConfig.filename)));
         server = server.default ? server.default : server;
 
         // eslint-disable-next-line
         console.log('Generating index.html & manifest.json');
 
-        Promise.all([
+        const [indexResponse, manifestResponse] = await Promise.all([
           request(server).get('/'),
           request(server).get('/manifest.json'),
-        ]).then(([indexResponse, manifestResponse]) => {
-          fs.writeFileSync(path.join(directories.build, 'index.html'), indexResponse.text, 'utf-8');
-          fs.writeFileSync(
-            path.join(directories.build, 'manifest.json'),
-            manifestResponse.text,
-            'utf-8',
-          );
-
-          // eslint-disable-next-line
-          console.log(`Successfully created: ${path.join(directories.build, 'index.html')}`);
-          // eslint-disable-next-line
-          console.log(`Successfully created: ${path.join(directories.build, 'manifest.json')}`);
-        }).then(async () => {
-          // eslint-disable-next-line
-          console.log('\n\nRe-organizing files...\n');
-          try {
-            const tempPawJSBuildPath = path.join(directories.root, 'pawjs-temp-build');
-            // Move to tempFolder
-            await del([tempPawJSBuildPath]);
-            mv(
-              directories.build,
-              tempPawJSBuildPath,
-              {
-                mkdirp: true,
-                clobber: true,
-              },
-              async (err) => {
-                if (err) {
-                  // eslint-disable-next-line
-                  console.error(err);
-                  return;
-                }
-                await del([directories.dist]);
-                mv(tempPawJSBuildPath, directories.dist, { clobber: true }, (err1) => {
-                  if (err1) {
-                    // eslint-disable-next-line
-                    console.error(err1);
-                    return;
-                  }
-                  // eslint-disable-next-line
-                  console.log('Static site generated successfully.');
-                  process.exit(0);
-                });
-              },
-            );
-          } catch (ex) {
-            // eslint-disable-next-line
-            console.log(ex);
+        ]);
+        fs.writeFileSync(path.join(directories.build, 'index.html'), indexResponse.text, 'utf-8');
+        fs.writeFileSync(
+          path.join(directories.build, 'manifest.json'),
+          manifestResponse.text,
+          'utf-8',
+        );
+        console.log(`Successfully created: ${path.join(directories.build, 'index.html')}`);
+        console.log(`Successfully created: ${path.join(directories.build, 'manifest.json')}`);
+        console.log('\n\nRe-organizing files...\n');
+        try {
+          const tempPawJSBuildPath = path.join(directories.root, 'pawjs-temp-build');
+          if (fse.existsSync(tempPawJSBuildPath)) {
+            fse.removeSync(tempPawJSBuildPath);
           }
-        });
+
+          fse.moveSync(directories.build, tempPawJSBuildPath);
+          fse.removeSync(directories.dist);
+          fse.moveSync(tempPawJSBuildPath, directories.dist);
+          console.log('Static site generated successfully.');
+        } catch (ex) {
+          // eslint-disable-next-line
+          console.log(ex);
+        }
       }
     });
   });

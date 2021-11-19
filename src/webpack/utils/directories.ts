@@ -1,6 +1,5 @@
-/* global getDefault */
-/* global pawExistsSync */
 import path from 'path';
+import { getDefault, pawExistsSync } from '../../globals';
 
 interface IDirectories {
   root: string;

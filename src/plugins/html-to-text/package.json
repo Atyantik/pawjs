@@ -1,0 +1,5 @@
+{
+  "name": "html-to-text",
+  "main": "./server.ts",
+  "browser": "./client.ts"
+}

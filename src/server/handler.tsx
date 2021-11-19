@@ -3,10 +3,12 @@ import {
   AsyncSeriesHook,
 } from 'tapable';
 import express from 'express';
+import { createPath, To } from 'history';
 import _ from 'lodash';
-import { renderToString } from 'react-dom/server';
-import { renderRoutes } from 'react-router-config';
-import { StaticRouter, Route } from 'react-router';
+import { renderToString, renderToNodeStream } from 'react-dom/server';
+import { Routes, Route, Outlet } from 'react-router-dom';
+import { StaticRouter } from 'react-router-dom/server';
+import { CookiesProvider } from 'react-cookie';
 import RouteHandler from '../router/handler';
 import Html from '../components/Html';
 import ErrorBoundary from '../components/ErrorBoundary';
@@ -14,12 +16,24 @@ import { generateMeta } from '../utils/seo';
 import AbstractPlugin from '../abstract-plugin';
 import { CompiledRoute } from '../@types/route';
 import NotFoundError from '../errors/not-found';
+import RedirectError from '../errors/redirect';
+import { PawProvider } from '../components/Paw';
+import { getBaseRequestUrl, getFullRequestUrl } from '../utils/server';
+
+const createHref = (to: To) => {
+  return typeof to === 'string' ? to : createPath(to);
+};
 
 type Options = {
   env: any;
+  expressApp?: express.Application,
 };
 type DependencyMapItem = { modules: string[], path: string };
 
+type RenderHtmlType<T> =
+  T extends true ? ReturnType<typeof renderToNodeStream> :
+    T extends false ? ReturnType<typeof renderToString> :
+      never;
 interface IApplication {
   context: any;
   htmlProps: any;
@@ -59,11 +73,10 @@ export default class ServerHandler extends AbstractPlugin {
     this.options = options;
   }
 
-  // eslint-disable-next-line class-methods-use-this
   getModuleCSS(
     modules: string[],
-    dependencyMap: DependencyMapItem[],
   ) {
+    const dependencyMap = this.options?.expressApp?.locals?.cssDependencyMap ?? [];
     const moduleCss: string [] = [];
     modules.forEach((mod) => {
       dependencyMap.forEach((c: DependencyMapItem) => {
@@ -75,27 +88,35 @@ export default class ServerHandler extends AbstractPlugin {
     return moduleCss;
   }
 
+  /**
+   * Render HTML with given parameters
+   * @param app
+   * @param req
+   * @param res
+   * @param htmlContent
+   * @param stream
+   * @returns
+   */
   async renderHtml(
     app: IApplication,
     req: express.Request,
     res: express.Response,
     htmlContent?: string,
-  ) {
+    stream: boolean = false,
+  ): Promise<RenderHtmlType<typeof stream>> {
     await new Promise(r => this.hooks.beforeHtmlRender.callAsync(app, req, res, r));
     const content = app.htmlProps.htmlContent ? app.htmlProps.htmlContent : htmlContent;
-    return renderToString(
+    const renderer = stream ? renderToNodeStream : renderToString;
+    return renderer(
       (
         <Html
           assets={app.htmlProps.assets}
-          noJS={app.htmlProps.noJS}
           metaTags={app.htmlProps.metaTags}
           pwaSchema={app.htmlProps.pwaSchema}
           preloadedData={app.htmlProps.preloadedData}
           cssFiles={app.htmlProps.cssFiles}
-          jsToBePreloaded={app.htmlProps.jsToBePreloaded}
           head={app.htmlProps.head}
           footer={app.htmlProps.footer}
-          env={app.htmlProps.env}
           appRootUrl={app.appRootUrl || (app.htmlProps.env && app.htmlProps.env.appRootUrl) || ''}
           clientRootElementId={this.options.env.clientRootElementId}
           dangerouslySetInnerHTML={(content ? { __html: content } : { __html: '' })}
@@ -110,15 +131,15 @@ export default class ServerHandler extends AbstractPlugin {
       req,
       res,
       next,
-      assets,
-      cssDependencyMap,
-      jsDependencyMap,
-    }: any,
+    }: { routeHandler: RouteHandler, req: express.Request, res: express.Response, next: express.NextFunction },
   ) {
+    /**
+     * Get assets from cached app locals
+     */
+    const assets = (this.options.expressApp?.locals?.assets ?? []) || [];
     const {
       serverSideRender,
       appRootUrl,
-      noJS,
     } = this.options.env;
     this.routeHandler = routeHandler;
 
@@ -134,27 +155,28 @@ export default class ServerHandler extends AbstractPlugin {
         r,
       ));
 
+    // @todo Route handler computation and requests can be improved
+    // We can optimize it for one time load only.
     let routes = routeHandler.getRoutes();
     const pwaSchema = routeHandler.getPwaSchema();
     const seoSchema = routeHandler.getDefaultSeoSchema();
     let renderedHtml = '';
-    let context:any = {};
+    let context: any = {};
     let promises: Promise<any> [] = [];
     const preloadedData: any[] = [];
-    const jsToBePreloaded: string[] = [];
     const modulesInRoutes: string[] = ['pawProjectClient'];
-    const baseUrl = `${req.protocol}://${req.get('host')}`;
-    const fullUrl = `${baseUrl}${req.originalUrl}`;
+    const baseUrl = getBaseRequestUrl(req);
+    const fullUrl = getFullRequestUrl(req);
+    res.locals.fullUrl = fullUrl;
     let metaTags = generateMeta({}, {
       baseUrl,
       seoSchema,
       pwaSchema,
       url: fullUrl,
     });
-    const modCss = this.getModuleCSS(modulesInRoutes, cssDependencyMap);
+    const modCss = this.getModuleCSS(modulesInRoutes);
     let htmlProps: any = {
       assets,
-      noJS,
       metaTags,
       pwaSchema,
       cssFiles: modCss,
@@ -174,16 +196,8 @@ export default class ServerHandler extends AbstractPlugin {
         currentRoutes: currentPageRoutes.slice(0),
         routes: routes.slice(0),
       };
-      renderedHtml = await this.renderHtml(application, req, res);
-      renderedHtml = renderedHtml.replace(
-        '<preload-css></preload-css>',
-        modCss.map(
-          p => `<link rel="preload" href="${p}" as="style" onerror="this.rel='stylesheet'" onload="this.rel='stylesheet'"/>`,
-        ).join(''),
-      );
-      res.write(renderedHtml);
-      res.end();
-      return next();
+      const renderedHtmlStream = await this.renderHtml(application, req, res, '', true) as ReturnType<typeof renderToNodeStream>;
+      return renderedHtmlStream.pipe(res);
     }
 
     currentPageRoutes.forEach(({ route }: { route: { modules: string[] } }) => {
@@ -192,15 +206,25 @@ export default class ServerHandler extends AbstractPlugin {
       }
     });
 
-    const cssToBeIncluded = this.getModuleCSS(modulesInRoutes, cssDependencyMap);
+    const cssToBeIncluded = this.getModuleCSS(modulesInRoutes);
 
-    modulesInRoutes.forEach((mod) => {
-      jsDependencyMap.forEach((c: { modules: string[], path: string }) => {
-        if (_.indexOf(c.modules, mod) !== -1 && _.indexOf(assets, c.path) === -1) {
-          jsToBePreloaded.push(c.path);
-        }
-      });
-    });
+    /**
+     * Add cookies and search params to load data
+     */
+    // @ts-ignore universalCookies is part of the request
+    routeHandler.routeCompiler.preloadManager.setParams('getCookies', () => req.universalCookies);
+    const getSearchParams = (): URLSearchParams => {
+      let searchParams;
+      try {
+        const searchUrl = new URL(fullUrl);
+        searchParams = new URLSearchParams(searchUrl.search);
+      } catch (ex) {
+        searchParams = new URLSearchParams('');
+      }
+      return searchParams;
+    };
+    routeHandler.routeCompiler.preloadManager.setParams('getSearchParams', () => getSearchParams);
+
 
     await new Promise(r => this
       .hooks
@@ -212,21 +236,23 @@ export default class ServerHandler extends AbstractPlugin {
         res,
         r,
       ));
-    currentPageRoutes.forEach(({ route, match }: any) => {
-      if (route.component.preload) {
-        promises.push(
-          route.component.preload(
-            undefined,
-            {
-              route,
-              match,
-            },
-          ).promise,
-        );
-      }
-    });
 
     try {
+      // Call preload for each element
+      currentPageRoutes.forEach(({ route, match }: any) => {
+        if (route.element.preload) {
+          promises.push(
+            route.element.preload(
+              undefined,
+              {
+                route,
+                match,
+              },
+            ).promise,
+          );
+        }
+      });
+
       const promisesData = await Promise.all(promises);
       let seoData = {};
       currentPageRoutes.forEach((r: { route: any, match: any }, i: number) => {
@@ -243,26 +269,39 @@ export default class ServerHandler extends AbstractPlugin {
       });
 
       htmlProps = {
-        noJS,
         assets,
         preloadedData,
         metaTags,
         pwaSchema,
-        jsToBePreloaded,
         cssFiles: cssToBeIncluded,
         head: [],
         footer: [],
-        env: { ...this.options.env },
+      };
+
+      const renderRoutes = (routesToRender: any, level = 0) => {
+        return routesToRender.map((r: any, index: number) => {
+          const { element: ElementComponent, ...others } = r;
+          if (!r.children) {
+            return (
+              <Route element={<ElementComponent />} key={`${level}_${index}`} {...others} />
+            );
+          }
+          return (
+            <Route element={<ElementComponent />} key={`${level}_${index}`} {...others}>
+              {renderRoutes(r.children, level + 1)}
+            </Route>
+          );
+        });
       };
 
       const appRoutes = {
         renderedRoutes: (
-          <ErrorBoundary
-            ErrorComponent={routeHandler.getErrorComponent()}
-            NotFoundComponent={routeHandler.get404Component()}
-          >
-            {renderRoutes(routes)}
-          </ErrorBoundary>
+          <>
+            <Routes>
+              {renderRoutes(routes)}
+            </Routes>
+            <Outlet />
+          </>
         ),
         setRenderedRoutes: (r: JSX.Element) => {
           appRoutes.renderedRoutes = r;
@@ -283,11 +322,7 @@ export default class ServerHandler extends AbstractPlugin {
       const application = {
         context,
         htmlProps,
-        children: (
-          <StaticRouter location={req.url} context={context} basename={appRootUrl}>
-            {appRoutes.renderedRoutes}
-          </StaticRouter>
-        ),
+        children: appRoutes.renderedRoutes,
         currentRoutes: currentPageRoutes.slice(0),
         routes: routes.slice(0),
       };
@@ -296,35 +331,37 @@ export default class ServerHandler extends AbstractPlugin {
 
       let htmlContent = this.options.env.singlePageApplication ? '' : renderToString(
         (
-          <ErrorBoundary>
-            {application.children}
-          </ErrorBoundary>
+          // @ts-ignore universalCookies is provided from universalCookies express middleware
+          <CookiesProvider cookies={req.universalCookies}>
+            <StaticRouter location={req.url} basename={appRootUrl}>
+              <PawProvider staticContext={application.context}>
+                <ErrorBoundary
+                  NotFoundComponent={routeHandler.get404Component()}
+                  ErrorComponent={routeHandler.getErrorComponent()}
+                >
+                  {application.children}
+                </ErrorBoundary>
+              </PawProvider>
+            </StaticRouter>
+          </CookiesProvider>
         ),
       );
 
-      if (context.url) {
+      const redirectUrl = createHref(context.redirect?.to ?? '');
+      if (redirectUrl) {
         // can use the `context.status` that
         // we added in RedirectWithStatus
-        res.redirect(context.status || 301, context.url);
+        res.redirect(context.statusCode ?? 302, redirectUrl);
         return next();
       }
-      if (context.status < 200 || context.status >= 300) {
-        htmlContent = '';
-      }
-      renderedHtml = await this.renderHtml(application, req, res, htmlContent);
-      res.status(context.status || 200).type('text/html');
+      renderedHtml = await this.renderHtml(application, req, res, htmlContent) as string;
+      res.status(context.statusCode ?? 200).type('text/html');
       res.write('<!DOCTYPE html>');
-      renderedHtml = renderedHtml.replace(
-        '<preload-css></preload-css>',
-        cssToBeIncluded.map(
-          p => `<link rel="preload" href="${p}" as="style" onload="this.rel='stylesheet'"/>`,
-        ).join(''),
-      );
       res.write(renderedHtml);
       res.end();
 
       // Free some memory
-      routes = null;
+      routes = null as any;
       currentPageRoutes = null;
       context = {};
       promises = [];
@@ -332,6 +369,9 @@ export default class ServerHandler extends AbstractPlugin {
     } catch (ex: any) {
       // eslint-disable-next-line no-console
       console.warn(ex);
+      if (ex instanceof RedirectError && ex.getRedirect()) {
+        return res.redirect(ex.getStatusCode() || 302, createHref(ex.getRedirect()));
+      }
       let components = {
         errorComponent: routeHandler.getErrorComponent(),
       };
@@ -340,44 +380,32 @@ export default class ServerHandler extends AbstractPlugin {
           errorComponent: routeHandler.get404Component(),
         };
       }
-      res.status(context.status || ex.code || 500).type('text/html');
+      const application = {
+        children: (
+          // @ts-ignore universalCookies is provided from universalCookies express middleware
+          <CookiesProvider cookies={req.universalCookies}>
+            <StaticRouter location={req.url} basename={appRootUrl}>
+              <PawProvider>
+                <components.errorComponent error={ex} />
+              </PawProvider>
+            </StaticRouter>
+          </CookiesProvider>
+        ),
+      };
+      res.status(context.statusCode ?? ex.code ?? 500).type('text/html');
       res.write('<!DOCTYPE html>');
-      const errorComponent = () => <components.errorComponent error={ex} info={ex.stack} />;
       renderedHtml = renderToString(
         (
           <Html
-            noJS={noJS}
             clientRootElementId={this.options.env.clientRootElementId}
             assets={assets}
             cssFiles={cssToBeIncluded}
             pwaSchema={htmlProps.pwaSchema}
             appRootUrl={appRootUrl}
-            env={{ ...this.options.env }}
             metaTags={htmlProps.metaTags}
-          >
-            {/* tslint:disable-next-line:jsx-no-multiline-js */}
-            {noJS && (
-            <ErrorBoundary>
-              <StaticRouter location={req.url} context={context} basename={appRootUrl}>
-                <ErrorBoundary
-                  ErrorComponent={routeHandler.getErrorComponent()}
-                  NotFoundComponent={routeHandler.get404Component()}
-                  error={ex}
-                >
-                  <Route path="*" component={errorComponent} />
-                </ErrorBoundary>
-              </StaticRouter>
-            </ErrorBoundary>
-            )}
-
-          </Html>
+            serverError={application.children}
+          />
         ),
-      );
-      renderedHtml = renderedHtml.replace(
-        '<preload-css></preload-css>',
-        cssToBeIncluded.map(
-          p => `<link rel="preload" href="${p}" as="style" onload="this.rel='stylesheet'"/>`,
-        ).join(''),
       );
       res.write(renderedHtml);
       res.end();

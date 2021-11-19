@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
-import Status from './RouteStatus';
+import { HttpStatus, Redirect } from './Paw';
 import NotFoundError from '../errors/not-found';
+import RedirectError from '../errors/redirect';
+import ServerError from '../errors/server';
 
 interface IErrorProps {
   ErrorComponent?: React.ComponentType<any>;
@@ -9,7 +11,7 @@ interface IErrorProps {
 }
 interface IErrorState {
   hasError: boolean;
-  error: null | Error;
+  error: null | Error | ServerError | NotFoundError | RedirectError;
   errorInfo: any;
 }
 
@@ -39,33 +41,43 @@ class ErrorBoundary extends Component<React.PropsWithChildren<IErrorProps>, IErr
       if (error instanceof NotFoundError && NotFoundComponent) {
         return <NotFoundComponent error={error} info={errorInfo} />;
       }
+      if (error instanceof RedirectError) {
+        return <Redirect to={error.getRedirect()} statusCode={error.getStatusCode()} />;
+      }
       if (ErrorComponent) {
         return (
-          <Status code={500}>
-            <ErrorComponent error={error} info={errorInfo} />
-          </Status>
+          <ErrorComponent error={error} info={errorInfo} />
         );
       }
       // You can render any custom fallback UI
       return (
-        <Status code={500}>
+        // @ts-ignore
+        <HttpStatus statusCode={error?.getStatusCode?.() ?? 500}>
           <div>
-            <h1>An error occurred, not handled by your error handler or at top of the router</h1>
+            <h1>An error occurred</h1>
             <h2>Error Stack:</h2>
-            <p>{error && error.message}</p>
-            <code>
-              <pre>
-                {error && error.stack}
-              </pre>
-            </code>
-            <h3>Component Stack:</h3>
-            <code>
-              <pre>
-                {errorInfo && errorInfo.componentStack}
-              </pre>
-            </code>
+            {!!error?.message && (
+              <p>{error && error.message}</p>
+            )}
+            {!!error?.stack && (
+              <code>
+                <pre>
+                  {error && error.stack}
+                </pre>
+              </code>
+            )}
+            {!!errorInfo?.componentStack && (
+              <>
+                <h3>Component Stack:</h3>
+                <code>
+                  <pre>
+                    {errorInfo && errorInfo.componentStack}
+                  </pre>
+                </code>
+              </>
+            )}
           </div>
-        </Status>
+        </HttpStatus>
       );
     }
     return children;

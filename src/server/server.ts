@@ -1,13 +1,21 @@
 import express from 'express';
 import hsts from 'hsts';
-import url from 'url';
+import cookiesMiddleware from 'universal-cookie-express';
 // eslint-disable-next-line
 import ProjectServer from 'pawProjectServer';
 import { NextHandleFunction } from 'connect';
 import RouteHandler from '../router/handler';
 import ServerHandler from './handler';
 import env from '../config';
-import { assetsToArray } from '../utils/utils';
+import { getFullRequestUrl } from '../utils/server';
+
+/**
+ * Initialize express application
+ * @type {*|Function}
+ */
+const app = express();
+// Enable universal cookies
+app.use(cookiesMiddleware());
 
 /**
  * Initialize Route handler for PWA details
@@ -35,6 +43,7 @@ if (env.serverSideRender) {
  */
 const sHandler = new ServerHandler({
   env: { ...env },
+  expressApp: app,
 });
 
 const serverMiddlewareList: express.Application[] = [];
@@ -44,12 +53,6 @@ sHandler.addPlugin(new ProjectServer({
     serverMiddlewareList.push(middleware);
   },
 }));
-
-/**
- * Initialize express application
- * @type {*|Function}
- */
-const app = express();
 
 // Disable x-powered-by (security issues)
 // Completely remove x-powered-by, previously it was PawJS
@@ -96,8 +99,9 @@ app.get(`${env.appRootUrl}/manifest.json`, (req, res) => {
 });
 
 const assetExtensions = /\.(jpg|jpeg|gif|svg|mov|bmp|css|js|png|webp|pdf|doc|docx|json)/;
-const isAssetRequest = (path: string) => {
-  const parsedUrl = url.parse(path);
+const isAssetRequest = (req: express.Request) => {
+  const fullUrl = getFullRequestUrl(req);
+  const parsedUrl = new URL(fullUrl);
   if (!parsedUrl.pathname) return false;
   return assetExtensions.test(parsedUrl.pathname);
 };
@@ -108,7 +112,7 @@ app.get('*', (req, res, next) => {
     || req.path.endsWith('favicon.ico')
     || req.path.endsWith('favicon.jpg')
     || req.path.endsWith('favicon.jpeg')
-    || isAssetRequest(req.path)
+    || isAssetRequest(req)
   ) {
     return next();
   }
@@ -125,9 +129,6 @@ app.get('*', (req, res, next) => {
     clientRouteHandler.addPlugin(new ProjectRoutes({ addPlugin: clientRouteHandler.addPlugin }));
   }
 
-  // Get the resources
-  const assets = assetsToArray(res.locals.assets);
-
   // If no server side rendering is necessary simply
   // run the handler and return streamed data
   if (!env.serverSideRender) {
@@ -135,35 +136,35 @@ app.get('*', (req, res, next) => {
       req,
       res,
       next,
-      assets,
       routeHandler: clientRouteHandler,
-      cssDependencyMap: res.locals.cssDependencyMap,
-      jsDependencyMap: res.locals.jsDependencyMap,
     });
   }
   // If server side render is enabled then, then let the routes load
   // Wait for all routes to load everything!
-  return clientRouteHandler.hooks.initRoutes.callAsync(fullUrl, req.headers['user-agent'], (err: Error) => {
-    if (err) {
-      // eslint-disable-next-line
-      console.log(err);
-      // @todo: Handle Error
-      return next();
-    }
+  return clientRouteHandler.hooks.initRoutes.callAsync(
+    fullUrl,
+    req.headers?.['user-agent'] ?? '',
+    (err) => {
+      if (err) {
+        // eslint-disable-next-line
+        console.log(err);
+        // @todo: Handle Error
+        return next();
+      }
 
-    // Once we have all the routes, pass the handler to the
-    // server run at this point we should have cssDependencyMap as well.
-    return sHandler.run({
-      req,
-      res,
-      next,
-      assets,
-      routeHandler: clientRouteHandler,
-      cssDependencyMap: res.locals.cssDependencyMap,
-      jsDependencyMap: res.locals.jsDependencyMap,
-    });
-  });
+      // Once we have all the routes, pass the handler to the
+      // server run at this point we should have cssDependencyMap as well.
+      return sHandler.run({
+        req,
+        res,
+        next,
+        routeHandler: clientRouteHandler,
+      });
+    },
+  );
 });
+
+export { app };
 
 /**
  * Export this a middleware export.

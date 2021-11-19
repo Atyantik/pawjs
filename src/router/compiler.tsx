@@ -1,13 +1,10 @@
-import { renderRoutes } from 'react-router-config';
-
 import PreloadDataManager from '../utils/preloadDataManager';
 import { Map as LoadableMap } from '../components/Loadable';
 import { CompiledRoute, ReactComponent, Route } from '../@types/route';
 import NotFoundError from '../errors/not-found';
-import ServerError from '../errors/server';
-import ErrorBoundary from '../components/ErrorBoundary';
+import RedirectError from '../errors/redirect';
+import { Redirect } from '../components/Paw';
 import { IRouteHandler } from './IRouteHandler';
-
 export default class RouteCompiler {
   public preloadManager: PreloadDataManager;
 
@@ -21,7 +18,6 @@ export default class RouteCompiler {
 
   compileRoute(route: Route, routerService: IRouteHandler): CompiledRoute {
     const {
-      exact,
       path,
       skeleton,
       error,
@@ -33,18 +29,20 @@ export default class RouteCompiler {
       layout,
       webpack,
       modules,
-      props: routeProps,
       routes,
       selfManageNewProps,
     } = route;
 
+    // If we have skeleton for route then default delay is 0
+    const defaultDelay = skeleton ? 0 : routerService.getDefaultAllowedLoadDelay();
+
     // JSXifiable component object
-    const PARAMS = {
+    const PARAMS: any = {
       errorComponent: error || routerService.getDefaultLoadErrorComponent(),
       notFoundComponent: error || routerService.get404Component(),
       skeletonComponent: skeleton || routerService.getDefaultLoaderComponent(),
       timeout: timeout || routerService.getDefaultLoadTimeout(),
-      delay: typeof delay === 'undefined' ? routerService.getDefaultAllowedLoadDelay() : delay,
+      delay: typeof delay === 'undefined' ? defaultDelay : delay,
     };
 
     let routeSeo = { ...(seo || {}) };
@@ -57,10 +55,8 @@ export default class RouteCompiler {
       if (typeof loadData !== 'undefined') {
         const extraParams = await this.preloadManager.getParams();
         const loadedData = await loadData({
-          NotFoundError,
-          ServerError,
           updateSeo,
-          ...props,
+          ...(props?.match ? { match: props.match } : {}),
           ...extraParams,
         });
         return loadedData || {};
@@ -88,45 +84,38 @@ export default class RouteCompiler {
           pastDelay,
           timedOut,
           retry,
-          history: propsHistory,
-          location: propsLocation,
-          match: propsMatch,
           route: propsRoute,
         } = props;
         if (err instanceof NotFoundError) {
           return (
-            // @ts-ignore
             <PARAMS.notFoundComponent
               error={err}
-              history={propsHistory}
-              location={propsLocation}
-              match={propsMatch}
               route={propsRoute}
+            />
+          );
+        }
+        if (err instanceof RedirectError) {
+          return (
+            <Redirect
+              to={err.getRedirect()}
+              statusCode={err.getStatusCode()}
             />
           );
         }
         if (err) {
           return (
-            // @ts-ignore
             <PARAMS.errorComponent
               error={err}
-              history={propsHistory}
-              location={propsLocation}
-              match={propsMatch}
               route={propsRoute}
             />
           );
         } if (pastDelay) {
           return (
-            // @ts-ignore
             <PARAMS.skeletonComponent
               error={err}
               pastDelay={pastDelay}
               timedOut={timedOut}
               retry={retry}
-              history={propsHistory}
-              location={propsLocation}
-              match={propsMatch}
               route={propsRoute}
             />
           );
@@ -158,53 +147,28 @@ export default class RouteCompiler {
         }
         const {
           props: componentProps,
-          history: propsHistory,
-          location: propsLocation,
-          match: propsMatch,
           route: propsRoute,
         } = props;
 
         components.routeComponent = (
           <components.routeComponent
             {...componentProps}
-            history={propsHistory}
-            location={propsLocation}
-            match={propsMatch}
             route={propsRoute}
             loadedData={loadedData}
-          >
-            {
-              propsRoute && propsRoute.routes
-                ? renderRoutes(propsRoute.routes)
-                : undefined
-            }
-          </components.routeComponent>
+          />
         );
 
         if (components.layout) {
           return (
-            <ErrorBoundary
-              // @ts-ignore
-              ErrorComponent={PARAMS.errorComponent}
+            <components.layout
+              route={propsRoute}
+              loadedData={loadedData}
             >
-              <components.layout
-                history={propsHistory}
-                location={propsLocation}
-                match={propsMatch}
-                route={propsRoute}
-                loadedData={loadedData}
-              >
-                {components.routeComponent}
-              </components.layout>
-            </ErrorBoundary>
+              {components.routeComponent}
+            </components.layout>
           );
         }
-        return (
-          // @ts-ignore
-          <ErrorBoundary ErrorComponent={PARAMS.errorComponent}>
-            {components.routeComponent}
-          </ErrorBoundary>
-        );
+        return components.routeComponent;
       },
       ...(route.modules ? { modules: route.modules } : {}),
     });
@@ -212,10 +176,8 @@ export default class RouteCompiler {
       path,
       webpack,
       modules,
-      exact,
-      props: routeProps,
       getRouteSeo: () => ({ ...routeSeo }),
-      component: loadableComponent,
+      element: loadableComponent,
       ...(routes ? { routes: this.compileRoutes(routes, routerService) } : {}),
     };
   }

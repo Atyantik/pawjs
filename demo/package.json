@@ -5,21 +5,24 @@
   "scripts": {
     "build": "npm run build:prod",
     "build:dev": "pawjs --no-cache --env=development --verbose build",
-    "build:prod": "pawjs --no-cache --env=production build",
+    "build:prod": "ENV_CONFIG_PATH=./.prod.env pawjs --env=production build",
     "lint": "eslint -c ./node_modules/@pawjs/pawjs/.eslintrc --ignore-path ./node_modules/@pawjs/pawjs/.gitignore ./src",
     "lint:fix": "eslint -c @pawjs/pawjs/.eslintrc --ignore-path @pawjs/pawjs/.gitignore --fix ./src",
     "start": "npm run start:dev",
-    "start:dev": "pawjs --no-cache --env=development --verbose start",
-    "start:prod": "pawjs --no-cache --env=production start",
+    "start:dev": "pawjs --no-cache --env=development start",
+    "start:prod": "ENV_CONFIG_PATH=./.prod.env pawjs --no-cache --env=production start",
     "test": "pawjs test"
   },
   "author": "Tirth Bodawala",
   "license": "MIT",
   "devDependencies": {
-    "@pawjs/pawjs": "file:.."
+    "@pawjs/pawjs": "file:..",
+    "@types/sass": "^1.43.0"
   },
   "dependencies": {
-    "bulma": "^0.8.0",
-    "cross-fetch": "^3.0.4"
+    "@pmmmwh/react-refresh-webpack-plugin": "^0.5.1",
+    "bulma": "^0.9.3",
+    "cross-fetch": "^3.0.4",
+    "fs-extra": "^10.0.0"
   }
 }

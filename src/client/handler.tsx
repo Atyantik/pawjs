@@ -1,9 +1,7 @@
-import { createBrowserHistory } from 'history';
 import invert from 'lodash/invert';
 import get from 'lodash/get';
-import { renderRoutes } from 'react-router-config';
-import { Router } from 'react-router';
-import { HashRouter } from 'react-router-dom';
+import { Outlet, useNavigationType } from 'react-router';
+import { Routes, Route, HashRouter, BrowserRouter } from 'react-router-dom';
 import { render, hydrate } from 'react-dom';
 import {
   Hook,
@@ -11,12 +9,17 @@ import {
   AsyncParallelBailHook,
   SyncHook,
 } from 'tapable';
+import { CookiesProvider } from 'react-cookie';
+import Cookies from 'universal-cookie';
 import RouteHandler from '../router/handler';
 import ErrorBoundary from '../components/ErrorBoundary';
 import { generateMeta } from '../utils/seo';
 import possibleStandardNames from '../utils/reactPossibleStandardNames';
 import AbstractPlugin from '../abstract-plugin';
 import { ICompiledRoute } from '../@types/route';
+import { useLayoutEffect } from 'react';
+import { useLocation } from 'react-router';
+import { PawProvider } from '../components/Paw';
 
 const possibleHtmlNames = invert(possibleStandardNames);
 const getPossibleHtmlName = (key: string): string => possibleHtmlNames[key] || key;
@@ -30,11 +33,7 @@ type HistoryLocation = {
 };
 
 export default class ClientHandler extends AbstractPlugin {
-  historyUnlistener = null;
-
   routeHandler: RouteHandler | null = null;
-
-  history: any;
 
   updatePageMetaTimeout: any = 0;
 
@@ -59,19 +58,6 @@ export default class ClientHandler extends AbstractPlugin {
     super();
     this.manageHistoryChange = this.manageHistoryChange.bind(this);
 
-    window.PAW_HISTORY = window.PAW_HISTORY || createBrowserHistory({
-      basename: options.env.appRootUrl,
-    });
-    this.history = window.PAW_HISTORY;
-    if (
-      this.historyUnlistener
-      && typeof this.historyUnlistener === 'function'
-    ) {
-      // @ts-ignore
-      this.historyUnlistener();
-    }
-    this.historyUnlistener = this.history.listen(this.manageHistoryChange);
-
     this.hooks = {
       locationChange: new AsyncParallelBailHook(['location', 'action']),
       appStart: new AsyncSeriesHook([]),
@@ -92,9 +78,10 @@ export default class ClientHandler extends AbstractPlugin {
   getCurrentRoutes(location: HistoryLocation | typeof window.location = window.location) {
     if (!this.routeHandler) return [];
     const routes = this.routeHandler.getRoutes();
-    const pathname = this.useHashRouter()
-      ? (location.hash || '').replace('#', '')
-      : window.location.pathname;
+    let pathname = location.pathname;
+    if (this.useHashRouter() && location.hash) {
+      pathname = location.hash.replace('#', '') || location.pathname;
+    }
     return RouteHandler.matchRoutes(
       routes,
       pathname.replace(
@@ -139,66 +126,71 @@ export default class ClientHandler extends AbstractPlugin {
         const currentRoutes = this.getCurrentRoutes(location);
         const promises: Promise<any> [] = [];
 
-        let seoData = {};
-        const pwaSchema = this.routeHandler.getPwaSchema();
-        const seoSchema = this.routeHandler.getDefaultSeoSchema();
-        currentRoutes.forEach((r: { route: ICompiledRoute, match: any }) => {
-          if (r.route && r.route.component && r.route.component.preload) {
-            promises.push(r.route.component.preload(undefined, {
-              route: r.route,
-              match: r.match,
-            }).promise);
-          }
-        });
-        await Promise.all(promises);
-        currentRoutes.forEach((r: { route: ICompiledRoute, match: any }) => {
-          let routeSeo = {};
-          if (r.route.getRouteSeo) {
-            routeSeo = r.route.getRouteSeo();
-          }
-          seoData = { ...seoData, ...routeSeo };
-        });
-        const metaTags = generateMeta(seoData, {
-          seoSchema,
-          pwaSchema,
-          baseUrl: window.location.origin,
-          url: window.location.href,
-        });
-
-        metaTags.forEach((meta) => {
-          let metaSearchStr = 'meta';
-          let firstMetaSearchStr = '';
-          const htmlMeta: any = {};
-
-          if (meta.name === 'title') {
-            document.title = this.getTitle(meta.content);
-          }
-
-          Object.keys(meta).forEach((key) => {
-            htmlMeta[getPossibleHtmlName(key)] = meta[key];
-            if (!firstMetaSearchStr) {
-              firstMetaSearchStr = `meta[${getPossibleHtmlName(key)}=${JSON.stringify(meta[key])}]`;
+        try {
+          let seoData = {};
+          const pwaSchema = this.routeHandler.getPwaSchema();
+          const seoSchema = this.routeHandler.getDefaultSeoSchema();
+          currentRoutes.forEach((r: { route: ICompiledRoute, match: any }) => {
+            if (r?.route?.element?.preload) {
+              promises.push(r.route.element.preload(undefined, {
+                route: r.route,
+                match: r.match,
+              })?.promise);
             }
-            metaSearchStr += `[${getPossibleHtmlName(key)}=${JSON.stringify(meta[key])}]`;
+          });
+          await Promise.all(promises);
+          currentRoutes.forEach((r: { route: ICompiledRoute, match: any }) => {
+            let routeSeo = {};
+            if (r.route.getRouteSeo) {
+              routeSeo = r.route.getRouteSeo();
+            }
+            seoData = { ...seoData, ...routeSeo };
+          });
+          const metaTags = generateMeta(seoData, {
+            seoSchema,
+            pwaSchema,
+            baseUrl: window.location.origin,
+            url: window.location.href,
           });
 
-          const alreadyExists = document.querySelector(metaSearchStr);
-          if (!alreadyExists) {
-            const previousExists = document.querySelector(firstMetaSearchStr);
-            if (previousExists && previousExists.remove) {
-              previousExists.remove();
+          metaTags.forEach((meta) => {
+            let metaSearchStr = 'meta';
+            let firstMetaSearchStr = '';
+            const htmlMeta: any = {};
+
+            if (meta.name === 'title') {
+              document.title = this.getTitle(meta.content);
             }
 
-            const metaElement = document.createElement('meta');
-            Object.keys(htmlMeta).forEach((htmlMetaKey) => {
-              metaElement.setAttribute(htmlMetaKey, htmlMeta[htmlMetaKey]);
+            Object.keys(meta).forEach((key) => {
+              htmlMeta[getPossibleHtmlName(key)] = meta[key];
+              if (!firstMetaSearchStr) {
+                firstMetaSearchStr = `meta[${getPossibleHtmlName(key)}=${JSON.stringify(meta[key])}]`;
+              }
+              metaSearchStr += `[${getPossibleHtmlName(key)}=${JSON.stringify(meta[key])}]`;
             });
-            document.getElementsByTagName('head')[0].appendChild(metaElement);
+
+            const alreadyExists = document.querySelector(metaSearchStr);
+            if (!alreadyExists) {
+              const previousExists = document.querySelector(firstMetaSearchStr);
+              if (previousExists && previousExists.remove) {
+                previousExists.remove();
+              }
+
+              const metaElement = document.createElement('meta');
+              Object.keys(htmlMeta).forEach((htmlMetaKey) => {
+                metaElement.setAttribute(htmlMetaKey, htmlMeta[htmlMetaKey]);
+              });
+              document.getElementsByTagName('head')[0].appendChild(metaElement);
+            }
+          });
+          if (action) {
+            this.hooks.postMetaUpdate.callAsync(location, action, () => null);
           }
-        });
-        if (action) {
-          this.hooks.postMetaUpdate.callAsync(location, action, () => null);
+        } catch (ex) {
+          console.error('ERR:: Unhandled error in load data', ex);
         }
+
       } else {
         if (this.updatePageMetaTimeout) {
           window.cancelIdleCallback(this.updatePageMetaTimeout);
@@ -272,6 +264,18 @@ export default class ClientHandler extends AbstractPlugin {
       ),
     );
     const { preloadManager: { setParams, getParams } } = this.routeHandler.routeCompiler;
+    setParams('getCookies', () => new Cookies());
+    const getSearchParams = (): URLSearchParams => {
+      let searchParams;
+      try {
+        searchParams = new URLSearchParams(window.location.search);
+      } catch (ex) {
+        searchParams = new URLSearchParams('');
+      }
+      return searchParams;
+    };
+    setParams('getSearchParams', getSearchParams);
+
     await new Promise(r => this
       .hooks
       .beforeLoadData
@@ -287,15 +291,15 @@ export default class ClientHandler extends AbstractPlugin {
       currentPageRoutes.forEach((r: { route: ICompiledRoute, match: any }, i: number) => {
         if (
           (typeof preloadedData[i] !== 'undefined')
-          && r.route && r.route.component && r.route.component.preload
+          && r.route && r.route.element && r.route.element.preload
         ) {
-          const preloadInit = r.route.component.preload(preloadedData[i], {
+          const preloadInit = r.route.element.preload(preloadedData[i], {
             route: r.route,
             match: r.match,
           });
           promises.push(preloadInit.promise);
-        } else if (r.route && r.route.component && r.route.component.preload) {
-          const preloadInit = r.route.component.preload(undefined, {
+        } else if (r.route && r.route.element && r.route.element.preload) {
+          const preloadInit = r.route.element.preload(undefined, {
             route: r.route,
             match: r.match,
           });
@@ -304,8 +308,8 @@ export default class ClientHandler extends AbstractPlugin {
       });
     } else {
       currentPageRoutes.forEach((r: { route: ICompiledRoute, match: any }) => {
-        if (r.route && r.route.component && r.route.component.preload) {
-          const preloadInit = r.route.component.preload(undefined, {
+        if (r.route && r.route.element && r.route.element.preload) {
+          const preloadInit = r.route.element.preload(undefined, {
             route: r.route,
             match: r.match,
           });
@@ -324,23 +328,43 @@ export default class ClientHandler extends AbstractPlugin {
     const routes = this.routeHandler.getRoutes();
     const currentPageRoutes = this.getCurrentRoutes();
     const components: any = {};
-    components.appRouter = this.useHashRouter() ? HashRouter : Router;
-
-    let routerParams: any = {
-      history: this.history,
+    components.appRouter = this.useHashRouter() ? HashRouter : BrowserRouter;
+    const renderRoutes = (rRoutes: any, level = 0) => {
+      return rRoutes.map((r: any, index: number) => {
+        const { element: ElementComponent, ...others } = r;
+        if (!r.children) {
+          return (
+            <Route element={<ElementComponent />} key={`${level}_${index}`} {...others} />
+          );
+        }
+        return (
+          <Route element={<ElementComponent />} key={`${level}_${index}`} {...others}>
+            {renderRoutes(r.children, level + 1)}
+          </Route>
+        );
+      });
     };
-    if (this.options.env.singlePageApplication && this.options.env.hashedRoutes) {
-      routerParams = {};
-    }
+
+    const NavigationListner: React.FC = ({ children }) => {
+      const navigationType = useNavigationType();
+      const location = useLocation();
+      useLayoutEffect(
+        () => {
+          this.manageHistoryChange(location, navigationType);
+        },
+        [navigationType, location],
+      );
+      return <>{ children }</>;
+    };
 
     const appRoutes = {
       renderedRoutes: (
-        <ErrorBoundary
-          ErrorComponent={this.routeHandler.getErrorComponent()}
-          NotFoundComponent={this.routeHandler.get404Component()}
-        >
-          {renderRoutes(routes)}
-        </ErrorBoundary>
+        <NavigationListner>
+          <Routes>
+            {renderRoutes(routes)}
+          </Routes>
+          <Outlet />
+        </NavigationListner>
       ),
       setRenderedRoutes: (r: JSX.Element) => {
         appRoutes.renderedRoutes = r;
@@ -357,13 +381,8 @@ export default class ClientHandler extends AbstractPlugin {
         r,
       )));
 
-    const children = (
-      <components.appRouter basename={this.options.env.appRootUrl} {...routerParams}>
-        {appRoutes.renderedRoutes}
-      </components.appRouter>
-    );
     const application = {
-      children,
+      children: appRoutes.renderedRoutes,
       currentRoutes: currentPageRoutes.slice(0),
       routes: routes.slice(0),
     };
@@ -373,9 +392,20 @@ export default class ClientHandler extends AbstractPlugin {
         // Render according to routes!
         renderer(
           (
-            <ErrorBoundary>
-              {application.children}
-            </ErrorBoundary>
+            <CookiesProvider>
+              <components.appRouter
+                basename={this?.options?.env?.appRootUrl}
+              >
+                <PawProvider>
+                  <ErrorBoundary
+                    ErrorComponent={this?.routeHandler?.getErrorComponent()}
+                    NotFoundComponent={this?.routeHandler?.get404Component()}
+                  >
+                    {application.children}
+                  </ErrorBoundary>
+                </PawProvider>
+              </components.appRouter>
+            </CookiesProvider>
           ),
           domRootReference,
           () => {
@@ -412,7 +442,7 @@ export default class ClientHandler extends AbstractPlugin {
     }
     await this.preloadCurrentRoutes();
     if (!this.options.env.serverSideRender) {
-      this.updatePageMeta(this.history.location);
+      this.updatePageMeta(window.location);
     }
     /**
      * Render application only if loaded

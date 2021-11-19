@@ -44,7 +44,7 @@ export default class WebpackHandler extends AbstractPlugin {
     return babelCssRules;
   }
 
-  getConfig(env = 'development', type = 'web') {
+  getConfig(env = 'development', type = 'web'): any {
     if (this.envConfigs[env] && this.envConfigs[env][type]) {
       this.hooks.beforeConfig.call(env, type, this.envConfigs[env][type]);
       return this.envConfigs[env][type];

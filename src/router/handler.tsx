@@ -1,7 +1,6 @@
 import { AsyncSeriesHook } from 'tapable';
 import _uniq from 'lodash/uniq';
 import _cloneDeep from 'lodash/cloneDeep';
-import React from 'react';
 import { matchPath } from 'react-router';
 // @ts-ignore
 // eslint-disable-next-line
@@ -16,7 +15,6 @@ import AsyncRouteLoadErrorComponent from '../components/AsyncRouteLoadError';
 import AsyncRouteLoaderComponent from '../components/AsyncRouteLoader';
 import NotFoundComponent from '../components/NotFound';
 import ErrorComponent from '../components/Error';
-import Status from '../components/RouteStatus';
 import RouteCompiler from './compiler';
 import { CompiledRoute, ReactComponent, Route } from '../@types/route';
 import AbstractPlugin from '../abstract-plugin';
@@ -91,8 +89,7 @@ export default class RouteHandler extends AbstractPlugin implements IRouteHandle
       let match;
 
       if (route.path) {
-        // @ts-ignore
-        match = matchPath(pathname, route);
+        match = matchPath(route.path, pathname);
       } else {
         match = branch.length ? branch[branch.length - 1].match // use parent match
           : RouteHandler.computeRootMatch(pathname);
@@ -219,9 +216,7 @@ export default class RouteHandler extends AbstractPlugin implements IRouteHandle
 
     this.set404Component = (COMPONENT = () => null) => {
       notFoundComponent = () => (
-        <Status code={404}>
-          <COMPONENT />
-        </Status>
+        <COMPONENT />
       );
       return this;
     };
@@ -229,9 +224,7 @@ export default class RouteHandler extends AbstractPlugin implements IRouteHandle
 
     this.setErrorComponent = (COMPONENT = () => null) => {
       errorComponent = () => (
-        <Status code={500}>
-          <COMPONENT />
-        </Status>
+        <COMPONENT />
       );
     };
 
@@ -253,7 +246,8 @@ export default class RouteHandler extends AbstractPlugin implements IRouteHandle
   getRoutes() {
     const routes = _cloneDeep(this.routes);
     routes.push({
-      component: this.get404Component(),
+      path: '*',
+      element: this.get404Component(),
       getRouteSeo: () => ({
         title: 'Page not found',
       }),

@@ -1,5 +1,6 @@
-import React from 'react';
-import Status from './RouteStatus';
+import { HttpStatus } from './Paw';
+import { useLocation } from 'react-router-dom';
+import { createPath } from 'history';
 
 export default (props = {
   error: {
@@ -10,25 +11,36 @@ export default (props = {
     componentStack: '',
   },
 }) => {
+  const location = useLocation();
   const { error, info } = props;
+  // You can render any custom fallback UI
   return (
-    <Status code={500}>
+    // @ts-ignore
+    <HttpStatus statusCode={error?.getStatusCode?.() ?? 500}>
       <div>
-        <h1>A Server error has occurred</h1>
+        <h1>An error occurred while loading route: {createPath(location)}</h1>
         <h2>Error Stack:</h2>
-        <p>{error && error.message}</p>
-        <code>
-          <pre>
-            {error && error.stack}
-          </pre>
-        </code>
-        <h3>Component Stack:</h3>
-        <code>
-          <pre>
-            {info && info.componentStack}
-          </pre>
-        </code>
+        {!!error?.message && (
+          <p>{error && error.message}</p>
+        )}
+        {!!error?.stack && (
+          <code>
+            <pre>
+              {error && error.stack}
+            </pre>
+          </code>
+        )}
+        {!!info?.componentStack && (
+          <>
+            <h3>Component Stack:</h3>
+            <code>
+              <pre>
+                {info && info.componentStack}
+              </pre>
+            </code>
+          </>
+        )}
       </div>
-    </Status>
+    </HttpStatus>
   );
 };

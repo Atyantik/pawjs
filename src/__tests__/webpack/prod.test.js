@@ -1,10 +1,9 @@
-const path = require('path');
-const webpack = require('webpack');
+import path from 'path';
+import webpack from 'webpack';
+import wHandler from '../../webpack';
 
 process.env.LIB_ROOT = path.resolve(__dirname, '../../../');
 process.env.PROJECT_ROOT = path.resolve(process.env.LIB_ROOT, 'demo');
-
-const wHandler = require('../../webpack');
 
 const prodWebConfig = wHandler.getConfig('production', 'web');
 const prodNodeServerConfig = wHandler.getConfig('production', 'server');
@@ -31,9 +30,7 @@ describe('WEB --env=prod', () => {
   });
 
   test('Configuration should be valid webpack schema', () => {
-    const validationError = webpack.validate(prodWebConfig);
-    expect(validationError)
-      .toHaveLength(0);
+    expect(() => webpack.validate(prodWebConfig)).not.toThrow();
   });
 
   test('Configuration should be compilable', () => {
@@ -57,9 +54,7 @@ describe('Node Server --env=prod', () => {
   });
 
   test('Configuration should be valid webpack schema', () => {
-    const validationError = webpack.validate(prodNodeServerConfig);
-    expect(validationError)
-      .toHaveLength(0);
+    expect(() => webpack.validate(prodNodeServerConfig)).not.toThrow();
   });
 
   test('Configuration should be compilable', () => {

@@ -23,7 +23,11 @@ module.exports = ({ types: t }) => ({
         ) {
           const { parent } = path.parentPath.parentPath;
           if (parent.type === 'ObjectProperty') {
-            if (parent.key.name === 'component' || parent.key.name === 'layout') {
+            if (
+              parent.key.name === 'component'
+              || parent.key.name === 'layout'
+              || parent.key.name === 'element'
+            ) {
               try {
                 const obj = path.parentPath.parentPath.parentPath;
 

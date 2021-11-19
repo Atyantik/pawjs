@@ -1,19 +1,15 @@
-import assignIn from 'lodash/assignIn';
-import { RuleSetQuery } from 'webpack';
-import directories from '../utils/directories';
+import { extensionRegex, imageAssetsExtensions } from '../utils/assets';
 
-const defaultOptions = {
-  outputPath: 'images/',
-  name: '[hash].[ext]',
-  context: directories.src,
-};
-
-export default (options: RuleSetQuery) => ({
-  test: /\.(jpe?g|png|gif|svg|webp|ico)$/i,
-  use: [
-    {
-      loader: 'file-loader',
-      options: assignIn({}, defaultOptions, options),
+export default () => ({
+  test: extensionRegex(imageAssetsExtensions),
+  type: 'asset',
+  parser: {
+    dataUrlCondition: {
+      maxSize: 4 * 1024, // 4kb
     },
-  ],
+  },
+  generator: {
+    // We will use content hash for long term caching of asset
+    filename: 'images/[contenthash]-[name][ext][query]',
+  },
 });

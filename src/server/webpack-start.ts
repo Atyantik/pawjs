@@ -1,24 +1,20 @@
-/* global pawExistsSync */
+import debounce from 'lodash/debounce';
 import path from 'path';
 import express from 'express';
 import webpack from 'webpack';
-import webpackMiddleware from 'webpack-dev-middleware';
+import webpackDevMiddleware from 'webpack-dev-middleware';
 import webpackHotMiddleware from 'webpack-hot-middleware';
-import webLog from 'webpack-log';
-import { NextHandleFunction } from 'connect';
+import { assetsToArray } from '../utils/utils';
 import pawConfig from '../config';
 import directories from '../webpack/utils/directories';
 import wHandler from '../webpack';
+
 // Utils
 // -- Require from string. create an export from string like `module.export = "Something";`
 import requireFromString from '../webpack/utils/requireFromString';
 // Assets normalizer appending publicPath
 import normalizeAssets from '../webpack/utils/normalizeAssets';
 
-interface IPawjsWebpackConfig extends webpack.Configuration {
-  entry: any;
-  externals: any;
-}
 // Notify the user that compilation has started and should be done soon.
 // eslint-disable-next-line
 console.log(`
@@ -28,134 +24,18 @@ console.log(`
   Thank you for your patience.
 =========================================================
 `);
-if (pawConfig.hotReload) {
-  wHandler
-    .hooks
-    .beforeConfig
-    .tap(
-      'AddHotReplacementPlugin',
-      (
-        wEnv: string,
-        wType: string,
-        wConfigs: IPawjsWebpackConfig [],
-      ) => {
-        // Add eval devtool to all the configs
-        wConfigs.forEach((wConfig: IPawjsWebpackConfig) => {
-          const config = wConfig;
-          if (!config.devtool) {
-            config.devtool = 'eval-source-map';
-            if (!config.resolve) config.resolve = {};
-            if (!config.resolve.alias) config.resolve.alias = {};
-            if (!config.resolve.alias['react-dom']) {
-              config.resolve.alias['react-dom'] = '@hot-loader/react-dom';
-            }
-          }
-        });
-
-        // Web specific configurations
-        if (wType === 'web') {
-          wConfigs.forEach((webpackConfig: IPawjsWebpackConfig) => {
-            const wConfig = webpackConfig;
-            if (
-              typeof wConfig.entry !== 'undefined'
-              && typeof wConfig.entry.client !== 'undefined'
-              && Array.isArray(wConfig.entry.client)
-            ) {
-              const libRoot = process.env.LIB_ROOT;
-              if (typeof libRoot === 'undefined') {
-                return;
-              }
-              let clientIndex = wConfig
-                .entry
-                .client
-                .indexOf(
-                  pawExistsSync(path.join(libRoot, 'src', 'client', 'app')),
-                );
-
-              // Add webpack-hot-middleware as entry point
-              const hotMiddlewareString = 'webpack-hot-middleware/client?name=web&'
-                + 'path=/__hmr_update&timeout=2000&overlay=true&quiet=false';
-
-              if (!wConfig.entry.client.includes(hotMiddlewareString)) {
-                if (clientIndex === -1) {
-                  wConfig.entry.client.unshift(hotMiddlewareString);
-                } else {
-                  wConfig.entry.client.splice(clientIndex, 0, hotMiddlewareString);
-                  clientIndex += 1;
-                }
-              }
-
-              // Replace app with hot-app
-              if (
-                wConfig.entry.client.includes(
-                  pawExistsSync(
-                    path.join(libRoot, 'src', 'client', 'app'),
-                  ),
-                )
-              ) {
-                // eslint-disable-next-line
-                wConfig.entry.client[clientIndex] = pawExistsSync(
-                  path.join(libRoot, 'src', 'client', 'hot-app'),
-                );
-              }
-
-              // check for Hot Module replacement plugin and add it if necessary
-              if (!wConfig.plugins) wConfig.plugins = [];
-              const hasHotPlugin = wConfig.plugins
-                .some(p => p instanceof webpack.HotModuleReplacementPlugin);
-
-              if (!hasHotPlugin) {
-                wConfig.plugins.unshift(new webpack.HotModuleReplacementPlugin({
-                  multiStep: true,
-                }));
-              }
-            }
-          });
-        }
-        if (wType === 'server') {
-          wConfigs.forEach((webpackConfig: IPawjsWebpackConfig) => {
-            const wConfig = webpackConfig;
-
-            if (!wConfig.module) wConfig.module = { rules: [] };
-            // do not emit image files for server!
-            wConfig.module.rules.forEach((r: any) => {
-              const rule = r;
-              if (rule.use && Array.isArray(rule.use)) {
-                rule.use.forEach((use: any) => {
-                  const u = use;
-                  if (u.loader && u.loader === 'file-loader') {
-                    if (!u.options) u.options = {};
-                    u.options.emitFile = typeof u.options.emitFile !== 'undefined'
-                      ? u.options.emitFile : false;
-                  }
-                });
-              }
-            });
-          });
-        }
-      },
-    );
-}
 
 try {
   // Server configurations
-  const serverConfig = wHandler.getConfig(process.env.PAW_ENV, 'server');
+  const serverConfig = wHandler.getConfig(process.env.PAW_ENV, 'server')?.[0];
 
   // Web client configurations
-  const webConfig = wHandler.getConfig(process.env.PAW_ENV, 'web');
+  const webConfig = wHandler.getConfig(process.env.PAW_ENV, 'web')?.[0];
 
   const devServerConfig = {
-    port: pawConfig.port,
-    host: pawConfig.host,
     serverSideRender: pawConfig.serverSideRender,
     publicPath: pawConfig.resourcesBaseUrl,
-    contentBase: path.join((directories.src || ''), 'public'),
   };
-
-  // Create new logging entity, pawjs
-  const log = webLog({
-    name: 'pawjs',
-  });
 
   const processEnv = process.env;
   const isVerbose = processEnv.PAW_VERBOSE === 'true';
@@ -172,16 +52,7 @@ try {
       errors: true,
       cachedAssets: isVerbose,
       version: isVerbose,
-      warningsFilter: (warning: string) => (
-        warning.indexOf('node_modules/express') !== -1
-        || warning.indexOf('node_modules/encoding') !== -1
-        || warning.indexOf('config/index') !== -1
-      ),
     },
-    logger: log,
-    logLevel: 'debug',
-    noInfo: !isVerbose,
-    hot: true,
   };
 
   const serverOptions: any = {
@@ -190,7 +61,6 @@ try {
   };
   const webOptions = {
     ...commonOptions,
-    inline: true,
     serverSideRender: true,
     publicPath: pawConfig.resourcesBaseUrl,
   };
@@ -210,20 +80,21 @@ try {
   app.set('x-powered-by', 'PawJS');
 
   // Add server middleware
-  const serverMiddleware:
-  webpackMiddleware.WebpackDevMiddleware
-  & NextHandleFunction = webpackMiddleware(serverCompiler, serverOptions);
+  const serverMiddleware = webpackDevMiddleware(serverCompiler, serverOptions);
 
   app.use(serverMiddleware);
 
   const getCommonServer = () => {
-    const mfs = serverMiddleware.fileSystem;
+    if (!serverMiddleware.context) { return; }
+    if (!serverMiddleware.context.stats) { return; }
+    // @ts-ignore
+    const mfs = serverMiddleware.context.outputFileSystem as any;
     // Get content of the server that is compiled!
     const serverFile = serverMiddleware.getFilenameFromUrl(
-      `${serverOptions.publicPath}/server.js`,
+      `${serverOptions.publicPath}server.js`,
     );
     if (!serverFile) {
-      throw new Error(`Cannot find server.js at ${serverOptions.publicPath}/server.js`);
+      throw new Error(`Cannot find server.js at ${serverOptions.publicPath}server.js`);
     }
 
     const serverContent = mfs.readFileSync(serverFile, 'utf-8');
@@ -235,7 +106,7 @@ try {
   };
   // Add web middleware
   // @ts-ignore
-  const webMiddleware = webpackMiddleware(webCompiler, webOptions);
+  const webMiddleware = webpackDevMiddleware(webCompiler, webOptions);
 
   // On adding this middleware the SSR data to serverMiddleware will be lost in
   // res.locals but its not needed anyway.
@@ -250,7 +121,7 @@ try {
     }));
   }
 
-  app.use(pawConfig.appRootUrl || '', express.static(serverOptions.contentBase));
+  app.use(pawConfig.appRootUrl || '', express.static(path.join((directories.src || ''), 'public')));
 
   /**
    * Below is where the magic happens!
@@ -259,7 +130,7 @@ try {
    * develop code with SSR enabled.
    */
   app.use((req, res, next) => {
-    const mfs = serverMiddleware.fileSystem;
+    const mfs = serverMiddleware.context.outputFileSystem as any;
     const fileNameFromUrl = serverMiddleware
       .getFilenameFromUrl(serverOptions.publicPath + req.path) || '';
 
@@ -282,16 +153,16 @@ try {
     try {
       // Get content of the server that is compiled!
       const commonServer = getCommonServer();
+      const expressApp = commonServer.app;
       commonServerMiddleware = commonServer.default;
-
       const {
         jsDependencyMap,
         cssDependencyMap,
         ...assets
-      } = normalizeAssets(res.locals.webpackStats);
-      res.locals.assets = assets;
-      res.locals.cssDependencyMap = cssDependencyMap;
-      res.locals.jsDependencyMap = jsDependencyMap;
+      } = normalizeAssets(webMiddleware?.context?.stats ?? null);
+      expressApp.locals.assets = assetsToArray(assets);
+      expressApp.locals.cssDependencyMap = cssDependencyMap;
+      expressApp.locals.jsDependencyMap = jsDependencyMap;
 
       return commonServerMiddleware(req, res, next, PAW_GLOBAL);
     } catch (ex) {
@@ -311,6 +182,7 @@ try {
     let afterStart: any;
     try {
       const commonServer = getCommonServer();
+      if (!commonServer) return;
       beforeStart = commonServer.beforeStart;
       afterStart = commonServer.afterStart;
     } catch (ex) {
@@ -319,8 +191,8 @@ try {
     }
 
     const nodeServerConfig = {
-      port: devServerConfig.port,
-      host: devServerConfig.host,
+      port: pawConfig.port,
+      host: pawConfig.host,
     };
 
     beforeStart(nodeServerConfig, PAW_GLOBAL, (err: Error) => {
@@ -347,16 +219,18 @@ try {
       );
     });
   };
+  const debouncedStartServer = debounce(startServer, 200);
 
   let totalCompilationComplete = 0;
+
   webCompiler.hooks.done.tap('InformWebCompiled', () => {
     totalCompilationComplete += 1;
-    if (totalCompilationComplete >= 2) startServer();
+    if (totalCompilationComplete >= 2) debouncedStartServer();
   });
 
   serverCompiler.hooks.done.tap('InformServerCompiled', () => {
     totalCompilationComplete += 1;
-    if (totalCompilationComplete >= 2) startServer();
+    if (totalCompilationComplete >= 2) debouncedStartServer();
   });
 } catch (ex) {
   // eslint-disable-next-line no-console
