@@ -9,7 +9,6 @@ import pawConfig from '../config';
 import resolverConfig from './inc/webpack-resolver-config';
 import serverRule from './inc/babel-server-rule';
 import { pawExistsSync } from '../globals';
-import { data } from 'autoprefixer';
 
 const isProductionMode = process.env.PAW_ENV === 'production';
 

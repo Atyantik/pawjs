@@ -1,7 +1,4 @@
-const babelServerRule = require('./src/webpack/inc/babel-server-rule')({
-  cacheDirectory: false,
-  noChunk: true,
-}).use.options;
+const babelServerRule = require('./src/webpack/inc/babel-server-rule')().use.options;
 
 module.exports = {
   presets: babelServerRule.presets,

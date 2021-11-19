@@ -51,7 +51,7 @@ class SwVariables {
             { url: '${variables.appRootUrl || ''}/sw.js', revision: ${swRevision} },
             ];${src}`;
 
-            if (assetList && assetList.length) {
+            if (assetList.length) {
               src = `${src};self.paw__offline_assets = ${JSON.stringify(assetList)}`;
             }
 
