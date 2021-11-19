@@ -25,7 +25,7 @@ const routes: IRoute[] = [
     },
   },
   {
-    path: '/typescript-counter/:id',
+    path: '/typescript-counter',
     component: () => import('../components/typescript-counter'),
     seo: {
       title: 'TypeScript Counter | ReactPWA Demo',

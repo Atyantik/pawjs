@@ -1,15 +1,6 @@
-import assignIn from 'lodash/assignIn';
-import directories from '../utils/directories';
 import { extensionRegex, imageAssetsExtensions } from '../utils/assets';
 
-const defaultOptions = {
-  outputPath: 'images/',
-  publicPath: 'images/',
-  name: '[contenthash].[ext]',
-  context: directories.src,
-};
-
-export default (options: any) => ({
+export default () => ({
   test: extensionRegex(imageAssetsExtensions),
   type: 'asset',
   parser: {
@@ -19,6 +10,6 @@ export default (options: any) => ({
   },
   generator: {
     // We will use content hash for long term caching of asset
-    filename: `${assignIn({}, defaultOptions, options).publicPath}[contenthash]-[name][ext][query]`,
+    filename: 'images/[contenthash]-[name][ext][query]',
   },
 });

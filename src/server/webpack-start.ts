@@ -1,10 +1,9 @@
+import debounce from 'lodash/debounce';
 import path from 'path';
 import express from 'express';
 import webpack from 'webpack';
-import webpackMiddleware from 'webpack-dev-middleware';
+import webpackDevMiddleware from 'webpack-dev-middleware';
 import webpackHotMiddleware from 'webpack-hot-middleware';
-import ReactRefreshWebpackPlugin from '@pmmmwh/react-refresh-webpack-plugin';
-import { NextHandleFunction } from 'connect';
 import { assetsToArray } from '../utils/utils';
 import pawConfig from '../config';
 import directories from '../webpack/utils/directories';
@@ -16,8 +15,6 @@ import requireFromString from '../webpack/utils/requireFromString';
 // Assets normalizer appending publicPath
 import normalizeAssets from '../webpack/utils/normalizeAssets';
 
-interface IPawjsWebpackConfig extends webpack.Configuration {}
-
 // Notify the user that compilation has started and should be done soon.
 // eslint-disable-next-line
 console.log(`
@@ -27,83 +24,13 @@ console.log(`
   Thank you for your patience.
 =========================================================
 `);
-if (pawConfig.hotReload) {
-  wHandler
-    .hooks
-    .beforeConfig
-    .tap(
-      'AddHotReplacementPlugin',
-      (
-        wEnv: string,
-        wType: string,
-        wConfigs: IPawjsWebpackConfig [],
-      ) => {
-        // Add eval devtool to all the configs
-        wConfigs.forEach((wConfig: IPawjsWebpackConfig) => {
-          const config = wConfig;
-          if (!config.devtool) {
-            config.devtool = 'eval-source-map';
-          }
-        });
-
-        // Web specific configurations
-        if (wType === 'web') {
-          wConfigs.forEach((webpackConfig: IPawjsWebpackConfig) => {
-            const wConfig = webpackConfig as any;
-            if (Array.isArray(wConfig?.entry?.client)) {
-
-              // Add webpack-hot-middleware as entry point
-              const hotMiddlewareString = 'webpack-hot-middleware/client?name=web&'
-                + 'path=/__hmr_update&timeout=2000&overlay=true&quiet=false';
-
-              wConfig.entry.client.unshift(hotMiddlewareString);
-
-              // check for Hot Module replacement plugin and add it if necessary
-              if (!wConfig.plugins) wConfig.plugins = [];
-              wConfig.plugins.unshift(new ReactRefreshWebpackPlugin());
-              wConfig.plugins.unshift(new webpack.HotModuleReplacementPlugin({
-                multiStep: true,
-              }));
-            }
-          });
-        }
-        if (wType === 'server') {
-          wConfigs.forEach((webpackConfig: IPawjsWebpackConfig) => {
-            const wConfig = webpackConfig as any;
-            // Add express as externals
-            if (!wConfig.externals) {
-              wConfig.externals = {};
-            }
-
-            wConfig.externals.express = 'express';
-
-            if (!wConfig.module) wConfig.module = { rules: [] };
-            // do not emit image files for server!
-            (wConfig.module.rules ?? []).forEach((r: any) => {
-              const rule = r;
-              if (rule.use && Array.isArray(rule.use)) {
-                rule.use.forEach((use: any) => {
-                  const u = use;
-                  if (u.loader && u.loader === 'file-loader') {
-                    if (!u.options) u.options = {};
-                    u.options.emitFile = typeof u.options.emitFile !== 'undefined'
-                      ? u.options.emitFile : false;
-                  }
-                });
-              }
-            });
-          });
-        }
-      },
-    );
-}
 
 try {
   // Server configurations
-  const serverConfig = wHandler.getConfig(process.env.PAW_ENV, 'server');
+  const serverConfig = wHandler.getConfig(process.env.PAW_ENV, 'server')?.[0];
 
   // Web client configurations
-  const webConfig = wHandler.getConfig(process.env.PAW_ENV, 'web');
+  const webConfig = wHandler.getConfig(process.env.PAW_ENV, 'web')?.[0];
 
   const devServerConfig = {
     serverSideRender: pawConfig.serverSideRender,
@@ -153,13 +80,13 @@ try {
   app.set('x-powered-by', 'PawJS');
 
   // Add server middleware
-  const serverMiddleware:
-  webpackMiddleware.WebpackDevMiddleware
-  & NextHandleFunction = webpackMiddleware(serverCompiler, serverOptions);
+  const serverMiddleware = webpackDevMiddleware(serverCompiler, serverOptions);
 
   app.use(serverMiddleware);
 
   const getCommonServer = () => {
+    if (!serverMiddleware.context) { return; }
+    if (!serverMiddleware.context.stats) { return; }
     // @ts-ignore
     const mfs = serverMiddleware.context.outputFileSystem as any;
     // Get content of the server that is compiled!
@@ -179,7 +106,7 @@ try {
   };
   // Add web middleware
   // @ts-ignore
-  const webMiddleware = webpackMiddleware(webCompiler, webOptions);
+  const webMiddleware = webpackDevMiddleware(webCompiler, webOptions);
 
   // On adding this middleware the SSR data to serverMiddleware will be lost in
   // res.locals but its not needed anyway.
@@ -232,7 +159,7 @@ try {
         jsDependencyMap,
         cssDependencyMap,
         ...assets
-      } = normalizeAssets(webMiddleware.context.stats as webpack.Stats);
+      } = normalizeAssets(webMiddleware?.context?.stats ?? null);
       expressApp.locals.assets = assetsToArray(assets);
       expressApp.locals.cssDependencyMap = cssDependencyMap;
       expressApp.locals.jsDependencyMap = jsDependencyMap;
@@ -255,6 +182,7 @@ try {
     let afterStart: any;
     try {
       const commonServer = getCommonServer();
+      if (!commonServer) return;
       beforeStart = commonServer.beforeStart;
       afterStart = commonServer.afterStart;
     } catch (ex) {
@@ -291,16 +219,18 @@ try {
       );
     });
   };
+  const debouncedStartServer = debounce(startServer, 200);
 
   let totalCompilationComplete = 0;
+
   webCompiler.hooks.done.tap('InformWebCompiled', () => {
     totalCompilationComplete += 1;
-    if (totalCompilationComplete >= 2) startServer();
+    if (totalCompilationComplete >= 2) debouncedStartServer();
   });
 
   serverCompiler.hooks.done.tap('InformServerCompiled', () => {
     totalCompilationComplete += 1;
-    if (totalCompilationComplete >= 2) startServer();
+    if (totalCompilationComplete >= 2) debouncedStartServer();
   });
 } catch (ex) {
   // eslint-disable-next-line no-console

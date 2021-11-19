@@ -1,20 +1,21 @@
-const lodash = require('lodash');
 const { getDefault } = require('../../globals');
 const babelPresetEnv = getDefault(require('@babel/preset-env'));
 const babelPresetReact = getDefault(require('@babel/preset-react'));
 const presetTypescript = getDefault(require('@babel/preset-typescript'));
 const babelPlugins = getDefault(require('../../babel/plugin'));
 
-const defaultOptions = {
-  cacheDirectory: process.env.PAW_CACHE === 'true',
-};
+const cacheDirectory = process.env.PAW_CACHE === 'true';
+const isProduction = process.env.PAW_ENV === 'production';
+const isStartCmd = process.env.PAW_START_CMD === 'true';
+const isHot = !isProduction && isStartCmd && process.env.PAW_HOT === 'true';
 
-const rule = (options = {}) => {
-  const o = lodash.assignIn({}, defaultOptions, options);
+const rule = () => {
   return {
     test: /\.(j|t)sx?$/,
     exclude: [
       /node_modules\/(?!(@pawjs|pawjs-)).*/,
+      /sw.js/,
+      /service-worker.js/,
     ],
     use: [
       {
@@ -27,7 +28,7 @@ const rule = (options = {}) => {
             [
               babelPresetEnv,
               {
-                useBuiltIns: 'entry',
+                useBuiltIns: 'usage',
                 corejs: '3.6',
                 targets: {
                   // Target all browsers that are not dead
@@ -40,13 +41,13 @@ const rule = (options = {}) => {
               {
                 runtime: 'automatic',
                 useBuiltIns: true,
-                development: process?.env?.PAW_ENV === 'development',
+                development: !isProduction,
               },
             ],
             presetTypescript,
           ],
-          cacheDirectory: o.cacheDirectory,
-          plugins: babelPlugins(o),
+          cacheDirectory,
+          plugins: babelPlugins({ useDynamicImport: true, hotRefresh: isHot }),
         },
       },
       {

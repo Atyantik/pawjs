@@ -1,20 +1,12 @@
-let presetEnv = require('@babel/preset-env');
+const { getDefault }  = require('../../globals');
+const presetEnv = getDefault(require('@babel/preset-env'));
+const presetReact = getDefault(require('@babel/preset-react'));
+const presetTypescript = getDefault(require('@babel/preset-typescript'));
+const babelPlugins = getDefault(require('../../babel/plugin'));
 
-presetEnv = presetEnv.default ? presetEnv.default : presetEnv;
+const cacheDirectory = process.env.PAW_CACHE === 'true';
 
-let presetReact = require('@babel/preset-react');
-
-presetReact = presetReact.default ? presetReact.default : presetReact;
-
-let presetTypescript = require('@babel/preset-typescript');
-
-presetTypescript = presetTypescript.default ? presetTypescript.default : presetTypescript;
-
-let babelPlugins = require('../../babel/plugin');
-
-babelPlugins = babelPlugins.default ? babelPlugins.default : babelPlugins;
-
-const rule = options => ({
+const rule = () => ({
   test: /\.(j|t)sx?$/,
   use: {
     loader: 'babel-loader',
@@ -35,8 +27,8 @@ const rule = options => ({
         ],
         presetTypescript,
       ],
-      cacheDirectory: typeof options.cacheDirectory !== 'undefined' ? options.cacheDirectory : process.env.PAW_CACHE === 'true',
-      plugins: babelPlugins(options),
+      cacheDirectory,
+      plugins: babelPlugins({ useDynamicImport: false }),
     },
   },
 });

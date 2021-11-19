@@ -104,10 +104,6 @@ const resolver = {
       pawSeoConfig: projectSeoConfig || emptyObject,
     },
     extensions: supportedExtensions.resolveExtensions,
-    fallback: {
-      // @todo: remove this or mange this properly
-      crypto: false
-    },
   },
   resolveLoader: {
     modules: [

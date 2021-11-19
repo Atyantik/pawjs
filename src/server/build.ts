@@ -27,7 +27,7 @@ if (!currentDir) currentDir = __dirname;
 const app = express();
 
 // Enable compression while building.
-app.use(compression());
+app.use(compression({ threshold: '2KB' }));
 
 // Disable x-powered-by (security issues)
 // Completely remove x-powered-by, previously it was PawJS

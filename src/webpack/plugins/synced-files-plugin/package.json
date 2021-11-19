@@ -1,6 +1,0 @@
-{
-  "name": "SyncedFileLoader",
-  "version": "1.0",
-  "private": true,
-  "main": "./index.js"
-}

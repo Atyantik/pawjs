@@ -65,7 +65,10 @@ const populate = (chunks:any [], type: string, publicPath: string) => {
   return arr;
 };
 
-export default (wStats: webpack.Stats): INormalizeAssets => {
+export default (wStats: webpack.Stats | null): INormalizeAssets => {
+  if (!wStats) {
+    return {};
+  }
   let assets = {};
   let cssDependencyMap: DependencyMap[] = [];
   let jsDependencyMap: DependencyMap[] = [];

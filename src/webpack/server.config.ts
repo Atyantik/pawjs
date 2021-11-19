@@ -9,12 +9,14 @@ import pawConfig from '../config';
 import resolverConfig from './inc/webpack-resolver-config';
 import serverRule from './inc/babel-server-rule';
 import { pawExistsSync } from '../globals';
+import { data } from 'autoprefixer';
 
-const isProduction = process.env.PAW_ENV === 'production';
+const isProductionMode = process.env.PAW_ENV === 'production';
 
 export default {
+  stats: true,
   name: 'server',
-  mode: isProduction ? 'production' : 'development',
+  mode: isProductionMode ? 'production' : 'development',
   target: 'node',
   entry: pawExistsSync(path.join(process.env.LIB_ROOT || '', './src/server/server')),
   module: {
@@ -24,18 +26,14 @@ export default {
         include: /node_modules/,
         type: "javascript/auto",
       },
-      assetsRule({
-        outputPath: `${pawConfig.resourcesBaseUrl}/build/images/`.replace('//', '/')
-      }),
+      assetsRule(),
       {
         resourceQuery: /raw/,
         type: 'asset/source',
       },
-      serverRule({ hot: false, noChunk: true, cacheDirectory: process.env.PAW_CACHE === 'true' }),
+      serverRule(),
       ...cssRule({ emit: false }),
-      imageRule({
-        outputPath: `${pawConfig.resourcesBaseUrl}/build/images/`.replace('//', '/')
-      }),
+      imageRule(),
     ],
   },
   context: directories.root,
@@ -49,7 +47,6 @@ export default {
     library: 'dev-server',
     libraryTarget: 'umd',
   },
-  stats: true,
   externals: {
     'pwa-assets': './assets.json',
   },
@@ -59,7 +56,10 @@ export default {
   },
   ...resolverConfig,
   plugins: [
-    new webpack.EnvironmentPlugin({ pawConfig: JSON.stringify(pawConfig), ...process.env }),
+    new webpack.EnvironmentPlugin({
+      pawConfig: JSON.stringify(pawConfig),
+      ...process.env,
+    }),
     new MiniCssExtractPlugin({ filename: 'server.css' }),
     new webpack.optimize.LimitChunkCountPlugin({
       maxChunks: 1,

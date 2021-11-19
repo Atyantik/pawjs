@@ -1,7 +1,8 @@
 import path from 'path';
 import WorkboxPlugin from 'workbox-webpack-plugin';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
-import webpack, { WebpackPluginInstance } from 'webpack';
+import webpack from 'webpack';
+import ReactRefreshWebpackPlugin from '@pmmmwh/react-refresh-webpack-plugin';
 import { BundleAnalyzerPlugin } from 'webpack-bundle-analyzer';
 import cssRule from './inc/babel-css-rule';
 import imageRule from './inc/babel-image-rule';
@@ -13,24 +14,61 @@ import resolverConfig from './inc/webpack-resolver-config';
 import pawConfig from '../config';
 import { pawExistsSync } from '../globals';
 
-const isHot = typeof process.env.PAW_HOT !== 'undefined' ? process.env.PAW_HOT === 'true' : pawConfig.hotReload;
+const isStartCmd = process.env.PAW_START_CMD === 'true';
+const isProductionMode = process.env.PAW_ENV === 'production';
+const isHot = !isProductionMode && isStartCmd && process.env.PAW_HOT === 'true';
+const isDebugEnabled = process.env.PAW_DEBUG === 'true';
 
-const devPlugins: WebpackPluginInstance[] = [];
-if (process.env.PAW_DEBUG === 'true') {
-  devPlugins.push(new BundleAnalyzerPlugin());
-}
-
-export default {
+const webConfig: webpack.Configuration = {
+  stats: true,
   name: 'web',
   target: 'web',
-  mode: process.env.PAW_ENV !== 'production' ? 'development' : 'production',
+  mode: isProductionMode ? 'production' : 'development',
+  devtool: isProductionMode ? 'source-map' : 'eval-source-map',
   context: directories.root,
+  optimization: {
+    splitChunks: {
+      chunks: 'async',
+      minSize: 100000,
+      minRemainingSize: 0,
+      minChunks: 1,
+      maxAsyncRequests: 20,
+      maxInitialRequests: 20,
+      enforceSizeThreshold: 120000,
+      cacheGroups: {
+        react: {
+          test: /[\\/]node_modules[\\/](react|react-dom)[\\/]/,
+          name: 'react',
+          chunks: 'all',
+          reuseExistingChunk: true,
+        },
+        corejs: {
+          test: /[\\/]node_modules[\\/](corejs|core-js)[\\/]/,
+          name: 'corejs',
+          chunks: 'all',
+          reuseExistingChunk: true,
+        },
+        reactRouter: {
+          test: /[\\/]node_modules[\\/](react-router|react-router-dom)[\\/]/,
+          name: 'react-router',
+          chunks: 'all',
+          reuseExistingChunk: true,
+        },
+        default: {
+          minChunks: 1,
+          priority: -20,
+          reuseExistingChunk: true,
+        },
+      },
+    },
+  },
   entry: {
     client: [
-      ...(isHot ? ['react-refresh/runtime'] : []),
+      isHot && 'webpack-hot-middleware/client?name=web&path=/__hmr_update&timeout=2000&overlay=true&quiet=false',
+      isHot && 'react-refresh/runtime',
       // Initial entry point for dev
       pawExistsSync(path.join(process.env.LIB_ROOT || '', './src/client/app')),
-    ],
+    ].filter(Boolean),
   },
   output: {
     path: directories.build,
@@ -39,7 +77,6 @@ export default {
     chunkFilename: 'js/[chunkhash].js',
     assetModuleFilename: 'assets/[contenthash]-[name][ext][query]',
   },
-  stats: true,
   module: {
     rules: [
       {
@@ -47,24 +84,17 @@ export default {
         include: /node_modules/,
         type: "javascript/auto",
       },
-      assetsRule({
-        outputPath: 'assets/',
-      }),
+      assetsRule(),
       {
         resourceQuery: /raw/,
         type: 'asset/source',
       },
-      webRule({ hot: isHot }),
+      webRule(),
       ...cssRule({ hot: isHot }),
-      imageRule({
-        outputPath: 'images/',
-      }),
+      imageRule(),
     ],
   },
   ...resolverConfig,
-  externals: {
-    ...(pawConfig.react === 'cdn' ? { react: 'React', 'react-dom': 'ReactDOM' } : {}),
-  },
   plugins: [
     new webpack.DefinePlugin({
       'process.env': {},
@@ -78,22 +108,24 @@ export default {
       pawConfig: JSON.stringify(pawConfig),
       ...process.env,
     }),
-    new MiniCssExtractPlugin({
+    !isStartCmd && new MiniCssExtractPlugin({
       // Options similar to the same options in webpackOptions.output
       // both options are optional
       filename: 'css/[contenthash].css',
       chunkFilename: 'css/[chunkhash].css',
     }),
-    ...(pawConfig.serviceWorker ? [
-      new WorkboxPlugin.InjectManifest({
-        swSrc: pawExistsSync(path.join(process.env.LIB_ROOT || '', 'src', 'service-worker')),
-        swDest: 'sw.js',
-      }),
-      new SwVariables({
-        fileName: 'sw.js',
-        variables: { workboxDebug: true, ...pawConfig },
-      }),
-    ] : []),
-    ...devPlugins,
-  ],
+    pawConfig.serviceWorker && new WorkboxPlugin.InjectManifest({
+      swSrc: pawExistsSync(path.join(process.env.LIB_ROOT || '', 'src', 'service-worker')),
+      swDest: 'sw.js',
+    }),
+    pawConfig.serviceWorker && new SwVariables({
+      fileName: 'sw.js',
+      variables: { workboxDebug: true, ...pawConfig },
+    }),
+    isDebugEnabled && new BundleAnalyzerPlugin(),
+    isHot && new ReactRefreshWebpackPlugin(),
+    isHot && new webpack.HotModuleReplacementPlugin(),
+  ].filter(Boolean),
 };
+
+export default webConfig;

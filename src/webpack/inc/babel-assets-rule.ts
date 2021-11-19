@@ -1,16 +1,10 @@
-import assignIn from 'lodash/assignIn';
 import { extensionRegex, staticAssetsExtensions } from '../utils/assets';
 
-const defaultOptions = {
-  outputPath: 'assets/',
-  publicPath: 'assets/',
-};
-
-export default (options: any) => ({
+export default () => ({
   test: extensionRegex(staticAssetsExtensions),
   type: 'asset/resource',
   generator: {
     // We will use content hash for long term caching of asset
-    filename: `${assignIn({}, defaultOptions, options).publicPath}[contenthash]-[name][ext][query]`,
+    filename: 'assets/[contenthash]-[name][ext][query]',
   },
 });

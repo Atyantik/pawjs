@@ -116,11 +116,13 @@ export default class CliHandler {
    */
   startServer() {
     process.env.PAW_HOT = process.env.PAW_HOT ?? (process.env.PAW_ENV === 'development' ? 'true' : 'false');
+    process.env.PAW_START_CMD = 'true';
     import('../server/webpack-start');
   }
 
   buildProd() {
     process.env.PAW_HOT = 'false';
+    process.env.PAW_START_CMD = 'false';
     import('../server/webpack-build');
   }
 

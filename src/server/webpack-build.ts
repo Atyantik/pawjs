@@ -1,17 +1,13 @@
 import path from 'path';
 import fs from 'fs';
 import fse from 'fs-extra';
-import del from 'del';
-import mv from 'mv';
 import request from 'supertest';
-import webpack, { RuleSetRule } from 'webpack';
+import webpack from 'webpack';
 import { CleanWebpackPlugin } from 'clean-webpack-plugin';
 import CopyWebpackPlugin from 'copy-webpack-plugin';
 import pawConfig from '../config';
 import directories from '../webpack/utils/directories';
 import wHandler from '../webpack';
-import webRule from '../webpack/inc/babel-web-rule';
-import serverRule from '../webpack/inc/babel-server-rule';
 import ExtractEmittedAssets from '../webpack/plugins/extract-emitted-assets';
 
 import { pawExistsSync } from '../globals';
@@ -131,27 +127,9 @@ console.log(`
 ===================================================
 `);
 
-const isBabelRule = (rule: RuleSetRule) => {
-  if (typeof rule === 'undefined') return false;
-  if (Array.isArray(rule.use)) {
-    return rule.use.some((u: any) => u.loader && u.loader === 'babel-loader');
-  }
-
-  return (
-    typeof rule.use === 'object'
-    && rule.use.loader === 'babel-loader'
-  );
-};
-
 let cleanDistFolder = false;
 let copyPublicFolder = !fs.existsSync(path.join(directories.src, 'public'));
 wHandler.hooks.beforeConfig.tap('AddSyncedFilesPlugin', (wEnv, wType, wConfigs) => {
-  // Before fresh build remove images sync file from previous build
-  const syncedOutputFilename = 'synced-files.json';
-  const syncedOutputPath = directories.dist;
-  if (fs.existsSync(path.join(syncedOutputPath, syncedOutputFilename))) {
-    fs.unlinkSync(path.join(syncedOutputPath, syncedOutputFilename));
-  }
   // Web specific configurations
   if (wType === 'web') {
     wConfigs.forEach((c: webpack.Configuration) => {
@@ -194,22 +172,6 @@ wHandler.hooks.beforeConfig.tap('AddSyncedFilesPlugin', (wEnv, wType, wConfigs) 
         copyPublicFolder = true;
       }
 
-      // Initialize wConfig.module if not already exists
-      if (!wConfig.module) wConfig.module = { rules: [] };
-      if (!wConfig.module.rules) wConfig.module.rules = [];
-      wConfig.module.rules.forEach((r: webpack.RuleSetRule | '...', index: number) => {
-        const rule = r as RuleSetRule;
-        /**
-         * Check for babel rule and replace it with babel rule that
-         * with babel web rule with param hot as false
-         */
-        if (isBabelRule(rule)) {
-          // We already know that wConfig.module is not undefined
-          // @ts-ignore
-          wConfig.module.rules[index] = webRule({ hot: false });
-        }
-      });
-
       const hasExtractEmittedAssets = wConfig.plugins
         && wConfig.plugins.some((p) => p instanceof ExtractEmittedAssets);
       if (!hasExtractEmittedAssets) {
@@ -239,19 +201,6 @@ wHandler.hooks.beforeConfig.tap('AddSyncedFilesPlugin', (wEnv, wType, wConfigs) 
         // @ts-ignore
         wConfig.externals['pwa-assets'] = './assets.json';
       }
-
-      if (!wConfig.module) wConfig.module = { rules: [] };
-      if (!wConfig.module.rules) wConfig.module.rules = [];
-      wConfig.module.rules.forEach((moduleRule: RuleSetRule | '...', index: number) => {
-        const rule = moduleRule as RuleSetRule;
-        if (isBabelRule(rule)) {
-          // @ts-ignore
-          wConfig.module.rules[index] = serverRule({
-            noChunk: true,
-            hot: false,
-          });
-        }
-      });
     });
   }
 });
@@ -280,10 +229,12 @@ try {
     webpack(serverConfig, async (serverErr, serverStats) => {
       if (serverErr || serverStats?.hasErrors()) {
         // Handle errors here
-        // eslint-disable-next-line
-        console.log(serverStats?.toString(stats));
+        if (serverErr) console.log(serverErr);
+        console.log(serverStats?.toString?.(stats) );
         return;
       }
+
+      // Move the images folder created from server compilation
       try {
         if (fs.existsSync(path.resolve(directories.dist, 'images'))) {
           fse.moveSync(
@@ -302,80 +253,46 @@ try {
             { overwrite: true },
           );
         }
+      } catch (ex) { console.log(ex); }
 
-      } catch (ex) {
-        console.log(ex);
-      }
-
-
-      // eslint-disable-next-line
       console.log(serverStats?.toString(stats));
-
       if (pawConfig.singlePageApplication) {
-        // eslint-disable-next-line
         console.log('Creating static files...');
         // @ts-ignore
         const outputConfig = serverConfig[0].output;
-        // eslint-disable-next-line
         let server = require(pawExistsSync(path.join(outputConfig.path, outputConfig.filename)));
         server = server.default ? server.default : server;
 
         // eslint-disable-next-line
         console.log('Generating index.html & manifest.json');
 
-        Promise.all([
+        const [indexResponse, manifestResponse] = await Promise.all([
           request(server).get('/'),
           request(server).get('/manifest.json'),
-        ]).then(([indexResponse, manifestResponse]) => {
-          fs.writeFileSync(path.join(directories.build, 'index.html'), indexResponse.text, 'utf-8');
-          fs.writeFileSync(
-            path.join(directories.build, 'manifest.json'),
-            manifestResponse.text,
-            'utf-8',
-          );
-
-          // eslint-disable-next-line
-          console.log(`Successfully created: ${path.join(directories.build, 'index.html')}`);
-          // eslint-disable-next-line
-          console.log(`Successfully created: ${path.join(directories.build, 'manifest.json')}`);
-        }).then(async () => {
-          // eslint-disable-next-line
-          console.log('\n\nRe-organizing files...\n');
-          try {
-            const tempPawJSBuildPath = path.join(directories.root, 'pawjs-temp-build');
-            // Move to tempFolder
-            await del([tempPawJSBuildPath]);
-            mv(
-              directories.build,
-              tempPawJSBuildPath,
-              {
-                mkdirp: true,
-                clobber: true,
-              },
-              async (err) => {
-                if (err) {
-                  // eslint-disable-next-line
-                  console.error(err);
-                  return;
-                }
-                await del([directories.dist]);
-                mv(tempPawJSBuildPath, directories.dist, { clobber: true }, (err1) => {
-                  if (err1) {
-                    // eslint-disable-next-line
-                    console.error(err1);
-                    return;
-                  }
-                  // eslint-disable-next-line
-                  console.log('Static site generated successfully.');
-                  process.exit(0);
-                });
-              },
-            );
-          } catch (ex) {
-            // eslint-disable-next-line
-            console.log(ex);
+        ]);
+        fs.writeFileSync(path.join(directories.build, 'index.html'), indexResponse.text, 'utf-8');
+        fs.writeFileSync(
+          path.join(directories.build, 'manifest.json'),
+          manifestResponse.text,
+          'utf-8',
+        );
+        console.log(`Successfully created: ${path.join(directories.build, 'index.html')}`);
+        console.log(`Successfully created: ${path.join(directories.build, 'manifest.json')}`);
+        console.log('\n\nRe-organizing files...\n');
+        try {
+          const tempPawJSBuildPath = path.join(directories.root, 'pawjs-temp-build');
+          if (fse.existsSync(tempPawJSBuildPath)) {
+            fse.removeSync(tempPawJSBuildPath);
           }
-        });
+
+          fse.moveSync(directories.build, tempPawJSBuildPath);
+          fse.removeSync(directories.dist);
+          fse.moveSync(tempPawJSBuildPath, directories.dist);
+          console.log('Static site generated successfully.');
+        } catch (ex) {
+          // eslint-disable-next-line
+          console.log(ex);
+        }
       }
     });
   });
