@@ -113,7 +113,7 @@ export default class ClientHandler extends AbstractPlugin {
     if (metaTitle === appName) {
       return metaTitle;
     }
-    if (!metaTitle && appName) {
+    if (!metaTitle) {
       return appName;
     }
     return `${metaTitle} ${titleSeparator} ${appName}`;

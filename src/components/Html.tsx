@@ -94,7 +94,7 @@ export default (props: React.PropsWithChildren<IHtmlProps> = {
     if (metaTitle === appName) {
       return metaTitle;
     }
-    if (!metaTitle && appName) {
+    if (!metaTitle) {
       return appName;
     }
     return `${metaTitle} ${titleSeparator} ${appName}`;
@@ -116,9 +116,7 @@ export default (props: React.PropsWithChildren<IHtmlProps> = {
    * Render CSS Files
    */
   const renderCSSFiles = () => cssFiles.map(path => (
-    (
-      <link rel="stylesheet" type="text/css" key={path} href={path} />
-    )
+    <link rel="stylesheet" type="text/css" key={path} href={path} />
   ));
   const renderPreLoadedData = () => {
     if (!preloadedData) return null;

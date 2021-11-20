@@ -1,8 +1,8 @@
-import React, { PureComponent } from 'react';
+import React, { PureComponent, SyntheticEvent } from 'react';
 import { Link } from 'react-router-dom';
 
 export default class Header extends PureComponent<any, any> {
-  constructor(props) {
+  constructor(props: any) {
     super(props);
     this.state = {
       open: false,
@@ -11,14 +11,13 @@ export default class Header extends PureComponent<any, any> {
     this.toggleMenuBar = this.toggleMenuBar.bind(this);
   }
 
-  toggleMenuBar(e) {
-    const { open } = this.state;
-    if (e && e.preventDefault) {
+  toggleMenuBar(e: SyntheticEvent) {
+    if (e.preventDefault) {
       e.preventDefault();
     }
-    this.setState({
-      open: !open,
-    });
+    this.setState((prevState: any) => ({
+      open: !prevState.open,
+    }));
   }
 
   closeMenuBar() {
@@ -58,7 +57,7 @@ export default class Header extends PureComponent<any, any> {
               <Link className="navbar-item" to="/global-local-css" onClick={this.closeMenuBar}>
                 Global & Local CSS
               </Link>
-              <Link className="navbar-item" to="/typescript-counter" onClick={this.closeMenuBar}>
+              <Link className="navbar-item" to="/typescript-counter/tirthbodawala" onClick={this.closeMenuBar}>
                 TypeScript Counter
               </Link>
               <Link className="navbar-item" to="/skeleton-loading" onClick={this.closeMenuBar}>

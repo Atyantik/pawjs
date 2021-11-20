@@ -59,7 +59,7 @@ export default {
       pawConfig: JSON.stringify(pawConfig),
       ...process.env,
     }),
-    new MiniCssExtractPlugin({ filename: 'server.css' }),
+    new MiniCssExtractPlugin({ filename: 'server.css', ignoreOrder: true, }),
     new webpack.optimize.LimitChunkCountPlugin({
       maxChunks: 1,
     }),

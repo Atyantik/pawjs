@@ -10,7 +10,7 @@ const routes: IRoute[] = [
     path: '/home',
     component: () => import('../components/home'),
     seo: {
-      title: 'Home | ReactPWA Demo',
+      title: 'Home',
       description: 'Feature set offered by ReactPWA with pluggable @pawjs plugins. ReactPWA is highly customizable and once can achieve anything as it is extendable',
       image: FeaturesImage,
     },
@@ -19,23 +19,23 @@ const routes: IRoute[] = [
     path: '/global-local-css',
     component: () => import('../components/global-local-css'),
     seo: {
-      title: 'CSS - Globally & Locally | ReactPWA Demo',
+      title: 'CSS - Globally & Locally',
       description: 'Sometimes we use global css classes like pad-10 but sometimes we need to write class names within modules that do not conflict with other modules, that is where local css comes into the picture',
       image: CSSGlobalLocalImage,
     },
   },
   {
-    path: '/typescript-counter',
+    path: '/typescript-counter/:id',
     component: () => import('../components/typescript-counter'),
     seo: {
-      title: 'TypeScript Counter | ReactPWA Demo',
+      title: 'TypeScript Counter',
       description: 'TypeScript is awesome and implementing it with React makes it more awesome. Checkout this simple counter example with react and typescript',
       image: CSSGlobalLocalImage,
     },
   },
   {
     path: '/skeleton-loading',
-    loadData: async () => new Promise((r) => {
+    loadData: async ({  }) => new Promise((r) => {
       setTimeout(() => {
         fetch('https://www.atyantik.com/wp-json/wp/v2/posts/?per_page=4&_fields[]=title&_fields[]=excerpt&_fields[]=jetpack_featured_media_url')
           .then(res => res.json())
@@ -46,7 +46,7 @@ const routes: IRoute[] = [
     skeleton,
     delay: 0,
     seo: {
-      title: 'Skeleton Loading | ReactPWA Demo',
+      title: 'Skeleton Loading',
       description: 'Tired of adding ugly loaders? Do not let your users get confused, give them the best user experience of what is getting loaded. Use Skeleton Loading',
       image: SkeletonImage,
     },
@@ -55,7 +55,7 @@ const routes: IRoute[] = [
     path: '/contribute',
     component: () => import('../components/contribute'),
     seo: {
-      title: 'Contribute | ReactPWA Demo',
+      title: 'Contribute',
       description: 'Be a part of larger family. Get involved with us and support our project ReactPWA',
     },
   },

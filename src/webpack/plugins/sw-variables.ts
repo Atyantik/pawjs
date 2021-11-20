@@ -54,10 +54,7 @@ class SwVariables {
             if (assetList.length) {
               src = `${src};self.paw__offline_assets = ${JSON.stringify(assetList)}`;
             }
-
-            if (variables) {
-              src = `${src};self.paw__injected_variables = ${JSON.stringify(variables)};`;
-            }
+            src = `${src};self.paw__injected_variables = ${JSON.stringify(variables)};`;
             if (text && text.length) {
               src = `${src};${text}`;
             }

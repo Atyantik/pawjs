@@ -17,8 +17,7 @@ module.exports = ({ types: t }) => ({
 
       if (path.parentPath.parent.type === 'ArrowFunctionExpression') {
         if (
-          path.parentPath
-          && path.parentPath.parentPath
+          path.parentPath.parentPath
           && path.parentPath.parentPath.parent
         ) {
           const { parent } = path.parentPath.parentPath;

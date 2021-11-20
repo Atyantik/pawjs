@@ -26,6 +26,7 @@ const createLoadableComponent = (
 
   const opts = {
     render,
+    path: '',
     loader: null,
     loading: null,
     delay: 200,
@@ -76,13 +77,14 @@ const createLoadableComponent = (
     }
   }
 
-  const loadableComponent = (props: any) => {
+  const loadableComponent = () => {
     const propsLocation = useLocation();
-    const propsMatch = useMatch(propsLocation.pathname);
+    const propsMatch = useMatch((opts?.path ?? '') || propsLocation.pathname);
     const previousRouterProps = useRef({
       propsLocation,
       propsMatch,
     });
+    const props = { match: propsMatch };
     // Initialisation
     // Set res reference
     const resReference = useRef(init(undefined, props));
@@ -233,13 +235,8 @@ const createLoadableComponent = (
     );
     if (
       !opts.selfManageNewProps
-      && previousRouterProps
-      && previousRouterProps.current
-      && previousRouterProps.current.propsMatch
-      && previousRouterProps.current.propsMatch.pathname
-      && previousRouterProps.current.propsMatch.pathname === propsMatch?.pathname
-      && previousRouterProps.current.propsLocation
-      && previousRouterProps.current.propsLocation.key !== propsLocation.key
+      && previousRouterProps.current.propsMatch?.pathname === propsMatch?.pathname
+      && previousRouterProps.current.propsLocation?.key !== propsLocation.key
     ) {
       // Component will receive props
       // The route has been changed, and the component remains the same
@@ -249,7 +246,7 @@ const createLoadableComponent = (
         propsLocation,
         propsMatch,
       };
-    } else if (!previousRouterProps || !previousRouterProps.current) {
+    } else if (!previousRouterProps.current) {
       previousRouterProps.current = {
         propsLocation,
         propsMatch,

@@ -2,8 +2,11 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import GuestLayout from './guest-layout';
 
-const Column = (props) => {
-  const { title, description, link } = props;
+const Column: React.FC<{
+  title: string,
+  description: string,
+  link: string,
+}> = ({ title, description, link }) => {
   return (
     <div className="column">
       <div className="card">

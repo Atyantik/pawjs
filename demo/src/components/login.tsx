@@ -4,10 +4,10 @@ import GuestLayout from './guest-layout';
 import cookie from '../libs/cookie';
 import Authenticator from './fake-authenticator';
 
-export default class Login extends React.Component {
+export default class Login extends React.Component<any, any> {
   onLoginRedirectUrl = '/dashboard';
 
-  constructor(props) {
+  constructor(props: any) {
     super(props);
     this.state = {
       loaded: false,
@@ -31,8 +31,8 @@ export default class Login extends React.Component {
     }
   }
 
-  handleSubmit(e) {
-    if (e && e.preventDefault) e.preventDefault();
+  handleSubmit(e: any) {
+    e.preventDefault();
     const loginData = new FormData(e.target);
     const username = loginData.get('username');
     const password = loginData.get('password');
@@ -42,6 +42,7 @@ export default class Login extends React.Component {
         errorMsg: 'Please use username:password as demo:demo',
       });
     } else {
+      // @ts-ignore
       cookie.setItem('secretKey', 'allowmein');
       this.setState({
         loggedIn: true,
@@ -58,7 +59,7 @@ export default class Login extends React.Component {
     } = this.state;
     if (!loaded) return null;
     if (loggedIn) {
-      return <Redirect push={false} to={this.onLoginRedirectUrl} />;
+      return <Redirect to={this.onLoginRedirectUrl} />;
     }
     return (
       <GuestLayout>

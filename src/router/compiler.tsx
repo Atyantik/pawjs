@@ -64,6 +64,7 @@ export default class RouteCompiler {
       return {};
     };
     const loadableComponent = LoadableMap({
+      path,
       selfManageNewProps:
         typeof selfManageNewProps !== 'undefined'
           ? !!selfManageNewProps : false,
@@ -147,13 +148,11 @@ export default class RouteCompiler {
         }
         const {
           props: componentProps,
-          route: propsRoute,
         } = props;
 
         components.routeComponent = (
           <components.routeComponent
             {...componentProps}
-            route={propsRoute}
             loadedData={loadedData}
           />
         );
@@ -161,7 +160,6 @@ export default class RouteCompiler {
         if (components.layout) {
           return (
             <components.layout
-              route={propsRoute}
               loadedData={loadedData}
             >
               {components.routeComponent}

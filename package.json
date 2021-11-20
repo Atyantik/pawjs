@@ -91,7 +91,7 @@
     "sass": "^1.43.4",
     "sass-loader": "^12.3.0",
     "serialize-javascript": "^6.0.0",
-    "snyk": "^1.765.0",
+    "snyk": "^1.766.0",
     "style-loader": "^3.3.1",
     "supertest": "^6.1.6",
     "synk": "^0.0.2",

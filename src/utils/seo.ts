@@ -296,7 +296,7 @@ export const generateMeta = (data = {}, options = {
   const hasImage = (seoData.image && !!seoData.image.length);
 
   if (hasImage) {
-    let images = hasImage ? seoData.image : [];
+    let images = seoData.image;
     if (!Array.isArray(images)) {
       images = [images];
     }

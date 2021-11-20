@@ -39,8 +39,7 @@ module.exports = ({ types: t }) => ({
 
       if (parent.type === 'ReturnStatement') {
         if (
-          path.parentPath
-          && path.parentPath.parentPath
+          path.parentPath.parentPath
           && path.parentPath.parentPath.parentPath
           && path.parentPath.parentPath.parentPath.parent
         ) {

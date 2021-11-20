@@ -26,6 +26,10 @@ const webConfig: webpack.Configuration = {
   mode: isProductionMode ? 'production' : 'development',
   devtool: isProductionMode ? 'source-map' : 'eval-source-map',
   context: directories.root,
+  experiments: {
+    backCompat: false,
+    cacheUnaffected: true,
+  },
   optimization: {
     splitChunks: {
       chunks: 'async',
@@ -113,6 +117,7 @@ const webConfig: webpack.Configuration = {
       // both options are optional
       filename: 'css/[contenthash].css',
       chunkFilename: 'css/[chunkhash].css',
+      ignoreOrder: true,
     }),
     pawConfig.serviceWorker && new WorkboxPlugin.InjectManifest({
       swSrc: pawExistsSync(path.join(process.env.LIB_ROOT || '', 'src', 'service-worker')),
@@ -125,6 +130,7 @@ const webConfig: webpack.Configuration = {
     isDebugEnabled && new BundleAnalyzerPlugin(),
     isHot && new ReactRefreshWebpackPlugin(),
     isHot && new webpack.HotModuleReplacementPlugin(),
+    // new webpack.ProgressPlugin(),
   ].filter(Boolean),
 };
 

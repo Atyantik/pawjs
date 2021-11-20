@@ -1,4 +1,3 @@
-import debounce from 'lodash/debounce';
 import path from 'path';
 import express from 'express';
 import webpack from 'webpack';
@@ -40,26 +39,26 @@ try {
   const processEnv = process.env;
   const isVerbose = processEnv.PAW_VERBOSE === 'true';
 
-  const commonOptions = {
-    stats: {
-      colors: true,
-      reasons: isVerbose,
-      entrypoints: isVerbose,
-      modules: isVerbose,
-      moduleTrace: isVerbose,
-      assets: true,
-      warnings: isVerbose,
-      errors: true,
-      cachedAssets: isVerbose,
-      version: isVerbose,
-    },
+  const stats = {
+    colors: true,
+    reasons: isVerbose,
+    entrypoints: isVerbose,
+    modules: isVerbose,
+    moduleTrace: isVerbose,
+    assets: true,
+    warnings: isVerbose,
+    errors: true,
+    cachedAssets: isVerbose,
+    version: isVerbose,
   };
 
-  const serverOptions: any = {
+  const commonOptions: webpackDevMiddleware.Options = { stats };
+
+  const serverOptions: webpackDevMiddleware.Options = {
     ...commonOptions,
     ...devServerConfig,
   };
-  const webOptions = {
+  const webOptions: webpackDevMiddleware.Options = {
     ...commonOptions,
     serverSideRender: true,
     publicPath: pawConfig.resourcesBaseUrl,
@@ -81,12 +80,36 @@ try {
 
   // Add server middleware
   const serverMiddleware = webpackDevMiddleware(serverCompiler, serverOptions);
-
   app.use(serverMiddleware);
 
+  // Add web middleware
+  const webMiddleware = webpackDevMiddleware(webCompiler, webOptions);
+  // On adding this middleware the SSR data to serverMiddleware will be lost in
+  // res.locals but its not needed anyway.
+  app.use(webMiddleware);
+
+  let startServer: () => void = () => {};
+
+  let checkTimeout: ReturnType<typeof setTimeout>;
+  let checkRetries = 0;
+  const checkInNext2Seconds = () => {
+    if (checkTimeout) {
+      clearTimeout(checkTimeout);
+    }
+    checkTimeout = setTimeout(() => {
+      checkRetries += 1;
+      startServer();
+    }, 2000);
+  };
+
   const getCommonServer = () => {
-    if (!serverMiddleware.context) { return; }
-    if (!serverMiddleware.context.stats) { return; }
+    if (checkRetries < 10 && !serverMiddleware?.context?.stats) {
+      checkInNext2Seconds();
+      return;
+    }
+    if (checkTimeout) {
+      clearTimeout(checkTimeout);
+    }
     // @ts-ignore
     const mfs = serverMiddleware.context.outputFileSystem as any;
     // Get content of the server that is compiled!
@@ -104,13 +127,7 @@ try {
       appendPaths: nodePath.split(path.delimiter),
     });
   };
-  // Add web middleware
-  // @ts-ignore
-  const webMiddleware = webpackDevMiddleware(webCompiler, webOptions);
 
-  // On adding this middleware the SSR data to serverMiddleware will be lost in
-  // res.locals but its not needed anyway.
-  app.use(webMiddleware);
 
   if (pawConfig.hotReload) {
     // Add hot middleware to the update
@@ -175,7 +192,7 @@ try {
 
   let serverStarted = false;
 
-  const startServer = () => {
+  startServer = () => {
     if (serverStarted) return;
 
     let beforeStart: any;
@@ -219,19 +236,8 @@ try {
       );
     });
   };
-  const debouncedStartServer = debounce(startServer, 200);
-
-  let totalCompilationComplete = 0;
-
-  webCompiler.hooks.done.tap('InformWebCompiled', () => {
-    totalCompilationComplete += 1;
-    if (totalCompilationComplete >= 2) debouncedStartServer();
-  });
-
-  serverCompiler.hooks.done.tap('InformServerCompiled', () => {
-    totalCompilationComplete += 1;
-    if (totalCompilationComplete >= 2) debouncedStartServer();
-  });
+  webCompiler.hooks.done.tap('InformWebCompiled', startServer);
+  serverCompiler.hooks.done.tap('InformServerCompiled', startServer);
 } catch (ex) {
   // eslint-disable-next-line no-console
   console.error(ex);
