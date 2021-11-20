@@ -79,7 +79,7 @@ const createLoadableComponent = (
 
   const loadableComponent = () => {
     const propsLocation = useLocation();
-    const propsMatch = useMatch((opts?.path ?? '') || propsLocation.pathname);
+    const propsMatch = useMatch(opts.path || propsLocation.pathname);
     const previousRouterProps = useRef({
       propsLocation,
       propsMatch,
@@ -138,101 +138,92 @@ const createLoadableComponent = (
     };
 
     // load current module
-    const loadModule = useCallback(
-      () => {
-        if (
-          !resReference
-          || !resReference.current
-          || (resReference.current.completed && previousCompleted.current)
-          || !resReference.current.promise
-          || !isMounted.current
-          || isModuleLoading.current
-        ) {
-          return false;
-        }
-        // Set module loading to true
-        isModuleLoading.current = true;
-        // Clear previous timeouts
-        clearTimeouts();
-        if (opts.delay > 0) {
-          pastDelayTimeoutRef.current = setTimeout(
-            () => {
-              if (isMounted.current) {
-                isModuleLoading.current = false;
-                updateLoadableState({ type: 'SET_PAST_DELAY', pastDelay: true });
-              }
+    const loadModule = () => {
+      if (
+        !resReference
+        || !resReference.current
+        || (resReference.current.completed && previousCompleted.current)
+        || !resReference.current.promise
+        || !isMounted.current
+        || isModuleLoading.current
+      ) {
+        return false;
+      }
+      // Set module loading to true
+      isModuleLoading.current = true;
+      // Clear previous timeouts
+      clearTimeouts();
+      if (opts.delay > 0) {
+        pastDelayTimeoutRef.current = setTimeout(
+          () => {
+            if (isMounted.current) {
+              isModuleLoading.current = false;
+              updateLoadableState({ type: 'SET_PAST_DELAY', pastDelay: true });
+            }
+          },
+          opts.delay,
+        );
+      }
+      if (opts.timeout) {
+        timedOutTimeoutRef.current = setTimeout(
+          () => {
+            if (isMounted.current) {
+              isModuleLoading.current = false;
+              updateLoadableState({ type: 'SET_TIMED_OUT', timedOut: true });
+            }
+          },
+          opts.timeout,
+        );
+      }
+      const update = () => {
+        if (isMounted.current) {
+          clearTimeouts();
+          updateLoadableState({
+            type: 'UPDATE',
+            payload: {
+              timedOut: false,
+              pastDelay: false,
+              loading: resReference.current.loading,
+              error: resReference.current.error,
             },
-            opts.delay,
-          );
-        }
-        if (opts.timeout) {
-          timedOutTimeoutRef.current = setTimeout(
-            () => {
-              if (isMounted.current) {
-                isModuleLoading.current = false;
-                updateLoadableState({ type: 'SET_TIMED_OUT', timedOut: true });
-              }
-            },
-            opts.timeout,
-          );
-        }
-        const update = () => {
-          if (isMounted.current) {
-            clearTimeouts();
-            updateLoadableState({
-              type: 'UPDATE',
-              payload: {
-                timedOut: false,
-                pastDelay: false,
-                loading: resReference.current.loading,
-                error: resReference.current.error,
-              },
-            });
-          }
-          previousCompleted.current = resReference.current.completed;
-          isModuleLoading.current = false;
-        };
-        resReference.current.promise
-          .then(update)
-          .catch(update);
-        return true;
-      },
-      [
-        props,
-      ],
-    );
-    const retry = useCallback(
-      () => {
-        // reset state of res
-        previousCompleted.current = false;
-        res = loadFn(opts.loader, undefined, props);
-        resReference.current = res;
-        resetLoadableState();
-        clearTimeouts();
-        if (opts.delay > 0) {
-          pastDelayTimeoutRef.current = setTimeout(
-            () => {
-              if (isMounted.current) {
-                isModuleLoading.current = false;
-                updateLoadableState({ type: 'SET_PAST_DELAY', pastDelay: true });
-              }
-            },
-            opts.delay,
-          );
-        }
-        if (res.promise && res.promise.then) {
-          res.promise.then(() => {
-            loadModule();
           });
-        } else {
-          loadModule();
         }
+        previousCompleted.current = resReference.current.completed;
+        isModuleLoading.current = false;
+      };
+      resReference.current.promise
+        .then(update)
+        .catch(update);
+      return true;
+    };
 
-      },
-      [
-        props,
-      ],
-    );
+    const retry = () => {
+      // reset state of res
+      previousCompleted.current = false;
+      res = loadFn(opts.loader, undefined, props);
+      resReference.current = res;
+      resetLoadableState();
+      clearTimeouts();
+      if (opts.delay > 0) {
+        pastDelayTimeoutRef.current = setTimeout(
+          () => {
+            if (isMounted.current) {
+              isModuleLoading.current = false;
+              updateLoadableState({ type: 'SET_PAST_DELAY', pastDelay: true });
+            }
+          },
+          opts.delay,
+        );
+      }
+      if (res.promise && res.promise.then) {
+        res.promise.then(() => {
+          loadModule();
+        });
+      } else {
+        loadModule();
+      }
+    };
+
     if (
       !opts.selfManageNewProps
       && previousRouterProps.current.propsMatch?.pathname === propsMatch?.pathname
