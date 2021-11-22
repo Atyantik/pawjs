@@ -1,6 +1,6 @@
 {
   "name": "@pawjs/pawjs",
-  "version": "4.0.0-alpha.1",
+  "version": "4.0.0-alpha.2",
   "description": "A minimal pluggable reactjs framework to develop a progressive web application",
   "main": "main.tsx",
   "engines": {
