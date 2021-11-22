@@ -22,9 +22,6 @@ export const getFullRequestUrl = (req: express.Request) => {
     let pathName = '/';
     if (parsedUrl.pathname) {
       pathName = parsedUrl.pathname;
-      if (!pathName.endsWith('/')) {
-        pathName += '/';
-      }
     }
     return `${baseUrl}${pathName}${parsedUrl.search || ''}`;
   } catch (ex) {

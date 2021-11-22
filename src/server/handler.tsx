@@ -43,10 +43,19 @@ interface IApplication {
   appRootUrl?: string;
 }
 
+type CacheOptions = false | {
+  max: number;
+  maxAge: number;
+  reCache?: boolean;
+};
+
+type CacheKeyHandler = (req?: express.Request, res?: express.Response) => string;
 export default class ServerHandler extends AbstractPlugin {
   options: Options;
 
   routeHandler: RouteHandler | undefined;
+
+  cacheKeyHandler: (req?: express.Request, res?: express.Response) => string = () => '';
 
   hooks: {
     beforeStart: AsyncSeriesHook<any>,
@@ -58,6 +67,43 @@ export default class ServerHandler extends AbstractPlugin {
     renderRoutes: AsyncSeriesHook<any>,
     [s: string]: Hook<any, any> | AsyncSeriesHook<any>,
   };
+
+  cacheOptions: CacheOptions = false;
+
+  setCache(cacheOptions: true | CacheOptions) {
+
+    if (cacheOptions === true) {
+      this.cacheOptions = {
+        // 50 MB
+        max: 52428800,
+        // 5 Min
+        maxAge: 300000,
+
+        // Re-cache after the cache expires
+        // An automated background request will be executed to
+        // re-create the cache after maxAge is expired
+        reCache: true,
+      };
+    } else {
+      this.cacheOptions = cacheOptions;
+    }
+
+  }
+
+  getCache() {
+    if (!this.cacheOptions) {
+      return false;
+    }
+    return Object.assign({}, this.cacheOptions);
+  }
+
+  getCacheKey(req: express.Request, res: express.Response) {
+    return this.cacheKeyHandler(req, res);
+  }
+
+  setCacheKeyHandler(handler: CacheKeyHandler) {
+    this.cacheKeyHandler = handler;
+  }
 
   constructor(options: Options) {
     super();
@@ -133,6 +179,7 @@ export default class ServerHandler extends AbstractPlugin {
       next,
     }: { routeHandler: RouteHandler, req: express.Request, res: express.Response, next: express.NextFunction },
   ) {
+    const write = res.locals.cachedWrite ?? res.write;
     /**
      * Get assets from cached app locals
      */
@@ -188,7 +235,7 @@ export default class ServerHandler extends AbstractPlugin {
     let currentPageRoutes = RouteHandler.matchRoutes(routes, req.path.replace(appRootUrl, ''));
     if (!serverSideRender) {
       res.status(200).type('text/html');
-      res.write('<!DOCTYPE html>');
+      write('<!DOCTYPE html>');
       const application: IApplication = {
         context,
         htmlProps,
@@ -356,8 +403,8 @@ export default class ServerHandler extends AbstractPlugin {
       }
       renderedHtml = await this.renderHtml(application, req, res, htmlContent) as string;
       res.status(context.statusCode ?? 200).type('text/html');
-      res.write('<!DOCTYPE html>');
-      res.write(renderedHtml);
+      write('<!DOCTYPE html>');
+      write(renderedHtml);
       res.end();
 
       // Free some memory
@@ -393,7 +440,7 @@ export default class ServerHandler extends AbstractPlugin {
         ),
       };
       res.status(context.statusCode ?? ex.code ?? 500).type('text/html');
-      res.write('<!DOCTYPE html>');
+      write('<!DOCTYPE html>');
       renderedHtml = renderToString(
         (
           <Html
@@ -407,7 +454,7 @@ export default class ServerHandler extends AbstractPlugin {
           />
         ),
       );
-      res.write(renderedHtml);
+      write(renderedHtml);
       res.end();
       return next();
     }

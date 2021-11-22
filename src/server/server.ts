@@ -3,7 +3,9 @@ import hsts from 'hsts';
 import cookiesMiddleware from 'universal-cookie-express';
 // eslint-disable-next-line
 import ProjectServer from 'pawProjectServer';
-import { NextHandleFunction } from 'connect';
+import { createHash } from 'crypto';
+import LRU from 'lru-cache';
+import request from 'supertest';
 import RouteHandler from '../router/handler';
 import ServerHandler from './handler';
 import env from '../config';
@@ -54,6 +56,157 @@ sHandler.addPlugin(new ProjectServer({
   },
 }));
 
+const cacheLog = (...args: any) => {
+  if (process.env.PAW_VERBOSE === 'true') {
+    console.log(...args);
+  }
+};
+const cacheOptions = sHandler.getCache();
+const existingRequests: { [cacheKey: string]: Boolean } = {};
+if (cacheOptions) {
+  // Create a superTest internal HTTP server to request and not record any
+  // external request
+  const internalHttpApp = request(app);
+
+  const optMax = cacheOptions.max || 52428800;
+  let optMaxAge = cacheOptions.maxAge;
+  const optReCache = !!cacheOptions.reCache;
+  if (typeof optMaxAge === 'undefined' || isNaN(optMaxAge)) {
+    optMaxAge = 300000;
+  }
+  const cache = new LRU({
+    max: optMax,
+    maxAge: optMaxAge,
+  });
+  // const reCacheHandler = () => {
+
+  // };
+  // setTimeout();
+  /**
+   * Add stale while revalidate caching
+   */
+  app.use((
+    req: express.Request,
+    res: express.Response,
+    next: express.NextFunction,
+  ) => {
+    if (req.method === 'GET') {
+      const fullUrl = getFullRequestUrl(req);
+
+      // Parse url
+      const url = new URL(fullUrl);
+      // check if __no_cache is present as parameter
+      const byPassCache = url.searchParams.has('__no_cache');
+
+      // Delete __no_cache irrespectively
+      url.searchParams.delete('__no_cache');
+
+      // Non-Origin URL, that can be used by supertest to create
+      const nonOriginUrl = url.toString().replace(url.origin, '');
+      cacheLog(`${nonOriginUrl}:: byPass value: ${byPassCache}`);
+
+      // The default cache key which only is dependent on the nonOriginUrl, considering the url Paramters
+      // @todo: Correct the url paramters and re-create the url just in case for non-conflicting order of params
+      // as order of params should not matter for cache.
+      const defaultCacheKey = `__express__${nonOriginUrl}`;
+
+      // create sha1 key hash for the provided key, either provided by custom handler
+      // or the defaultCacheKey
+      const cacheKey = createHash('sha1').update(sHandler.getCacheKey?.(req, res) || defaultCacheKey).digest('base64');
+
+      const reCacheRequest = () => {
+        if (existingRequests[cacheKey] === true) {
+          return;
+        }
+        existingRequests[cacheKey] = true;
+        // Execute the same request in background!
+        url.searchParams.set('__no_cache', 'true');
+        const nonOriginUrlWithNoCache = url.toString().replace(url.origin, '');
+        url.searchParams.delete('__no_cache');
+        cacheLog(`${nonOriginUrl}:: Re-Caching in the background`);
+        internalHttpApp.get(nonOriginUrlWithNoCache).then(() => {
+          existingRequests[cacheKey] = false;
+          // do nothing.
+          // This is required, else the request is killed halfway.
+        });
+      };
+
+      // If this request is for byPassingCache, i.e. triggered internally,
+      // Then do not return cache value
+      if (!byPassCache && cache.has(cacheKey)) {
+        // If cache found & not a byPassRequest
+        cacheLog(`${nonOriginUrl}:: Cache found`);
+        const cachedData: any = cache.get(cacheKey);
+
+        // cache data should contain, headers, statusCode and data to be returned via cache.
+        // if either of it is not defined, then do not return such cached data
+        if (
+          cachedData
+          && cachedData.headers
+          && cachedData.statusCode
+          && cachedData.data
+        ) {
+          // Remove content-encoding and vary from the request as we will provide the
+          // paramter from the current request only, get all other headerOptions
+          const {
+            ['content-encoding']: contentEncoding,
+            vary,
+            ...otherHeaders
+          } = cachedData.headers;
+
+          // Send the cached data
+          cacheLog(`${nonOriginUrl}:: Sending cached`);
+          res.set(otherHeaders);
+          res.status(cachedData.statusCode);
+          res.write(cachedData.data);
+
+          // After sending the data, recache the data in the background
+          reCacheRequest();
+          return res.end();
+        }
+      }
+
+      if (byPassCache) {
+        cacheLog(`${nonOriginUrl}:: Caching was not used/checked as __no_cache was found in the url`);
+      }
+
+      let interceptedData: any = '';
+      res.locals.cachedWrite = (data: string) => {
+        interceptedData += data;
+        return res.write(data);
+      };
+
+      res.on('finish', () => {
+        // An appropriate response was returned to the user
+        if (res.statusCode >= 200 && res.statusCode < 300) {
+          try {
+            const headers = res.getHeaders();
+            cacheLog(`${nonOriginUrl}:: Setting new cache`);
+            cache.set(cacheKey, {
+              url: nonOriginUrl,
+              headers: JSON.parse(JSON.stringify(headers)),
+              statusCode: res.statusCode,
+              data: interceptedData,
+            });
+            if (optReCache) {
+              setTimeout(() => {
+                if (!cache.has(cacheKey)) {
+                  reCacheRequest();
+                } else {
+                  cacheLog(`${nonOriginUrl}:: Still have cache, thus not executing, re-cache`);
+                }
+              }, optMaxAge + 1);
+            }
+          } catch (ex) {
+            cacheLog(ex);
+          }
+        }
+      });
+    }
+    return next();
+  });
+}
+
 // Disable x-powered-by (security issues)
 // Completely remove x-powered-by, previously it was PawJS
 // But have removed it on various request
@@ -90,7 +243,7 @@ if (hstsSettings.enabled) {
   });
 }
 
-serverMiddlewareList.forEach((middleware: NextHandleFunction) => {
+serverMiddlewareList.forEach((middleware) => {
   app.use(middleware);
 });
 

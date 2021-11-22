@@ -58,6 +58,7 @@ export default class Server {
 
   apply(serverHandler: ServerHandler) {
     this.serverHandler = serverHandler;
+    this.serverHandler.setCache({ max: 52428800, maxAge: 1000 * 20, reCache: true });
     this.addHeadLinks();
   }
 }
