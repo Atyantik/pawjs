@@ -63,8 +63,11 @@ export default class Header extends PureComponent<any, any> {
               <Link className="navbar-item" to="/skeleton-loading" onClick={this.closeMenuBar}>
                 Skeleton Loading
               </Link>
-              <Link className="navbar-item" to="/image-optimization" onClick={this.closeMenuBar}>
-                Image Optimization
+              <Link className="navbar-item" to="/nested" onClick={this.closeMenuBar}>
+                Nested
+              </Link>
+              <Link className="navbar-item" to="/invalid-path" onClick={this.closeMenuBar}>
+                Invalid Path
               </Link>
               <Link className="navbar-item" to="/login" onClick={this.closeMenuBar}>
                 Auth

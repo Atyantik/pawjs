@@ -1,7 +1,7 @@
 import { AsyncSeriesHook } from 'tapable';
 import _uniq from 'lodash/uniq';
 import _cloneDeep from 'lodash/cloneDeep';
-import { matchPath } from 'react-router';
+import { matchRoutes } from 'react-router';
 // @ts-ignore
 // eslint-disable-next-line
 import pawSeoSchema from 'pawSeoConfig';
@@ -83,30 +83,9 @@ export default class RouteHandler extends AbstractPlugin implements IRouteHandle
 
   static matchRoutes = (...args: any[] | [any, any]) => {
     const [routes, pathname] = args;
-    const branch = args.length > 2 && args[2] !== undefined ? args[2] : [];
+    const matches = matchRoutes(routes, pathname);
 
-    routes.some((route: Route) => {
-      let match;
-
-      if (route.path) {
-        match = matchPath(route.path, pathname);
-      } else {
-        match = branch.length ? branch[branch.length - 1].match // use parent match
-          : RouteHandler.computeRootMatch(pathname);
-      }
-
-      if (match) {
-        branch.push({ route, match });
-
-        if (route.routes) {
-          RouteHandler.matchRoutes(route.routes, pathname, branch);
-        }
-      }
-
-      return match;
-    });
-
-    return branch;
+    return matches || [];
   };
 
   routes: CompiledRoute [] = [];

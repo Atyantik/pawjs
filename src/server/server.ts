@@ -10,6 +10,7 @@ import RouteHandler from '../router/handler';
 import ServerHandler from './handler';
 import env from '../config';
 import { getFullRequestUrl } from '../utils/server';
+import { RouteMatch } from 'react-router';
 
 /**
  * Initialize express application
@@ -63,7 +64,10 @@ const cacheLog = (...args: any) => {
 };
 const cacheOptions = sHandler.getCache();
 const existingRequests: { [cacheKey: string]: Boolean } = {};
-if (cacheOptions) {
+const isStartCmd = process.env.PAW_START_CMD === 'true';
+if (cacheOptions && !isStartCmd) {
+  // For singed integer, 2 bit is left for sign, thus it is not Math.pow(2, 32) but Math.pow(2, 30);
+  const max32BitInt =  Math.pow(2, 30) - 1;
   // Create a superTest internal HTTP server to request and not record any
   // external request
   const internalHttpApp = request(app);
@@ -78,10 +82,7 @@ if (cacheOptions) {
     max: optMax,
     maxAge: optMaxAge,
   });
-  // const reCacheHandler = () => {
 
-  // };
-  // setTimeout();
   /**
    * Add stale while revalidate caching
    */
@@ -182,20 +183,41 @@ if (cacheOptions) {
           try {
             const headers = res.getHeaders();
             cacheLog(`${nonOriginUrl}:: Setting new cache`);
+            let maxAge = optMaxAge;
+            if (
+              res.locals.currentPageRoutes &&
+              Array.isArray(res.locals.currentPageRoutes)
+              && res.locals.currentPageRoutes.length
+            ) {
+              res.locals.currentPageRoutes.forEach((match: RouteMatch) => {
+                const { route } = match as any;
+                if (typeof route.cache !== 'undefined') {
+                  if (route.cache === false || route.cache < 0) {
+                    maxAge = -1;
+                  } else if (!isNaN(route.cache.maxAge)) {
+                    maxAge = route.cache.maxAge;
+                  }
+                }
+              });
+            }
+            if (maxAge > max32BitInt) {
+              maxAge = max32BitInt;
+            }
             cache.set(cacheKey, {
               url: nonOriginUrl,
               headers: JSON.parse(JSON.stringify(headers)),
               statusCode: res.statusCode,
               data: interceptedData,
-            });
-            if (optReCache) {
+            }, maxAge);
+
+            if (optReCache && maxAge > 0) {
               setTimeout(() => {
                 if (!cache.has(cacheKey)) {
                   reCacheRequest();
                 } else {
                   cacheLog(`${nonOriginUrl}:: Still have cache, thus not executing, re-cache`);
                 }
-              }, optMaxAge + 1);
+              }, maxAge + 1);
             }
           } catch (ex) {
             cacheLog(ex);
@@ -204,6 +226,14 @@ if (cacheOptions) {
       });
     }
     return next();
+  });
+} else {
+  app.use((_req, res, next) => {
+    // Simply create wrapper of cachedWrite that does nothing.
+    res.locals.cachedWrite = (data: string) => {
+      return res.write(data);
+    };
+    next();
   });
 }
 

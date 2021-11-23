@@ -4,6 +4,7 @@ import { IRoute } from '@pawjs/pawjs';
 import FeaturesImage from '../resources/images/seo/features.png';
 import CSSGlobalLocalImage from '../resources/images/seo/css-global-local.png';
 import SkeletonImage from '../resources/images/seo/skeleton-loading.png';
+import { toName } from '../utils/text';
 
 const routes: IRoute[] = [
   {
@@ -58,6 +59,41 @@ const routes: IRoute[] = [
       title: 'Contribute',
       description: 'Be a part of larger family. Get involved with us and support our project ReactPWA',
     },
+  },
+  {
+    path: '/nested',
+    component: () => import('../components/nested/index'),
+    seo: {
+      title: 'Nested routes',
+      description: 'Create nested routes. Very handy when managing large applications.',
+    },
+    cache: false,
+    routes: [
+      {
+        path: 'simple',
+        component: () => import('../components/nested/simple'),
+        cache: {
+          // 1 year
+          maxAge: 31536000000,
+        },
+        seo: {
+          title: 'Simple | Nested routes',
+          description: 'Create nested routes. Very handy when managing large applications.',
+        },
+      },
+      {
+        path: ':name',
+        component: () => import('../components/nested/dynamic'),
+        loadData: ({ updateSeo, match }) => {
+          const { params: { name } } = match;
+          updateSeo({
+            title: `${toName(name || '')} | Nested routes`,
+            description: `${toName(name || '')} in nested routes. You can add your own dynamic name in the url!`,
+          });
+          return {};
+        },
+      },
+    ],
   },
 ];
 

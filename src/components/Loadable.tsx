@@ -4,7 +4,7 @@ import React, {
   useRef,
 } from 'react';
 import { useLocation }  from 'react-router';
-import { useMatch } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import loadMap, { load, LoadableState } from '../utils/loadable';
 
 // eslint-disable-next-line no-underscore-dangle
@@ -77,13 +77,14 @@ const createLoadableComponent = (
   }
 
   const loadableComponent = () => {
-    const propsLocation = useLocation();
-    const propsMatch = useMatch(opts.path || propsLocation.pathname);
+    const location = useLocation();
+    const params = useParams();
+    const props = { match: { params } };
     const previousRouterProps = useRef({
-      propsLocation,
-      propsMatch,
+      location,
+      params,
     });
-    const props = { match: propsMatch };
+    // console.log(opts.path, props);
     // Initialisation
     // Set res reference
     const resReference = useRef(init(undefined, props));
@@ -225,21 +226,20 @@ const createLoadableComponent = (
 
     if (
       !opts.selfManageNewProps
-      && previousRouterProps.current.propsMatch?.pathname === propsMatch?.pathname
-      && previousRouterProps.current.propsLocation?.key !== propsLocation.key
+      && previousRouterProps.current.location?.key !== location.key
     ) {
       // Component will receive props
       // The route has been changed, and the component remains the same
       // console.log('Props changed, route changed');
       retry();
       previousRouterProps.current = {
-        propsLocation,
-        propsMatch,
+        location,
+        params,
       };
     } else if (!previousRouterProps.current) {
       previousRouterProps.current = {
-        propsLocation,
-        propsMatch,
+        location,
+        params,
       };
     }
 

@@ -6,6 +6,7 @@ import express from 'express';
 import { createPath, To } from 'history';
 import _ from 'lodash';
 import { renderToString, renderToNodeStream } from 'react-dom/server';
+import { RouteMatch } from 'react-router';
 import { Routes, Route, Outlet } from 'react-router-dom';
 import { StaticRouter } from 'react-router-dom/server';
 import { CookiesProvider } from 'react-cookie';
@@ -38,7 +39,7 @@ interface IApplication {
   context: any;
   htmlProps: any;
   children: null | JSX.Element;
-  currentRoutes: CompiledRoute [];
+  currentRoutes: RouteMatch<string>[];
   routes: CompiledRoute [];
   appRootUrl?: string;
 }
@@ -179,7 +180,7 @@ export default class ServerHandler extends AbstractPlugin {
       next,
     }: { routeHandler: RouteHandler, req: express.Request, res: express.Response, next: express.NextFunction },
   ) {
-    const write = res.locals.cachedWrite ?? res.write;
+    const write = res.locals.cachedWrite;
     /**
      * Get assets from cached app locals
      */
@@ -233,6 +234,7 @@ export default class ServerHandler extends AbstractPlugin {
     };
 
     let currentPageRoutes = RouteHandler.matchRoutes(routes, req.path.replace(appRootUrl, ''));
+    res.locals.currentPageRoutes = currentPageRoutes.slice(0);
     if (!serverSideRender) {
       res.status(200).type('text/html');
       write('<!DOCTYPE html>');
@@ -246,8 +248,8 @@ export default class ServerHandler extends AbstractPlugin {
       const renderedHtmlStream = await this.renderHtml(application, req, res, '', true) as ReturnType<typeof renderToNodeStream>;
       return renderedHtmlStream.pipe(res);
     }
-
-    currentPageRoutes.forEach(({ route }: { route: { modules: string[] } }) => {
+    currentPageRoutes.forEach((match) => {
+      const { route } = match as any;
       if (route.modules) {
         modulesInRoutes.push(...route.modules);
       }
@@ -286,14 +288,14 @@ export default class ServerHandler extends AbstractPlugin {
 
     try {
       // Call preload for each element
-      currentPageRoutes.forEach(({ route, match }: any) => {
+      currentPageRoutes.forEach((match: RouteMatch) => {
+        const { route, params } = match as any;
         if (route.element.preload) {
           promises.push(
             route.element.preload(
               undefined,
               {
-                route,
-                match,
+                match: { params },
               },
             ).promise,
           );
@@ -302,8 +304,9 @@ export default class ServerHandler extends AbstractPlugin {
 
       const promisesData = await Promise.all(promises);
       let seoData = {};
-      currentPageRoutes.forEach((r: { route: any, match: any }, i: number) => {
-        seoData = { ...seoData, ...r.route.getRouteSeo() };
+      currentPageRoutes.forEach((match, i: number) => {
+        const { route } = match as any;
+        seoData = { ...seoData, ...route.getRouteSeo() };
         if (promisesData[i]) {
           preloadedData.push(promisesData[i][1]);
         }
@@ -409,7 +412,7 @@ export default class ServerHandler extends AbstractPlugin {
 
       // Free some memory
       routes = null as any;
-      currentPageRoutes = null;
+      currentPageRoutes = [];
       context = {};
       promises = [];
       return next();

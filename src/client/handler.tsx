@@ -16,8 +16,7 @@ import ErrorBoundary from '../components/ErrorBoundary';
 import { generateMeta } from '../utils/seo';
 import possibleStandardNames from '../utils/reactPossibleStandardNames';
 import AbstractPlugin from '../abstract-plugin';
-import { ICompiledRoute } from '../@types/route';
-import { useLayoutEffect } from 'react';
+import { useLayoutEffect, useRef } from 'react';
 import { useLocation } from 'react-router';
 import { PawProvider } from '../components/Paw';
 
@@ -130,19 +129,20 @@ export default class ClientHandler extends AbstractPlugin {
           let seoData = {};
           const pwaSchema = this.routeHandler.getPwaSchema();
           const seoSchema = this.routeHandler.getDefaultSeoSchema();
-          currentRoutes.forEach((r: { route: ICompiledRoute, match: any }) => {
-            if (r?.route?.element?.preload) {
-              promises.push(r.route.element.preload(undefined, {
-                route: r.route,
-                match: r.match,
+          currentRoutes.forEach((match) => {
+            const { route, params } = match as any;
+            if (route?.element?.preload) {
+              promises.push(route.element.preload(undefined, {
+                match: { params },
               })?.promise);
             }
           });
           await Promise.all(promises);
-          currentRoutes.forEach((r: { route: ICompiledRoute, match: any }) => {
+          currentRoutes.forEach((match) => {
+            const { route } = match as any;
             let routeSeo = {};
-            if (r.route.getRouteSeo) {
-              routeSeo = r.route.getRouteSeo();
+            if (route.getRouteSeo) {
+              routeSeo = route.getRouteSeo();
             }
             seoData = { ...seoData, ...routeSeo };
           });
@@ -288,30 +288,29 @@ export default class ClientHandler extends AbstractPlugin {
     const promises: Promise<any> [] = [];
     if (window.PAW_PRELOADED_DATA) {
       const preloadedData = window.PAW_PRELOADED_DATA;
-      currentPageRoutes.forEach((r: { route: ICompiledRoute, match: any }, i: number) => {
+      currentPageRoutes.forEach((match, i: number) => {
+        const { route, params } = match as any;
         if (
           (typeof preloadedData[i] !== 'undefined')
-          && r.route && r.route.element && r.route.element.preload
+          && route && route.element && route.element.preload
         ) {
-          const preloadInit = r.route.element.preload(preloadedData[i], {
-            route: r.route,
-            match: r.match,
+          const preloadInit = route.element.preload(preloadedData[i], {
+            match: { params },
           });
           promises.push(preloadInit.promise);
-        } else if (r.route && r.route.element && r.route.element.preload) {
-          const preloadInit = r.route.element.preload(undefined, {
-            route: r.route,
-            match: r.match,
+        } else if (route && route.element && route.element.preload) {
+          const preloadInit = route.element.preload(undefined, {
+            match: { params },
           });
           promises.push(preloadInit.promise);
         }
       });
     } else {
-      currentPageRoutes.forEach((r: { route: ICompiledRoute, match: any }) => {
-        if (r.route && r.route.element && r.route.element.preload) {
-          const preloadInit = r.route.element.preload(undefined, {
-            route: r.route,
-            match: r.match,
+      currentPageRoutes.forEach((match) => {
+        const { route, params } = match as any;
+        if (route && route.element && route.element.preload) {
+          const preloadInit = route.element.preload(undefined, {
+            match: { params },
           });
           promises.push(preloadInit.promise);
         }
@@ -348,9 +347,13 @@ export default class ClientHandler extends AbstractPlugin {
     const NavigationListner: React.FC = ({ children }) => {
       const navigationType = useNavigationType();
       const location = useLocation();
+      const isFirstLoad = useRef(true);
       useLayoutEffect(
         () => {
-          this.manageHistoryChange(location, navigationType);
+          if (!isFirstLoad.current) {
+            this.manageHistoryChange(location, navigationType);
+          }
+          isFirstLoad.current = false;
         },
         [navigationType, location],
       );

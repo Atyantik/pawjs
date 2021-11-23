@@ -34,6 +34,9 @@ export interface IRoute extends RouteProps {
   timeout?: number;
   webpack?: string [];
   selfManageNewProps?: boolean;
+  cache?: false | {
+    maxAge: number,
+  },
 }
 
 export interface ICompiledRoute {
@@ -47,6 +50,9 @@ export interface ICompiledRoute {
   routes?: CompiledRoute[];
   modules?: string[];
   webpack?: string[];
+  cache?: false | {
+    maxAge: number,
+  };
 }
 
 export type Route = IRoute ;

@@ -31,6 +31,7 @@ export default class RouteCompiler {
       modules,
       routes,
       selfManageNewProps,
+      cache,
     } = route;
 
     // If we have skeleton for route then default delay is 0
@@ -174,9 +175,10 @@ export default class RouteCompiler {
       path,
       webpack,
       modules,
+      cache,
       getRouteSeo: () => ({ ...routeSeo }),
       element: loadableComponent,
-      ...(routes ? { routes: this.compileRoutes(routes, routerService) } : {}),
+      ...(routes ? { children: this.compileRoutes(routes, routerService) } : {}),
     };
   }
 }

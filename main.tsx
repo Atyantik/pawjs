@@ -34,4 +34,7 @@ export interface IRoute {
   };
   routes?: IRoute[];
   index?: boolean;
+  cache?: false | {
+    maxAge: number,
+  },
 }

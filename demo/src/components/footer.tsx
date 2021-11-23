@@ -1,6 +1,6 @@
 import React from 'react';
 
-export default () => (
+export default React.memo(() => (
   <footer className="footer">
     <div className="content has-text-centered">
       <p>
@@ -26,4 +26,4 @@ export default () => (
       </div>
     </div>
   </footer>
-);
+));
