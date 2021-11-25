@@ -4,6 +4,10 @@ const { getDefault, pawExistsSync } = require('../../globals');
 // eslint-disable-next-line import/extensions
 const supportedExtensions = require('../../extensions.js');
 const packageJson = require('../../../package.json');
+const presetEnv = getDefault(require('@babel/preset-env'));
+const presetReact = getDefault(require('@babel/preset-react'));
+const presetTypescript = getDefault(require('@babel/preset-typescript'));
+const babelPlugins = getDefault(require('../../babel/plugin'));
 
 const libRoot = path.resolve(
   path.join(
@@ -60,25 +64,28 @@ Array.from(process.argv).forEach((arg) => {
   }
 });
 
-// Get babel configuration for nodejs
-// eslint-disable-next-line import/extensions
-const babelServer = getDefault(require('../../babel/node.js'))({
-  cacheDirectory: cacheEnabled,
-  hot: false,
-}).use.options;
-
 /**
  * Use babel register so that we can use latest EcmaScript & TypeScript version
  * in included files. Also we need to make sure that any plugins for pawjs or pawjs core
  * modules needs to be access with new code directly and there should be no need for
  * compiled code even if it lies in node_modules
  */
-require('@babel/register')({
-  presets: getDefault(babelServer.presets),
-  plugins: babelServer.plugins,
+
+ require('@babel/register')({
+  presets: [
+    [
+      presetEnv,
+      {
+        targets: { node: '12' },
+      },
+    ],
+    presetReact,
+    presetTypescript,
+  ],
+  plugins: babelPlugins({ hotRefresh: false }),
   cache: cacheEnabled,
   ignore: [
-    // Allow @pawjs core & pawjs- plguins to be of es6 or TS format
+    // Allow @pawjs core & pawjs- plugins to be of es6 or TS format
     /node_modules\/(?!(@pawjs|pawjs-)).*/,
   ],
   extensions: supportedExtensions.resolveExtensions,

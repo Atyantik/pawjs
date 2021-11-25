@@ -19,36 +19,26 @@ const rule = () => {
     ],
     use: [
       {
-        loader: 'babel-loader',
+        loader: 'swc-loader',
         options: {
-          sourceType: 'unambiguous',
-          compact: false,
-          retainLines: true,
-          presets: [
-            [
-              babelPresetEnv,
-              {
-                useBuiltIns: 'usage',
-                corejs: '3.6',
-                targets: {
-                  // Target all browsers that are not dead
-                  browsers: ['defaults', 'not dead'],
-                },
-              },
-            ],
-            [
-              babelPresetReact,
-              {
+          jsc: {
+            parser: {
+              syntax: "typescript",
+              tsx: true,
+            },
+            transform: {
+              react: {
                 runtime: 'automatic',
-                useBuiltIns: true,
-                development: !isProduction,
+                pragma: 'React.createElement',
+                pragmaFrag: 'React.Fragment',
+                throwIfNamespace: true,
+                development: process.env.PAW_ENV === 'development',
+                useBuiltins: false,
+                refresh: isHot
               },
-            ],
-            presetTypescript,
-          ],
-          cacheDirectory,
-          plugins: babelPlugins({ useDynamicImport: true, hotRefresh: isHot }),
-        },
+            },
+          }
+        }
       },
       {
         loader: 'prefetch-loader',
