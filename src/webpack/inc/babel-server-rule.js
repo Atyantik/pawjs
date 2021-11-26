@@ -1,5 +1,10 @@
 const rule = () => ({
   test: /\.(j|t)sx?$/,
+  exclude: [
+    /node_modules\/(?!(@pawjs|pawjs-)).*/,
+    /sw.js/,
+    /service-worker.js/,
+  ],
   use: {
     loader: 'swc-loader',
     options: {

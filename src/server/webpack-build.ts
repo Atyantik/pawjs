@@ -212,89 +212,97 @@ try {
   // Web client configurations
   const webConfig = wHandler.getConfig(process.env.PAW_ENV, 'web');
 
-  // Create a webpack web compiler from the web configurations
-  webpack(webConfig, (webErr?: Error, webStats?: webpack.Stats) => {
-    if (webErr || webStats?.hasErrors()) {
-      // eslint-disable-next-line
-      console.log(webErr);
-      // Handle errors here
-      // eslint-disable-next-line
-      webStats?.toJson && console.log(webStats.toJson());
-      // eslint-disable-next-line
-      console.log('Web compiler error occurred. Please handle error here');
-      return;
-    }
-    // eslint-disable-next-line
-    console.log(webStats?.toString(stats));
-    webpack(serverConfig, async (serverErr, serverStats) => {
-      if (serverErr || serverStats?.hasErrors()) {
-        // Handle errors here
-        if (serverErr) console.log(serverErr);
-        console.log(serverStats?.toString?.(stats) );
-        return;
-      }
-
-      // Move the images folder created from server compilation
-      try {
-        if (fs.existsSync(path.resolve(directories.dist, 'images'))) {
-          fse.moveSync(
-            path.resolve(directories.dist, 'images'),
-            path.resolve(directories.build, 'images'),
-            { overwrite: true },
-          );
-        }
-      } catch (ex) { console.log(ex); }
-
-      try {
-        if (fs.existsSync(path.resolve(directories.dist, 'assets'))) {
-          fse.moveSync(
-            path.resolve(directories.dist, 'assets'),
-            path.resolve(directories.build, 'assets'),
-            { overwrite: true },
-          );
-        }
-      } catch (ex) { console.log(ex); }
-
-      console.log(serverStats?.toString(stats));
-      if (pawConfig.singlePageApplication) {
-        console.log('Creating static files...');
-        // @ts-ignore
-        const outputConfig = serverConfig[0].output;
-        let server = require(pawExistsSync(path.join(outputConfig.path, outputConfig.filename)));
-        server = server.default ? server.default : server;
-
-        // eslint-disable-next-line
-        console.log('Generating index.html & manifest.json');
-
-        const [indexResponse, manifestResponse] = await Promise.all([
-          request(server).get('/'),
-          request(server).get('/manifest.json'),
-        ]);
-        fs.writeFileSync(path.join(directories.build, 'index.html'), indexResponse.text, 'utf-8');
-        fs.writeFileSync(
-          path.join(directories.build, 'manifest.json'),
-          manifestResponse.text,
-          'utf-8',
-        );
-        console.log(`Successfully created: ${path.join(directories.build, 'index.html')}`);
-        console.log(`Successfully created: ${path.join(directories.build, 'manifest.json')}`);
-        console.log('\n\nRe-organizing files...\n');
-        try {
-          const tempPawJSBuildPath = path.join(directories.root, 'pawjs-temp-build');
-          if (fse.existsSync(tempPawJSBuildPath)) {
-            fse.removeSync(tempPawJSBuildPath);
-          }
-
-          fse.moveSync(directories.build, tempPawJSBuildPath);
-          fse.removeSync(directories.dist);
-          fse.moveSync(tempPawJSBuildPath, directories.dist);
-          console.log('Static site generated successfully.');
-        } catch (ex) {
+  Promise.all([
+    new Promise((resolve, reject) => {
+      webpack(webConfig, (webErr?: Error, webStats?: webpack.Stats) => {
+        if (webErr || webStats?.hasErrors()) {
           // eslint-disable-next-line
-          console.log(ex);
+          console.log(webErr);
+          // Handle errors here
+          // eslint-disable-next-line
+          webStats?.toJson && console.log(webStats.toJson());
+          // eslint-disable-next-line
+          console.log('Web compiler error occurred. Please handle error here');
+          reject('Error while compiling web');
+          return;
         }
+        resolve(webStats?.toString?.(stats) ?? '');
+      });
+    }),
+    new Promise((resolve, reject) => {
+      webpack(serverConfig, async (serverErr, serverStats) => {
+        if (serverErr || serverStats?.hasErrors()) {
+          // Handle errors here
+          if (serverErr) console.log(serverErr);
+          console.log(serverStats?.toString?.(stats) );
+          reject('Error while compiling server');
+          return;
+        }
+        resolve(serverStats?.toString?.(stats) ?? '');
+      });
+    }),
+  ]).then(async ([webStats, serverStats]) => {
+    console.log(webStats);
+    console.log(serverStats);
+    // Move the images folder created from server compilation
+    try {
+      if (fs.existsSync(path.resolve(directories.dist, 'images'))) {
+        fse.moveSync(
+          path.resolve(directories.dist, 'images'),
+          path.resolve(directories.build, 'images'),
+          { overwrite: true },
+        );
       }
-    });
+    } catch (ex) { console.log(ex); }
+
+    try {
+      if (fs.existsSync(path.resolve(directories.dist, 'assets'))) {
+        fse.moveSync(
+          path.resolve(directories.dist, 'assets'),
+          path.resolve(directories.build, 'assets'),
+          { overwrite: true },
+        );
+      }
+    } catch (ex) { console.log(ex); }
+
+    if (pawConfig.singlePageApplication) {
+      console.log('Creating static files...');
+      // @ts-ignore
+      const outputConfig = serverConfig[0].output;
+      let server = require(pawExistsSync(path.join(outputConfig.path, outputConfig.filename)));
+      server = server.default ? server.default : server;
+
+      // eslint-disable-next-line
+      console.log('Generating index.html & manifest.json');
+
+      const [indexResponse, manifestResponse] = await Promise.all([
+        request(server).get('/'),
+        request(server).get('/manifest.json'),
+      ]);
+      fs.writeFileSync(path.join(directories.build, 'index.html'), indexResponse.text, 'utf-8');
+      fs.writeFileSync(
+        path.join(directories.build, 'manifest.json'),
+        manifestResponse.text,
+        'utf-8',
+      );
+      console.log(`Successfully created: ${path.join(directories.build, 'index.html')}`);
+      console.log(`Successfully created: ${path.join(directories.build, 'manifest.json')}`);
+      console.log('\n\nRe-organizing files...\n');
+      try {
+        const tempPawJSBuildPath = path.join(directories.root, 'pawjs-temp-build');
+        if (fse.existsSync(tempPawJSBuildPath)) {
+          fse.removeSync(tempPawJSBuildPath);
+        }
+
+        fse.moveSync(directories.build, tempPawJSBuildPath);
+        fse.removeSync(directories.dist);
+        fse.moveSync(tempPawJSBuildPath, directories.dist);
+        console.log('Static site generated successfully.');
+      } catch (ex) {
+        // eslint-disable-next-line
+        console.log(ex);
+      }
+    }
   });
 } catch (ex) {
   // eslint-disable-next-line
