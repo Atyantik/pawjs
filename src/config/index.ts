@@ -23,6 +23,11 @@ interface IConfig {
   noJS?: boolean;
   hotReload?: boolean;
 }
+
+const isStartCmd = process.env.PAW_START_CMD === 'true';
+const isProductionMode = process.env.PAW_ENV === 'production';
+const isHot = !isProductionMode && isStartCmd && process.env.PAW_HOT === 'true';
+
 let config: IConfig = {};
 try {
   if (typeof process.env.pawConfig !== 'undefined') {
@@ -92,12 +97,7 @@ config = {
      * then maximum number of websocket connections (HMR) is 6 (browser dependent).
      * After that your new pages will not be dynamically imported
      */
-    hotReload: getBool(
-      process.env.HOT_RELOAD,
-      typeof config.hotReload !== 'undefined'
-        ? config.hotReload
-        : process.env.NODE_ENV !== 'production',
-    ),
+    hotReload: isHot,
   },
 };
 
