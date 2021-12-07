@@ -33,14 +33,14 @@ type DependencyMapItem = { modules: string[], path: string };
 
 type RenderHtmlType<T> =
   T extends true ? ReturnType<typeof renderToNodeStream> :
-    T extends false ? ReturnType<typeof renderToString> :
-      never;
+  T extends false ? ReturnType<typeof renderToString> :
+  never;
 interface IApplication {
   context: any;
   htmlProps: any;
   children: null | JSX.Element;
   currentRoutes: RouteMatch<string>[];
-  routes: CompiledRoute [];
+  routes: CompiledRoute[];
   appRootUrl?: string;
 }
 
@@ -124,7 +124,7 @@ export default class ServerHandler extends AbstractPlugin {
     modules: string[],
   ) {
     const dependencyMap = this.options?.expressApp?.locals?.cssDependencyMap ?? [];
-    const moduleCss: string [] = [];
+    const moduleCss: string[] = [];
     modules.forEach((mod) => {
       dependencyMap.forEach((c: DependencyMapItem) => {
         if (_.indexOf(c.modules, mod) !== -1) {
@@ -210,7 +210,7 @@ export default class ServerHandler extends AbstractPlugin {
     const seoSchema = routeHandler.getDefaultSeoSchema();
     let renderedHtml = '';
     let context: any = {};
-    let promises: Promise<any> [] = [];
+    let promises: Promise<any>[] = [];
     const preloadedData: any[] = [];
     const modulesInRoutes: string[] = ['pawProjectClient'];
     const baseUrl = getBaseRequestUrl(req);
@@ -272,7 +272,7 @@ export default class ServerHandler extends AbstractPlugin {
       }
       return searchParams;
     };
-    routeHandler.routeCompiler.preloadManager.setParams('getSearchParams', () => getSearchParams);
+    routeHandler.routeCompiler.preloadManager.setParams('getSearchParams', getSearchParams);
 
 
     await new Promise(r => this
