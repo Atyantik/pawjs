@@ -33,8 +33,8 @@ type DependencyMapItem = { modules: string[], path: string };
 
 type RenderHtmlType<T> =
   T extends true ? ReturnType<typeof renderToNodeStream> :
-  T extends false ? ReturnType<typeof renderToString> :
-  never;
+    T extends false ? ReturnType<typeof renderToString> :
+      never;
 interface IApplication {
   context: any;
   htmlProps: any;
