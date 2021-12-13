@@ -4,12 +4,12 @@ const lodash = getDefault(require('babel-plugin-lodash'));
 
 // We require both plugins below for proper mapping of modules with routes!
 // Do not delete untill you know what you are doing.
-const dynamicImportWebpack = getDefault(require('./plugins/dynamic-import-webpack'));
+const replaceDynamicImportWebpack = getDefault(require('./plugins/dynamic-import-webpack'));
 const reactLoadableRoutes = getDefault(require('./plugins/react-loadable-routes'));
 
-module.exports = (options = { hotRefresh: false }) => {
+module.exports = (options = { hotRefresh: false, useDynamicImport: false }) => {
   return [
-    dynamicImportWebpack,
+    replaceDynamicImportWebpack(options.useDynamicImport),
     reactLoadableRoutes,
     lodash,
     options.hotRefresh && reactRefresh,

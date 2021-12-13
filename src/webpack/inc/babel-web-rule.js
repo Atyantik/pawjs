@@ -16,6 +16,8 @@ const rule = () => {
       /node_modules\/(?!(@pawjs|pawjs-)).*/,
       /sw.js/,
       /service-worker.js/,
+      /core-js/,
+      /webpack\/builtin/,
     ],
     use: [
       {

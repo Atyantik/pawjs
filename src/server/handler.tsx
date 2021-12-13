@@ -212,7 +212,7 @@ export default class ServerHandler extends AbstractPlugin {
     let context: any = {};
     let promises: Promise<any>[] = [];
     const preloadedData: any[] = [];
-    const modulesInRoutes: string[] = ['pawProjectClient'];
+    const modulesInRoutes: string[] = ['pawProjectClient', 'pawProjectRoutes'];
     const baseUrl = getBaseRequestUrl(req);
     const fullUrl = getFullRequestUrl(req);
     res.locals.fullUrl = fullUrl;
