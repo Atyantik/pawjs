@@ -92,6 +92,7 @@ if (cacheOptions && !isStartCmd) {
     next: express.NextFunction,
   ) => {
     if (req.method === 'GET') {
+      const requestHeaders = req.headers;
       const fullUrl = getFullRequestUrl(req);
 
       // Parse url
@@ -125,7 +126,11 @@ if (cacheOptions && !isStartCmd) {
         const nonOriginUrlWithNoCache = url.toString().replace(url.origin, '');
         url.searchParams.delete('__no_cache');
         cacheLog(`${nonOriginUrl}:: Re-Caching in the background`);
-        internalHttpApp.get(nonOriginUrlWithNoCache).then(() => {
+        const internalReq = internalHttpApp.get(nonOriginUrlWithNoCache);
+        if (requestHeaders) {
+          internalReq.set(requestHeaders);
+        }
+        internalReq.then(() => {
           existingRequests[cacheKey] = false;
           // do nothing.
           // This is required, else the request is killed halfway.
