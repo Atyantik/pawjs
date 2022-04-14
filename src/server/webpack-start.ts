@@ -52,13 +52,13 @@ try {
     version: isVerbose,
   };
 
-  const commonOptions: webpackDevMiddleware.Options = { stats };
+  const commonOptions: webpackDevMiddleware.Options<any, any> = { stats };
 
-  const serverOptions: webpackDevMiddleware.Options = {
+  const serverOptions: webpackDevMiddleware.Options<any, any> = {
     ...commonOptions,
     ...devServerConfig,
   };
-  const webOptions: webpackDevMiddleware.Options = {
+  const webOptions: webpackDevMiddleware.Options<any, any> = {
     ...commonOptions,
     serverSideRender: true,
     publicPath: pawConfig.resourcesBaseUrl,

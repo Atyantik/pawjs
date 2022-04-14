@@ -95,6 +95,7 @@ const resolver = {
   resolve: {
     alias: {
       ...dependenciesAlias,
+      'superagent': 'superagent/lib/node',
       pawjs: libRoot,
       pawProjectClient: projectClientPath || emptyClass,
       pawProjectSW: projectSWPath || emptyFunction,

@@ -2,7 +2,7 @@ import invert from 'lodash/invert';
 import get from 'lodash/get';
 import { Outlet, useNavigationType } from 'react-router';
 import { Routes, Route, HashRouter, BrowserRouter } from 'react-router-dom';
-import { render, hydrate } from 'react-dom';
+import { createRoot, hydrateRoot } from 'react-dom/client';
 import {
   Hook,
   AsyncSeriesHook,
@@ -16,7 +16,7 @@ import ErrorBoundary from '../components/ErrorBoundary';
 import { generateMeta } from '../utils/seo';
 import possibleStandardNames from '../utils/reactPossibleStandardNames';
 import AbstractPlugin from '../abstract-plugin';
-import { useLayoutEffect, useRef } from 'react';
+import React, { useLayoutEffect, useRef } from 'react';
 import { useLocation } from 'react-router';
 import { PawProvider } from '../components/Paw';
 
@@ -37,6 +37,8 @@ export default class ClientHandler extends AbstractPlugin {
   updatePageMetaTimeout: any = 0;
 
   loaded = false;
+
+  renderResolver: (value: unknown) => void = () => {};
 
   hooks: {
     beforeRender: AsyncSeriesHook<any>;
@@ -241,16 +243,16 @@ export default class ClientHandler extends AbstractPlugin {
     }
   }
 
-  getRenderer() {
+  getRendererCondition() {
     const { env } = this.options;
     const root = get(env, 'clientRootElementId', 'app');
     const domRootReference = document.getElementById(root);
-    return (
+    return !!(
       env.serverSideRender
       && !env.singlePageApplication
       && domRootReference
       && domRootReference.innerHTML !== ''
-    ) ? hydrate : render;
+    );
   }
 
   async preloadCurrentRoutes() {
@@ -319,11 +321,14 @@ export default class ClientHandler extends AbstractPlugin {
     return Promise.all(promises);
   }
 
+
   async renderApplication() {
     if (!this.routeHandler) return false;
     const root = get(this.options.env, 'clientRootElementId', 'app');
     const domRootReference = document.getElementById(root);
-    const renderer = this.getRenderer();
+    if (!domRootReference) {
+      return;
+    }
     const routes = this.routeHandler.getRoutes();
     const currentPageRoutes = this.getCurrentRoutes();
     const components: any = {};
@@ -344,10 +349,25 @@ export default class ClientHandler extends AbstractPlugin {
       });
     };
 
-    const NavigationListner: React.FC = ({ children }) => {
+    const onRenderComplete = () => {
+      window.PAW_PRELOADED_DATA = null;
+      delete window.PAW_PRELOADED_DATA;
+      const preloadedElement = document.getElementById('__pawjs_preloaded');
+      if (preloadedElement && preloadedElement.remove) {
+        preloadedElement.remove();
+      }
+      this.hooks.renderComplete.call();
+      this.renderResolver(null);
+    };
+    const NavigationListner: React.FC<{
+      children: React.ReactNode,
+    }> = ({ children }) => {
       const navigationType = useNavigationType();
       const location = useLocation();
       const isFirstLoad = useRef(true);
+      useLayoutEffect(() => {
+        onRenderComplete();
+      }, []);
       useLayoutEffect(
         () => {
           if (!isFirstLoad.current) {
@@ -391,37 +411,31 @@ export default class ClientHandler extends AbstractPlugin {
     };
 
     return new Promise((resolve) => {
+      this.renderResolver = resolve;
       this.hooks.beforeRender.callAsync(application, async () => {
-        // Render according to routes!
-        renderer(
-          (
-            <CookiesProvider>
-              <components.appRouter
-                basename={this?.options?.env?.appRootUrl}
-              >
-                <PawProvider>
-                  <ErrorBoundary
-                    ErrorComponent={this?.routeHandler?.getErrorComponent()}
-                    NotFoundComponent={this?.routeHandler?.get404Component()}
-                  >
-                    {application.children}
-                  </ErrorBoundary>
-                </PawProvider>
-              </components.appRouter>
-            </CookiesProvider>
-          ),
-          domRootReference,
-          () => {
-            window.PAW_PRELOADED_DATA = null;
-            delete window.PAW_PRELOADED_DATA;
-            const preloadedElement = document.getElementById('__pawjs_preloaded');
-            if (preloadedElement && preloadedElement.remove) {
-              preloadedElement.remove();
-            }
-            this.hooks.renderComplete.call();
-            resolve(null);
-          },
+        const useHydrate = this.getRendererCondition();
+        const Component = (
+          <CookiesProvider>
+            <components.appRouter
+              basename={this?.options?.env?.appRootUrl}
+            >
+              <PawProvider>
+                <ErrorBoundary
+                  ErrorComponent={this?.routeHandler?.getErrorComponent()}
+                  NotFoundComponent={this?.routeHandler?.get404Component()}
+                >
+                  {application.children}
+                </ErrorBoundary>
+              </PawProvider>
+            </components.appRouter>
+          </CookiesProvider>
         );
+        if (useHydrate) {
+          hydrateRoot(domRootReference, Component);
+        } else {
+          const reactRoot = createRoot(domRootReference);
+          reactRoot.render(Component);
+        }
       });
     });
   }

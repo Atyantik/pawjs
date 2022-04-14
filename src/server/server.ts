@@ -1,7 +1,6 @@
 import express from 'express';
 import hsts from 'hsts';
 import cookiesMiddleware from 'universal-cookie-express';
-// eslint-disable-next-line
 import ProjectServer from 'pawProjectServer';
 import { createHash } from 'crypto';
 import LRU from 'lru-cache';
@@ -58,7 +57,7 @@ sHandler.addPlugin(new ProjectServer({
 }));
 
 const cacheLog = (...args: any) => {
-  if (process.env.PAW_VERBOSE === 'true') {
+  if (true || process.env.PAW_VERBOSE === 'true') {
     console.log(...args);
   }
 };
@@ -72,15 +71,14 @@ if (cacheOptions && !isStartCmd) {
   // external request
   const internalHttpApp = request(app);
 
-  const optMax = cacheOptions.max || 52428800;
-  let optMaxAge = cacheOptions.maxAge;
+  let optMaxAge = cacheOptions?.maxAge ?? 300000;
   const optReCache = !!cacheOptions.reCache;
   if (typeof optMaxAge === 'undefined' || isNaN(optMaxAge)) {
     optMaxAge = 300000;
   }
   const cache = new LRU({
-    max: optMax,
-    maxAge: optMaxAge,
+    ttl: optMaxAge,
+    ttlAutopurge: true,
   });
 
   /**
@@ -213,7 +211,7 @@ if (cacheOptions && !isStartCmd) {
               headers: JSON.parse(JSON.stringify(headers)),
               statusCode: res.statusCode,
               data: interceptedData,
-            }, maxAge);
+            }, { ttl: maxAge });
 
             if (optReCache && maxAge > 0) {
               setTimeout(() => {

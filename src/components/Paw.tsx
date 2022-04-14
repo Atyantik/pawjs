@@ -40,7 +40,7 @@ const PawContext = createContext<{
  * in a reference variable, and should never be used for re-rendering purpose.
  * @returns
  */
-export const PawProvider: React.FC<{ staticContext?: any }> = ({ children, staticContext = PawStaticContext }) => {
+export const PawProvider: React.FC<{ staticContext?: any, children?: React.ReactNode }> = ({ children, staticContext = PawStaticContext }) => {
   const initialRender = useRef(true);
   const statusCodeChanged = useRef(false);
   useEffect(() => {

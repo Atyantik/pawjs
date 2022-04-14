@@ -16,13 +16,11 @@
   "author": "Tirth Bodawala",
   "license": "MIT",
   "devDependencies": {
-    "@pawjs/pawjs": "file:..",
-    "@types/sass": "^1.43.0"
+    "@pawjs/pawjs": "file:.."
   },
   "dependencies": {
     "@pmmmwh/react-refresh-webpack-plugin": "^0.5.1",
     "bulma": "^0.9.3",
-    "cross-fetch": "^3.0.4",
-    "fs-extra": "^10.0.0"
+    "cross-fetch": "^3.0.4"
   }
 }
