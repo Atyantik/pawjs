@@ -4,12 +4,12 @@ import cookiesMiddleware from 'universal-cookie-express';
 import ProjectServer from 'pawProjectServer';
 import { createHash } from 'crypto';
 import LRU from 'lru-cache';
-import request from 'supertest';
 import RouteHandler from '../router/handler';
 import ServerHandler from './handler';
 import env from '../config';
 import { getFullRequestUrl } from '../utils/server';
 import { RouteMatch } from 'react-router';
+import { request } from './local-server';
 
 /**
  * Initialize express application
@@ -114,7 +114,7 @@ if (cacheOptions && !isStartCmd) {
       // or the defaultCacheKey
       const cacheKey = createHash('sha1').update(sHandler.getCacheKey?.(req, res) || defaultCacheKey).digest('base64');
 
-      const reCacheRequest = () => {
+      const reCacheRequest = async () => {
         if (existingRequests[cacheKey] === true) {
           return;
         }
@@ -124,15 +124,8 @@ if (cacheOptions && !isStartCmd) {
         const nonOriginUrlWithNoCache = url.toString().replace(url.origin, '');
         url.searchParams.delete('__no_cache');
         cacheLog(`${nonOriginUrl}:: Re-Caching in the background`);
-        const internalReq = internalHttpApp.get(nonOriginUrlWithNoCache);
-        if (requestHeaders) {
-          internalReq.set(requestHeaders);
-        }
-        internalReq.then(() => {
-          existingRequests[cacheKey] = false;
-          // do nothing.
-          // This is required, else the request is killed halfway.
-        });
+        await internalHttpApp.get(nonOriginUrlWithNoCache, requestHeaders);
+        existingRequests[cacheKey] = false;
       };
 
       // If this request is for byPassingCache, i.e. triggered internally,
@@ -165,7 +158,9 @@ if (cacheOptions && !isStartCmd) {
           res.write(cachedData.data);
 
           // After sending the data, recache the data in the background
-          reCacheRequest();
+          if (!app.locals.noRecache) {
+            reCacheRequest();
+          }
           return res.end();
         }
       }
@@ -213,7 +208,7 @@ if (cacheOptions && !isStartCmd) {
               data: interceptedData,
             }, { ttl: maxAge });
 
-            if (optReCache && maxAge > 0) {
+            if (!app.locals.noRecache && optReCache && maxAge > 0) {
               setTimeout(() => {
                 if (!cache.has(cacheKey)) {
                   reCacheRequest();

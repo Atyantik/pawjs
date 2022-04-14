@@ -1,7 +1,6 @@
 import path from 'path';
 import fs from 'fs';
 import fse from 'fs-extra';
-import request from 'supertest';
 import webpack from 'webpack';
 import { CleanWebpackPlugin } from 'clean-webpack-plugin';
 import CopyWebpackPlugin from 'copy-webpack-plugin';
@@ -11,6 +10,7 @@ import wHandler from '../webpack';
 import ExtractEmittedAssets from '../webpack/plugins/extract-emitted-assets';
 
 import { pawExistsSync } from '../globals';
+import { request } from './local-server';
 
 const isVerbose = process.env.PAW_VERBOSE === 'true';
 
@@ -266,14 +266,15 @@ try {
         // eslint-disable-next-line
         console.log('Generating index.html & manifest.json');
 
+
         const [indexResponse, manifestResponse] = await Promise.all([
           request(server).get('/'),
           request(server).get('/manifest.json'),
         ]);
-        fs.writeFileSync(path.join(directories.build, 'index.html'), indexResponse.text, 'utf-8');
+        fs.writeFileSync(path.join(directories.build, 'index.html'), await indexResponse.text(), 'utf-8');
         fs.writeFileSync(
           path.join(directories.build, 'manifest.json'),
-          manifestResponse.text,
+          await manifestResponse.text(),
           'utf-8',
         );
         console.log(`Successfully created: ${path.join(directories.build, 'index.html')}`);
@@ -289,6 +290,7 @@ try {
           fse.removeSync(directories.dist);
           fse.moveSync(tempPawJSBuildPath, directories.dist);
           console.log('Static site generated successfully.');
+          process.exit(0);
         } catch (ex) {
           // eslint-disable-next-line
           console.log(ex);

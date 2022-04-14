@@ -45,7 +45,6 @@ interface IApplication {
 }
 
 type CacheOptions = false | {
-  max: number;
   maxAge: number;
   reCache?: boolean;
 };
@@ -75,8 +74,6 @@ export default class ServerHandler extends AbstractPlugin {
 
     if (cacheOptions === true) {
       this.cacheOptions = {
-        // 50 MB
-        max: 52428800,
         // 5 Min
         maxAge: 300000,
 
