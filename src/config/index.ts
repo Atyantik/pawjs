@@ -4,6 +4,7 @@ interface IConfig {
   port?: string;
   host?: string;
   appRootUrl?: string;
+  appPublicPath?: string;
   cdnUrl?: string;
   serverSideRender?: boolean;
   serviceWorker?: boolean;
@@ -72,6 +73,7 @@ config = {
     port: process.env.PORT || config.port,
     host: process.env.HOST || config.host,
     appRootUrl: process.env.APP_ROOT_URL || config.appRootUrl,
+    appPublicPath: process.env.APP_PUBLIC_PATH || config.appPublicPath,
     cdnUrl: process.env.CDN_URL || config.cdnUrl,
     serverSideRender: getBool(process.env.SSR_ENABLED, config.serverSideRender),
     serviceWorker: getBool(process.env.SERVICE_WORKER_ENABLED, config.serviceWorker),

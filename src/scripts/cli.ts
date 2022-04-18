@@ -44,6 +44,7 @@ export default class CliHandler {
 
   constructor() {
     this.startServer = this.startServer.bind(this);
+    this.startLibrary = this.startLibrary.bind(this);
     this.buildProd = this.buildProd.bind(this);
     this.test = this.test.bind(this);
     this.lint = this.lint.bind(this);
@@ -120,6 +121,15 @@ export default class CliHandler {
     import('../server/webpack-start');
   }
 
+  /**
+   * Start server depending on the env variable
+   */
+  startLibrary() {
+    process.env.PAW_HOT = 'false';
+    process.env.PAW_START_CMD = 'false';
+    import('../server/webpack-lib-start');
+  }
+
   buildProd() {
     process.env.PAW_HOT = 'false';
     process.env.PAW_START_CMD = 'false';
@@ -188,6 +198,11 @@ export default class CliHandler {
       .command('start')
       .description('Start the application')
       .action(this.startServer);
+
+    this.program
+      .command('library')
+      .description('Start the library compilation')
+      .action(this.startLibrary);
 
     this.program
       .command('build')

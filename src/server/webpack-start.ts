@@ -176,6 +176,7 @@ try {
         jsDependencyMap,
         cssDependencyMap,
         ...assets
+        // @ts-ignore
       } = normalizeAssets(webMiddleware?.context?.stats ?? null);
       expressApp.locals.assets = assetsToArray(assets);
       expressApp.locals.cssDependencyMap = cssDependencyMap;

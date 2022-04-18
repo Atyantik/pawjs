@@ -3,6 +3,7 @@ import { Hook, SyncHook } from 'tapable';
 // non npm imports
 import serverConfig from './server.config';
 import webConfig from './web.config';
+import libConfig from './lib.config';
 import babelCssRules from './inc/babel-css-rule';
 import AbstractPlugin from '../abstract-plugin';
 
@@ -29,10 +30,12 @@ export default class WebpackHandler extends AbstractPlugin {
     };
     this.envConfigs = {
       development: {
+        lib: [libConfig],
         web: [webConfig],
         server: [serverConfig],
       },
       production: {
+        lib: [libConfig],
         web: [webConfig],
         server: [serverConfig],
       },
