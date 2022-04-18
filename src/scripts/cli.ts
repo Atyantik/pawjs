@@ -273,7 +273,7 @@ export default class CliHandler {
     this.program.parse(process.argv);
 
     if (!process.argv.slice(2).length) {
-      this.startLibrary();
+      this.startServer();
     }
   }
 }
