@@ -9,6 +9,7 @@
     "lint": "eslint -c ./node_modules/@pawjs/pawjs/.eslintrc --ignore-path ./node_modules/@pawjs/pawjs/.gitignore ./src",
     "lint:fix": "eslint -c @pawjs/pawjs/.eslintrc --ignore-path @pawjs/pawjs/.gitignore --fix ./src",
     "start": "npm run start:dev",
+    "start:lib": "pawjs --no-cache --env=production library",
     "start:dev": "pawjs --no-cache --env=development start",
     "start:prod": "ENV_CONFIG_PATH=./.prod.env pawjs --no-cache --env=production start",
     "test": "pawjs test"
