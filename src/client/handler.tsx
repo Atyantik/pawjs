@@ -430,11 +430,23 @@ export default class ClientHandler extends AbstractPlugin {
             </components.appRouter>
           </CookiesProvider>
         );
-        if (useHydrate) {
-          hydrateRoot(domRootReference, Component);
-        } else {
+        // If the react root already exists, unmount and re-create it for
+        // MST hot reload
+        if (window.PAW_REACT_ROOT) {
+          // umount, re-create root and remount
+          window.PAW_REACT_ROOT?.unmount?.();
+          delete window.PAW_REACT_ROOT;
           const reactRoot = createRoot(domRootReference);
           reactRoot.render(Component);
+          window.PAW_REACT_ROOT = reactRoot;
+        } else {
+          if (useHydrate) {
+            window.PAW_REACT_ROOT = hydrateRoot(domRootReference, Component);
+          } else {
+            const reactRoot = createRoot(domRootReference);
+            reactRoot.render(Component);
+            window.PAW_REACT_ROOT = reactRoot;
+          }
         }
       });
     });
