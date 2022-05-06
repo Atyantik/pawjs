@@ -24,7 +24,12 @@ const rule = (options) => ({
           },
         ],
         presetReact,
-        presetTypescript,
+        [
+          presetTypescript,
+          {
+            allowDeclareFields: true
+          },
+        ]
       ],
       cacheDirectory: getCacheOption(options.cacheDirectory),
       plugins: babelPlugins(options),

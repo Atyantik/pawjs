@@ -25,7 +25,12 @@ const rule = () => ({
             runtime: 'automatic',
           },
         ],
-        presetTypescript,
+        [
+          presetTypescript,
+          {
+            allowDeclareFields: true
+          },
+        ],
       ],
       cacheDirectory,
       plugins: babelPlugins({ useDynamicImport: false }),

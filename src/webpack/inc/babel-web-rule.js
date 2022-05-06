@@ -46,7 +46,12 @@ const rule = () => {
                 development: !isProduction,
               },
             ],
-            presetTypescript,
+            [
+              presetTypescript,
+              {
+                allowDeclareFields: true
+              },
+            ],
           ],
           cacheDirectory,
           plugins: babelPlugins({ useDynamicImport: true, hotRefresh: isHot }),
