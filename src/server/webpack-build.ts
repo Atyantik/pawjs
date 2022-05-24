@@ -226,7 +226,6 @@ try {
     }
     // eslint-disable-next-line
     console.log(webStats?.toString(stats));
-    pawDebug(serverConfig);
     // return;
     webpack(serverConfig, async (serverErr, serverStats) => {
       if (serverErr || serverStats?.hasErrors()) {
