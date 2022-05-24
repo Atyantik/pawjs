@@ -9,7 +9,7 @@ import directories from '../webpack/utils/directories';
 import wHandler from '../webpack';
 import ExtractEmittedAssets from '../webpack/plugins/extract-emitted-assets';
 
-import { pawExistsSync } from '../globals';
+import { pawDebug, pawExistsSync } from '../globals';
 import { request } from './local-server';
 
 const isVerbose = process.env.PAW_VERBOSE === 'true';
@@ -226,6 +226,8 @@ try {
     }
     // eslint-disable-next-line
     console.log(webStats?.toString(stats));
+    pawDebug(serverConfig);
+    // return;
     webpack(serverConfig, async (serverErr, serverStats) => {
       if (serverErr || serverStats?.hasErrors()) {
         // Handle errors here
@@ -237,21 +239,23 @@ try {
       // Move the images folder created from server compilation
       try {
         if (fs.existsSync(path.resolve(directories.dist, 'images'))) {
-          fse.moveSync(
+          fse.copySync(
             path.resolve(directories.dist, 'images'),
             path.resolve(directories.build, 'images'),
-            { overwrite: true },
+            { overwrite: true, recursive: true },
           );
+          fse.removeSync(path.resolve(directories.dist, 'images'));
         }
       } catch (ex) { console.log(ex); }
 
       try {
         if (fs.existsSync(path.resolve(directories.dist, 'assets'))) {
-          fse.moveSync(
+          fse.copySync(
             path.resolve(directories.dist, 'assets'),
             path.resolve(directories.build, 'assets'),
-            { overwrite: true },
+            { overwrite: true, recursive: true },
           );
+          fse.removeSync(path.resolve(directories.dist, 'assets'));
         }
       } catch (ex) { console.log(ex); }
 
