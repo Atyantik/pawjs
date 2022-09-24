@@ -24,6 +24,7 @@ module.exports = (options) => {
       decorators,
       {
         legacy: true,
+        loose: true,
       },
     ],
     [

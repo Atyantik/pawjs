@@ -35,6 +35,7 @@ const rule = (options = {}) => {
             [
               babelPresetEnv,
               {
+                loose: true,
                 useBuiltIns: 'entry',
                 corejs: '3.6',
                 targets: {
