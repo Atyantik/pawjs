@@ -314,7 +314,6 @@ app.get('*', (req, res, next) => {
       }
     }
     fullUrl = `${protocol}://${host}${pathName}${parsedUrl.search || ''}`;
-    return next();
   } catch (ex) {
     // Some error with parsing of url
   }
