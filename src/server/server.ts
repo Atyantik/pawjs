@@ -10,6 +10,7 @@ import env from '../config';
 import { getFullRequestUrl } from '../utils/server';
 import { RouteMatch } from 'react-router';
 import { request } from './local-server';
+import { parse } from 'url';
 
 /**
  * Initialize express application
@@ -297,7 +298,26 @@ app.get('*', (req, res, next) => {
   ) {
     return next();
   }
-  const fullUrl = `${req.protocol}://${req.get('host')}${req.originalUrl}`;
+  let fullUrl = req.originalUrl;
+  try {
+    const parsedUrl = parse(req.originalUrl);
+    const host = req.get('X-Host') || req.get('X-Forwarded-Host') || req.get('host');
+    const protocol = req.protocol
+      || req.get('X-Forwarded-Protocol')
+      || req.get('X-Forwarded-Proto')
+      || (req.secure ? 'https' : 'http');
+    let pathName = '/';
+    if (parsedUrl.pathname) {
+      pathName = parsedUrl.pathname;
+      if (!pathName.endsWith('/')) {
+        pathName += '/';
+      }
+    }
+    fullUrl = `${protocol}://${host}${pathName}${parsedUrl.search || ''}`;
+    return next();
+  } catch (ex) {
+    // Some error with parsing of url
+  }
 
   const clientRouteHandler = new RouteHandler({
     env: { ...env },
