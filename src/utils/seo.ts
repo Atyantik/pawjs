@@ -178,10 +178,10 @@ export const generateMeta = (data = {}, options = {
   const descriptionText = getTextFromHtml(seoData.description);
   // Get 155 words out of description
   // const desc155words = trimTillLastSentence(seoData.description, 155);
-  const desc155chars = descriptionText.slice(0, 155);
+  // const desc155chars = descriptionText.slice(0, 155);
 
-  // Get 200 words out of description
-  const desc200chars = descriptionText.slice(0, 200);
+  // // Get 200 words out of description
+  // const desc200chars = descriptionText.slice(0, 200);
 
   // const desc200words = trimTillLastSentence(seoData.description, 200);
 
@@ -269,11 +269,11 @@ export const generateMeta = (data = {}, options = {
   // Meta description
   generatedSchema.push({
     name: 'description',
-    content: desc155chars,
+    content: descriptionText,
   });
   generatedSchema.push({
     name: 'twitter:description',
-    content: desc200chars,
+    content: descriptionText,
   });
   generatedSchema.push({
     property: 'og:description',
