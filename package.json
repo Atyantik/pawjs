@@ -116,7 +116,7 @@
     "universal-url": "2.0.0",
     "webpack": "5.73.0",
     "webpack-bundle-analyzer": "4.5.0",
-    "webpack-dev-middleware": "5.3.3",
+    "webpack-dev-middleware": "5.3.4",
     "webpack-hot-middleware": "2.25.1",
     "workbox-webpack-plugin": "6.5.3"
   },
