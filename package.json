@@ -118,7 +118,7 @@
     "webpack-bundle-analyzer": "4.5.0",
     "webpack-dev-middleware": "5.3.3",
     "webpack-hot-middleware": "2.25.1",
-    "workbox-webpack-plugin": "6.5.3"
+    "workbox-webpack-plugin": "7.1.0"
   },
   "repository": {
     "type": "git",
