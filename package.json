@@ -44,7 +44,7 @@
     "@babel/preset-typescript": "7.17.12",
     "@babel/register": "7.17.7",
     "@babel/types": "7.18.4",
-    "@pmmmwh/react-refresh-webpack-plugin": "0.5.7",
+    "@pmmmwh/react-refresh-webpack-plugin": "0.6.0",
     "@types/compression": "1.7.2",
     "@types/express": "4.17.13",
     "@types/fs-extra": "9.0.13",
