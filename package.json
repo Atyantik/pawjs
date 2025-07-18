@@ -67,7 +67,7 @@
     "babel-template": "6.26.0",
     "clean-webpack-plugin": "4.0.0",
     "commander": "9.3.0",
-    "compression": "1.7.4",
+    "compression": "1.8.1",
     "copy-webpack-plugin": "11.0.0",
     "core-js": "3.23.2",
     "cross-env": "7.0.3",
