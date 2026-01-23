@@ -90,7 +90,7 @@
     "hsts": "2.2.0",
     "html-to-text": "8.2.0",
     "jest": "28.1.1",
-    "lodash": "4.17.21",
+    "lodash": "4.17.23",
     "lru-cache": "^7.10.2",
     "mini-css-extract-plugin": "2.6.1",
     "postcss-loader": "7.0.0",
@@ -115,7 +115,7 @@
     "universal-cookie-express": "8.0.1",
     "universal-url": "2.0.0",
     "webpack": "5.73.0",
-    "webpack-bundle-analyzer": "4.5.0",
+    "webpack-bundle-analyzer": "5.2.0",
     "webpack-dev-middleware": "5.3.3",
     "webpack-hot-middleware": "2.25.1",
     "workbox-webpack-plugin": "6.5.3"
